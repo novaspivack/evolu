@@ -1,0 +1,194 @@
+# Evolu
+
+**A living world that rewrites itself, played by AI minds, and rebuilt between runs by the AI that wrote it.**
+
+Evolu is an experimental world game that runs as a single page inside Claude. A small world of lands, weather, plants, animals and minerals is simulated in the browser. The people in it are not scripted: each one thinks with its own calls to Claude, has drives, feelings, memories, a creed and plans of its own, and can change its own reflexes and body. Above them stands a second AI, the **maker**, which watches the world while it runs and changes its laws, adds animals, plants, recipes, places and technologies, and writes down what it could not build. After a run, the complete record is handed back to Claude, which reads it, rewrites the engine, and publishes the next generation.
+
+Nothing in Evolu is hard-coded to happen. Things are made possible, and the beings find them or do not.
+
+Created by **Nova Spivack**, built with Claude. Generation 14, November 2026.
+Source: <https://github.com/novaspivack/evolu>
+
+> Evolu was called Seedworld until Generation 14.
+
+![A being selected in Evolu: the land around it on the left, its mind on the right](docs/images/evolu-being.png)
+
+*Generation 14, taken by the browser test (a scripted stand-in plays the minds there).*
+
+## Contents
+
+- [What happens in a run](#what-happens-in-a-run)
+- [How it works](#how-it-works)
+- [Why it is interesting](#why-it-is-interesting)
+- [Inspiration, and how Evolu differs](#inspiration-and-how-evolu-differs)
+- [Run it inside Claude](#run-it-inside-claude)
+- [Export a run and build the next generation](#export-a-run-and-build-the-next-generation)
+- [Extend it](#extend-it)
+- [What is in this repository](#what-is-in-this-repository)
+- [Tests](#tests)
+- [What is and is not verified](#what-is-and-is-not-verified)
+- [Licence and credit](#licence-and-credit)
+
+## What happens in a run
+
+You open the page and see a world of nine lands divided by a sea: woods, desert, lakes, highlands, marsh, steppe and tundra, each with its own plants, animals and minerals. Twelve people of three peoples wake in three different lands. Each people has its own body, dress, way of naming and tongue; speech in a tongue you do not know arrives as strange sounds.
+
+Press **Wake minds** and they begin to think. Each thought is a real call to Claude, made from the page, that returns what the being thinks, says, plans and wants to change about itself. You can click any being and read its mind: what presses on it, what it believes, who it trusts, what it has learned from what befell others.
+
+From there it is theirs. In real runs so far they have built shelters and halls, shared food, formed small bands, raised children, mined, grieved for their dead, and starved by wandering alone. They have not yet traded, tamed an animal, fought a planned battle or crossed the sea. Every few days a chronicler writes the next chapter of the world's story, and the maker visits, reads the numbers, changes something, predicts what will follow, and checks its prediction on the next visit.
+
+## How it works
+
+There are four loops, one inside the next.
+
+```
+ 4. THE PROGRAMMER LOOP   a person and Claude: read the run record, rewrite the code, publish
+    3. THE OUTER LOOP     the maker and the chronicler: change the world's laws while it runs
+       2. THE MINDS       each being: think, speak, plan, rewrite its own reflexes and creed
+          1. THE WORLD    a deterministic simulation whose laws are data
+```
+
+**1. The world** (`src/engine.js`). A deterministic simulation: 144 by 96 tiles, 240 moments to a day, three days to a season. Terrain, water, weather, calamities, plants, animals that mate in pairs and can be tamed, minerals in the ground, buildings, roads, bridges, vessels. Bodies have energy, thirst, health, age, sickness, genes and feelings. What matters most is that **the laws are data**: every number that governs the world sits in one registry (`w.laws`), and plants, animals, recipes, goods, buildings, minerals, places of power and the 68 "ways" of the knowledge tree are entries in it, not code. All of them act through one small language of effects on attributes, so anything can be combined with anything.
+
+**2. The minds** (`src/minds.js`). Each being's thinking is a call to Claude. The prompt is built from what that being can see, feel, remember and has been told; the reply is JSON: a thought, perhaps something said, a plan of steps, changes to its own reflexes, creed, memory or body, a tale or a mark. Everyday thoughts are frequent and cheap; deep reflections are rare and can rewrite the being. Between thoughts the body runs on its plan and its reflexes. Drives (hunger, belonging, ambition, grief, standing, 43 in all) are computed from the being's state and press on its thinking without deciding it.
+
+**3. The outer loop** (`src/maker.js`). Two roles stand outside the world. The **chronicler** writes the story in chapters. The **maker**, on a stronger model, reads computed statistics and the chronicle and may apply a few changes per visit from a fixed set of operations: move a law, add a plant, animal, recipe, good, mineral, building, way or place of power, call weather or a calamity, set the mood of the music. Each change is first tried in a copy of the world, and refused if beings die of it or the animals collapse. The maker keeps a notebook of lessons, ideas and predictions, and files written **requests** for anything that would need new code.
+
+**4. The programmer loop.** This is the part that makes Evolu a project and not only a game. Every run can be exported as one file. That file begins with instructions addressed to Claude: analyse this record with code, learn from the maker, build the next generation, keep what the maker kept, report plainly. Hand the file to Claude and it does that. The changes the maker made and kept (the world's **heritage**) are folded into the engine, so the next world begins with them and no maker has to rediscover them.
+
+The interface (`src/ui.js`, `src/index.html`) draws the world and gives you instruments: an inspector for any being, the story, voices, events, peoples and their bonds, the tree of ways, every kind of thing in the world, the laws, the maker's visits with the fate of each change, and settings. The sound (`src/audio.js`) is synthesized in the page; nothing is recorded.
+
+## Why it is interesting
+
+- **Self-modification at three levels.** A being rewrites its own reflexes, creed and body. The maker rewrites the world's laws during the run. Claude rewrites the engine between runs, guided by what the first two did. Each level leaves a record the next one reads.
+- **Open, not scripted.** There is no quest, no win condition and no event that is supposed to happen. Fire, farming, writing, sailing and rule are possibilities with costs; whether anyone reaches them is an experimental result.
+- **Runs are experiments.** Every thought, word, plan, failure, prompt sample and maker decision is recorded. A run ends as a data file with numbers you can count, and the next generation is built from what the numbers showed. The design log in `docs/` reads like a lab notebook because it is one.
+- **The designer is inside the loop.** The maker makes predictions and is held to them. Its requests are a to-do list written by an AI for the AI that maintains the code.
+- **Knowledge accumulates across worlds.** Heritage carries forward what worked: recipes people actually used, animals that steadied the ecology, lessons such as "a lever must reach what beings want or see".
+- **Societies with inner lives.** Standing that must be earned before anyone will follow, tongues that must be learned, tales that drift as they are retold, a community that learns from how one of its own died.
+- **It is honest about what it does not know.** The design log separates what was tested from what was only designed, and what real minds did from what was hoped.
+
+## Inspiration, and how Evolu differs
+
+Evolu draws on Sid Meier's *Civilization* (a tree of knowledge through the ages, lands and resources that differ), *SimCity* and *SimEarth* (a world you watch and tune), *Dwarf Fortress* and *The Sims* (individuals with needs and histories), artificial-life systems such as Tierra and Avida (open-ended evolution as the point), and research on communities of language-model agents such as *Generative Agents*.
+
+It differs from them in these ways:
+
+- **No player in the usual sense.** You do not command anyone. You set the conditions, watch, and decide what the next generation of the world should be.
+- **The rules are not fixed.** In a strategy game the tech tree is the designer's. Here the tree, the animals, the recipes and the numbers are data that an AI maker edits during play, and code that an AI programmer edits between runs.
+- **The agents are minds, not behaviour trees**, and they can edit themselves.
+- **Unlike most agent-society research, there is a hard physical world underneath**: hunger, thirst, cold, predators, distance, scarcity. Talk alone feeds no one.
+- **The game develops by running it.** The loop of run, record, analysis and rebuild is part of the design, and the repository is its history.
+
+## Run it inside Claude
+
+Evolu is a Claude **artifact**: a page published from the six files in `src/`. The minds think by calling Claude from that page, so it has to run inside Claude. There is no build step and nothing to install.
+
+**To get your own copy running**
+
+1. Open Claude with this repository available to it (attach the six files in `src/`, or connect the repository in a Claude session that can read GitHub).
+2. Ask:
+
+   > Publish the six files in `src/` as one artifact called Evolu, with `index.html` as the page and the other five beside it. Declare the capabilities the page asks for: `sample` (the page calls Claude for each thought), `db` (the run is recorded as it goes), `downloads` (the run file can be saved) and `user`.
+
+3. Open the artifact.
+
+Each thought is a call to Claude on your account. The models are chosen in Settings; by default the beings use Sonnet and the maker uses Opus.
+
+**To play**
+
+1. The world starts on its own and runs on instinct. **Space** pauses, drag pans, scroll zooms, click inspects, **F** follows.
+2. Open **Settings** to choose the models, how often beings think, the **thought budget** (3,000 by default) and whether to **keep thinking past the budget** for long runs. A new world can be started from a seed there.
+3. Press **Wake minds**.
+4. Watch. The tabs are Inspect, Story, Voices, Events, Peoples, Ways, Kinds, Laws, Maker and Settings.
+5. Let it run for some days of world time. Twenty to thirty days and several hundred thoughts is enough to learn from.
+
+Two things to know. Publishing a new version reloads an open page, so do not publish during a run. And a world saved under an older generation still loads but keeps its old laws; start a new world to get new ones.
+
+**Outside Claude.** Serve `src/` with any static web server and the world runs, on instinct only: the minds cannot wake, because there is nothing to call. This is how the browser tests run it, with a scripted stand-in for Claude.
+
+## Export a run and build the next generation
+
+This is the loop the project lives by.
+
+1. **Export.** In **Settings**, press **Download run log**. You get one file, `evolu-<run id>-day<N>.json`, holding every thought, everything said, the chronicle, sampled prompts with raw replies, failures, the chronicler's chapters, the maker's visits and requests, the final state of every being, and the heritage.
+2. **Hand it to Claude.** Attach the file in a Claude session that has this repository, and say what you noticed and what you want next. You do not need to explain the procedure: the file's first field, `_READ_ME_FIRST`, tells Claude what to do.
+3. **Claude analyses** the record with code, not by skimming: births, deaths and their causes, which drives led, what was built, made, given and learned, how the peoples dealt with each other, prompt sizes, failed calls, and each of the maker's predictions against what happened.
+4. **Claude builds** the next generation in `src/`: fixes for what the run showed, the maker's requests, the next items from [`ROADMAP.md`](ROADMAP.md), and the run's heritage folded into `K.HERITAGE` in `src/maker.js`.
+5. **Claude tests** (`tests/run-all.sh browser`), publishes a new version of the same artifact, and commits the generation here with the design log and roadmap brought up to date.
+6. **Run it again.**
+
+[`CLAUDE.md`](CLAUDE.md) holds the working instructions for step 3 to 5 and is read by Claude when it opens the repository.
+
+## Extend it
+
+Three ways, from lightest to heaviest.
+
+**Let the maker do it.** During a run the maker adds to the world by itself. What it keeps travels to the next world started in the same browser, and into the run file.
+
+**Add data.** Most new content needs no new code: an entry in the laws registry is enough. For example, a recipe and a place of power, in the same form the maker uses (see `K.HERITAGE` in `src/maker.js` for some twenty that real runs produced):
+
+```js
+{ op: 'recipe', name: 'feast', way: null,
+  needs: { food: 'any', foodN: 2, fire: true, beings: 1 },
+  gives: { fxAll: [{ on: 'joy', by: 0.3 }, { on: 'lonely', by: -0.3 }] },
+  hint: 'Share food beside a fire with another, and all who sit near are gladdened.' }
+
+{ op: 'site', name: 'Warmwell', kind: 'spring', on: 'marsh', r: 2, cool: 480,
+  fx: [{ on: 'health', by: 10 }, { on: 'warmth', times: 1.3, for: 240 }] }
+```
+
+Effects act now (`thirst, energy, health, lore, anger, fear, grief, joy, lonely, sick`) or as lasting boons (`strength, toughness, vigor, appetite, warmth, luck, learning, thirst`). The operations are `law, plant, creature, herd, sow, recipe, mix, good, mineral, lode, building, way, site, weather, event, music`; `K.OPS` (the description the maker is given) and `K.applyOp` in `src/maker.js` are the reference.
+
+**Change the code, with Claude.** Ask for what you want in plain words ("people should learn from what happens to other people"; "bridges"; "a sea that divides the world"). The rule Claude is asked to hold to: make it possible, give it a cost and a use, tell the beings only what they could perceive, and never script the outcome. Then add a check to `tests/`, run the suites, and publish.
+
+Where things live:
+
+| To change | Look in |
+| --- | --- |
+| Terrain, lands, weather, calamities, bodies, animals, actions, laws | `src/engine.js` |
+| What a being is told, its drives, memory, tales, lessons, the run record | `src/minds.js` |
+| The maker's operations, its statistics, the chronicler, heritage, the roadmap it reads | `src/maker.js` |
+| Drawing, tabs, inspector, settings | `src/ui.js`, `src/index.html` |
+| Music and sound | `src/audio.js` |
+
+## What is in this repository
+
+```
+src/                 the artifact: index.html, engine.js, minds.js, maker.js, audio.js, ui.js
+tests/               checks against the current engine; run-all.sh runs every suite
+tests/browser/       the page in headless Chrome with a scripted stand-in for Claude
+docs/design-log.md   every generation and every real run, newest first
+runs/                exported records of real runs
+ROADMAP.md           what is planned, in order; mirrors the maker's notebook
+CLAUDE.md            working instructions for Claude in this repository
+LICENSE.md, NOTICE   licence and required credit
+```
+
+Git history is the history of generations from Generation 14 onward. Earlier generations are described in the design log; their code is not kept.
+
+## Tests
+
+```
+tests/run-all.sh            engine, minds and maker (about three minutes, needs only Node)
+tests/run-all.sh browser    the same, then the page in headless Chrome (needs Playwright and Chrome)
+```
+
+There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore. Together they are a regression suite of about 260 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds.
+
+## What is and is not verified
+
+- The tests show that the mechanics work and that the page runs without errors. They cannot show how real minds behave: those calls only happen when the page runs inside Claude.
+- What real minds did is known from six recorded runs, described in the design log. Generation 14 had not yet been run with real minds when this was written.
+- The later ages of the knowledge tree (roughly the fourth onward) are sketched: the ways, minerals and buildings exist, but few have mechanics behind them yet.
+- The sound has been written without being heard by its author.
+
+## Licence and credit
+
+Evolu is released under the **PolyForm Noncommercial License 1.0.0** ([`LICENSE.md`](LICENSE.md)): you may use, study, change and share it for any noncommercial purpose. Commercial use needs permission from the author.
+
+Any copy or derivative must carry this notice:
+
+> Required Notice: Copyright (c) 2026 Nova Spivack (https://github.com/novaspivack/evolu)
+
+Please credit **Nova Spivack** and link to <https://github.com/novaspivack/evolu> wherever you show, publish or build on Evolu.

@@ -1,0 +1,51 @@
+# Working on Evolu (instructions for Claude)
+
+Evolu is a self-modifying world simulation by Nova Spivack that runs as a Claude artifact. Read `README.md` for what it is. This file is how the work is done.
+
+## The source of record
+
+- `src/` holds the artifact, exactly as published: `index.html`, `engine.js`, `minds.js`, `maker.js`, `audio.js`, `ui.js`. No build step.
+- The live artifact is titled "Evolu", slug `be8f1f8f-42db-4703-ac0d-c3e87d04f447`, owned by Nova. Publish the six files to that slug (base version = the live version). Its capabilities `sample`, `db`, `user`, `downloads` carry forward.
+- **Never publish while Nova is running a world.** Publishing reloads the open page. Ask, or wait for the run file.
+- One commit per published generation, message `Generation N: <one line>`. `src/` at that commit must be what is live.
+
+## When you are handed a run file
+
+The file's `_READ_ME_FIRST` says the same thing more briefly. Do this without being asked:
+
+1. **Analyse with code, not by skimming.** Load the JSON in Python (`python3 -I`). Count: births, deaths and causes by day; top drives; what was built, made, given, mined, tamed, traded, stolen, fought; ways learned and when; tongues understood; standing and followers; prompt sizes; failed calls. Quote the record. Put the file in `runs/` and add it to `runs/README.md`.
+2. **Read the maker.** Its visits, each prediction against what happened, its lessons, and above all its `request` records: things it could not build from its parts. Answer each one, or say why not.
+3. **Build the next generation** in `src/`: fixes the run calls for, the maker's requests, then items from `ROADMAP.md` in order (NOW before NEXT). Be ambitious, but do not pull FAR items forward.
+4. **Fold in the heritage.** The run file's `heritage` lists every change the maker made and kept, with lessons and ideas. Add them to `K.HERITAGE` in `src/maker.js`. Drop only what the record shows did harm.
+5. **Keep the two roadmaps in step:** `ROADMAP.md` and `K.SEED` in `src/maker.js`.
+6. **Test**, then publish, then commit and push: `src/`, tests, `docs/design-log.md` (a "What the Nth run showed" section and a "Generation N" section, newest first), `ROADMAP.md`.
+7. **Report plainly** to Nova: what the run showed with numbers, what changed and why, what was verified and what could not be. Send him the design log as a file as well.
+
+## Design rules
+
+- Open and emergent. Make things possible; give them a cost and a use; never script an outcome.
+- New content should be **data in the laws registry** acting through the effects language (`SW.FX_NOW`, `SW.FX_BOON`), so the maker can make more of it. Add code only for a new kind of mechanic.
+- Give the maker a lever and a statistic for everything new (`K.applyOp`, `K.OPS`, `K.stats`, `LAW_GROUPS`).
+- Tell a being only what it could perceive. When an act fails, say why, to that being.
+- The engine is deterministic for a seed. Use `rnd(w)`, never `Math.random()`, inside the world step.
+- A world saved by the previous generation must still load: extend `SW.upgrade` (engine) and the normaliser in `M.restore` (minds). Bump `settings.v` when settings change. `SAVE_KEY` keeps the old name `seedworld.save.v4` on purpose.
+- Watch prompt size (`M.buildPrompt`); it was about 20,000 characters in the sixth run.
+- Watch speed: a world moment should stay near 2 ms.
+- Do not put apostrophes inside single-quoted strings in `minds.js` prompts; it has broken the file twice.
+
+## Tests
+
+```
+tests/run-all.sh                                   # needs only Node
+PLAYWRIGHT=/path/to/node_modules/playwright tests/run-all.sh browser
+```
+
+All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`09-...js`), with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
+
+What the tests cannot show is how real minds behave. Say so in every report.
+
+## How to write to Nova
+
+- When posing a decision: the question, the options, the proposed answer and why.
+- Separate what was built, what was tested, and what was only designed.
+- No hype. Numbers from the record over impressions.
