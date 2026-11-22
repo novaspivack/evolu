@@ -7,6 +7,7 @@ const srv = http.createServer((req, res) => { const f = path.join(dir, req.url =
   const browser = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', args: ['--no-sandbox'] });
   const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message)); page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
+  await page.addInitScript(() => { window.EVOLU_SEED = 7; });
   await page.goto('http://localhost:8135/'); await page.waitForTimeout(900);
   const info = await page.evaluate(() => {
     const d = window.SWdebug, st = d.st, w = st.world, M = window.SWM, ag = w.agents, P0 = ag.filter(a => a.people === 0), P1 = ag.filter(a => a.people === 1), P2 = ag.filter(a => a.people === 2);

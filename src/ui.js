@@ -328,9 +328,9 @@ function resize() {
 }
 function clampCam() {
   cam.z = clamp(cam.z, cam.fit * 0.85, 110);
-  const hw = W / cam.z / 2, hh = H / cam.z / 2;
-  cam.x = hw >= w.W / 2 ? w.W / 2 : clamp(cam.x, hw, w.W - hw);
-  cam.y = hh >= w.H / 2 ? w.H / 2 : clamp(cam.y, hh, w.H - hh);
+  const hw = W / cam.z / 2, hh = H / cam.z / 2, ox = hw * 0.7, oy = hh * 0.7; /* the view may run past the rim by most of half a screen */
+  cam.x = hw - ox >= w.W - hw + ox ? w.W / 2 : clamp(cam.x, hw - ox, w.W - hw + ox);
+  cam.y = hh - oy >= w.H - hh + oy ? w.H / 2 : clamp(cam.y, hh - oy, w.H - hh + oy);
 }
 function sx(tx) { return (tx + 0.5 - cam.x) * cam.z + W / 2; }
 function sy(ty) { return (ty + 0.5 - cam.y) * cam.z + H / 2; }
@@ -362,7 +362,7 @@ function refreshBands() {
 function draw() {
   const c = cx, z = cam.z;
   c.setTransform(DPR, 0, 0, DPR, 0, 0);
-  c.fillStyle = '#05080b'; c.fillRect(0, 0, W, H);
+  c.fillStyle = w.veil ? '#20232f' : '#05080b'; c.fillRect(0, 0, W, H); /* past the rim of a world with an unknown, more mist */
   c.imageSmoothingEnabled = true;
   c.drawImage(terrainBmp, sx(-0.5), sy(-0.5), w.W * z, w.H * z);
   { const sv = seasonVeils(); c.imageSmoothingEnabled = true;
@@ -1100,6 +1100,8 @@ $('panel').addEventListener('click', function (e) {
   else if (act === 'recsave') recDownload();
   else if (act === 'newworld') newWorld(+$('setSeed').value || Math.floor(Math.random() * 9999) + 1);
   else if (act === 'randomworld') newWorld(Math.floor(Math.random() * 9999) + 1);
+  else if (act === 'openworld') openWorld(el.dataset.id);
+  else if (act === 'forgetworld') { if (U.forget === el.dataset.id) { U.forget = null; libDel(el.dataset.id); } else U.forget = el.dataset.id; U.keys.settings = ''; }
 });
 
 /* ---------- voices, chronicle, kinds ---------- */
@@ -1447,6 +1449,8 @@ function renderSettings() {
     '<label for="setFore">Foresight<small>Let a reflecting mind test new reflexes in an imagined copy of the world (costs extra calls)</small></label><select class="field" id="setFore"><option value="1"' + (S.foresight ? ' selected' : '') + '>on</option><option value="0"' + (S.foresight ? '' : ' selected') + '>off</option></select></div>' +
     '<h3>Pace and budget</h3><div class="form"><label for="setPM">Thoughts per minute<small>across all beings</small></label><input type="number" id="setPM" min="1" max="60" value="' + S.perMinute + '">' +
     '<label for="setPar">At the same time</label><input type="number" id="setPar" min="1" max="8" value="' + S.parallel + '">' +
+    '<label for="setWait">The world waits for the minds<small>when there are more beings than Claude can think for in time, the clock slows so that each still thinks about this often; nothing in the world is cut</small></label><select class="field" id="setWait"><option value="1"' + (S.wait !== false ? ' selected' : '') + '>yes</option><option value="0"' + (S.wait === false ? ' selected' : '') + '>no, keep the clock steady</option></select>' +
+    '<label for="setThink">Each being thinks about every<small>moments of the world (a day is 240)</small></label><input type="number" id="setThink" min="30" max="480" value="' + (S.thinkEvery || 90) + '">' +
     '<label for="setBudget">Thought budget<small>minds fall asleep when it is spent</small></label><input type="number" id="setBudget" min="5" max="100000" value="' + S.budget + '">' +
     '<label for="setAuto">Wake the minds when the page opens<small>and after it reloads, so a long run carries on by itself</small></label><select class="field" id="setAuto"><option value="1"' + (S.autoWake ? ' selected' : '') + '>yes</option><option value="0"' + (S.autoWake ? '' : ' selected') + '>no</option></select>' +
     '<label for="setEndless">Keep thinking past the budget<small>for long runs: the minds never fall asleep by themselves</small></label><select class="field" id="setEndless"><option value="0"' + (S.endless ? '' : ' selected') + '>no</option><option value="1"' + (S.endless ? ' selected' : '') + '>yes</option></select></div>' +
@@ -1456,19 +1460,22 @@ function renderSettings() {
     '<h3>Run record <small>so Claude can read the whole run afterwards</small></h3><p class="note" id="recNote">' + recText() + '</p><div class="form"><label for="setRec">Record this run<small>Every thought, everything said, every event, and each being\'s state, kept with this artifact, where you and Claude can read it (and anyone you later share the artifact with)</small></label><select class="field" id="setRec"><option value="1"' + (S.record ? ' selected' : '') + '>on</option><option value="0"' + (S.record ? '' : ' selected') + '>off</option></select></div>' +
     '<div class="row"><button class="btn" data-act="recsend">Send everything now</button><button class="btn" data-act="recsave">Download run log</button></div>' +
     '<h3>Sound</h3><div class="form"><label for="setVol">Volume</label><input type="range" id="setVol" min="0" max="1" step="0.05" value="' + SWA.vol + '"></div>' +
-    '<h3>World</h3><div class="form"><label for="setBounty">The land<small>How fast food grows back. Lean land makes beings compete</small></label><select class="field" id="setBounty">' + [[1, 'lush'], [0.7, 'fair'], [0.5, 'lean'], [0.3, 'harsh']].map(function (q) { return '<option value="' + q[0] + '"' + (Math.abs((w.laws.ecology.bounty == null ? 1 : w.laws.ecology.bounty) - q[0]) < 0.06 ? ' selected' : '') + '>' + q[1] + '</option>'; }).join('') + '</select><label for="setSeed">Seed<small>the same seed grows the same land</small></label><input type="number" id="setSeed" min="1" max="99999" value="' + w.seed + '"></div><div class="row"><button class="btn" data-act="newworld">Begin a new world from this seed</button><button class="btn" data-act="randomworld">Surprise me</button></div>' +
-    '<p class="note" id="saveNote">The world is saved in this browser as it runs.</p>';
+    '<h3>World</h3><div class="form"><label for="setBounty">The land<small>How fast food grows back. Lean land makes beings compete</small></label><select class="field" id="setBounty">' + [[1, 'lush'], [0.7, 'fair'], [0.5, 'lean'], [0.3, 'harsh']].map(function (q) { return '<option value="' + q[0] + '"' + (Math.abs((w.laws.ecology.bounty == null ? 1 : w.laws.ecology.bounty) - q[0]) < 0.06 ? ' selected' : '') + '>' + q[1] + '</option>'; }).join('') + '</select><label for="setSeed">Seed<small>the same seed grows the same land</small></label><input type="number" id="setSeed" min="1" max="99999" value="' + w.seed + '"><label for="setName">Name of this world</label><input type="text" id="setName" maxlength="28" value="' + esc(w.name || '') + '"></div><div class="row"><button class="btn" data-act="newworld">Begin a new world from this seed</button><button class="btn" data-act="randomworld">Surprise me</button></div>' +
+    '<p class="note" id="saveNote">' + (LIB.db ? 'Every world is kept in this browser under its name as it runs. Beginning a new one does not lose this one.' : 'The world is saved in this browser as it runs. This browser keeps only one world: beginning a new one replaces it.') + '</p>' +
+    (function () { const others = LIB.list.filter(function (m) { return m.id !== st.runId; }); return '<h3>Saved worlds <small>in this browser</small></h3>' + (others.length ? others.map(function (m) { return '<div class="world"><div><b>' + esc(m.name || 'A world') + '</b><small>' + esc(worldLine(m)) + '</small></div><span><button class="btn" data-act="openworld" data-id="' + esc(m.id) + '">Continue</button> <button class="btn" data-act="forgetworld" data-id="' + esc(m.id) + '">' + (U.forget === m.id ? 'Really forget?' : 'Forget') + '</button></span></div>'; }).join('') : '<p class="muted">No other world is saved here yet.</p>'); })();
   const bind = function (id, fn) { $(id).onchange = function () { fn(this.value); save(); }; };
+  bind('setName', function (v) { const nm = String(v || '').replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 28); if (nm) { w.name = nm; $('worldName').textContent = nm; } });
   bind('setRM', function (v) { S.routine.model = v; }); bind('setRE', function (v) { S.routine.effort = v; });
   bind('setDM', function (v) { S.deep.model = v; }); bind('setDE', function (v) { S.deep.effort = v; });
   bind('setEvery', function (v) { S.reflectEvery = clamp(Math.round(+v) || 5, 2, 30); });
+  bind('setWait', function (v) { S.wait = v === '1'; }); bind('setThink', function (v) { S.thinkEvery = clamp(Math.round(+v) || 90, 30, 480); });
   bind('setFore', function (v) { S.foresight = v === '1'; });
   bind('setPM', function (v) { S.perMinute = clamp(Math.round(+v) || 6, 1, 60); });
   bind('setRec', function (v) { S.record = v === '1'; });
   bind('setStEvery', function (v) { S.story.every = clamp(Math.round(+v) || 3, 1, 30); }); bind('setStModel', function (v) { S.story.model = v; });
   bind('setMkOn', function (v) { S.maker.on = v === '1'; U.keys.maker = ''; }); bind('setMkEvery', function (v) { S.maker.every = clamp(Math.round(+v) || 4, 1, 30); }); bind('setMkModel', function (v) { S.maker.model = v; U.keys.maker = ''; });
   bind('setBounty', function (v) { w.laws.ecology.bounty = +v; U.keys.laws = ''; });
-  bind('setPar', function (v) { S.parallel = clamp(Math.round(+v) || 2, 1, 8); });
+  bind('setPar', function (v) { S.parallel = clamp(Math.round(+v) || 2, 1, 8); st.par = 0; });
   bind('setBudget', function (v) { S.budget = clamp(Math.round(+v) || 40, 5, 100000); });
   bind('setEndless', function (v) { S.endless = v === '1'; });
   bind('setAuto', function (v) { S.autoWake = v === '1'; });
@@ -1503,7 +1510,7 @@ function updatePanels() {
   $('clockText').innerHTML = '<b>Day ' + SW.day(w) + '</b> · ' + SW.SEASONS[SW.season(w)] + ' · ' + SW.phaseName(w) + ' · <b>' + w.weather.kind + '</b>';
   drawDial();
   $('census').innerHTML = '<span class="chip glass"><i style="background:var(--accent)"></i><b>' + c.agents + '</b>beings</span><span class="chip glass"><i style="background:#c9a877"></i><b>' + c.hopper + '</b>grazers</span><span class="chip glass"><i style="background:#a68bd8"></i><b>' + c.stalker + '</b>hunters</span><span class="chip glass"><i style="background:var(--life)"></i><b>' + c.plants + '</b>plants</span><span class="chip glass"><b>' + (c.plantKinds + c.creatureKinds) + '</b>kinds</span>';
-  $('meter').innerHTML = '<b>' + st.used + '</b> / ' + st.settings.budget + ' thoughts' + (st.inflight ? ' · ' + st.inflight + ' thinking' : '');
+  $('meter').innerHTML = '<b>' + st.used + '</b> / ' + st.settings.budget + ' thoughts' + (st.inflight ? ' · ' + st.inflight + ' thinking' : '') + (st.on && U.pace != null && U.pace < 0.93 ? ' · <span title="The world has slowed so that every being still comes to think about once in ' + (st.settings.thinkEvery || 90) + ' moments. Change this in Setup.">time ×' + U.pace.toFixed(2) + '</span>' : '');
   if (st.notice) { const again = st.budgetHit; showNotice(st.notice, again ? { label: 'Another round', run: function () { wakeMinds(true); } } : null); st.notice = ''; syncButtons(); }
   if (st.blocked && !U.toldBlocked && st.sample === null) U.toldBlocked = true;
   syncButtons();
@@ -1531,7 +1538,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 18, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 19, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1550,13 +1557,77 @@ function recDownload() {
   try { const u = URL.createObjectURL(new Blob([data], { type: 'application/json' })), el = document.createElement('a'); el.href = u; el.download = name; document.body.appendChild(el); el.click(); el.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 4000); }
   catch (e) { showNotice('Downloads are not available in this view.'); }
 }
-function save() {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(SWM.snapshot(st))); } catch (e) { /* storage may be unavailable; the world still runs */ }
+/* ---------- saved worlds ----------
+   Every world is kept by name in this browser (IndexedDB), so one can be left and another begun or carried on.
+   The single older slot in localStorage is still written, as a fallback where the library cannot be opened. */
+const LIB = { db: null, list: [], legacy: null };
+function libOpen() {
+  return new Promise(function (res) {
+    let done = false; const fin = function (v) { if (!done) { done = true; res(v); } };
+    try {
+      const rq = indexedDB.open('evolu', 1);
+      rq.onupgradeneeded = function () { const d = rq.result; if (!d.objectStoreNames.contains('meta')) d.createObjectStore('meta', { keyPath: 'id' }); if (!d.objectStoreNames.contains('snap')) d.createObjectStore('snap'); };
+      rq.onsuccess = function () { LIB.db = rq.result; fin(true); }; rq.onerror = function () { fin(false); }; rq.onblocked = function () { fin(false); };
+      setTimeout(function () { fin(!!LIB.db); }, 2500);
+    } catch (e) { fin(false); }
+  });
 }
+function libReq(store, mode, fn) {
+  return new Promise(function (res) {
+    if (!LIB.db) return res(null);
+    try { const rq = fn(LIB.db.transaction(store, mode).objectStore(store)); rq.onsuccess = function () { res(rq.result === undefined ? true : rq.result); }; rq.onerror = function () { res(null); }; } catch (e) { res(null); }
+  });
+}
+function libList() { return libReq('meta', 'readonly', function (o) { return o.getAll(); }).then(function (a) { return (Array.isArray(a) ? a : []).sort(function (p, q) { return (q.at || 0) - (p.at || 0); }); }); }
+function libGet(id) { return libReq('snap', 'readonly', function (o) { return o.get(id); }).then(function (v) { return typeof v === 'string' ? v : (LIB.legacy && LIB.legacy.id === id ? LIB.legacy.str : null); }); }
+function libPut(meta, str) { const k = LIB.list.findIndex(function (m) { return m.id === meta.id; }); if (k >= 0) LIB.list[k] = meta; else LIB.list.unshift(meta); return libReq('snap', 'readwrite', function (o) { return o.put(str, meta.id); }).then(function (ok) { return ok ? libReq('meta', 'readwrite', function (o) { return o.put(meta); }) : null; }); }
+function libDel(id) { LIB.list = LIB.list.filter(function (m) { return m.id !== id; }); return libReq('snap', 'readwrite', function (o) { return o.delete(id); }).then(function () { return libReq('meta', 'readwrite', function (o) { return o.delete(id); }); }); }
+const NAME_A = ['Ar', 'Bel', 'Cor', 'Dun', 'El', 'Fen', 'Gal', 'Har', 'Il', 'Jor', 'Kel', 'Lor', 'Mar', 'Nim', 'Or', 'Per', 'Quel', 'Ros', 'Sel', 'Tor', 'Ul', 'Val', 'Wen', 'Yar', 'Zel', 'Ash', 'Bryn', 'Thal', 'Is', 'Om'];
+const NAME_B = ['a', 'e', 'i', 'o', 'u', 'ae', 'ia', 'ou', 'en', 'an', 'or', 'ir'];
+const NAME_C = ['dor', 'land', 'mere', 'vale', 'wyn', 'reth', 'mar', 'thos', 'nia', 'lund', 'gard', 'veil', 'sar', 'moor', 'heim', 'ria', 'den', 'ros', 'tide', 'fell'];
+function worldName(from) { /* a name for a world: by chance for a new one, or always the same for a world that was saved without one */
+  let h = 0; if (from != null) { const t = String(from); for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0; }
+  const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
+  return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
+}
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 19, rim: !!ww.veil, at: Date.now() }; }
+function save() {
+  if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
+  let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }
+  try { localStorage.setItem(SAVE_KEY, str); } catch (e) { /* storage may be unavailable or full; the world still runs */ }
+  try { sessionStorage.setItem('evolu.current', st.runId); } catch (e) {}
+  libPut(metaOf(st), str);
+}
+function openWorld(id) {
+  if (st && !U.choosing) save();
+  return libGet(id).then(function (str) {
+    let state = null; try { state = str ? SWM.restore(JSON.parse(str)) : null; } catch (e) { state = null; }
+    if (!state) { showNotice('That world could not be opened: its save is missing or damaged.'); return false; }
+    U.choosing = false; $('chooser').hidden = true; attach(state);
+    if (st.settings.autoWake && st.sample && st.used < st.settings.budget) st.on = true;
+    U.playing = true; $('notice').hidden = true; syncButtons(); setTab('inspect'); save();
+    try { if (st.settings.sound !== false && SWA.on && SWA.reseed) SWA.reseed(w.seed); } catch (e) {}
+    return true;
+  });
+}
+function whenText(at) { if (!at) return ''; const m = Math.round((Date.now() - at) / 60000); return m < 2 ? 'just now' : m < 90 ? m + ' minutes ago' : m < 2880 ? Math.round(m / 60) + ' hours ago' : Math.round(m / 1440) + ' days ago'; }
+function worldLine(m) { return 'day ' + m.day + ' · ' + m.alive + ' living' + (m.thoughts ? ' · ' + m.thoughts + ' thoughts' : '') + (m.rim === false ? ' · no unknown rim' : '') + (m.at ? ' · ' + whenText(m.at) : ''); }
+function showChooser() {
+  const others = LIB.list.filter(function (m) { return !st || m.id !== st.runId; });
+  $('chooserList').innerHTML = others.map(function (m) { return '<div class="world"><div><b>' + esc(m.name || 'A world') + '</b><small>' + esc(worldLine(m)) + '</small></div><button class="btn" data-open="' + esc(m.id) + '">Continue</button></div>'; }).join('');
+  $('chooserNew').textContent = 'Begin a new world: ' + (w.name || '');
+  $('chooserNote').textContent = LIB.db ? 'Worlds are kept in this browser, by name. You can come back to any of them from Setup.' : 'This browser keeps only one world at a time: beginning a new one will replace the one saved here.';
+  $('chooser').hidden = false; try { $('chooserNew').focus(); } catch (e) {}
+}
+$('chooser').addEventListener('click', function (e) {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.open) openWorld(b.dataset.open);
+  else if (b.id === 'chooserNew') { U.choosing = false; U.playing = true; $('chooser').hidden = true; if (st.settings.autoWake && st.sample) st.on = true; syncButtons(); save(); }
+});
 
 /* ---------- world lifecycle ---------- */
 function attach(state) {
-  st = state; w = st.world;
+  st = state; w = st.world; if (!w.name) w.name = worldName(st.runId); $('worldName').textContent = w.name;
   st.sample = sampleFn; st.toolsOK = toolsOK;
   st.ui = onWorldEvent;
   U.sel = null; U.follow = false; U.bubbles = []; U.fx = []; U.hist = []; U.keys = {}; U.acc = 0; U.flash = 0;
@@ -1566,16 +1637,18 @@ function attach(state) {
   if (w.agents.length) { cam.x = w.agents.reduce(function (s, a) { return s + a.x; }, 0) / w.agents.length + 0.5; cam.y = w.agents.reduce(function (s, a) { return s + a.y; }, 0) / w.agents.length + 0.5; }
   else { cam.x = w.W / 2; cam.y = w.H / 2; }
   clampCam(); syncButtons();
-  window.SWdebug = { st: st, U: U, cam: cam };
+  window.SWdebug = { st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam };
 }
 function newWorld(seed) {
   const keep = st ? st.settings : null;
   const legacy = st ? SWK.legacy(st) : null;
-  attach(SWM.createState(SW.createWorld(seed), keep || SWM.defaultSettings()));
+  if (st && !U.choosing) save(); /* the world being left is kept under its name */
+  const fresh = SWM.createState(SW.createWorld(seed), keep ? JSON.parse(JSON.stringify(keep)) : SWM.defaultSettings()); fresh.world.name = worldName(null);
+  attach(fresh); U.playing = true;
   if (st.settings.autoWake && st.sample) st.on = true;
   SWK.inherit(st, legacy);
   SWM.chron(st, 'birth', w.peoples.map(function (P) { return P.name + ' (' + P.noun + ') in ' + (w.regions[P.region] ? w.regions[P.region].name : 'the land'); }).join('; ') + ': ' + w.peoples.length + ' peoples woke in different lands of a new world, a sea between them (seed ' + seed + ').', []);
-  $('notice').hidden = true; save(); setTab('inspect');
+  $('notice').hidden = true; save(); setTab('inspect'); if (U.choosing) showChooser();
 }
 function settle() {
   const made = SW.settle(w, 3);
@@ -1589,8 +1662,9 @@ function stepWorld() {
 }
 function frame(ts) {
   const dt = Math.min(0.1, (ts - U.last) / 1000 || 0); U.last = ts; U.time += dt;
-  if (U.playing) {
-    U.acc += dt * TICKS_PER_SEC * U.speed;
+  if (U.playing && !U.choosing) {
+    U.pace = (U.pace == null ? 1 : U.pace) + (SWM.pace(st) - (U.pace == null ? 1 : U.pace)) * 0.05; /* the clock eases toward what the minds can keep up with */
+    U.acc += dt * TICKS_PER_SEC * U.speed * U.pace;
     let n = 0; while (U.acc >= 1 && n < 30) { stepWorld(); U.acc -= 1; n++; }
     if (U.acc > 1) U.acc = 1;
     SWM.pump(st);
@@ -1603,15 +1677,38 @@ function frame(ts) {
   if (ts - U.lastMini > 400) { U.lastMini = ts; drawMini(); }
   if (ts - (U.lastRec || 0) > 5000) { U.lastRec = ts; recFlush(false); SWK.tick(st); }
   if (ts - U.lastScene > 500) { U.lastScene = ts; if (!U.eraT || ts - U.eraT > 6000) { U.eraT = ts; let er = 1; w.agents.forEach(function (a) { for (const k in a.knows) er = Math.max(er, (w.laws.tree[k] || {}).era || 1); }); U.era = er; } const R0 = SW.regionAt(w, clamp(Math.round(cam.x), 0, w.W - 1), clamp(Math.round(cam.y), 0, w.H - 1)); SWA.scene(nightLevel(), SW.season(w), w.weather.kind, { biome: R0 ? R0.biome : 'mixed', mood: w.musicMood || 'calm', era: U.era || 1, crowd: w.settlements.length }); }
-  if (ts - U.lastSave > 30000) { U.lastSave = ts; save(); }
+  if (ts - U.lastSave > 30000 && !U.choosing) { U.lastSave = ts; save(); }
   requestAnimationFrame(frame);
 }
 function start(data) {
+  /* 1. the page was republished or reloaded by its host while a world ran: carry on with it.
+     2. the same tab was reloaded: carry on with the world it held.
+     3. worlds are saved here from before: offer them, and a new world, and wait for the choice.
+     4. nothing is saved here: begin a new world, with a name of its own, and let it run. */
   let state = null;
   try { if (data && data.world) state = SWM.restore(data); } catch (e) { state = null; }
-  if (!state) { try { const raw = localStorage.getItem(SAVE_KEY); if (raw) state = SWM.restore(JSON.parse(raw)); } catch (e) { state = null; } }
+  if (state) { libOpen().then(libList).then(function (list) { (list || []).forEach(function (m) { if (!LIB.list.some(function (q) { return q.id === m.id; })) LIB.list.push(m); }); save(); }).catch(function () {}); return go(state, false); } /* the library is opened behind a world that carries on, and that world is filed in it */
+  libOpen().then(libList).then(function (list) {
+    LIB.list = list || [];
+    let raw = null, cur = null, old = null;
+    try { raw = localStorage.getItem(SAVE_KEY); } catch (e) {}
+    try { cur = sessionStorage.getItem('evolu.current'); } catch (e) {}
+    if (raw) { try { old = SWM.restore(JSON.parse(raw)); } catch (e) { old = null; } }
+    if (old) { /* a world saved before worlds had names is filed with the rest, so that nothing is lost */
+      if (!old.world.name) old.world.name = worldName(old.runId);
+      LIB.legacy = { id: old.runId, str: raw };
+      if (!LIB.list.some(function (m) { return m.id === old.runId; })) { const m = metaOf(old); m.at = Date.now() - 60000; libPut(m, raw); }
+    }
+    if (cur && old && old.runId === cur) return go(old, false);
+    if (cur && LIB.list.some(function (m) { return m.id === cur; })) return libGet(cur).then(function (str) { let s2 = null; try { s2 = str ? SWM.restore(JSON.parse(str)) : null; } catch (e) { s2 = null; } go(s2, !s2 && LIB.list.length > 0); });
+    go(null, LIB.list.length > 0);
+  }).catch(function () { go(null, false); });
+}
+function go(state, choose) {
+  U.choosing = !!choose;
   if (state) attach(state);
-  else { attach(SWM.createState(SW.createWorld(7), SWM.defaultSettings())); SWK.inherit(st, null); SWM.chron(st, 'birth', w.peoples.map(function (P) { return P.name + ' (' + P.noun + ') in ' + (w.regions[P.region] ? w.regions[P.region].name : 'the land'); }).join('; ') + ': ' + w.peoples.length + ' peoples woke in different lands of a new world, a sea between them (seed 7).', []); }
+  else newWorld(+window.EVOLU_SEED || Math.floor(Math.random() * 9999) + 1);
+  if (choose) showChooser();
   window.addEventListener('resize', resize);
   document.addEventListener('visibilitychange', function () { if (document.hidden) save(); });
   if (window.claude && window.claude.use) {

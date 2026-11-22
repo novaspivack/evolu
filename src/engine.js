@@ -43,7 +43,7 @@ SW.defaultLaws = function () {
     /* when the living fall below a floor, a small band comes into the land from beyond its edge: of the people that has fewest left */
     arrivals: { floor: 14, size: 4, gapDays: 4 },
     /* the known world ends in mist. One who stands at it may venture in: a band has a few attempts, then its will must return */
-    explore: { chance: 0.5, pushes: 3, restDays: 5, cost: 8, depth: 10, length: 40, finds: 3, beasts: 0.5, strangers: 0.2 },
+    explore: { chance: 0.35, pushes: 3, restDays: 8, cost: 8, depth: 6, length: 40, gapDays: 1, finds: 3, beasts: 0.5, strangers: 0.2 },
     /* standing among others: what earns it, what loses it, and how much of it one needs before another will follow */
     status: { wealth: 1, deeds: 1, knowledge: 1, children: 1, works: 1, followers: 1, giving: 1, renown: 1, shame: 1, leadNeeds: 1.2, shameFade: 0.9 },
     /* how ways are come to: what a being has suffered sharpens it toward the ways that would answer it; what it already knows in a line helps with the next */
@@ -1633,6 +1633,7 @@ SW.upgrade = function (w) {
   w.agents.forEach(function (a) { if (!a.things) a.things = {}; if (!a.tongues) a.tongues = {}; if (a.tall == null) a.tall = 1; if (!a.press) a.press = {}; });
   w.agents.forEach(function (a, k) { if (!a.sex) a.sex = sexFor(w, a.people); if (!a.calling) a.calling = SW.CALLINGS[(a.id + k) % SW.CALLINGS.length]; }); if (!w.narrow) narrowWater(w);
   if ((w.tuned2 || 0) < 18) { w.tuned2 = 18; const A2 = w.laws.arrivals; if (A2) { if (A2.floor === 10) A2.floor = 14; if (A2.size === 3) A2.size = 4; } if (w.laws.ecology && w.laws.ecology.grazerTarget === 90) w.laws.ecology.grazerTarget = 120; }
+  if ((w.tuned2 || 0) < 19) { w.tuned2 = 19; const E2 = w.laws.explore; if (E2) { if (E2.chance === 0.5) E2.chance = 0.35; if (E2.restDays === 5) E2.restDays = 8; if (E2.depth === 10) E2.depth = 6; if (E2.gapDays == null) E2.gapDays = 1; } }
   /* laws that were re-tuned after a world was made: a world still at the old value takes the new one; a value its maker changed is left alone */
   if ((w.tuned || 0) < 16) { w.tuned = 16; const L = w.laws;
     [['time', 'winterGrowth', 0.1, 0.2], ['time', 'winterWither', 0.005, 0.0025], ['time', 'winterWither', 0.004, 0.0025], ['mate', 'cooldown', 1500, 900], ['mate', 'minAgeFraction', 0.2, 0.14], ['mate', 'maxPopulation', 40, 60], ['age', 'childUntil', 0.14, 0.1], ['age', 'elderFrom', 0.78, 0.8]].forEach(function (q) { if (L[q[0]] && L[q[0]][q[1]] === q[2]) L[q[0]][q[1]] = q[3]; });
@@ -2228,9 +2229,10 @@ function act(w, a, r, S, emit) {
       const Rt = rootOf(w, a), X = Rt.ex = Rt.ex || { n: 0, rest: 0 };
       if (w.tick < X.rest) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'The will to push into the unknown is spent, yours and your band\'s. It returns in about ' + Math.ceil((X.rest - w.tick) / L.time.dayLength) + ' days.' }); return false; }
       if (a.e < 30) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You are too weak to push into the unknown. Eat first.' }); return false; }
+      if (w.lastStrip != null && w.tick - w.lastStrip < (E.gapDays || 0) * L.time.dayLength) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You went to the edge of the known world, and the mist lay too thick to enter today. It thins again within a day or so; your will to try is not spent.' }); a.fin = 1; return true; } /* the mist parts for no one for a while after it has parted anywhere: the known world grows slowly */
       a.e -= E.cost || 0; a.fin = 1; X.n++; a.stats.ventured = (a.stats.ventured || 0) + 1; a.doing = 'venturing into the unknown';
       if (X.n >= (E.pushes || 3)) { X.n = 0; X.rest = w.tick + (E.restDays || 5) * L.time.dayLength; }
-      if (rnd(w) < (E.chance == null ? 0.5 : E.chance)) { const ev = SW.openStrip(w, a.x, a.y, noop); if (ev) { ev.a = a.id; a.stats.found = (a.stats.found || 0) + 1; a.loreWhy = 'finding new land'; a.lore = Math.round((a.lore + 0.4) * 10) / 10; feel(a, 'joy', 0.6); a.stat = null; emit(ev); return true; } }
+      if (rnd(w) < (E.chance == null ? 0.5 : E.chance)) { const ev = SW.openStrip(w, a.x, a.y, noop); if (ev) { w.lastStrip = w.tick; ev.a = a.id; a.stats.found = (a.stats.found || 0) + 1; a.loreWhy = 'finding new land'; a.lore = Math.round((a.lore + 0.4) * 10) / 10; feel(a, 'joy', 0.6); a.stat = null; emit(ev); return true; } }
       emit({ type: 'fail', a: a.id, text: 'You pushed into the mist at the edge of the known world and found no way through this time. ' + (X.rest > w.tick ? 'Your will to try again is spent for now, and your band\'s with it.' : 'It may yet open to another try.') }); return true;
     }
     case 'tell': { /* to tell of what has been, by a fire, to those who are near */

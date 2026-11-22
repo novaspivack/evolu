@@ -12,6 +12,45 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## What the eleventh run showed (a new world on Generation 18, four days, run `r7-mwsfrgn7`, 130 thoughts)
+
+From the downloaded run log (`runs/generation-18-run-r7-mwsfrgn7-day4.json`). The first run of a world with a veiled rim, and the first in which `claim`, `venture` and `tell` could reach a body.
+
+- **Twenty-five alive on day 4, no deaths.** Fifteen founders, two children (Osli, Sela) and two bands of four: one Nova added by hand, one that came by itself.
+- **The unknown opened far too fast.** Nineteen plan steps were `venture`; nine pushes were made and **six of them opened land** in days 2 to 4: 2,476 tiles, 22% of everything veiled, in three days. A strip was twelve deep (the law said ten, and the code added two), so two pushes on one side reached the end of the map. On the south side that is what happened: land now runs to the map's last row.
+- **"You cannot scroll to the new land."** The map did not go on past the view: it ended there. The view stopped exactly at the map's rim, so the last rows sat under the small map and the help bar and could not be brought clear of them.
+- **The minds fell asleep on a single refusal.** `rate_limited: too many sample calls at once from this page — let some finish`, once, on day 4, with 25 beings and six thoughts at once (my new default). One refusal put every mind to sleep until woken by hand. A thought took 10.4 seconds (middle), where it had taken 3.4 on the old world with four at once; I do not know why.
+- **Hunting is chosen now:** 11 kills in four days (21 in the whole 66 days of the old world), none yet made together. 62 pickings. 1,064 moments swum.
+- **A tale was made on day 3:** "Kragog Opens the Mist". It came by the tale field of a reply, not by telling at a fire; no one has yet told.
+- **Top drives:** ambition 56, curiosity 46, belonging 12, family 10. Plans added up to 70 moments (middle) against a thought every 87.
+- The maker had not yet visited.
+
+## Generation 19 (built, not yet run with real minds): a rim that opens slowly, and worlds with names
+
+**The view passes the rim.** The camera can be carried past the edge of the map by most of half a screen, so land at the rim can always be brought clear of the controls; past the map of a world with an unknown, more mist is drawn.
+
+**The unknown opens slowly.** A push opens with a chance of 0.35 (it was 0.5); a strip is eight deep (it was twelve); a band rests eight days after three tries (it was five); and once a strip has opened anywhere, the mist parts for no one for a day, without spending the try. At most one strip a day in the whole world, of about 330 tiles: the rim of a new world lasts thirty days at the very least. A world carried on from Generation 18 takes these laws where its maker had not set its own.
+
+**The world waits for its minds.** Claude allows a page only so many thoughts in a given time, whatever the number of beings. Until now the clock ran on regardless, so more beings meant each thought less often in a day of the world. Now, while the minds are awake, the clock slows as more of them fall overdue for a thought (overdue is 90 moments by default): free while fewer than a tenth are waiting, down to a tenth of its speed when half are. Time slows for the watcher and nothing in the world is cut; with fewer beings it runs fast again. The meter shows it ("time ×0.54"), and Setup can change the 90 or switch the waiting off.
+
+**The minds ease off.** When Claude refuses for too many calls at once, they stay awake, think one fewer at a time, wait twelve seconds, and the mind refused asks again; after three quiet minutes they try one more at a time again, so the pace finds what Claude allows. Only five refusals in two minutes put them to sleep. Four at once is the default again (a saved six becomes four); forty a minute stays.
+
+**Worlds with names.** Every world has a name (a new one gets one by chance, shown by the title and changeable in Setup) and is kept under it in the browser. Opening the page:
+- with nothing saved, a new world begins at once from a chance seed and runs;
+- with worlds saved, a panel offers each of them (name, day, living, when last played) and a new world, which is the lit button; nothing runs or is saved until one is chosen;
+- a tab that is reloaded, or the page republished while open, carries on with its world without asking.
+Setup lists the other saved worlds, to continue or to forget. Beginning a new world no longer replaces the one being left, and a new world always starts playing. A world saved before this is filed in the library the first time the page opens.
+
+**The big world (`r7-mws0f6n0`, 66 days) is not in my hands, and may be gone.** The browser had one slot for a saved world. The page's own record shows the big world open under Generation 18 at 5:55 pm on 22 November and the new world begun about two minutes later; if that was the same browser, beginning the new world replaced it. If the big world was last open in another browser or on another device, it is still there, and opening Evolu there will now file it by name. What certainly survives is its whole record: every being with its body, mind, bonds and knowledge, the culture, the laws the maker set, and its land, which the Generation 14 generator makes again exactly from seed 7 (I checked: the same nine lands and the same founders). What the record does not hold is where each roof, store, plant and deposit stood.
+
+**Checked.** 25 new checks in `tests/13-a-rim-that-opens-slowly.js` (406 in thirteen files) and a new browser suite, `worlds.js` (11 checks: first visit, reload, return visit, continue, new, Setup, the camera, the old slot, a republish).
+
+**Not checked, and not built.**
+- No real mind has met Generation 19. The waiting clock is checked as arithmetic (how slow for how many overdue); how it feels with thirty beings and real calls is for the next run.
+- **The world as a globe.** Nova asked, while this was being built, for a world that wraps so that exploring fills it in and comes back around, perhaps a torus, perhaps seen as a globe from far off. Not built: every distance, path and neighbourhood in the engine assumes an edge, and the land must be made so that its seams join. It is first in NEXT, with a choice to make (see the roadmap).
+- **Rebuilding the big world from its record,** as a world for those who want to begin farther along. Not built; a choice for Nova.
+- Whether IndexedDB is allowed where Evolu runs inside Claude I could not see from here. Where it is not, the page falls back to the one old slot and says so in the panel and in Setup.
+
 ## What the tenth run showed (the same world carried on, days 51 to 66, on Generation 17; run `r7-mws0f6n0`, 478 thoughts)
 
 From the downloaded run log (`runs/generation-17-run-r7-mws0f6n0-day66.json`), counted with code. Nova's reading before I looked: halls planned and never claimed, hunger, plans empty or not followed, too few people, too few animals, no shroud at the edge, a world that felt stuck. Most of that was right, and the largest cause was a fault of mine.

@@ -16,10 +16,10 @@ M.MODELS = [
 ];
 M.defaultSettings = function () {
   return {
-    v: 11, autoWake: true, sound: true,
+    v: 12, autoWake: true, sound: true,
     routine: { model: 'claude-sonnet-5-5', effort: '' },
     deep: { model: 'claude-sonnet-5-5', effort: 'medium' },
-    perMinute: 40, parallel: 6, budget: 3000, endless: false, reflectEvery: 4, foresight: true, record: true,
+    perMinute: 40, parallel: 4, budget: 3000, endless: false, reflectEvery: 4, foresight: true, record: true, wait: true, thinkEvery: 90,
     story: { model: 'claude-sonnet-5-5', effort: 'medium', every: 3 },
     maker: { on: true, model: 'claude-opus-5-5', effort: 'high', every: 4 }
   };
@@ -83,7 +83,7 @@ M.record = function (st, item) {
 M.digest = function (st) {
   const w = st.world;
   return {
-    run: st.runId, generation: 18, seed: w.seed, culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {} }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
+    run: st.runId, generation: 19, seed: w.seed, culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {} }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
     peoples: (w.peoples || []).map(function (P) { return { name: P.name, noun: P.noun, kind: P.kind, way: P.way, custom: P.custom, land: P.region != null && w.regions[P.region] ? w.regions[P.region].name : '', alive: w.agents.filter(function (a) { return a.people === P.id; }).length }; }), lands: (w.regions || []).map(function (R) { return { name: R.name, biome: R.biome, minerals: R.minerals || [], beings: w.agents.filter(function (a) { return w.region[a.y * w.W + a.x] === R.id; }).length }; }), tally: w.tally || {}, alive: w.agents.length, creatures: w.creatures.length, plants: w.plants.filter(Boolean).length, wars: w.wars, settlements: w.settlements.map(function (q) { return q.name; }), ways: Object.keys(w.laws.tree).filter(function (k) { return w.agents.some(function (a) { return a.knows[k]; }); }), designs: Object.keys(w.laws.tools),
     beings: Object.keys(st.minds).map(function (id) {
       const m = st.minds[id], a = agentById(w, +id);
@@ -734,7 +734,7 @@ M.buildPrompt = function (st, mind, kind, lean) {
     if (rb) out.push('AN EMPTY ' + String(rb.kind).toUpperCase() + ' stands at (' + rb.x + ',' + rb.y + '), ' + rbd + ' steps ' + SW.compass(rb.x - a.x, rb.y - a.y) + '. Those who raised it are dead and it belongs to no one. Whoever stands at it and claims it (plan step claim) holds it, with every roof, wall and store of theirs around it: a home ready made, for you or to add to what your band holds.'); }
   out.push('You are a ' + (SW.stage(w, a) === 'child' ? (a.sex === 'f' ? 'girl' : 'boy') : (a.sex === 'f' ? 'woman' : 'man')) + '. A child comes only of a woman and a man together who are not close kin. A grown body can swim water that is narrow (a river up to four steps across) at a cost in strength; lakes and the sea need a vessel or a bridge. An animal within reach can be hunted for meat (plan step hunt); with one of your own beside you a kill is far likelier and a wound far less likely, and every hunt makes you better at the next.' + ((a.stats.hunted || 0) + (a.stats.picked || 0) > 0 ? ' What practice has taught your hands: ' + [(a.stats.hunted ? 'hunting (' + a.stats.hunted + ' kills' + (a.stats.huntedWith ? ', ' + a.stats.huntedWith + ' of them with others' : '') + ')' : ''), (a.stats.picked ? 'gathering (' + a.stats.picked + ' pickings; a practised hand often picks two at once)' : '')].filter(Boolean).join(', ') + '.' : ''));
   if (a.marks && Object.keys(a.marks).length) out.push('WHAT YOU DO NOT FORGET:\n' + Object.keys(a.marks).map(function (id) { const m = a.marks[id]; return '- ' + (m.name || nameOf(st, +id)) + ' ' + m.why + ' on day ' + m.day + (m.k === 'grudge' ? ': a grudge. It will not ease by itself for a long time; three gifts from them would mend it.' : ': a kindness you hold to.'); }).join('\n'));
-  { const eg = SW.edgeNear(w, a); if (eg) { const Rt = SW.rootOf(w, a), rest = Rt && Rt.ex && w.tick < Rt.ex.rest; out.push('THE EDGE OF THE KNOWN WORLD is ' + eg.d + ' steps ' + SW.compass(eg.x - a.x, eg.y - a.y) + ', at (' + eg.x + ',' + eg.y + '): beyond it lies mist that no one has entered. The land does not end there; it only has not been seen. ' + (rest ? 'The will to push into it is spent for now, yours and your band\u2019s; it returns in about ' + Math.ceil((Rt.ex.rest - w.tick) / w.laws.time.dayLength) + ' days.' : 'One who stands at it can venture in (plan step venture). It does not always open, and a band has only a few tries before its will must return; but land found first is often rich in food, herds and things in the ground, and the one who finds it is remembered for it.')); } }
+  { const eg = SW.edgeNear(w, a); if (eg) { const Rt = SW.rootOf(w, a), rest = Rt && Rt.ex && w.tick < Rt.ex.rest; out.push('THE EDGE OF THE KNOWN WORLD is ' + eg.d + ' steps ' + SW.compass(eg.x - a.x, eg.y - a.y) + ', at (' + eg.x + ',' + eg.y + '): beyond it lies mist that no one has entered. The land does not end there; it only has not been seen. ' + (rest ? 'The will to push into it is spent for now, yours and your band\u2019s; it returns in about ' + Math.ceil((Rt.ex.rest - w.tick) / w.laws.time.dayLength) + ' days.' : 'One who stands at it can venture in (plan step venture). It opens seldom, never twice in one day anywhere, and a band has only a few tries before its will must return; but land found first is often rich in food, herds and things in the ground, and the one who finds it is remembered for it.')); } }
   out.push('YOUR CREED (your own words to yourself; this is who you are):\n"' + mind.creed + '"');
   if (mind.method) out.push('HOW YOU HAVE TAUGHT YOURSELF TO THINK (your own discipline; follow it):\n"' + mind.method + '"');
   out.push('YOUR AIM (what you are working toward over many days; you set it and may change it): ' + (mind.aim ? '"' + mind.aim + '"' : 'none yet. A being without an aim only reacts.') +
@@ -1179,7 +1179,12 @@ M.think = async function (st, mind, kind) {
   } catch (e) {
     const code = (e && e.code) || 'upstream_error';
     if (HIDE[code]) { st.on = false; st.blocked = 'Claude is not available to this page in this view, so the beings run on reflexes alone.'; }
-    else if (code === 'rate_limited') { st.on = false; st.notice = e.reason === 'usage_limit' ? 'You have reached your Claude usage limit. The minds are asleep; wake them again later.' : 'Too many thoughts at once. The minds are asleep: lower thoughts per minute in Settings, then wake them.'; }
+    else if (code === 'rate_limited' && e.reason === 'usage_limit') { st.on = false; st.notice = 'You have reached your Claude usage limit. The minds are asleep; wake them again later.'; }
+    else if (code === 'rate_limited') { /* asked for fewer at once: think fewer at a time, wait a little, and carry on. Only if it keeps happening do the minds sleep */
+      const now = Date.now(); st.easeN = (now - (st.easeT || 0) < 120000 ? (st.easeN || 0) : 0) + 1; st.easeT = now;
+      st.par = Math.max(1, Math.min(st.par || st.settings.parallel, st.settings.parallel) - 1); st.hold = now + 12000 * st.easeN; mind.again = true;
+      if (st.easeN >= 5) { st.on = false; st.notice = 'Claude refused the pace five times in two minutes. The minds are asleep: lower thoughts per minute in Setup, then wake them.'; }
+      else st.notice = 'Claude asked for fewer thoughts at once. The minds carry on, ' + st.par + ' at a time.'; }
     else if (code === 'session_expired') { st.on = false; st.notice = 'Your session expired. Sign in again, then wake the minds.'; }
     else if (code === 'tools_unavailable') { st.toolsOK = false; st.notice = 'Foresight (imagined test runs) is not available in this view; deep reflection continues without it.'; }
     else if (code !== 'cancelled') {
@@ -1190,7 +1195,7 @@ M.think = async function (st, mind, kind) {
     M.record(st, { t: 'failed', id: mind.id, name: mind.name, kind: kind, code: code, raw: e && e.text ? String(e.text).slice(0, 1500) : (e && e.message) || '' });
     st.ui({ type: 'thought_failed', a: mind.id, code: code });
   } finally {
-    mind.busy = false; mind.stream = ''; mind.urge = 0; st.inflight--; mind.rev++;
+    mind.busy = false; mind.stream = ''; mind.urge = mind.again ? 2 : 0; mind.again = false; st.inflight--; mind.rev++;
   }
   return entry;
 };
@@ -1299,10 +1304,22 @@ M.kindFor = function (st, mind) {
   if (mind.wantDeep && mind.sinceDeep >= 2) return 'deep';
   return 'routine';
 };
+/* The world waits for its minds. Claude allows only so many thoughts in a given time, whatever the number of beings, so with more beings each would
+   think less often in a day of the world. This says how much the clock should slow so that every being still comes to think about once in
+   settings.thinkEvery moments: 1 while few are waiting, falling toward a tenth as more of them are overdue. Time slows for the watcher; nothing in the world is cut. */
+M.pace = function (st) {
+  if (!st.on || !st.sample || st.blocked || st.settings.wait === false) return 1;
+  const w = st.world, G = Math.max(20, st.settings.thinkEvery || 90); let n = 0, late = 0;
+  for (let k = 0; k < w.agents.length; k++) { const m = st.minds[w.agents[k].id]; if (!m || m.dead) continue; n++; if (m.lastT == null) m.lastT = w.tick; if (!m.busy && w.tick - m.lastT > G) late++; }
+  if (!n) return 1; const f = late / n;
+  return f <= 0.1 ? 1 : Math.max(0.1, Math.round((1 - (f - 0.1) * 2.5) * 100) / 100);
+};
 M.pump = function (st) {
   if (!st.on || !st.sample || st.blocked) return;
   if (st.used >= st.settings.budget && !st.settings.endless) { st.on = false; st.notice = 'The minds have had the ' + st.settings.budget + ' thoughts you allowed and are asleep. Wake them for another ' + st.settings.budget + ', or raise the budget in Setup.'; st.budgetHit = true; return; }
-  if (st.inflight >= st.settings.parallel) return;
+  if (st.inflight >= Math.min(st.settings.parallel, st.par || 99)) return;
+  if (Date.now() < (st.hold || 0)) return;
+  if (st.par && st.par < st.settings.parallel && Date.now() - Math.max(st.easeT || 0, st.upT || 0) > 180000) { st.par++; st.upT = Date.now(); } /* three quiet minutes: try one more at a time again */
   if (Date.now() - st.lastStart < 60000 / Math.max(1, st.settings.perMinute)) return;
   let best = null;
   for (const id in st.minds) {
@@ -1328,7 +1345,7 @@ M.snapshot = function (st) {
 M.restore = function (snap) {
   if (!snap || snap.v !== 4 || !snap.world || !snap.world.laws || snap.world.v !== 2) return null;
   const base = M.defaultSettings(), got = snap.settings || {};
-  if (got.v === base.v || got.v === 10) { for (const k in got) if (k in base) base[k] = got[k]; if (got.v === 10) { if (got.perMinute === 24) base.perMinute = 40; if (got.parallel === 4) base.parallel = 6; base.v = 11; } } /* settings from the generation before are kept, and its pace moves to the new one where it was never changed; older settings give way to the defaults */
+  if (got.v === base.v || got.v === 10 || got.v === 11) { for (const k in got) if (k in base) base[k] = got[k]; if (got.v === 10 && got.perMinute === 24) base.perMinute = 40; if (got.v === 11 && got.parallel === 6) base.parallel = 4; /* six at once was more than Claude allows a page */ base.v = 12; } /* settings from the generation before are kept, and its pace moves to the new one where it was never changed; older settings give way to the defaults */
   SW.upgrade(snap.world);
   const st = M.createState(snap.world, base);
   st.minds = snap.minds || {}; st.names = snap.names || {}; st.chron = snap.chron || []; st.voices = snap.voices || [];

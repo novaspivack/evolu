@@ -112,12 +112,13 @@ Each thought is a call to Claude on your account. The models are chosen in Setup
 
 **To play**
 
-1. The world starts on its own. **The minds are awake from the moment the page opens** and wake again by themselves if the page reloads, so thoughts are being spent as soon as you open it. **Minds awake** (top right) puts them to sleep and wakes them.
-2. **Sound is on** from the start. Some browsers hold a page silent until it is first touched; the button then reads "Sound on · click to hear", and any click or key lets it through. The button turns sound off.
-3. **Space** pauses, drag pans, scroll zooms, click inspects, **F** follows.
-4. Open **Setup** to choose the models, how often beings think, the pace (forty thoughts a minute across all beings by default, six at once; lower it if calls begin to fail), the **thought budget** (3,000 by default), whether to **keep thinking past the budget** for long runs, and whether the minds wake when the page opens. A new world can be started from a seed there.
-5. Watch. The tabs are Inspect, Story, Culture, Voices, Events, Peoples, Ways, Kinds, Laws, Maker and Setup.
-6. Let it run for some days of world time. Twenty to thirty days and several hundred thoughts is enough to learn from.
+1. **The first time you open it, a new world begins**, from a chance seed, with a name of its own (shown beside the title; change it in Setup), and runs. Every world is kept under its name in your browser. When you come back, a panel offers each saved world to continue and a new one to begin; a tab that is only reloaded carries on without asking. Setup lists the saved worlds, to continue or to forget.
+2. **The minds are awake from the moment the page opens** and wake again by themselves if the page reloads, so thoughts are being spent as soon as you open it. **Minds awake** (top right) puts them to sleep and wakes them.
+3. **Sound is on** from the start. Some browsers hold a page silent until it is first touched; the button then reads "Sound on · click to hear", and any click or key lets it through. The button turns sound off.
+4. **Space** pauses, drag pans, scroll zooms, click inspects, **F** follows.
+5. Open **Setup** to choose the models, how often beings think, the pace (forty thoughts a minute across all beings by default, four at once; if Claude refuses for too many calls at once the minds ease off by themselves), whether **the world waits for the minds** (by default it does: with more beings than Claude can think for in time, the clock slows so that each still thinks about every 90 moments, and the meter shows "time ×0.5"), the **thought budget** (3,000 by default), whether to **keep thinking past the budget** for long runs, and whether the minds wake when the page opens. A new world can be started from a seed there.
+6. Watch. The tabs are Inspect, Story, Culture, Voices, Events, Peoples, Ways, Kinds, Laws, Maker and Setup.
+7. Let it run for some days of world time. Twenty to thirty days and several hundred thoughts is enough to learn from.
 
 Three things to know. Publishing a new version reloads an open page, so do not publish during a run; and if you are working with Claude in the same conversation while a world runs, ask it to do nothing until the run is over. A world saved under an older generation still loads and can be carried on: it takes the laws that were re-tuned since, but not new lands, peoples, heritage or the veiled rim that lets the world grow, so start a new world for those. And the run is written to the artifact's store as it goes, so a run that is cut short is not lost: Claude can read its final state from there.
 
@@ -190,12 +191,14 @@ tests/run-all.sh            engine, minds and maker (about three minutes, needs 
 tests/run-all.sh browser    the same, then the page in headless Chrome (needs Playwright and Chrome)
 ```
 
-There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore, culture and necessity, peoples that last, a world with edges, and what a mind is offered. Together they are a regression suite of 381 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds.
+There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore, culture and necessity, peoples that last, a world with edges, what a mind is offered, and a rim that opens slowly. Together they are a regression suite of 406 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds.
 
 ## What is and is not verified
 
 - The tests show that the mechanics work and that the page runs without errors. They cannot show how real minds behave: those calls only happen when the page runs inside Claude.
-- What real minds did is known from ten recorded runs, described in the design log. Generation 18 had not yet been run with real minds when this was written.
+- What real minds did is known from eleven recorded runs, described in the design log. Generation 19 had not yet been run with real minds when this was written.
+- Saved worlds live in the browser (IndexedDB, with one older slot as a fallback). They do not travel between browsers or devices; the run log does.
+- The map is finite. Land opened at its last row ends in a straight line; a world that can be gone around is first in the roadmap.
 - An act can pass every check on the body and still never be reachable by a mind: claiming and venturing were in that state for two generations. The last suite now drives each act through the mind's own path, and reads the list of acts out of the prompt to check the body accepts every one.
 - A world made before Generation 17 has no veiled rim and cannot grow at its edges; only a new world can.
 - The later ages of the knowledge tree (roughly the fourth onward) are sketched: the ways, minerals and buildings exist, but few have mechanics behind them yet.

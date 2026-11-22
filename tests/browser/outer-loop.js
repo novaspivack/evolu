@@ -7,6 +7,7 @@ const srv = http.createServer((req, res) => { const f = path.join(dir, req.url =
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message + ' ' + (e.stack || '').split('\n')[1])); page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   await page.addInitScript(() => {
+    window.EVOLU_SEED = 7; /* the first world of a visitor is made from a chance seed; the checks need the same land each time */
     let n = 0; window.CALLS = { mind: 0, story: 0, maker: 0, models: {} };
     const sample = async (prompt, opts) => {
       n++; await new Promise(r => setTimeout(r, 200)); window.CALLS.models[opts.model] = (window.CALLS.models[opts.model] || 0) + 1;

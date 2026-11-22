@@ -14,7 +14,7 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 18, to be watched and tuned
+## NOW: built in Generations 14 to 19, to be watched and tuned
 
 | Item | State |
 | --- | --- |
@@ -44,11 +44,22 @@ Knowledge is earned slowly, in ages. Later things need earlier ones, need materi
 | **Telling by a fire,** which makes tales and opens lorekeeping | Built in 18 from the maker's request |
 | **Courting that holds for a day; children sooner under a roof, sooner still in a hall; reasons given** | Built in 18 |
 | **People added by hand** (one to ten) **and by the maker; newcomers below fourteen** | Built in 18 |
-| **Plans that last until the next thought;** forty thoughts a minute by default | Built in 18 |
+| **Plans that last until the next thought;** forty thoughts a minute by default | Built in 18. Four at once, easing off when Claude refuses, and a clock that waits for the minds as the population grows, in 19 |
+| **Worlds with names,** kept side by side in the browser; a choice on opening between a saved world and a new one; a new world for a first visit | Built in 19 |
+| **A rim that opens slowly,** and a view that can pass the edge of the map | Built in 19 from the eleventh run |
 
 Answered by the seventh run: people do earn a following (nine pledges), and lessons from the dead do change plans. Still open, for the next run: does need bring storage before the first winter; do fewer starve; does anyone tell a tale, begin a teaching or take one up; does anyone tame an animal; do the peoples meet, trade or cross water.
 
 ## NEXT: once NOW is seen working
+
+**First, from Nova's notes of 22 November, evening: the world as a globe.** A world of a fixed size that can be gone around, so that exploring fills it in until it meets itself and need not be held back. Two ways to build it, to be chosen:
+
+- *A torus:* east joins west and north joins south. Every place is like every other and the corners need no special care (the four corners of the map are one neighbourhood), but a torus cannot be shown as a globe without a lie: on a ball, north and south do not meet.
+- *A world that wraps east to west, with ice at the top and bottom* (proposed). Sailing or walking east brings you round to the west; north and south end in polar ice that cannot be crossed. This is what a globe is, so the view from far off can be a turning ball that becomes the flat map as one comes closer, and there are no corners at all.
+
+Either way: one function through which every coordinate, distance, path and neighbourhood passes; land made so that the seam joins (the noise it is grown from must itself wrap); the veil closing on itself; the view and the small map wrapping; and checks that walk a being round the world across every seam. A world made before this stays flat.
+
+**Second: the big world, rebuilt.** The 66-day world's last save may be lost (see the design log, Generation 19), but its record is whole and its land can be made again from its seed. Rebuilt from the record it would hold its fifteen people with their minds, bonds and knowledge, its culture, its laws and its lands; its buildings would have to be raised again where the record names them (two settlements, ten halls, forty-four roofs) and its plants regrown. It would ship with the page as a world anyone can choose who wants to begin farther along.
 
 **From Nova's notes of 22 November, afternoon, in the order proposed:**
 
@@ -116,6 +127,8 @@ These run through every stage and are picked up as runs call for them.
 - **Starvation in winter.** Ten of seventeen over 41 days. Generation 15 brought storage, but on the eve of famine; Generation 16 answers with foresight in autumn, a land that no longer runs down, a milder winter and bodies that reach their stores.
 - **Peoples too small and too closely related to grow.** Generation 16 answered with newcomers, twins and longer lives, and the world went from six to twelve; Generation 17 adds women and men, which narrows who can pair, and bands of four to offset it.
 - **A carried-on world cannot grow at its edges.** Only a new world has the veiled rim. Now in NEXT.
+- **The map is finite and its end shows.** Land opened at the last row of the map stops in a straight line. The globe in NEXT is the answer.
+- **A thought took 10 seconds in the eleventh run,** three times what it took in the tenth. Unexplained; it sets how often a being can think.
 - **Acts that never reached a body.** `claim` and `venture` were unreachable for real minds in Generations 16 and 17 because tests called the body directly. Fixed in 18, with a check that reads the acts out of the prompt.
 - **Minds hunt very little:** 2 plan steps of 1,274 in the tenth run. Generation 18 points the hungry at prey; unknown whether they will go.
 - **Speed.** A world moment costs about 2.8 ms in the larger world, up from 2.
@@ -144,3 +157,5 @@ A short index; the detail is in the design log.
 | 15 | Discovery driven by need, the Culture tab, ideas with holders and paths of spread, teachings, talismans and relics, flight to shelter, taming by trust, minds awake and sound on by default |
 | 16 | A land that does not run down, a milder winter, foresight in autumn, twins, longer lives, newcomers, claiming what the dead built, an elder's legacy, a benevolent maker |
 | 17 | The veiled rim and venturing, strangers in new land, women and men, swimming, seasons of plenty, animals and deposits that return, callings and desire |
+| 18 | Acts that reach the body (claiming, venturing, telling), hunting and gathering as skills, two together, grudges and kindness, courting that holds, people added by hand, plans that last |
+| 19 | A rim that opens slowly, a view past the edge, minds that ease off, worlds with names and a choice on opening |

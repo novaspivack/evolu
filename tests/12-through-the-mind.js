@@ -48,7 +48,7 @@ const run = (w, em, n, keep) => { for (let k = 0; k < n; k++) { w.creatures = []
 { // people added by hand; the sick; a world carried on
   const { w, st, ev, em } = fresh(7); const n0 = w.agents.length, made = SW.addPeople(w, 7); SW.step(w, em); ok(made.length === 7 && w.agents.length >= n0 + 7 - 1 && made.every(o => st.minds[o.id]) && new Set(made.map(o => o.people)).size >= 1 && st.chron.filter(c => /came into the land/.test(c.text)).length === 2, 'seven people can be added by hand: they come as a band of four and a band of three, each with a mind');
   const a = w.agents[0]; st.emit({ type: 'sick', a: a.id, from: 'eating raw fish' }); ok((st.minds[a.id].lessons || []).some(q => /raw fish\. Eaten within a step of a fire/.test(q.text)), 'one who sickens on raw fish learns the remedy with the cause');
-  const snap = JSON.parse(require('zlib').gunzipSync(require('fs').readFileSync(require('path').join(__dirname, 'fixtures', 'save-generation-17.json.gz'))).toString()); snap.world.laws.arrivals.floor = 10; snap.world.tuned2 = 0; const st2 = M.restore(snap); ok(st2.world.laws.arrivals.floor === 14 && SW.ACTIONS.indexOf('claim') >= 0, 'a world carried on takes the higher floor for newcomers');
+  const snap = JSON.parse(require('zlib').gunzipSync(require('fs').readFileSync(require('path').join(__dirname, 'fixtures', 'save-generation-18.json.gz'))).toString()); snap.world.laws.arrivals.floor = 10; snap.world.tuned2 = 0; const st2 = M.restore(snap); ok(st2.world.laws.arrivals.floor === 14 && SW.ACTIONS.indexOf('claim') >= 0, 'a world carried on takes the higher floor for newcomers');
   ok(/fewer than about twenty, bring newcomers/.test(K.make.toString()) && w.laws.arrivals.floor === 14, 'the maker is told to bring people when they are few, and the world does so below fourteen');
 }
 { // what courting needs, said; a hall; beasts and company; the maker's own numbers; hunger pointed at food
@@ -85,9 +85,9 @@ const run = (w, em, n, keep) => { for (let k = 0; k < n; k++) { w.creatures = []
   think(st, a, 'routine', { plan: [{ do: 'rest', ticks: 10 }] }); w.tick += 90; think(st, a, 'routine', { plan: null }); w.tick += 110; think(st, a, 'routine', { plan: null });
   ok(m.gap === 100 && /YOUR THOUGHTS COME about once every 100 moments\. When you make a plan, let its steps add up to at least that long \(up to 5 steps\)/.test(M.buildPrompt(st, m, 'routine')), 'a mind is told how often its thoughts come, so that a plan can last until the next one');
   think(st, a, 'routine', { plan: [1, 2, 3, 4, 5, 6].map(() => ({ do: 'rest', ticks: 20 })) }); ok(a.plan.length + (a.intent ? 1 : 0) === 5, 'and a plan may hold five steps');
-  const d = M.defaultSettings(); ok(d.v === 11 && d.perMinute === 40 && d.parallel === 6, 'by default forty thoughts a minute, six at once');
+  const d = M.defaultSettings(); ok(d.v === 12 && d.perMinute === 40 && d.parallel === 4, 'by default forty thoughts a minute, four at once');
   const snap = JSON.parse(JSON.stringify(M.snapshot(st))); snap.settings = Object.assign({}, snap.settings, { v: 10, perMinute: 24, parallel: 4, budget: 9000, sound: false }); const st2 = M.restore(snap);
-  ok(st2.settings.v === 11 && st2.settings.perMinute === 40 && st2.settings.parallel === 6 && st2.settings.budget === 9000 && st2.settings.sound === false, 'settings saved by Generation 17 are kept, and its pace moves to the new one where it had not been changed');
+  ok(st2.settings.v === 12 && st2.settings.perMinute === 40 && st2.settings.parallel === 4 && st2.settings.budget === 9000 && st2.settings.sound === false, 'settings saved by Generation 17 are kept, and its pace moves to the new one where it had not been changed');
   snap.settings = Object.assign({}, snap.settings, { v: 10, perMinute: 12, parallel: 2 }); const st3 = M.restore(snap); ok(st3.settings.perMinute === 12 && st3.settings.parallel === 2, 'a pace the owner chose is left alone');
 }
 console.log(fails ? fails + ' FAILED' : 'ALL PASS');

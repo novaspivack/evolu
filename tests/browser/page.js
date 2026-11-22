@@ -12,6 +12,7 @@ const srv = http.createServer((req, res) => {
   page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   page.on('pageerror', e => errs.push('PAGEERROR ' + e.message + '\n' + (e.stack || '').split('\n').slice(0, 4).join('\n')));
   await page.addInitScript(() => {
+    window.EVOLU_SEED = 7; /* the first world of a visitor is made from a chance seed; the checks need the same land each time */
     let n = 0;
     const lines = ['The berries near the water are thick. I should not strip them bare.', 'Kendo watches me. I do not know yet whether to trust that one.', 'Night is coming and I am cold. A roof would change everything.', 'That red-capped thing made me sick. Never again.'];
     const sample = async (prompt, opts) => {

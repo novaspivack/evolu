@@ -37,7 +37,7 @@ The page writes each run to the artifact's store as it goes. With the artifact d
 - Give the maker a lever and a statistic for everything new (`K.applyOp`, `K.OPS`, `K.stats`, `LAW_GROUPS`).
 - Tell a being only what it could perceive. When an act fails, say why, to that being.
 - The engine is deterministic for a seed. Use `rnd(w)`, never `Math.random()`, inside the world step.
-- A world saved by the previous generation must still load: extend `SW.upgrade` (engine) and the normaliser in `M.restore` (minds). Bump `settings.v` when settings change. `SAVE_KEY` keeps the old name `seedworld.save.v4` on purpose.
+- A world saved by the previous generation must still load: extend `SW.upgrade` (engine) and the normaliser in `M.restore` (minds). Bump `settings.v` when settings change. `SAVE_KEY` keeps the old name `seedworld.save.v4` on purpose. Worlds are also kept by name in IndexedDB (`LIB` in `ui.js`: stores `meta` and `snap`, keyed by run id); never write code that begins a world without first saving the one being left, and never let an unchosen world (`U.choosing`) save over anything.
 - Watch prompt size (`M.buildPrompt`); the middle prompt was 24,000 characters in the eighth run and the longest 36,800.
 - A world may be carried on across generations (same run id). `SW.upgrade` moves a law to its re-tuned value only where the world still holds the old default; add to that table when you re-tune a law.
 - Measure balance changes on at least ten seeds before believing them: three seeds swing by several deaths either way. Survival on instinct alone cannot show what minds do with stores, fire and shelter.
@@ -50,6 +50,8 @@ The page writes each run to the artifact's store as it goes. With the artifact d
 - Keep a copy, not a reference, of anything shown as "before": the maker's numbers at its last visit held live tallies and so never differed from the present.
 - When inserting into a list in a source file with a script, anchor on the exact closing text of that list and check the count afterwards; `],` also ends other things, and the result can still parse.
 - A patch of open grass of a given length may not exist: test helpers that look for one return undefined, and every position after that is NaN. Ask for eight tiles or fewer.
+- The browser checks set `window.EVOLU_SEED = 7` before the page loads, because a first visit now begins a world from a chance seed.
+- Claude allows a page only so many calls at once (six was refused in the eleventh run; four ran 478 thoughts without a refusal). The chronicler, the maker and foresight add to the count.
 - Beasts wander in from the edge of the map over time. A check that runs for hundreds of moments must keep clearing `w.creatures` if it needs beings to stay put.
 
 ## Tests
@@ -59,7 +61,7 @@ tests/run-all.sh                                   # needs only Node
 PLAYWRIGHT=/path/to/node_modules/playwright tests/run-all.sh browser
 ```
 
-All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`13-...js`), with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
+All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`14-...js`), with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
 
 What the tests cannot show is how real minds behave. Say so in every report.
 
