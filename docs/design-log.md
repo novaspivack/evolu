@@ -12,6 +12,65 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## What the eighth run showed (the same world carried on to day 41, on Generation 15; run `r7-mws0f6n0`, 684 thoughts recorded from day 19)
+
+The world of the seventh run was not started afresh: it was carried from day 19 to day 41 on the Generation 15 page, with its Generation 14 laws.
+
+- **Seventeen lived, eleven died, six were alive at day 41,** three of them old. Ten starved and one was killed by a frostfang. The Brusha died out. One child was born in these 22 days (five in all 41).
+- **They were not hungry most of the time.** On days 20 to 33 the middle being's energy stood at 58 to 71, and hunger led fewer than one thought in eight. Then the winter of days 34 to 36: the middle energy fell to 30, the lowest to 3, and four starved on one day (Skarar, Balar, Gorog, Tanna, all at Gorog's Hold, three of them elders).
+- **Is food not regenerating? Two answers.** Within a year it does: by the maker's count, food standing fell from 1,858 to 594 in one winter and from 1,137 to 380 in the next (with two blights), and was back at 1,202 by summer. But across years the land was running down: 1,909 plants at the start, 1,150 on day 19, 867 on day 41. I reproduced that without minds on three seeds (about 1,700 plants falling to between 550 and 1,080 in forty days). The cause: how readily plants seed was tied to the same "bounty" law that sets how fast food grows back, and that law has stood at half since Generation 8. Plants died of age faster than they seeded.
+- **Need did bring knowledge, and storage came too late.** 53 discoveries in 22 days, against seven ways known in the first 19; fifteen ways known in the world at the end. Storage was found by seven beings: two in the first days, then four on day 35, the day before they starved, with nothing left to store. Two stores were ever built. The maker saw it exactly: "Spurring storage by famine made the knowledge arrive exactly when there was nothing to store. A way meant for foresight must be sharpened by the signs that come before the hardship."
+- **Why the peoples do not grow.** "Family" led 183 of 684 thoughts and one child came of it. Bands of four become kin within a generation (at the end: "Nyssa and Xaeth are parent and child, and the two Garnbar are apart"), and founders, who begin at a fifth of a 60-day life, are old by day 35.
+- **Hunting and fishing do feed them:** 89 fish caught, 22 hunts, 58 meals of meat, 82 of fish. No animal was tamed.
+- **Culture:** 65 lessons from what befell others; 20 sayings passed by teaching; eight ideas crossed between peoples; four carved figures and three talismans made, one figure given. No tale, song or myth was made and no teaching begun. Tanna, the last of the Brusha, lived at the Garnbar Hold and came to understand their tongue at 81 percent in four days, where single meetings had taught almost nothing.
+- **Prompts** were long: a middle of 24,236 characters and a longest of 36,803. One call of 685 failed (a reply that was not valid JSON).
+- **The maker** made six visits and kept every change: storage spurred by cold and hunger, a spirit place for the dead Minna, a new wool-bearing grazer, cooked fish, giving and works counted for more in standing, lorekeeping spurred by loss, blight made rarer after the famine, kelbulb sown, loneliness made stronger. It wrote eleven requests; each is answered below.
+- **Sound** did not start when the page opened, as Nova saw.
+
+## Generation 16 (built, not yet run with real minds): peoples that last
+
+Built from the eighth run, the maker's eleven requests, and Nova's notes of 1:00 pm.
+
+**The land no longer runs down.** How readily plants seed is now its own law (`ecology.seeding`, three quarters of the full rate) and no longer halves with the bounty. Without minds, plants now hold at 1,300 to 1,500 on day 40 where they had fallen to 550 to 1,080. Winter is milder on standing food (it withers half as fast, and grows at a fifth of the summer rate where it grew at a tenth). Blight is rarer, as the maker set it. A setting that let plants seed at their full rate was measured and not taken: the land grew past where it began.
+
+**Foresight before the lean season.** In autumn everyone feels the year turning, and that alone brings storage, salting and farming within reach before the hunger. What a store needs is said where the way is described. A starving body now goes to its own store and eats, and with nothing to eat in sight it follows its nose to food up to thirty steps off.
+
+**Children.** One birth in five is of twins. Parents can have another child after under four days, where it was over six. A life is 80 days, where it was 60, and childhood a tenth of it.
+
+**Newcomers.** When the living fall below ten, a band of three comes into the land from beyond its edge, of the people with fewest left, and unrelated by blood to anyone there; another may follow after four days. This is how a people that has died out returns, and how a world that is carried on after hard losses begins again. A world begins with fifteen, five to a people, where it began with twelve.
+
+**What the dead built.** A roof, hall, wall or store whose builder is dead stands empty and is shown as such to whoever comes near. Standing at it, a being can claim it, and holds every building of the dead around it: a home ready made, for a band or for one who has none.
+
+**Elders.** One who alone among its people knows a way feels the pull to hand it on before it dies.
+
+**A benevolent maker.** The maker is told that its first care is that the peoples live, are fed through the lean season, have children and grow; that it should answer hunger and shrinking numbers before anything else; that it may rarely answer cruelty with hardship, never a deadly one; and that it should not flood the world either. It can call newcomers itself.
+
+**The maker's eleven requests.**
+1. *A helper arrives empty-handed.* Kin who hear a starving cry are now told that empty hands save no one: carry food or gather it on the way.
+2. *The thought count dropped and a survivor was lost from view.* The count now carries across a reload, and every being is listed with its people, land and place.
+3. *Stores are not built though the way is known* (asked twice). The way now says what a store takes and how to fill and draw from it, and failing to build one says which way is missing. Two stores were in the end built.
+4. *"Times eaten" is frozen* (asked twice). The counter does count (berry 123 on day 19, 209 on day 41). I found no fault in it and changed nothing; I cannot yet explain what the maker saw.
+5. *Why did Tanna's wish to follow not become a pledge?* Each pledge refused for want of standing is now kept with both standings.
+6. *Show every being's standing.* Done, with followers.
+7. *A sign that winter is coming.* Done: the year turning.
+8. *Newcomers when the living fall below a floor.* Done.
+9. *Elders should hand on what only they know.* A drive, as above. Knowledge left at a grave for others to find is not built.
+
+**Heritage.** Twenty of the maker's kept changes from this world now begin every new world, among them the longhall and its welcome, cooked fish, kelbulb, the murrock, night song, longer sight and hearing, rarer blight, and its spurs on storage and lorekeeping. The three places it made for the dead of that world are left to that world. A fault that wrote the same kept change into the heritage several times is fixed.
+
+**Sound.** It now starts when the page opens. Where a browser holds it silent until the page is touched, the button says so ("Sound on · click to hear"), and any click or key lets it through.
+
+**A world carried on.** A world made by an earlier generation takes the re-tuned laws when it is opened (winter, seeding, children, length of life), unless its maker had changed them.
+
+**Checked.** 21 new checks pass with every earlier suite (321 in ten files), the scripted mind runs, the ecology, and the page in headless Chrome at desktop and phone size. A world saved by Generation 15 loads and runs. Forty days on instinct alone, ten seeds: 125 of 153 alive at the end (82 percent), the same share as Generation 15 by the same measure; 19 starved, most in autumn and winter, and 9 were killed by beasts. Bodies on instinct never store food, so this measure cannot show what foresight and stores are worth.
+
+**Not checked, and not built.**
+- No real mind has met Generation 16. Whether stores are filled before winter, whether newcomers are taken in or fought, whether anyone claims what the dead left: unknown.
+- **The world does not grow at its edges** (Nova saw people reach the edge). See `ROADMAP.md` for the decision.
+- No tale or teaching has yet been made by a real mind. I did not change that in this generation.
+- Prompts are longer again; nothing was done to shorten them.
+- The music has never been heard by me.
+
 ## What the seventh run showed (Generation 14, 605 thoughts, 19 days, run `r7-mws0f6n0`, cut short)
 
 The run stopped at day 19 when the page reloaded and the minds did not wake again by themselves. This reading is from the state the page had written to its store (the final state of every being and the tallies). The record's thoughts and the maker's visits were too large to read through the conversation, so the maker's requests from this run are not answered here.
@@ -26,7 +85,7 @@ The run stopped at day 19 when the page reloaded and the minds did not wake agai
 - **Built:** 15 shelters, 2 halls, 3 longhalls, two named settlements. **Done together:** sharing 15 times, watchfire 5, hallwelcome 4, amberknot 3.
 - **No tale was told to anyone,** and no one became a bard. One being said "sing with me" at a fire.
 
-## Generation 15 (built, not yet run with real minds): culture and necessity
+## Generation 15 (built; run on a world carried over from Generation 14: see the eighth run above): culture and necessity
 
 Built from the seventh run and from Nova's notes of 11:13 and 11:18 am.
 

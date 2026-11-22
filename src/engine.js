@@ -32,24 +32,26 @@ SW.rnd = rnd; SW.cheb = cheb; SW.clamp = clamp;
 /* ---------- the rule registry ---------- */
 SW.defaultLaws = function () {
   return {
-    time: { dayLength: 240, nightFraction: 0.35, seasonDays: 3, winterGrowth: 0.1, winterCold: 0.06, winterWither: 0.005 },
+    time: { dayLength: 240, nightFraction: 0.35, seasonDays: 3, winterGrowth: 0.2, winterCold: 0.06, winterWither: 0.0025 },
     body: {
       baseDrain: 0.085, moveCost: 0.045, restFactor: 0.55, nightCold: 0.07, shelterShield: 0.9,
-      healRate: 0.06, healAbove: 50, lifespan: 14400, carryMax: 6, sight: 7, hearing: 9,
+      healRate: 0.06, healAbove: 50, lifespan: 19200, carryMax: 6, sight: 7, hearing: 9,
       speechCost: 0.02, foresightCost: 2, biteSeedChance: 0.3, thirstRate: 0.25, thirstHarm: 0.04, thirstWound: 0.12
     },
     fight: { agentDamage: 14, angerBonus: 0.5, huntChance: 0.45, predatorKillChance: 0.25, predatorBite: 14, fleshFood: 3, fleshEnergy: 18, stealChance: 0.6, noticeChance: 0.6 },
-    mate: { minEnergy: 70, cost: 25, childEnergy: 55, minAgeFraction: 0.2, cooldown: 1500, maxPopulation: 40 },
+    mate: { minEnergy: 70, cost: 25, childEnergy: 55, minAgeFraction: 0.14, cooldown: 900, maxPopulation: 60, twinChance: 0.2 },
+    /* when the living fall below a floor, a small band comes into the land from beyond its edge: of the people that has fewest left */
+    arrivals: { floor: 10, size: 3, gapDays: 4 },
     /* standing among others: what earns it, what loses it, and how much of it one needs before another will follow */
     status: { wealth: 1, deeds: 1, knowledge: 1, children: 1, works: 1, followers: 1, giving: 1, renown: 1, shame: 1, leadNeeds: 1.2, shameFade: 0.9 },
     /* how ways are come to: what a being has suffered sharpens it toward the ways that would answer it; what it already knows in a line helps with the next */
     discovery: { needBoost: 0.6, kinBoost: 0.04, floor: 0.35, pressFade: 0.85, pressMax: 3 },
     culture: { faithComfort: 0.004, faithStanding: 0.2, tameTrust: 0.6 },
-    age: { childUntil: 0.14, elderFrom: 0.78, childStrength: 0.45, elderStrength: 0.7, childDrain: 0.75, elderMove: 1.5, elderTeach: 1.5, childLearn: 1.5 },
+    age: { childUntil: 0.1, elderFrom: 0.8, childStrength: 0.45, elderStrength: 0.7, childDrain: 0.75, elderMove: 1.5, elderTeach: 1.5, childLearn: 1.5 },
     water: { fishChance: 0.09, fishFood: 14, fishRecover: 300, winterFish: 0.5, riverFert: 0.25, oreSeams: 0.1 },
     disease: { rawChance: 0.05, marshChance: 0.0005, spread: 0.008, drain: 0.045, harm: 0.035, length: 480, immunity: 2400 },
     /* how loudly each inner drive speaks, for every being; 1 is as written, 0 silences it */
-    drives: { hunger: 1, pain: 1, sickness: 1, dread: 1, cold: 1, loneliness: 1, missing: 1, resentment: 1, anger: 1, grief: 1, fear: 1, envy: 1, ambition: 1, belonging: 1, family: 1, temptation: 1, curiosity: 1, restlessness: 1, longing: 1, mortality: 1, purpose: 1, freedom: 1, jealousy: 1, selfdoubt: 1, compassion: 1, guilt: 1, awe: 1, insecurity: 1, pride: 1, gratitude: 1, loyalty: 1, betrayal: 1, devotion: 1, guile: 1, obsession: 1, thirst: 1, deference: 1, discontent: 1, contentment: 1, homeseeking: 1, territory: 1, strangeness: 1, standing: 1 },
+    drives: { hunger: 1, pain: 1, sickness: 1, dread: 1, cold: 1, loneliness: 1, missing: 1, resentment: 1, anger: 1, grief: 1, fear: 1, envy: 1, ambition: 1, belonging: 1, family: 1, temptation: 1, curiosity: 1, restlessness: 1, longing: 1, mortality: 1, purpose: 1, freedom: 1, jealousy: 1, selfdoubt: 1, compassion: 1, guilt: 1, awe: 1, insecurity: 1, pride: 1, gratitude: 1, loyalty: 1, betrayal: 1, devotion: 1, guile: 1, obsession: 1, thirst: 1, deference: 1, discontent: 1, contentment: 1, homeseeking: 1, territory: 1, strangeness: 1, standing: 1, legacy: 1 },
     /* kinds of building beyond a plain shelter. Each is a roof like any other, plus what it does: effects on one who spends time in it
        (once a day), bonds made between those gathered there, sight from its top, longer-lasting tools made beside it. Recipes may require one. */
     buildings: {
@@ -90,7 +92,7 @@ SW.defaultLaws = function () {
     device: { life: 3600, wood: 2, stone: 1, strike: 9, holdMax: 6 },
     home: { minStructures: 2, reach: 4, margin: 3, heal: 1.5 },
     magic: { wane: 0.22, loreToCast: 5, loreToLearnArt: 2.5, cost: 6, duration: 720, maxRadius: 5, maxFields: 12, teachGain: 0.25, greatLore: 10, greatArts: 2, greatHelpers: 2, greatCost: 50, helperCost: 10, greatDuration: 480 },
-    ecology: { bounty: 0.5, tameChance: 0.3, leash: 4, pairRange: 5, milkEnergy: 12, rideCost: 0.4, rideCarry: 4, grazeWear: 0.006, pastureHeal: 0.0005, crowding: 4, dormantSeeds: 0.12, wildMutation: 0.004, maxPlantKinds: 44, maxCreatureKinds: 30, grazerCap: 260, hunterCap: 26 },
+    ecology: { seeding: 0.75, bounty: 0.5, tameChance: 0.3, leash: 4, pairRange: 5, milkEnergy: 12, rideCost: 0.4, rideCarry: 4, grazeWear: 0.006, pastureHeal: 0.0005, crowding: 4, dormantSeeds: 0.12, wildMutation: 0.004, maxPlantKinds: 44, maxCreatureKinds: 30, grazerCap: 260, hunterCap: 26 },
     craft: { cultivateSkill: 3, cultivateCost: 8, markWood: 1, markLife: 2400, signLife: 5, fireLife: 360, fireWarmth: 0.3, fireReach: 2, cookBonus: 1.5, storeMax: 20, farmGrowth: 1.6, sturdy: 0.4, toolPower: 1.3, toolGrowth: 1.15, toolLore: 0.12, toolWear: 60, maxTools: 3, maxDesigns: 60, stoneMax: 6, oreMax: 4, clayMax: 4, oreChance: 0.35, metalPower: 1.25, metalWear: 3, potWater: 3, potCarry: 2, potMax: 2, potClay: 2 },
     /* what lies in the ground, each in its own kind of land. Deep ones cannot be won by hand. Every one is a thing that can be carried, given, traded and made into other things. */
     minerals: {
@@ -251,7 +253,7 @@ SW.defaultLaws = function () {
       herding:  { tree: 'life',    era: 1, needs: [],                 lore: 1,   stat: 'tamed',   n: 2,  hint: 'keeping animals: those that are yours can be milked and sheared' },
       signs:    { tree: 'mind',    era: 1, needs: [],                 lore: 1.5, stat: 'marks',   n: 4,  hint: 'marks that last and teach their words to whoever reads them' },
       customs:  { tree: 'society', era: 1, needs: [],                 lore: 1,   stat: 'led',     n: 1,  hint: 'declaring customs that your whole band lives by' },
-      storage:  { tree: 'society', era: 1, needs: ['tools'],          lore: 1,   stat: 'built',   n: 3,  hint: 'a store that keeps food for you and your band; with salt, meat that keeps' },
+      storage:  { tree: 'society', era: 1, needs: ['tools'],          lore: 1,   stat: 'built',   n: 3,  hint: 'a store that keeps food for you and your band through the lean season (plan step build with what: store, 2 wood, on bare ground; then stash while standing on it to put carried food in, take to draw it out); with salt, meat that keeps' },
       medicine: { tree: 'life',    era: 1, needs: ['farming'],        lore: 2,   stat: 'healed',  n: 4,  hint: 'using healing plants on yourself and on others' },
       weaving:  { tree: 'craft',   era: 1, needs: ['tools'],          lore: 1.5, stat: 'wood',    n: 14, hint: 'working fibre and wool: baskets to carry more, cloaks against the cold' },
       pottery:  { tree: 'craft',   era: 1, needs: ['fire'],           lore: 2,   stat: 'clay',    n: 5,  hint: 'fired clay: beside a fire, craft a pot (plan step craft with what: pot) from 2 clay; each pot lets you carry 2 more food and three drinks of water' },
@@ -991,7 +993,7 @@ SW.createWorld = function (seed, opts) {
   for (const pk in w.laws.plants) { const ps = w.laws.plants[pk]; if (!ps.look) ps.look = SW.genPlant(pk, ps.form); }
   for (const bk in SW.BEAST_LOOKS) if (w.laws.creatures[bk]) w.laws.creatures[bk].look = JSON.parse(JSON.stringify(SW.BEAST_LOOKS[bk]));
   w.lookV = 5;
-  const bands = opts.bands != null ? opts.bands : 3, per = opts.agents != null ? opts.agents : 4, chosen = [];
+  const bands = opts.bands != null ? opts.bands : 3, per = opts.agents != null ? opts.agents : 5, chosen = [];
   for (let b = 0; b < bands; b++) {
     let P;
     if (w.regions.length > 1) {
@@ -1015,6 +1017,15 @@ SW.createWorld = function (seed, opts) {
 const ARCHETYPES = [[0.88, 0.3, 0.4, 0.12, 0.5, 0.88], [0.25, 0.85, 0.5, 0.9, 0.88, 0.12], [0.5, 0.5, 0.95, 0.6, 0.7, 0.3], [0.72, 0.85, 0.4, 0.25, 0.1, 0.8], [0.2, 0.12, 0.7, 0.7, 0.8, 0.4], [0.8, 0.6, 0.3, 0.15, 0.75, 0.5], [0.4, 0.9, 0.8, 0.5, 0.3, 0.6], [0.9, 0.5, 0.7, 0.5, 0.6, 0.7], [0.55, 0.7, 0.85, 0.75, 0.6, 0.2]];
 const HUES = [18, 200, 285, 48, 150, 330, 95, 240, 0, 170, 310, 70];
 /* Place a founding band close together, well away from any band already there, so peoples begin apart and meet later. */
+/* newcomers: a small band of the people with fewest living comes into the land */
+SW.arrive = function (w, n, people, emit) {
+  emit = emit || noop; const L = w.laws.arrivals || {};
+  if (!people) { const cnt = {}; (w.peoples || []).forEach(function (p) { cnt[p.id] = 0; }); w.agents.forEach(function (a) { if (cnt[a.people] != null) cnt[a.people]++; }); let best = null, bn = 1e9; (w.peoples || []).forEach(function (p) { if (cnt[p.id] < bn) { bn = cnt[p.id]; best = p; } }); people = best; }
+  const before = w.agents.length, made = SW.settle(w, Math.max(1, Math.min(6, n || L.size || 3)), people) || w.agents.slice(before);
+  made.forEach(function (a) { a.arrived = w.tick; a.carry = a.carry || []; while (a.carry.length < 3) a.carry.push({ k: 'berry', n: 14 }); });
+  w.lastArrival = w.tick; if (made.length) { w.arrivedQ = w.arrivedQ || []; w.arrivedQ.push({ ids: made.map(function (a) { return a.id; }), people: people ? people.id : null }); }
+  return made;
+};
 SW.settle = function (w, n, people) {
   const multi = w.regions && w.regions.length > 1;
   if (!people) { let rid = null, kind = ['woodland', 'highland', 'lakeland', 'steppe', 'marsh'][w.peoples.length % 5]; if (multi) { const R = w.regions[ri(w, w.regions.length)]; rid = R.id; if (SW.PEOPLE_KINDS[R.biome]) kind = R.biome; } people = newPeople(w, kind, rid); }
@@ -1133,9 +1144,10 @@ function trySeed(w, i, spName, sp) {
 function stepPlants(w) {
   const L = w.laws, season = SW.season(w);
   const sky = w.weather.kind;
-  const gm = (L.ecology.bounty == null ? 1 : L.ecology.bounty) * (season === 3 ? L.time.winterGrowth : season === 1 ? 1.15 : 1) * (sky === 'rain' ? L.weather.rainGrowth : sky === 'storm' ? 1.2 : sky === 'drought' ? L.weather.droughtGrowth : sky === 'snow' ? 0.6 : 1);
+  const bty = (L.ecology.bounty == null ? 1 : L.ecology.bounty), sm = bty > 0 ? Math.max(1, (L.ecology.seeding || 1) / bty) : 1; /* bounty is how fast food comes back on a plant; how readily plants seed is its own law */
+  const gm = bty * (season === 3 ? L.time.winterGrowth : season === 1 ? 1.15 : 1) * (sky === 'rain' ? L.weather.rainGrowth : sky === 'storm' ? 1.2 : sky === 'drought' ? L.weather.droughtGrowth : sky === 'snow' ? 0.6 : 1);
   /* The soil keeps dormant seed, so a stripped land is slow to return but never dead for good. */
-  if (rnd(w) < L.ecology.dormantSeeds * gm) {
+  if (rnd(w) < L.ecology.dormantSeeds * gm * sm) {
     const j = ri(w, w.plants.length);
     if (!w.plants[j] && !w.shelters[j] && !w.walls[j] && w.fert[j] > 0.1) { const kd = kindFor(w, j); if (kd) w.plants[j] = newPlant(w, kd, 0.02, j); }
   }
@@ -1153,7 +1165,7 @@ function stepPlants(w) {
       else if (sky === 'drought') p.food = Math.max(0.2, p.food - 0.0008);
       else if (lf < 1 && sky !== 'drought' && p.food > 0.2 && lf < 0.6) p.food = Math.max(0.2, p.food - 0.0006 / lf);
       else if (p.food < sp.maxFood) p.food = Math.min(sp.maxFood, p.food + sp.regrow * (sp.hardy ? Math.max(gm, 0.3) : gm) * lf * (p.t ? L.craft.farmGrowth : 1));
-      if (rnd(w) < sp.seedRate * gm) trySeed(w, i, p.sp, sp);
+      if (rnd(w) < sp.seedRate * gm * sm) trySeed(w, i, p.sp, sp);
     }
   }
 }
@@ -1343,7 +1355,7 @@ SW.findAgentByName = function (w, name) {
 };
 function senses(w, a) {
   const L = w.laws, R = SW.sight(w), near = {}, vars = {};
-  let fd = 99, td = 99, sd = 99, fired = 99, stod = 99, wd = 99;
+  let fd = 99, td = 99, sd = 99, fired = 99, stod = 99, wd = 99, rud = 99;
   for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
     const x = a.x + dx, y = a.y + dy; if (!inb(w, x, y)) continue;
     const i = idx(w, x, y), d = Math.max(Math.abs(dx), Math.abs(dy));
@@ -1351,6 +1363,7 @@ function senses(w, a) {
     if (p && d < fd && bitesFor(a, p) > 0) { fd = d; near.food = { x: x, y: y, d: d }; }
     if (d < td && w.terrain[i] === T.FOREST && w.trees[i] > 0) { td = d; near.tree = { x: x, y: y, d: d }; }
     if (d < sd && w.shelters[i]) { sd = d; near.shelter = { x: x, y: y, d: d }; }
+    if (w.shelters[i] > 0 && d < rud && !isAlive(w, w.shelters[i])) { rud = d; near.ruin = { x: x, y: y, d: d, kind: (w.bkind && w.bkind[i]) || 'shelter' }; }
     if (d < fired && w.fires[i] > w.tick) { fired = d; near.fire = { x: x, y: y, d: d }; }
     if (d < stod && w.stores[i]) { stod = d; near.store = { x: x, y: y, d: d }; }
     if (d < wd && (w.terrain[i] === T.WATER || w.terrain[i] === T.SHALLOWS)) { wd = d; near.water = { x: x, y: y, d: d, name: 'water' }; }
@@ -1536,6 +1549,8 @@ function waterStep(w, a) {
   if (best < 0) return false;
   return move(w, a, stepDir(w, a, HEAD[best][0], HEAD[best][1]));
 }
+function isAlive(w, id) { if (w.aliveT !== w.tick || !w.aliveM) { w.aliveM = {}; for (let k = 0; k < w.agents.length; k++) if (!w.agents[k].dead) w.aliveM[w.agents[k].id] = 1; w.aliveT = w.tick; } return !!w.aliveM[id]; }
+SW.isAlive = isAlive;
 function agentById(w, id) { for (let k = 0; k < w.agents.length; k++) if (w.agents[k].id === id) return w.agents[k]; return null; }
 /* what a spot offers to one who would live there */
 SW.siteQuality = function (w, x, y) {
@@ -1548,9 +1563,14 @@ SW.upgrade = function (w) {
   if (!w.regions || !w.regions.length) { w.regions = [{ id: 0, name: 'the Land', biome: 'mixed', x: w.W >> 1, y: w.H >> 1 }]; w.region = []; for (let i = 0; i < w.W * w.H; i++) w.region.push(0); }
   ['lodes', 'bkind', 'roads', 'works'].forEach(function (k) { if (!w[k]) w[k] = {}; });
   if (!w.peoples) w.peoples = []; if (!w.tally) w.tally = { made: {}, eaten: {}, built: {} }; ['made', 'eaten', 'built'].forEach(function (k) { if (!w.tally[k]) w.tally[k] = {}; });
-  const D = SW.defaultLaws(); ['minerals', 'goods', 'recipes', 'buildings', 'drives', 'status', 'discovery', 'culture'].forEach(function (g) { if (!w.laws[g]) w.laws[g] = D[g]; else for (const k in D[g]) if (w.laws[g][k] == null && g !== 'recipes') w.laws[g][k] = D[g][k]; });
+  const D = SW.defaultLaws(); ['minerals', 'goods', 'recipes', 'buildings', 'drives', 'status', 'discovery', 'culture', 'arrivals'].forEach(function (g) { if (!w.laws[g]) w.laws[g] = D[g]; else for (const k in D[g]) if (w.laws[g][k] == null && g !== 'recipes') w.laws[g][k] = D[g][k]; });
   for (const g in D) if (D[g] && typeof D[g] === 'object' && !Array.isArray(D[g]) && w.laws[g] && ['plants', 'creatures', 'tools', 'tree', 'recipes', 'buildings', 'minerals', 'goods'].indexOf(g) < 0) for (const k in D[g]) if (w.laws[g][k] == null) w.laws[g][k] = D[g][k];
   w.agents.forEach(function (a) { if (!a.things) a.things = {}; if (!a.tongues) a.tongues = {}; if (a.tall == null) a.tall = 1; if (!a.press) a.press = {}; });
+  /* laws that were re-tuned after a world was made: a world still at the old value takes the new one; a value its maker changed is left alone */
+  if ((w.tuned || 0) < 16) { w.tuned = 16; const L = w.laws;
+    [['time', 'winterGrowth', 0.1, 0.2], ['time', 'winterWither', 0.005, 0.0025], ['time', 'winterWither', 0.004, 0.0025], ['mate', 'cooldown', 1500, 900], ['mate', 'minAgeFraction', 0.2, 0.14], ['mate', 'maxPopulation', 40, 60], ['age', 'childUntil', 0.14, 0.1], ['age', 'elderFrom', 0.78, 0.8]].forEach(function (q) { if (L[q[0]] && L[q[0]][q[1]] === q[2]) L[q[0]][q[1]] = q[3]; });
+    if (L.tree && L.tree.storage && L.tree.storage.n === 4) L.tree.storage.n = 3;
+    if (L.body && L.body.lifespan === 14400) { L.body.lifespan = 19200; w.agents.forEach(function (a) { if (a.life && a.life < 18000) a.life = Math.round(a.life * 19200 / 14400); }); } }
   if (!w.relics) w.relics = []; if (!w.faiths) w.faiths = {}; if (!w.culture) w.culture = { seq: 1, items: {}, log: [], days: [], rites: {} };
   return w;
 };
@@ -1917,7 +1937,7 @@ function act(w, a, r, S, emit) {
         a.wood -= bw; a.stone -= bs; a.stats.built++; a.fin = 1; w.shelters[here] = a.id; if (!w.bkind) w.bkind = {}; w.bkind[here] = r.what; delete w.looks[here]; w.tally.built[r.what] = (w.tally.built[r.what] || 0) + 1;
         emit({ type: 'built', a: a.id, x: a.x, y: a.y, what: r.what, building: true }); a.doing = 'raising a ' + r.what; return true;
       }
-      if (what === 'store' && !a.knows.storage) { emit({ type: 'fail', a: a.id, text: 'You tried to build a store, but you do not know how.' }); return false; }
+      if (what === 'store' && !a.knows.storage) { emit({ type: 'fail', a: a.id, text: 'You tried to build a store, but you do not know how: that is the way of storage, which you have not yet come to. A roof (build with what: shelter) you can raise without it.' }); return false; }
       const wall = what === 'wall', hasB = a.tools.some(function (q) { return L.tools[q.k] && L.tools[q.k].use === 'build'; });
       const cost = Math.max(1, (wall ? (a.knows.masonry ? 1 : L.build.wallWood) : what === 'store' ? 2 : L.build.shelterWood) - (hasB ? 1 : 0));
       if (a.wood < cost) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You tried to build a ' + what + ', but it takes ' + cost + ' wood and you have ' + a.wood + '.' }); return false; }
@@ -2134,6 +2154,17 @@ function act(w, a, r, S, emit) {
       if (t !== a) a.stats.tended = (a.stats.tended || 0) + 1;
       emit({ type: 'healed', a: a.id, b: t.id, amt: amt, with: it.k }); SW.glimpse(w, a, 'medicine', emit); return true;
     }
+    case 'claim': { /* what the dead raised stands empty: whoever claims it holds it, and everything of theirs around it */
+      let ti = -1; for (let dy = -1; dy <= 1 && ti < 0; dy++) for (let dx = -1; dx <= 1 && ti < 0; dx++) { const x = a.x + dx, y = a.y + dy; if (!inb(w, x, y)) continue; const j = idx(w, x, y), own = (w.shelters[j] > 0 ? w.shelters[j] : 0) || (w.stores[j] && w.stores[j].by) || 0; if (own && !isAlive(w, own)) ti = j; }
+      if (ti < 0) { if (S.near.ruin && S.near.ruin.d > 1) { if (!move(w, a, pathToward(w, a, S.near.ruin.x, S.near.ruin.y, 1))) return false; a.doing = 'going to an empty ' + S.near.ruin.kind; return true; } if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You tried to claim a building, but none stands empty here: only what the dead raised can be claimed.' }); return false; }
+      let n = 0; const tx = ti % w.W, ty = Math.floor(ti / w.W), kinds = {};
+      for (let dy = -6; dy <= 6; dy++) for (let dx = -6; dx <= 6; dx++) { const x = tx + dx, y = ty + dy; if (!inb(w, x, y)) continue; const j = idx(w, x, y);
+        if (w.shelters[j] > 0 && !isAlive(w, w.shelters[j])) { w.shelters[j] = a.id; n++; const kd = (w.bkind && w.bkind[j]) || 'shelter'; kinds[kd] = (kinds[kd] || 0) + 1; }
+        if (w.stores[j] && w.stores[j].by && !isAlive(w, w.stores[j].by)) { w.stores[j].by = a.id; n++; kinds.store = (kinds.store || 0) + 1; }
+        if (w.walls[j] && !isAlive(w, w.walls[j])) { w.walls[j] = a.id; n++; kinds.wall = (kinds.wall || 0) + 1; } }
+      a.fin = 1; a.stats.claimed = (a.stats.claimed || 0) + n; a.doing = 'claiming what the dead left'; w.tally.claimed = (w.tally.claimed || 0) + n; a.stat = null;
+      emit({ type: 'claimed', a: a.id, n: n, kinds: kinds, x: tx, y: ty }); return true;
+    }
     case 'stash': {
       const st = w.stores[here]; if (!st || !a.carry.length || st.items.length >= L.craft.storeMax) return false;
       let n = 0; while (a.carry.length && st.items.length < L.craft.storeMax) { st.items.push(a.carry.pop()); n++; }
@@ -2193,6 +2224,8 @@ function act(w, a, r, S, emit) {
           w.agents.length < M.maxPopulation) {
         a.e -= M.cost; t.e -= M.cost; a.mateCd = t.mateCd = M.cooldown; a.court = t.court = null; a.mateT = t.mateT = w.tick;
         const mix = function (k) { return Math.round(clamp((a.temperament[k] + t.temperament[k]) / 2 + (rnd(w) - 0.5) * 0.3, 0, 1) * 100) / 100; };
+        const nKids = rnd(w) < (M.twinChance || 0) ? 2 : 1;
+        for (let tw = 0; tw < nKids && w.agents.length + w.newborn.length < M.maxPopulation; tw++) {
         const kid = newAgent(w, a.x, a.y, {
           e: M.childEnergy, gen: Math.max(a.gen, t.gen) + 1, parents: [a.id, t.id],
           temperament: { bold: mix('bold'), sociable: mix('sociable'), curious: mix('curious'), gentle: mix('gentle'), honest: mix('honest'), greedy: mix('greedy') },
@@ -2213,7 +2246,8 @@ function act(w, a, r, S, emit) {
         a.rel[t.id] = clamp((a.rel[t.id] || 0) + 0.3, -1, 1); t.rel[a.id] = clamp((t.rel[a.id] || 0) + 0.3, -1, 1);
         a.stats.kids++; t.stats.kids++; feel(a, 'joy', 0.6); feel(t, 'joy', 0.6); a.fin = 1;
         w.newborn.push(kid);
-        emit({ type: 'birth', a: kid.id, p1: a.id, p2: t.id });
+        emit({ type: 'birth', a: kid.id, p1: a.id, p2: t.id, twin: nKids > 1 });
+        }
       }
       return true;
     }
@@ -2240,6 +2274,10 @@ function stepAgents(w, emit) {
     a.sheltered = S.vars.sheltered;
     let done = false;
     if (a.e < 18 && (a.carry.some(function (q) { return a.habits.avoid.indexOf(q.k) < 0; }) || S.vars.plant_here >= 1)) { done = act(w, a, { do: 'eat' }, S, emit); if (done) a.doing += ' (starving: the body ate by itself)'; }
+    if (!done && a.e < 22 && !a.carry.length && S.near.store) { const sj = idx(w, S.near.store.x, S.near.store.y), so = w.stores[sj]; if (so && so.items && so.items.length && (!so.by || allied(w, a, so.by) || !isAlive(w, so.by))) { if (S.near.store.d === 0) { done = act(w, a, { do: 'take' }, S, emit); if (done) a.doing = 'taking from the store, starving'; } else if (move(w, a, pathToward(w, a, S.near.store.x, S.near.store.y, 0))) { done = true; a.doing = 'making for the store, starving'; } } }
+    if (!done && a.e < 20 && !a.carry.length && !S.near.food && !(S.near.predator && cheb(a.x, a.y, S.near.predator.x, S.near.predator.y) <= 2) && (w.tick + a.id) % 2 === 0) { /* nothing to eat in sight: a starving body follows its nose to the nearest food, far off */
+      if (!a.nose || w.tick - a.nose.t > 40) { let bj = -1, bd = 31; for (let dy = -30; dy <= 30; dy += 1) for (let dx = -30; dx <= 30; dx += 1) { const x = a.x + dx, y = a.y + dy; if (!inb(w, x, y)) continue; const j = idx(w, x, y), q = w.plants[j]; if (!q || q.food < 1 || !(L.plants[q.sp].nutrition > 0) || a.habits.avoid.indexOf(q.sp) >= 0) continue; const dd = Math.max(Math.abs(dx), Math.abs(dy)); if (dd < bd) { bd = dd; bj = j; } } a.nose = { t: w.tick, j: bj }; }
+      if (a.nose.j >= 0 && move(w, a, pathToward(w, a, a.nose.j % w.W, Math.floor(a.nose.j / w.W), 0))) { done = true; a.doing = 'following the smell of food, starving'; } }
     if (!done && a.e < 22 && S.near.food && !(S.near.predator && cheb(a.x, a.y, S.near.predator.x, S.near.predator.y) <= 2)) { done = act(w, a, { do: 'seek', target: 'food' }, S, emit); if (done) a.doing = 'making for food, starving'; } /* a starving body goes to food it can see, whatever the plan, unless teeth are upon it */
     for (let i = 0; i < a.policy.length && !done; i++) {
       const r = a.policy[i];
@@ -2281,6 +2319,7 @@ function stepAgents(w, emit) {
     if (ground === T.DESERT && !night) drain += L.land.desertThirst;
     if (w.fields.length) { cold *= fieldFactor(w, 'cold', a.x, a.y); drain *= fieldFactor(w, 'drain', a.x, a.y); }
     drain += cold;
+    if (SW.season(w) === 2) SW.press(w, a, 'turning', 0.004); /* autumn: the days shorten, and everyone feels what is coming */
     if (cold > 0.09) SW.press(w, a, 'cold', 0.004); if ((sky === 'storm' || sky === 'gale' || (w.blizzard || 0) > w.tick) && !a.sheltered) SW.press(w, a, 'storms', 0.003); if ((a.thirst || 0) > 80) SW.press(w, a, 'thirst', 0.01);
     if (sky === 'drought') drain += L.weather.droughtThirst;
     a.mood.lonely = clamp(a.mood.lonely + (S.near.agent ? -0.006 : 0.002), 0, 1);
@@ -2365,6 +2404,8 @@ SW.step = function (w, emit) {
   stepPlants(w);
   stepCreatures(w, emit);
   stepAgents(w, emit);
+  { const AR = w.laws.arrivals; if (AR && AR.floor > 0 && w.tick % w.laws.time.dayLength === 5 && w.agents.length < AR.floor && w.agents.length < w.laws.mate.maxPopulation && w.tick - (w.lastArrival == null ? -1e9 : w.lastArrival) >= (AR.gapDays || 4) * w.laws.time.dayLength && w.tick > w.laws.time.dayLength * 2) SW.arrive(w, AR.size, null, emit); }
+  if (w.arrivedQ && w.arrivedQ.length) { const q = w.arrivedQ; w.arrivedQ = []; q.forEach(function (e) { emit({ type: 'arrived', ids: e.ids, people: e.people }); }); }
   stepDevices(w, emit);
   if (w.tick % w.laws.time.dayLength === 77 && rnd(w) < (w.laws.weather.disaster || 0)) SW.disaster(w, SW.pickDisaster(w), emit);
   if (w.tick % 8 === 5 && w.sites && w.sites.length) stepSites(w, emit);
@@ -2509,10 +2550,10 @@ SW.teach = function (w, a, t, art, emit) {
 
 /* ---------- paths of knowledge ---------- */
 /* What a being has suffered presses on it, and fades over days. Each way answers some kinds of pressure. */
-SW.PRESSURES = { hunger: 'hunger', famine: 'hunger in the lean season', cold: 'cold', thirst: 'thirst', sickness: 'sickness', beasts: 'the teeth of beasts', loss: 'the deaths of your own', water: 'water you could not cross', burden: 'more than hands can carry', strife: 'blows from your own kind', storms: 'storm and calamity', strangers: 'speech you could not understand' };
-SW.SPURS = { tools: { hunger: 0.3, burden: 0.4 }, fire: { cold: 1, beasts: 0.7, sickness: 0.2 }, fishing: { hunger: 0.7, famine: 0.3 }, farming: { hunger: 0.5, famine: 0.7 }, herding: { hunger: 0.3, famine: 0.5 }, signs: { loss: 0.6, strangers: 0.3 }, customs: { strife: 0.7, loss: 0.3 },
-  storage: { famine: 1.2, hunger: 0.4 }, medicine: { sickness: 1.2, loss: 0.3, beasts: 0.3 }, weaving: { cold: 0.8, burden: 0.6 }, pottery: { thirst: 1, burden: 0.5 }, masonry: { beasts: 0.5, cold: 0.4, strife: 0.6, storms: 0.7 }, devices: { beasts: 0.6, hunger: 0.3 },
-  rafts: { water: 1.2 }, lorekeeping: { loss: 0.9 }, archery: { beasts: 0.9, hunger: 0.4 }, bridges: { water: 1 }, armour: { strife: 1, beasts: 0.5 }, signals: { strife: 0.4, loss: 0.3, strangers: 0.3 }, boats: { water: 0.8 }, salting: { famine: 0.8 }, writing: { loss: 0.5, strangers: 0.4 }, schooling: { loss: 0.4 } };
+SW.PRESSURES = { hunger: 'hunger', famine: 'hunger in the lean season', cold: 'cold', thirst: 'thirst', sickness: 'sickness', beasts: 'the teeth of beasts', loss: 'the deaths of your own', water: 'water you could not cross', burden: 'more than hands can carry', strife: 'blows from your own kind', storms: 'storm and calamity', strangers: 'speech you could not understand', turning: 'the year turning toward the lean season' };
+SW.SPURS = { tools: { hunger: 0.3, burden: 0.4 }, fire: { cold: 1, beasts: 0.7, sickness: 0.2 }, fishing: { hunger: 0.7, famine: 0.3 }, farming: { hunger: 0.5, famine: 0.7, turning: 0.3 }, herding: { hunger: 0.3, famine: 0.5 }, signs: { loss: 0.6, strangers: 0.3 }, customs: { strife: 0.7, loss: 0.3 },
+  storage: { famine: 1.2, hunger: 0.4, turning: 1 }, medicine: { sickness: 1.2, loss: 0.3, beasts: 0.3 }, weaving: { cold: 0.8, burden: 0.6, turning: 0.3 }, pottery: { thirst: 1, burden: 0.5 }, masonry: { beasts: 0.5, cold: 0.4, strife: 0.6, storms: 0.7 }, devices: { beasts: 0.6, hunger: 0.3 },
+  rafts: { water: 1.2 }, lorekeeping: { loss: 0.9 }, archery: { beasts: 0.9, hunger: 0.4 }, bridges: { water: 1 }, armour: { strife: 1, beasts: 0.5 }, signals: { strife: 0.4, loss: 0.3, strangers: 0.3 }, boats: { water: 0.8 }, salting: { famine: 0.8, turning: 0.8 }, writing: { loss: 0.5, strangers: 0.4 }, schooling: { loss: 0.4 } };
 SW.press = function (w, a, k, n) { if (!a || a.dead || !SW.PRESSURES[k]) return; const P = a.press = a.press || {}, mx = (w.laws.discovery || {}).pressMax || 3; P[k] = Math.min(mx, Math.round(((P[k] || 0) + n) * 1000) / 1000); };
 /* how strongly a being is pressed toward one way, and by what */
 SW.needFor = function (w, a, id) {
@@ -2776,7 +2817,7 @@ SW.pledge = function (w, a, name, emit) {
   }
   const t = SW.findAgentByName(w, name);
   if (!t || t === a || a.leader === t.id) return false;
-  { const need = (w.laws.status || {}).leadNeeds || 0, ts = SW.status(w, t), as = SW.status(w, a), kin = (a.parents || []).indexOf(t.id) >= 0; if (!kin && (ts < need || ts < as)) { emit({ type: 'fail', a: a.id, text: 'You meant to pledge yourself to ' + t.name + ', but something in you would not bend: ' + t.name + (ts < as ? ' stands no higher among others than you do' : ' has not yet the standing that draws a following') + '. People follow one who has built, given, known, won or been sung of more than they have themselves.' }); return false; } }
+  { const need = (w.laws.status || {}).leadNeeds || 0, ts = SW.status(w, t), as = SW.status(w, a), kin = (a.parents || []).indexOf(t.id) >= 0; if (!kin && (ts < need || ts < as)) { w.tally.pledgesRefused = w.tally.pledgesRefused || []; w.tally.pledgesRefused.push({ day: SW.day(w), who: a.name, to: t.name, theirStanding: ts, ownStanding: as, needed: need }); if (w.tally.pledgesRefused.length > 20) w.tally.pledgesRefused.shift(); emit({ type: 'fail', a: a.id, text: 'You meant to pledge yourself to ' + t.name + ', but something in you would not bend: ' + t.name + (ts < as ? ' stands no higher among others than you do' : ' has not yet the standing that draws a following') + '. People follow one who has built, given, known, won or been sung of more than they have themselves.' }); return false; } }
   let cur = t;
   for (let k = 0; k < 8 && cur; k++) { if (cur === a) return false; cur = cur.leader != null ? w.agents.filter(function (o) { return o.id === cur.leader && !o.dead; })[0] : null; }
   const was = a.leader; a.leader = t.id;

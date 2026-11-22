@@ -6,7 +6,7 @@ Evolu is an experimental world game that runs as a single page inside Claude. A 
 
 Nothing in Evolu is hard-coded to happen. Things are made possible, and the beings find them or do not.
 
-Created by **Nova Spivack**, built with Claude. Generation 15, November 2026.
+Created by **Nova Spivack**, built with Claude. Generation 16, November 2026.
 Source: <https://github.com/novaspivack/evolu>
 
 > Evolu was called Seedworld until Generation 14.
@@ -31,11 +31,13 @@ Source: <https://github.com/novaspivack/evolu>
 
 ## What happens in a run
 
-You open the page and see a world of nine lands divided by a sea: woods, desert, lakes, highlands, marsh, steppe and tundra, each with its own plants, animals and minerals. Twelve people of three peoples wake in three different lands. Each people has its own body, dress, way of naming and tongue; speech in a tongue you do not know arrives as strange sounds.
+You open the page and see a world of nine lands divided by a sea: woods, desert, lakes, highlands, marsh, steppe and tundra, each with its own plants, animals and minerals. Fifteen people of three peoples wake in three different lands. Each people has its own body, dress, way of naming and tongue; speech in a tongue you do not know arrives as strange sounds.
 
 The minds wake by themselves and begin to think. Each thought is a real call to Claude, made from the page, that returns what the being thinks, says, plans and wants to change about itself. You can click any being and read its mind: what presses on it, what it believes, who it trusts, what it has learned from what befell others.
 
-From there it is theirs. In real runs so far they have built shelters and halls, shared food, formed small bands, raised children, mined, grieved for their dead, and starved by wandering alone. They have not yet traded, tamed an animal, fought a planned battle or crossed the sea. Every few days a chronicler writes the next chapter of the world's story, and the maker visits, reads the numbers, changes something, predicts what will follow, and checks its prediction on the next visit.
+From there it is theirs. In real runs so far they have built shelters and halls, shared food, formed bands around leaders, raised children, mined and smelted, carved figures, grieved for their dead, learned from how others died, and starved in winter with no stores. They have not yet told a tale, tamed an animal, fought a planned battle or crossed the sea.
+
+Peoples are meant to last. When the living grow few, a small band comes into the land from beyond its edge. What the dead built stands empty until someone claims it. Every few days a chronicler writes the next chapter of the world's story, and the maker visits, reads the numbers, changes something, predicts what will follow, and checks its prediction on the next visit.
 
 <img src="docs/images/evolu-culture.png" alt="The Culture tab: one people's custom, a teaching held across two peoples, and a myth with the way another now tells it" width="420">
 
@@ -107,13 +109,13 @@ Each thought is a call to Claude on your account. The models are chosen in Setup
 **To play**
 
 1. The world starts on its own. **The minds are awake from the moment the page opens** and wake again by themselves if the page reloads, so thoughts are being spent as soon as you open it. **Minds awake** (top right) puts them to sleep and wakes them.
-2. **Sound is on** and begins at your first click or key, because a browser will not start sound sooner. **Sound on** turns it off.
+2. **Sound is on** from the start. Some browsers hold a page silent until it is first touched; the button then reads "Sound on · click to hear", and any click or key lets it through. The button turns sound off.
 3. **Space** pauses, drag pans, scroll zooms, click inspects, **F** follows.
 4. Open **Setup** to choose the models, how often beings think, the **thought budget** (3,000 by default), whether to **keep thinking past the budget** for long runs, and whether the minds wake when the page opens. A new world can be started from a seed there.
 5. Watch. The tabs are Inspect, Story, Culture, Voices, Events, Peoples, Ways, Kinds, Laws, Maker and Setup.
 6. Let it run for some days of world time. Twenty to thirty days and several hundred thoughts is enough to learn from.
 
-Three things to know. Publishing a new version reloads an open page, so do not publish during a run; and if you are working with Claude in the same conversation while a world runs, ask it to do nothing until the run is over. A world saved under an older generation still loads but keeps its old laws; start a new world to get new ones. And the run is written to the artifact's store as it goes, so a run that is cut short is not lost: Claude can read its final state from there.
+Three things to know. Publishing a new version reloads an open page, so do not publish during a run; and if you are working with Claude in the same conversation while a world runs, ask it to do nothing until the run is over. A world saved under an older generation still loads and can be carried on: it takes the laws that were re-tuned since, but not new lands, peoples or heritage, so start a new world for those. And the run is written to the artifact's store as it goes, so a run that is cut short is not lost: Claude can read its final state from there.
 
 **Outside Claude.** Serve `src/` with any static web server and the world runs, on instinct only: the minds cannot wake, because there is nothing to call. This is how the browser tests run it, with a scripted stand-in for Claude.
 
@@ -184,12 +186,12 @@ tests/run-all.sh            engine, minds and maker (about three minutes, needs 
 tests/run-all.sh browser    the same, then the page in headless Chrome (needs Playwright and Chrome)
 ```
 
-There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore, culture and necessity. Together they are a regression suite of 300 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds.
+There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore, culture and necessity, peoples that last. Together they are a regression suite of 321 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds.
 
 ## What is and is not verified
 
 - The tests show that the mechanics work and that the page runs without errors. They cannot show how real minds behave: those calls only happen when the page runs inside Claude.
-- What real minds did is known from seven recorded runs, described in the design log. Generation 15 had not yet been run with real minds when this was written.
+- What real minds did is known from eight recorded runs, described in the design log. Generation 16 had not yet been run with real minds when this was written.
 - The later ages of the knowledge tree (roughly the fourth onward) are sketched: the ways, minerals and buildings exist, but few have mechanics behind them yet.
 - The sound has been written without being heard by its author.
 

@@ -15,7 +15,7 @@ const T = { WATER: 0, GRASS: 2, FOREST: 3, ROCK: 4, SHALLOWS: 5 };
 }
 { // peoples
   const { w, st, ev, em } = fresh(7); const P = w.peoples;
-  ok(P.length === 3 && new Set(P.map(p => p.tongue)).size === 3 && new Set(P.map(p => p.kind)).size === 3 && w.agents.length === 12 && [0, 1, 2].every(i => w.agents.filter(a => a.people === i).length === 4), 'three peoples of four, each with its own tongue: ' + P.map(p => p.name + ' (' + p.noun + ')').join(', '));
+  ok(P.length === 3 && new Set(P.map(p => p.tongue)).size === 3 && new Set(P.map(p => p.kind)).size === 3 && w.agents.length === 15 && [0, 1, 2].every(i => w.agents.filter(a => a.people === i).length === 5), 'three peoples of five, each with its own tongue: ' + P.map(p => p.name + ' (' + p.noun + ')').join(', '));
   const a = w.agents[0], b = w.agents.find(o => o.people !== a.people), skin = o => o.look.shapes.filter(s => s.t === 'circle' || s.t === 'ellipse').map(s => s.fill).join();
   ok(skin(a) !== skin(b) && a.tall !== b.tall && a.genes && Object.keys(a.genes).length >= 2 && a.knows[P[a.people].way] && !b.knows[P[a.people].way] === (P[a.people].way !== P[b.people].way), 'they differ in body, in what they are born with and in what they know (' + P[a.people].way + ' / ' + P[b.people].way + ')');
   const g0 = SW.garble(w, 'Come and eat at my fire, friend.', b.lang, 0), g1 = SW.garble(w, 'Come and eat at my fire, friend.', b.lang, 1); ok(g0 !== g1 && !/fire/.test(g0) && g1 === 'Come and eat at my fire, friend.', 'an unknown tongue is noise: "' + g0 + '"');

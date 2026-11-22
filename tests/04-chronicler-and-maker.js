@@ -10,8 +10,8 @@ let fails = 0; const ok = (n, c, x) => { console.log((c ? 'PASS ' : 'FAIL ') + n
   reply = { title: 'Three bands wake', text: 'They woke and ate. ' + 'More happened. '.repeat(20), threads: [{ name: 'Brukel and Yeba', kind: 'rivalry', text: 'Brukel claimed the grain.' }, { bad: 1 }], trends: ['No one has built anything (0 shelters).'] };
   const ch = await K.tell(st);
   ok('the chronicler writes a chapter with threads and trends', ch && st.story.chapters.length === 1 && st.story.threads.length === 1 && st.story.trends.length === 1 && st.story.last === w.tick, ch && ch.title);
-  ok('its prompt carries the record, the people and the numbers', /WHAT HAPPENED/.test(prompts[0].p) && /THE PEOPLE NOW/.test(prompts[0].p) && /The grain is mine/.test(prompts[0].p) && /"alive":12/.test(prompts[0].p) && prompts[0].o.model === 'claude-sonnet-5-5', prompts[0].p.length + ' chars');
-  const s0 = K.stats(st); ok('the numbers are computed', s0.alive === 12 && s0.plants > 100 && typeof s0.events.gifts === 'number' && s0.energyMedian > 0, JSON.stringify(s0).length + ' bytes');
+  ok('its prompt carries the record, the people and the numbers', /WHAT HAPPENED/.test(prompts[0].p) && /THE PEOPLE NOW/.test(prompts[0].p) && /The grain is mine/.test(prompts[0].p) && /"alive":15/.test(prompts[0].p) && prompts[0].o.model === 'claude-sonnet-5-5', prompts[0].p.length + ' chars');
+  const s0 = K.stats(st); ok('the numbers are computed', s0.alive === 15 && s0.plants > 100 && typeof s0.events.gifts === 'number' && s0.energyMedian > 0, JSON.stringify(s0).length + ' bytes');
   /* each kind of change, with bounds */
   const L = w.laws, t = (op) => K.applyOp(w, op);
   const a1 = t({ op: 'law', group: 'body', key: 'baseDrain', value: 99 }); ok('a law moves at most to double', a1.ok && L.body.baseDrain === 0.17, a1.text);

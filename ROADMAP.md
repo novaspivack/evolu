@@ -1,6 +1,6 @@
 # Evolu roadmap
 
-Set by Nova Spivack; sequenced so that the world is not asked to hold everything at once. Last updated with Generation 15 (22 November 2026).
+Set by Nova Spivack; sequenced so that the world is not asked to hold everything at once. Last updated with Generation 16 (22 November 2026).
 
 ## How this file is used
 
@@ -14,7 +14,7 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 and 15, to be watched and tuned
+## NOW: built in Generations 14 to 16, to be watched and tuned
 
 | Item | State |
 | --- | --- |
@@ -31,8 +31,20 @@ Knowledge is earned slowly, in ages. Later things need earlier ones, need materi
 | **Teachings** that can be begun, heard, taken up and given up, with real effect on those who share one | Built in 15, as a first step toward religions and schools of thought |
 | **Talismans and carved figures;** every prized thing remembered with its maker and each hand it passes to | Built in 15 |
 | **Bodies that reach safety and food;** animals that come to trust the hand that feeds them | Built in 15 from the seventh run |
+| **Peoples that last.** Newcomers when the living are few; twins; longer lives; a land that does not run down; a milder lean season; foresight in autumn | Built in 16 from the eighth run |
+| **What the dead built** stands empty and can be claimed, to begin a home or add to a band's | Built in 16 |
+| **A benevolent maker** whose first care is that the peoples live and grow | Built in 16 |
 
 Answered by the seventh run: people do earn a following (nine pledges), and lessons from the dead do change plans. Still open, for the next run: does need bring storage before the first winter; do fewer starve; does anyone tell a tale, begin a teaching or take one up; does anyone tame an animal; do the peoples meet, trade or cross water.
+
+## Decision for Nova: should the world grow at its edges?
+
+People reached the edge in the eighth run and nothing happened. That is as built: the world is fixed in size.
+
+- **(a) Leave it fixed.** Simple; the sea and nine lands are room enough for now.
+- **(b) Open a strip of new land whenever someone reaches an edge.** Cheap to trigger, but land then appears for walking, not for any deed, and the map sprawls.
+- **(c) Open a whole new land, with its own kind, riches and perhaps a people, when a people first crosses the sea or reaches a far shore by vessel.** Growth is then earned by a way (rafts, boats), and it gives crossing water a reward.
+- **Proposed: (c), and not yet.** No one has crossed water in eight runs, and most of the map is still empty of people, so more land would answer nothing today. It also means re-indexing every map array when the grid grows, which must be tested on saved worlds. It stays first among the NEXT items; say so if you would rather have (b) sooner, since people do walk to the edge.
 
 ## NEXT: once NOW is seen working
 
@@ -85,12 +97,14 @@ These run through every stage and are picked up as runs call for them.
 
 ## Known open problems
 
-- **Starvation in the first winter.** Six of sixteen in the seventh run. Generation 15 answers with need-driven discovery of storage, flight that ends at a roof, and bodies that go to food.
+- **Starvation in winter.** Ten of seventeen over 41 days. Generation 15 brought storage, but on the eve of famine; Generation 16 answers with foresight in autumn, a land that no longer runs down, a milder winter and bodies that reach their stores.
+- **Peoples too small and too closely related to grow.** Generation 16 answers with newcomers, twins and longer lives.
 - **Nothing passes between strangers.** In seven runs: no trade, no planned fight, no animal tamed, and peoples that meet a handful of times.
-- **No tale has yet been told to anyone** by a real mind.
+- **No tale, song, myth or teaching has yet been made** by a real mind, though sayings and hard lessons spread and cross between peoples.
 - **The record of a run is too large to read from the store.** An interrupted run can be read only through its final state and, from Generation 15, the maker's own small document. A full analysis needs the downloaded run log.
 - **The later ages are sketches.** From about the fourth age the ways, minerals and buildings have names and looks but little that they do.
-- **Prompts are long** (about 17,000 characters for an everyday thought and 24,000 for a deep reflection in a young Generation 15 world).
+- **Prompts are long and growing:** a middle of 24,000 characters and a longest of 36,800 in the eighth run.
+- **The maker reports that "times eaten" does not move between its visits.** The counter does count; unexplained.
 - **The maker's report that recipe counts did not update** in the sixth run: no fault found.
 
 ## Done, by generation
@@ -109,3 +123,4 @@ A short index; the detail is in the design log.
 | 13 | Nine lands and a sea, three peoples with bodies and tongues, 45 ways in five ages, deposits, great works, vessels, roads |
 | 14 | Standing and roles, songs and tales, community learning, kin and childhood, bridges, worn goods and weapons, land that wears, the sciences, 68 ways in six ages; renamed Evolu |
 | 15 | Discovery driven by need, the Culture tab, ideas with holders and paths of spread, teachings, talismans and relics, flight to shelter, taming by trust, minds awake and sound on by default |
+| 16 | A land that does not run down, a milder winter, foresight in autumn, twins, longer lives, newcomers, claiming what the dead built, an elder's legacy, a benevolent maker |

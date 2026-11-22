@@ -7,7 +7,7 @@
 cd "$(dirname "$0")" || exit 1
 bad=0
 for f in ../src/*.js; do node --check "$f" || { echo "SYNTAX  $f"; bad=1; }; done
-for t in 0*.js; do
+for t in [0-9][0-9]-*.js; do
   out=$(node "$t" 2>&1); n=$(printf '%s\n' "$out" | grep -c '^FAIL'); last=$(printf '%s\n' "$out" | tail -1)
   if [ "$n" -eq 0 ] && [ "$last" = "ALL PASS" ]; then echo "pass    $t ($(printf '%s\n' "$out" | grep -c '^ok\|^PASS') checks)"; else echo "FAIL    $t"; printf '%s\n' "$out" | grep '^FAIL\|Error' | head -8; bad=1; fi
 done

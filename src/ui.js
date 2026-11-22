@@ -889,7 +889,7 @@ function showNotice(text, action) {
 function syncButtons() {
   $('btnPlay').textContent = U.playing ? '❚❚' : '▶'; $('btnPlay').classList.toggle('on', !U.playing);
   $('btnFollow').classList.toggle('on', U.follow); $('btnFollow').disabled = !(U.sel && U.sel.t === 'agent');
-  $('btnSound').textContent = SWA.on ? 'Sound on' : 'Sound off'; $('btnSound').classList.toggle('on', SWA.on);
+  $('btnSound').textContent = SWA.on ? (SWA.ctx && SWA.ctx.state !== 'running' ? 'Sound on · click to hear' : 'Sound on') : 'Sound off'; $('btnSound').classList.toggle('on', SWA.on);
   const bm = $('btnMinds'); bm.textContent = st && st.on ? 'Minds awake' : 'Wake minds'; bm.classList.toggle('awake', !!(st && st.on));
 }
 $('btnPlay').onclick = togglePlay;
@@ -1528,7 +1528,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 15, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 16, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1622,9 +1622,11 @@ function start(data) {
     window.claude.use('downloads').then(function (d) { dlNS = d; }).catch(function () {});
   } else recState = 'not offered';
   try { if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(function () { return SWM.snapshot(st); }); } catch (e) {}
-  /* sound is on unless turned off; a browser will only let it begin at the first touch or key */
-  const firstTouch = function () { if (st && st.settings.sound !== false && !SWA.on) { try { SWA.start(w.seed); } catch (e) {} syncButtons(); } if (SWA.on || (st && st.settings.sound === false)) { window.removeEventListener('pointerdown', firstTouch, true); window.removeEventListener('keydown', firstTouch, true); } };
-  window.addEventListener('pointerdown', firstTouch, true); window.addEventListener('keydown', firstTouch, true);
+  /* sound is on from the start unless turned off. A browser may hold it silent until the page is first touched; every touch or key then lets it through */
+  const soundUp = function () { return SWA.on && SWA.ctx && SWA.ctx.state === 'running'; };
+  const wake = function () { if (!st || st.settings.sound === false) return; try { if (!SWA.on) SWA.start(w.seed); else if (SWA.ctx && SWA.ctx.state !== 'running') SWA.ctx.resume(); } catch (e) {} setTimeout(syncButtons, 150); if (soundUp()) ['pointerdown', 'pointerup', 'click', 'keydown', 'touchend'].forEach(function (k) { window.removeEventListener(k, wake, true); }); };
+  ['pointerdown', 'pointerup', 'click', 'keydown', 'touchend'].forEach(function (k) { window.addEventListener(k, wake, true); });
+  if (st.settings.sound !== false) { try { SWA.start(w.seed); if (SWA.ctx) SWA.ctx.onstatechange = function () { syncButtons(); }; } catch (e) {} }
   syncButtons(); setTab('inspect');
   requestAnimationFrame(frame);
 }

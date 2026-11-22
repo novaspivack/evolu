@@ -38,7 +38,9 @@ The page writes each run to the artifact's store as it goes. With the artifact d
 - Tell a being only what it could perceive. When an act fails, say why, to that being.
 - The engine is deterministic for a seed. Use `rnd(w)`, never `Math.random()`, inside the world step.
 - A world saved by the previous generation must still load: extend `SW.upgrade` (engine) and the normaliser in `M.restore` (minds). Bump `settings.v` when settings change. `SAVE_KEY` keeps the old name `seedworld.save.v4` on purpose.
-- Watch prompt size (`M.buildPrompt`); it was about 20,000 characters in the sixth run.
+- Watch prompt size (`M.buildPrompt`); the middle prompt was 24,000 characters in the eighth run and the longest 36,800.
+- A world may be carried on across generations (same run id). `SW.upgrade` moves a law to its re-tuned value only where the world still holds the old default; add to that table when you re-tune a law.
+- Measure balance changes on at least ten seeds before believing them: three seeds swing by several deaths either way. Survival on instinct alone cannot show what minds do with stores, fire and shelter.
 - Watch speed: a world moment should stay near 2 ms.
 - Do not put apostrophes inside single-quoted strings in `minds.js` prompts; it has broken the file three times.
 - A patch of open grass of a given length may not exist: test helpers that look for one return undefined, and every position after that is NaN. Ask for eight tiles or fewer.
@@ -51,7 +53,7 @@ tests/run-all.sh                                   # needs only Node
 PLAYWRIGHT=/path/to/node_modules/playwright tests/run-all.sh browser
 ```
 
-All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`10-...js`), with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
+All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`11-...js`), with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
 
 What the tests cannot show is how real minds behave. Say so in every report.
 
