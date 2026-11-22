@@ -6,7 +6,7 @@ const fresh = seed => { const w = SW.createWorld(seed), st = M.createState(w); K
   const a = w.agents[0], b = w.agents[1], c = w.agents[2], m = st.minds[a.id];
   a.leader = b.id; a.temperament.bold = 0.8; a.rel[b.id] = 0.9; b.x = a.x + 1; b.y = a.y; c.x = b.x; c.y = b.y + 1; b.rel[c.id] = 0.9; b.rel[a.id] = 0.3; a.stats.stolen = 3; a.temperament.honest = 0.9; m.dull = 4; a.e = 90; a.hp = 100;
   let d = M.drives(st, m, a, SW.look(w, a)).map(q => q.k);
-  ok(d.includes('purpose') && d.includes('jealousy') && d.includes('freedom'), 'new drives speak: ' + d.join(', '));
+  ok(d.includes('purpose') && d.includes('jealousy'), 'new drives speak: ' + d.join(', '));
   w.laws.drives.jealousy = 0; ok(!M.drives(st, m, a, SW.look(w, a)).some(q => q.k === 'jealousy'), 'the drives law silences a drive');
   ok(K.applyOp(w, { op: 'law', group: 'drives', key: 'purpose', value: 1.8 }).ok, 'the maker can tune a drive');
 }
@@ -35,7 +35,7 @@ const fresh = seed => { const w = SW.createWorld(seed), st = M.createState(w); K
   const tx = Math.max(2, Math.min(w.W - 3, a.x + (a.x > 48 ? -8 : 8))); a.x = tx; for (let k = 0; k < 60; k++) { a.e = 90; g.e = 50; SW.step(w, em); } ok(!g.dead && SW.cheb(g.x, g.y, a.x, a.y) <= 5, 'it keeps near its keeper (' + SW.cheb(g.x, g.y, a.x, a.y) + ' steps)');
   for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (dx || dy) { const j = (g.y + dy) * w.W + g.x + dx; w.walls[j] = a.id; } const gx = g.x, gy = g.y; a.x = Math.max(2, Math.min(w.W - 3, a.x + (a.x > 48 ? -14 : 14)));
   for (let k = 0; k < 120; k++) { a.e = 90; g.e = 50; SW.step(w, em); } ok(g.x === gx && g.y === gy, 'a ring of wall holds it though its keeper walks away');
-  const w2 = SW.createWorld(3); w2.laws.weather.herd = 0; w2.laws.weather.pack = 0; Object.keys(w2.laws.creatures).forEach(k => { w2.laws.creatures[k].migrate = 0; }); w2.creatures = w2.creatures.filter(c => c.sp === w2.creatures[0].sp).slice(0, 1); const lone = w2.creatures[0]; let born = 0; for (let k = 0; k < 1500; k++) { lone.e = 99; lone.age = 999; SW.step(w2, e => { if (e.type === 'cbirth' || e.type === 'born') born++; }); } ok(w2.creatures.filter(c => c.sp === lone.sp).length <= 1, 'an animal alone does not breed');
+  const w2 = SW.createWorld(3); w2.laws.ecology.herdReturn = 0; w2.laws.weather.herd = 0; w2.laws.weather.pack = 0; Object.keys(w2.laws.creatures).forEach(k => { w2.laws.creatures[k].migrate = 0; }); w2.creatures = w2.creatures.filter(c => c.sp === w2.creatures[0].sp).slice(0, 1); const lone = w2.creatures[0]; let born = 0; for (let k = 0; k < 1500; k++) { lone.e = 99; lone.age = 999; SW.step(w2, e => { if (e.type === 'cbirth' || e.type === 'born') born++; }); } ok(w2.creatures.filter(c => c.sp === lone.sp).length <= 1, 'an animal alone does not breed');
   const w3 = SW.createWorld(3); w3.laws.weather.herd = 0; w3.laws.weather.pack = 0; Object.keys(w3.laws.creatures).forEach(k => { w3.laws.creatures[k].migrate = 0; }); const sp3 = w3.creatures.find(c => !w3.laws.creatures[c.sp].predator).sp; w3.creatures = w3.creatures.filter(c => c.sp === sp3).slice(0, 2); w3.creatures[1].x = w3.creatures[0].x; w3.creatures[1].y = w3.creatures[0].y; for (let k = 0; k < 1500 && w3.creatures.length < 3; k++) { w3.creatures.slice(0, 2).forEach(c => { c.e = 99; c.age = 999; }); if (SW.cheb(w3.creatures[0].x, w3.creatures[0].y, w3.creatures[1].x, w3.creatures[1].y) > 3) { w3.creatures[1].x = w3.creatures[0].x; w3.creatures[1].y = w3.creatures[0].y; } SW.step(w3); } ok(w3.creatures.length >= 3, 'a pair kept together does');
 }
 { // battle

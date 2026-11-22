@@ -12,6 +12,50 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## What the ninth run showed (the same world carried on to day 50, on Generation 16; run `r7-mws0f6n0`, 305 thoughts from day 41)
+
+Read from what the page had written to its store (the maker's own document and the run's summary line), since the run was stopped before a log was downloaded. The beings' thoughts for these nine days were not read.
+
+- **Twelve alive at day 50, from six on day 41.** Two bands of newcomers came in as built: three Brusha with a child, and three Garnbar. One death in nine days: Ssaua, killed by a ridgecat.
+- **The first winter with no deaths** (days 46 to 48), though food standing fell from 1,346 to 503. The maker's reading: "Nobody starved because the hungry were near someone who could feed them, so in the lean season, closeness counts for more than total food."
+- **An elder did hand on what he knew.** Kragar spent his last days teaching Gorar.
+- **The peoples met.** A louder loneliness (the maker's change) moved Kragar toward the Eiuys, and Garnbar and Eiuys met on day 44 for the first time in the world's history.
+- **Still nothing:** no tale, no teaching, no animal tamed, no building of the dead claimed, cooked fish never made.
+- **The maker** made three visits and kept every change: fewer hunters allowed (26 to 20), winter growth raised, bounty raised to 0.6, a root sown. It wrote four requests: places of power are capped at twelve and all taken, mostly by places no one found; its counts of deaths and of everyone who ever lived went down between visits; sowing should take a place, because "hunger deaths come from food being too far from the person who needs it".
+
+## Generation 17 (built, not yet run with real minds): a world with edges
+
+Built from the ninth run, the maker's four requests, and Nova's notes of 2:49 to 3:26 pm. The notes held far more than one generation can carry; what was not built is sequenced in `ROADMAP.md`.
+
+**The edge of the world.** The world is now made larger than what is known (184 by 136, of which the middle 144 by 96 is known), and its rim is veiled: shown as mist, impassable, with nothing living in it. Because the veiled land was made in the same act as the known land, its rivers, shores, lakes and kinds of ground are already there, and what is opened continues what it joins: a river that reaches the edge goes on beyond it. A being within sight of the mist is told the land does not end there and feels the pull to know what lies beyond. Standing at it, it can **venture**: each try costs strength and opens, one time in two, a strip about forty wide and ten deep. A band has three tries, then its will is spent for five days. New land comes with what was always in it plus three rich deposits, food already grown, a herd that has never seen people, often beasts that hunt, and one time in five a band of strangers: a new people with its own tongue, customs and a way or two the finders may lack. The finder gains understanding and standing, and the finding is told among its people. There are sixteen lands in the larger world, so pushing outward crosses into country unlike home.
+
+**Women and men** (Nova asked whether there were any: there were not). Every being is a woman or a man; a people keeps near as many of each; a child comes only of one of each who are not close kin. Twins are a girl and a boy. When both parents are well fed and well, in a kind season, the wait before another child is shorter and twins likelier; in hard times it is as before. The maker can switch the rule off.
+
+**Swimming.** A grown being can swim deep water that lies within two steps of ground, so rivers up to four wide can be crossed and lakes and the sea cannot. It costs strength, and one who swims is pressed toward rafts, boats and bridges.
+
+**Seasons of plenty.** Plants grow faster in spring and at harvest as well as in rain. Animals breed more in spring and less in winter.
+
+**Animals that hold their numbers.** Grazers breed faster when they are few; hunters breed by how much prey there is for each. When grazers fall well below their level a herd comes in at the rim, and when hunters are few for the prey a pair follows. Without minds, on three seeds over forty days, grazers went from 168 to 145, 163 and 246, where they had been falling to 60 to 100.
+
+**Deposits return.** A worked deposit refills by a hundredth of its size a day, and a spent one may reappear, small, after eight days.
+
+**Newcomers** come four at a time, two women and two men.
+
+**Drama, kept in proportion.** Each being has a calling it wants to be known for (hero, leader, hunter, warrior, sage, merchant, healer, builder, bard, explorer). Desire fixes on one person of standing or warm acquaintance, and gnaws when that person has had a child with another; inside one's own band it is the weaker pull. Those who fight grow a little stronger and need a little more food, and both fighting and being attacked bring weapons and defences sooner. Songs and poems are asked to rhyme, keep a beat and carry a moral.
+
+**The maker's four requests.** Places of power: the cap is eighteen, and a place no one ever found gives way to a new one. Counts: deaths and everyone who ever lived are now counted by the world itself (they had been counted from the minds of the dead, which are let go after a time). Sowing can be aimed at a being, a spot or a land. Graves as spirit places of their own: not built.
+
+**Heritage.** The maker's three kept law changes are the new defaults, and its two lessons are folded in.
+
+**Checked.** 21 new checks pass with every earlier suite (342 in eleven files), the scripted mind runs, the ecology, and the page in headless Chrome. A world saved by Generation 16 loads and runs. Forty days on instinct, three seeds: 13, 12 and 15 of 15 alive; plants 1,607 to 2,174. A world moment costs about 2.8 ms, up from 2, because the world is larger.
+
+**Not checked, and not built.**
+- No real mind has met Generation 17.
+- **A world carried on from an earlier generation has no veiled rim and cannot grow.** Exploring needs a new world.
+- I looked at the mist around the known world in a screenshot and it draws as intended. I have not looked at an opened strip on the page; the tests show the land, plants and deposits are there and that nothing breaks.
+- From Nova's notes, not built: monsters and their eggs; heroes, tribute and duels with spoils; mate stealing; grudges, compensation, peacemakers and peace ceremonies; talents, quests, dreams and prophecies; bandits; shared skills of hunting and defence together. All are in the roadmap.
+- The music has never been heard by me.
+
 ## What the eighth run showed (the same world carried on to day 41, on Generation 15; run `r7-mws0f6n0`, 684 thoughts recorded from day 19)
 
 The world of the seventh run was not started afresh: it was carried from day 19 to day 41 on the Generation 15 page, with its Generation 14 laws.
@@ -27,7 +71,7 @@ The world of the seventh run was not started afresh: it was carried from day 19 
 - **The maker** made six visits and kept every change: storage spurred by cold and hunger, a spirit place for the dead Minna, a new wool-bearing grazer, cooked fish, giving and works counted for more in standing, lorekeeping spurred by loss, blight made rarer after the famine, kelbulb sown, loneliness made stronger. It wrote eleven requests; each is answered below.
 - **Sound** did not start when the page opened, as Nova saw.
 
-## Generation 16 (built, not yet run with real minds): peoples that last
+## Generation 16 (built; run on the carried-on world, days 41 to 50: see the ninth run above): peoples that last
 
 Built from the eighth run, the maker's eleven requests, and Nova's notes of 1:00 pm.
 

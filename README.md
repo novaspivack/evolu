@@ -6,7 +6,7 @@ Evolu is an experimental world game that runs as a single page inside Claude. A 
 
 Nothing in Evolu is hard-coded to happen. Things are made possible, and the beings find them or do not.
 
-Created by **Nova Spivack**, built with Claude. Generation 16, November 2026.
+Created by **Nova Spivack**, built with Claude. Generation 17, November 2026.
 Source: <https://github.com/novaspivack/evolu>
 
 > Evolu was called Seedworld until Generation 14.
@@ -37,7 +37,9 @@ The minds wake by themselves and begin to think. Each thought is a real call to 
 
 From there it is theirs. In real runs so far they have built shelters and halls, shared food, formed bands around leaders, raised children, mined and smelted, carved figures, grieved for their dead, learned from how others died, and starved in winter with no stores. They have not yet told a tale, tamed an animal, fought a planned battle or crossed the sea.
 
-Peoples are meant to last. When the living grow few, a small band comes into the land from beyond its edge. What the dead built stands empty until someone claims it. Every few days a chronicler writes the next chapter of the world's story, and the maker visits, reads the numbers, changes something, predicts what will follow, and checks its prediction on the next visit.
+Peoples are meant to last. When the living grow few, a band comes into the land from beyond its edge. What the dead built stands empty until someone claims it.
+
+The known world ends in mist. The land does not end there; it has only not been seen. Whoever stands at the edge can venture in, and sometimes a wide strip of new country opens, continuing the rivers and shores it joins, richer and wilder than home, and now and then already lived in by strangers. Every few days a chronicler writes the next chapter of the world's story, and the maker visits, reads the numbers, changes something, predicts what will follow, and checks its prediction on the next visit.
 
 <img src="docs/images/evolu-culture.png" alt="The Culture tab: one people's custom, a teaching held across two peoples, and a myth with the way another now tells it" width="420">
 
@@ -54,7 +56,7 @@ There are four loops, one inside the next.
           1. THE WORLD    a deterministic simulation whose laws are data
 ```
 
-**1. The world** (`src/engine.js`). A deterministic simulation: 144 by 96 tiles, 240 moments to a day, three days to a season. Terrain, water, weather, calamities, plants, animals that mate in pairs and can be tamed, minerals in the ground, buildings, roads, bridges, vessels. Bodies have energy, thirst, health, age, sickness, genes and feelings. What matters most is that **the laws are data**: every number that governs the world sits in one registry (`w.laws`), and plants, animals, recipes, goods, buildings, minerals, places of power and the 68 "ways" of the knowledge tree are entries in it, not code. All of them act through one small language of effects on attributes, so anything can be combined with anything.
+**1. The world** (`src/engine.js`). A deterministic simulation: a known world of 144 by 96 tiles inside a veiled rim that can be explored, 240 moments to a day, three days to a season. Terrain, water, weather, calamities, plants, animals that mate in pairs and can be tamed, minerals in the ground, buildings, roads, bridges, vessels. Bodies have energy, thirst, health, age, sickness, genes and feelings. What matters most is that **the laws are data**: every number that governs the world sits in one registry (`w.laws`), and plants, animals, recipes, goods, buildings, minerals, places of power and the 68 "ways" of the knowledge tree are entries in it, not code. All of them act through one small language of effects on attributes, so anything can be combined with anything.
 
 **2. The minds** (`src/minds.js`). Each being's thinking is a call to Claude. The prompt is built from what that being can see, feel, remember and has been told; the reply is JSON: a thought, perhaps something said, a plan of steps, changes to its own reflexes, creed, memory or body, a tale or a mark. Everyday thoughts are frequent and cheap; deep reflections are rare and can rewrite the being. Between thoughts the body runs on its plan and its reflexes. Drives (hunger, belonging, ambition, grief, standing, 43 in all) are computed from the being's state and press on its thinking without deciding it.
 
@@ -115,7 +117,7 @@ Each thought is a call to Claude on your account. The models are chosen in Setup
 5. Watch. The tabs are Inspect, Story, Culture, Voices, Events, Peoples, Ways, Kinds, Laws, Maker and Setup.
 6. Let it run for some days of world time. Twenty to thirty days and several hundred thoughts is enough to learn from.
 
-Three things to know. Publishing a new version reloads an open page, so do not publish during a run; and if you are working with Claude in the same conversation while a world runs, ask it to do nothing until the run is over. A world saved under an older generation still loads and can be carried on: it takes the laws that were re-tuned since, but not new lands, peoples or heritage, so start a new world for those. And the run is written to the artifact's store as it goes, so a run that is cut short is not lost: Claude can read its final state from there.
+Three things to know. Publishing a new version reloads an open page, so do not publish during a run; and if you are working with Claude in the same conversation while a world runs, ask it to do nothing until the run is over. A world saved under an older generation still loads and can be carried on: it takes the laws that were re-tuned since, but not new lands, peoples, heritage or the veiled rim that lets the world grow, so start a new world for those. And the run is written to the artifact's store as it goes, so a run that is cut short is not lost: Claude can read its final state from there.
 
 **Outside Claude.** Serve `src/` with any static web server and the world runs, on instinct only: the minds cannot wake, because there is nothing to call. This is how the browser tests run it, with a scripted stand-in for Claude.
 
@@ -186,12 +188,12 @@ tests/run-all.sh            engine, minds and maker (about three minutes, needs 
 tests/run-all.sh browser    the same, then the page in headless Chrome (needs Playwright and Chrome)
 ```
 
-There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore, culture and necessity, peoples that last. Together they are a regression suite of 321 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds.
+There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore, culture and necessity, peoples that last, a world with edges. Together they are a regression suite of 342 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds.
 
 ## What is and is not verified
 
 - The tests show that the mechanics work and that the page runs without errors. They cannot show how real minds behave: those calls only happen when the page runs inside Claude.
-- What real minds did is known from eight recorded runs, described in the design log. Generation 16 had not yet been run with real minds when this was written.
+- What real minds did is known from nine recorded runs, described in the design log. Generation 17 had not yet been run with real minds when this was written.
 - The later ages of the knowledge tree (roughly the fourth onward) are sketched: the ways, minerals and buildings exist, but few have mechanics behind them yet.
 - The sound has been written without being heard by its author.
 

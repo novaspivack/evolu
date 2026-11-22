@@ -8,7 +8,7 @@ Exported records of real runs: worlds whose beings thought with Claude. Each fil
 | `generation-13-run-r7-mwrxhd1y-day30.json` | 13 | 30 days, 883 thoughts | Twelve births, seven starved, kin mating with kin, no dealings between peoples. Led to Generation 14. |
 | `generation-14-15-run-r7-mws0f6n0-day41.json` | 14, carried on under 15 | 41 days; records from day 19 (684 thoughts) | Ten of seventeen starved, most in winter; storage found on the eve of famine; the land running down; peoples too small to grow. Led to Generation 16. |
 
-The first 19 days of that world (the seventh run) were cut short before a log was downloaded; what could be read of them from the artifact's store is in the design log.
+Days 41 to 50 of that world (the ninth run, on Generation 16) were stopped before a log was downloaded; what the page had written to its store is in the design log. The first 19 days of that world (the seventh run) were cut short before a log was downloaded; what could be read of them from the artifact's store is in the design log.
 
 The analysis of each is in [`docs/design-log.md`](../docs/design-log.md). Earlier runs were recorded but their files are not kept here.
 

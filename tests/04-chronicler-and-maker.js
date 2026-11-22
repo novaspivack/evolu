@@ -40,7 +40,7 @@ let fails = 0; const ok = (n, c, x) => { console.log((c ? 'PASS ' : 'FAIL ') + n
   const mp = prompts[prompts.length - 1]; ok('its prompt has the story, numbers, parts, notebook and catalogue, on Opus', /THE STORY SO FAR/.test(mp.p) && /Three bands wake/.test(mp.p) && /baseDrain=0.085/.test(mp.p) && /moonwort/.test(mp.p) && /YOUR NOTEBOOK/.test(mp.p) && /tribal bonds/.test(mp.p) && /"op":"recipe"/.test(mp.p) && mp.o.model === 'claude-opus-5-5' && mp.o.effort === 'high', mp.p.length + ' chars');
   reply = { seen: 'Too harsh.', review: [{ id: v1.id, keep: false, why: 'Two starved.' }], changes: [], predict: 'Recovery.', ideas: {}, lesson: null, requests: [] };
   const v2 = await K.make(st);
-  ok('at its next visit it can undo what it did', st.maker.log[0].verdict === 'undone' && L.ecology.bounty === 0.5 && w.sites.length === 1 && v2.verdict === 'nothing', 'bounty ' + L.ecology.bounty);
+  ok('at its next visit it can undo what it did', st.maker.log[0].verdict === 'undone' && L.ecology.bounty === 0.6 && w.sites.length === 1 && v2.verdict === 'nothing', 'bounty ' + L.ecology.bounty);
   /* tales */
   const a = w.agents[0], b = w.agents[1], m = st.minds[a.id]; b.x = a.x + 1; b.y = a.y;
   reply = { thought: 'I look back on the first winter and what it took from us.', tale: { title: 'The First Winter', text: 'When the berries withered we ate fish from the river and lived.' }, teach: { to: b.name, lesson: 'Remember the winter.', tale: 'the first winter' } };

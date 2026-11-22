@@ -1,6 +1,6 @@
 # Evolu roadmap
 
-Set by Nova Spivack; sequenced so that the world is not asked to hold everything at once. Last updated with Generation 16 (22 November 2026).
+Set by Nova Spivack; sequenced so that the world is not asked to hold everything at once. Last updated with Generation 17 (22 November 2026).
 
 ## How this file is used
 
@@ -14,7 +14,7 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 16, to be watched and tuned
+## NOW: built in Generations 14 to 17, to be watched and tuned
 
 | Item | State |
 | --- | --- |
@@ -34,19 +34,25 @@ Knowledge is earned slowly, in ages. Later things need earlier ones, need materi
 | **Peoples that last.** Newcomers when the living are few; twins; longer lives; a land that does not run down; a milder lean season; foresight in autumn | Built in 16 from the eighth run |
 | **What the dead built** stands empty and can be claimed, to begin a home or add to a band's | Built in 16 |
 | **A benevolent maker** whose first care is that the peoples live and grow | Built in 16 |
+| **The world grows at its edges.** A veiled rim, venturing, strips that continue the rivers and ground they join, rich finds, wilder beasts, sometimes strangers | Built in 17. New worlds only |
+| **Women and men;** girl-and-boy twins; children sooner in plenty | Built in 17 |
+| **Swimming narrow water;** seasons of plenty; animals that hold their numbers and return from the rim; deposits that refill | Built in 17 |
+| **Callings and desire,** kept weaker inside a band than across bands | Built in 17, as a first step toward the drama below |
 
 Answered by the seventh run: people do earn a following (nine pledges), and lessons from the dead do change plans. Still open, for the next run: does need bring storage before the first winter; do fewer starve; does anyone tell a tale, begin a teaching or take one up; does anyone tame an animal; do the peoples meet, trade or cross water.
 
-## Decision for Nova: should the world grow at its edges?
-
-People reached the edge in the eighth run and nothing happened. That is as built: the world is fixed in size.
-
-- **(a) Leave it fixed.** Simple; the sea and nine lands are room enough for now.
-- **(b) Open a strip of new land whenever someone reaches an edge.** Cheap to trigger, but land then appears for walking, not for any deed, and the map sprawls.
-- **(c) Open a whole new land, with its own kind, riches and perhaps a people, when a people first crosses the sea or reaches a far shore by vessel.** Growth is then earned by a way (rafts, boats), and it gives crossing water a reward.
-- **Proposed: (c), and not yet.** No one has crossed water in eight runs, and most of the map is still empty of people, so more land would answer nothing today. It also means re-indexing every map array when the grid grows, which must be tested on saved worlds. It stays first among the NEXT items; say so if you would rather have (b) sooner, since people do walk to the edge.
-
 ## NEXT: once NOW is seen working
+
+**From Nova's notes of 22 November, afternoon, in the order proposed:**
+
+- **Grudges and their healing.** Hatred that arises from defeat, theft or a stolen mate and lasts until healed or paid for with large compensation; other hard feelings flare and die down fast. **Peacemakers and peace ceremonies.** All of it rarer inside a family or band than across them, and arising from conflict, great differences in wealth, history, or charisma.
+- **More of the drama:** jealousy of what others have, self-sacrifice for family or tribe, pride and over-confidence that help or harm, greed, and beside them kindness, generosity and charity. (Many of these already press on beings as drives; what is missing is acts and consequences that follow from them.)
+- **Rivalry for mates:** competition, mates won away or defecting, a child at once with the one who wins them.
+- **Heroes.** Standing and deeds that spread as lore; songs and poems about them; tribute from those who meet them; challenges and duels from the ambitious. The winner of a fight or duel takes four fifths of the loser's wealth and may take their mate.
+- **Fighting together.** Skills of hunting, fighting and defending as a group; calling for help and answering it as things that are learned.
+- **Talents and quests.** Skill in one way raising the pull and the chance of the next along its line (a first step exists: knowing neighbouring ways lowers what the next one takes). Learning what a way demands through dreams as skill grows, visions from certain herbs, or a shaman's prophecy; quests to gather the ways, practice and things it needs.
+- **Bandits** in new lands; stranger settlements that are plainly friendly or hostile, with things to trade.
+- **Herding and farming as a settlement's steady food:** farms, flocks kept and bred.
 
 - **Objects of culture** beyond the first talismans and carvings: special gems, named relics that gather a history. **Secret manuscripts** holding spells, knowledge or cures.
 - **Religious figures, sages with followers, cults, schools of thought and religions** growing out of teachings, that form and compete, some of the light and some of the dark. Benefits, secrets, abilities and costs for those who belong, in some cases sacrifice. Shrines, temples and churches that members pay toward.
@@ -58,6 +64,8 @@ People reached the edge in the eighth run and nothing happened. That is as built
 - **Later roles:** alchemists, scholars, scientists, as ways and standing allow. (The names exist; little yet depends on them.)
 
 ## LATER: ages three and four
+
+- **Monsters.** Dragons and great beasts that wander in rarely, attack, and can be killed only by a band acting together; slaying one gives much food and boons. With high skill they can be captured, tamed and bred as weapons of war or defence. They breed from eggs without mating, need a great deal of food, and the eggs hatch slowly, must be guarded, can be stolen and stolen back. Everyone wants them: those who learn of them organise to steal them, and their owners to defend them.
 
 - **Siege warfare and defensive works;** weapons of war carried to a siege.
 - **Upkeep.** What is built must be kept up or it decays. Old buildings taken down to raise new ones (taking down is built). Concrete and metal as building stuffs, mined and carried from where they are won.
@@ -98,7 +106,9 @@ These run through every stage and are picked up as runs call for them.
 ## Known open problems
 
 - **Starvation in winter.** Ten of seventeen over 41 days. Generation 15 brought storage, but on the eve of famine; Generation 16 answers with foresight in autumn, a land that no longer runs down, a milder winter and bodies that reach their stores.
-- **Peoples too small and too closely related to grow.** Generation 16 answers with newcomers, twins and longer lives.
+- **Peoples too small and too closely related to grow.** Generation 16 answered with newcomers, twins and longer lives, and the world went from six to twelve; Generation 17 adds women and men, which narrows who can pair, and bands of four to offset it.
+- **A carried-on world cannot grow at its edges.** Only a new world has the veiled rim.
+- **Speed.** A world moment costs about 2.8 ms in the larger world, up from 2.
 - **Nothing passes between strangers.** In seven runs: no trade, no planned fight, no animal tamed, and peoples that meet a handful of times.
 - **No tale, song, myth or teaching has yet been made** by a real mind, though sayings and hard lessons spread and cross between peoples.
 - **The record of a run is too large to read from the store.** An interrupted run can be read only through its final state and, from Generation 15, the maker's own small document. A full analysis needs the downloaded run log.
@@ -124,3 +134,4 @@ A short index; the detail is in the design log.
 | 14 | Standing and roles, songs and tales, community learning, kin and childhood, bridges, worn goods and weapons, land that wears, the sciences, 68 ways in six ages; renamed Evolu |
 | 15 | Discovery driven by need, the Culture tab, ideas with holders and paths of spread, teachings, talismans and relics, flight to shelter, taming by trust, minds awake and sound on by default |
 | 16 | A land that does not run down, a milder winter, foresight in autumn, twins, longer lives, newcomers, claiming what the dead built, an elder's legacy, a benevolent maker |
+| 17 | The veiled rim and venturing, strangers in new land, women and men, swimming, seasons of plenty, animals and deposits that return, callings and desire |

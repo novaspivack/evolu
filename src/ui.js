@@ -179,8 +179,8 @@ function vnoise(x, y, s) {
 /* The land is painted once per world: wandering borders, light from the north-west, deep and shallow water, shore foam, then brushwork and detail. */
 function buildTerrain() {
   const Wt = w.W, Ht = w.H, SS = 4, sw = Wt * SS, shh = Ht * SS;
-  const ELEV = [-2.4, 0.1, 1, 1.3, 3.4, -1, 0.6, 1.1, 2.7];
-  const PAL = [[22, 52, 80], [196, 178, 136], [104, 132, 74], [70, 100, 62], [122, 114, 106], [54, 108, 120], [82, 98, 70], [194, 152, 96], [222, 229, 234]];
+  const ELEV = [-2.4, 0.1, 1, 1.3, 3.4, -1, 0.6, 1.1, 2.7, 0.4];
+  const PAL = [[22, 52, 80], [196, 178, 136], [104, 132, 74], [70, 100, 62], [122, 114, 106], [54, 108, 120], [82, 98, 70], [194, 152, 96], [222, 229, 234], [34, 38, 52]]; /* the last is the unknown: mist */
   const el = new Float32Array(Wt * Ht), eb = new Float32Array(Wt * Ht);
   for (let i = 0; i < Wt * Ht; i++) el[i] = ELEV[w.terrain[i]] + (hash(i % Wt, Math.floor(i / Wt), 3) - 0.5) * 0.5;
   for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) {
@@ -294,7 +294,7 @@ function buildTerrain() {
     const cv = document.createElement('canvas'); cv.width = sw; cv.height = shh; const g = cv.getContext('2d'), im = g.createImageData(sw, shh), q = im.data;
     for (let py = 0; py < shh; py++) for (let qx = 0; qx < sw; qx++) {
       const fx = (qx + 0.5) / SS, fy = (py + 0.5) / SS, jx = fx + (vnoise(fx * 1.4, fy * 1.4, 11) - 0.5), jy = fy + (vnoise(fx * 1.4, fy * 1.4, 12) - 0.5);
-      const t = w.terrain[clamp(Math.floor(jy), 0, Ht - 1) * Wt + clamp(Math.floor(jx), 0, Wt - 1)], v = fn(t, fx, fy, hash(qx, py, 71)), k = (py * sw + qx) * 4;
+      const t = w.terrain[clamp(Math.floor(jy), 0, Ht - 1) * Wt + clamp(Math.floor(jx), 0, Wt - 1)], v = t === 9 ? [0, 0, 0, 0] : fn(t, fx, fy, hash(qx, py, 71)), k = (py * sw + qx) * 4;
       q[k] = v[0]; q[k + 1] = v[1]; q[k + 2] = v[2]; q[k + 3] = v[3];
     }
     g.putImageData(im, 0, 0); return cv;
@@ -634,7 +634,7 @@ function wrap(c, text, maxW) {
 function drawLabels(c) {
   const z = cam.z;
   c.textAlign = 'center'; c.textBaseline = 'alphabetic';
-  if (w.regions && w.regions.length > 1 && z < 15) { c.font = 'italic 600 ' + Math.round(clamp(z * 1.5, 11, 20)) + 'px "Bricolage Grotesque", sans-serif'; w.regions.forEach(function (R) { const px = sx(R.x), py = sy(R.y); if (px < -100 || py < -20 || px > W + 100 || py > H + 20) return; c.lineWidth = 3; c.strokeStyle = 'rgba(5,8,11,0.55)'; c.strokeText(R.name, px, py); c.fillStyle = 'rgba(236,232,220,0.78)'; c.fillText(R.name, px, py); }); }
+  if (w.regions && w.regions.length > 1 && z < 15) { c.font = 'italic 600 ' + Math.round(clamp(z * 1.5, 11, 20)) + 'px "Bricolage Grotesque", sans-serif'; w.regions.forEach(function (R) { if (w.terrain[Math.round(R.y) * w.W + Math.round(R.x)] === 9) return; const px = sx(R.x), py = sy(R.y); if (px < -100 || py < -20 || px > W + 100 || py > H + 20) return; c.lineWidth = 3; c.strokeStyle = 'rgba(5,8,11,0.55)'; c.strokeText(R.name, px, py); c.fillStyle = 'rgba(236,232,220,0.78)'; c.fillText(R.name, px, py); }); }
   for (let k = 0; k < w.settlements.length; k++) {
     const stl = w.settlements[k], root = agentOf(stl.root), px = sx(stl.x), py = sy(stl.y) - (stl.r + 0.9) * z; if (px < -120 || py < -30 || px > W + 120 || py > H + 30) continue;
     c.font = '800 ' + Math.round(clamp(z * 0.62, 12, 22)) + 'px "Bricolage Grotesque", sans-serif';
@@ -751,6 +751,7 @@ function onWorldEvent(ev) {
     case 'took': if (ev.raid) { addFx({ type: 'float', x: ev.x, y: ev.y, text: 'raid!', life: 1.8, color: '#ff8f6b' }); soundAt('stole', ev.x, ev.y); } break;
     case 'story': U.keys.story = ''; break;
     case 'insight': U.keys.inspect = ''; break;
+    case 'opened': buildTerrain(); U.keys.kinds = ''; addFx({ type: 'ring', x: (ev.x0 + ev.x1) / 2, y: (ev.y0 + ev.y1) / 2, r: 10, life: 4, color: 'rgba(250,236,170,0.9)' }); showNotice('New land has been found beyond the edge of the known world' + (ev.land ? ', in ' + ev.land : '') + '.'); break;
     case 'disaster': if (ev.x2 != null) addFx({ type: 'ring', x: ev.x2, y: ev.y2, r: 4, life: 3.5, color: 'rgba(230,230,240,0.9)' }); addFx({ type: 'ring', x: ev.x, y: ev.y, r: Math.max(4, ev.r), life: 3.5, color: ev.kind === 'wildfire' || ev.kind === 'volcano' ? 'rgba(255,120,40,0.95)' : ev.kind === 'locusts' ? 'rgba(190,200,90,0.9)' : 'rgba(230,230,240,0.9)' }); addFx({ type: 'float', x: ev.x, y: ev.y, text: ev.kind === 'quake' ? 'the earth shakes' : ev.kind === 'volcano' ? 'the mountain burns' : ev.kind, life: 4, color: '#ffb070' }); soundAt('lightning', ev.x, ev.y); U.keys.laws = ''; break;
     case 'maker': U.keys.maker = ''; U.keys.laws = ''; U.keys.kinds = ''; U.keys.ways = ''; if (ev.entry.ops.length) showNotice('The maker changed the world: ' + ev.entry.ops.join('; ') + '. See the Maker tab.'); break;
     case 'site': if (ev.first) { addFx({ type: 'ring', x: ev.x, y: ev.y, r: 5, life: 2.5, color: 'rgba(214,196,255,0.9)' }); soundAt('cast', ev.x, ev.y); } break;
@@ -957,7 +958,7 @@ function renderAgent(pane, id) {
     h += '<div class="traits">' + ['bold', 'sociable', 'curious', 'gentle', 'honest', 'greedy'].map(function (k) { return '<div class="trait">' + k + bar(t[k], 'var(--accent)') + '</div>'; }).join('') + '</div>';
     h += '<div class="traits moods">' + ['anger', 'fear', 'grief', 'joy', 'lonely'].map(function (k) { return '<div class="trait">' + k + bar(a.mood[k], MOOD_COLOR[k]) + '</div>'; }).join('') + '</div>';
     const bd = bandCache[a.id], fol = w.agents.filter(function (o) { return o.leader === a.id; });
-    { const rl = SW.roleOf(w, a), md0 = st.minds[a.id]; h += '<div class="kv">Standing <b>' + SW.status(w, a).toFixed(1) + '</b>' + (rl ? ' · known as a <b>' + esc(rl) + '</b>' : '') + (a.shame > 0.05 ? ' · shame ' + a.shame : '') + (a.sung ? ' · sung of ' + a.sung + ' times' : '') + (a.faith && w.culture && w.culture.items[a.faith] ? '<br>Holds the teaching <b>“' + esc(w.culture.items[a.faith].title) + '”</b>' : '') + (a.press && Object.keys(a.press).length ? '<br>Pressed by: ' + Object.keys(a.press).sort(function (x, y) { return a.press[y] - a.press[x]; }).slice(0, 4).map(function (k) { return esc(SW.PRESSURES[k] || k) + ' ' + a.press[k].toFixed(1); }).join(' · ') : '') + (md0 && md0.lessons && md0.lessons.length ? '<br>Learned from what befell others: ' + md0.lessons.slice(-3).map(function (q) { return esc(q.text); }).join(' · ') : '') + '</div>'; }
+    { const rl = SW.roleOf(w, a), md0 = st.minds[a.id]; h += '<div class="kv">Standing <b>' + SW.status(w, a).toFixed(1) + '</b>' + (rl ? ' · known as a <b>' + esc(rl) + '</b>' : '') + (a.shame > 0.05 ? ' · shame ' + a.shame : '') + (a.sung ? ' · sung of ' + a.sung + ' times' : '') + (a.sex ? ' · ' + (a.sex === 'f' ? 'female' : 'male') : '') + (a.faith && w.culture && w.culture.items[a.faith] ? '<br>Holds the teaching <b>“' + esc(w.culture.items[a.faith].title) + '”</b>' : '') + (a.press && Object.keys(a.press).length ? '<br>Pressed by: ' + Object.keys(a.press).sort(function (x, y) { return a.press[y] - a.press[x]; }).slice(0, 4).map(function (k) { return esc(SW.PRESSURES[k] || k) + ' ' + a.press[k].toFixed(1); }).join(' · ') : '') + (md0 && md0.lessons && md0.lessons.length ? '<br>Learned from what befell others: ' + md0.lessons.slice(-3).map(function (q) { return esc(q.text); }).join(' · ') : '') + '</div>'; }
     { const P0 = SW.peopleOf(w, a); if (P0) h += '<div class="kv">Of <b>' + esc(P0.name) + '</b> (' + esc(P0.noun) + ')' + (a.mixed ? ' · born of two peoples' : '') + ' · in ' + esc((SW.regionAt(w, a.x, a.y) || {}).name || '') + (a.genes ? '<br>Born with: ' + Object.keys(a.genes).map(function (g) { return esc(g) + ' ×' + a.genes[g]; }).join(' · ') : '') + (Object.keys(a.tongues || {}).filter(function (k) { return +k !== a.lang && a.tongues[k] > 0.02; }).length ? '<br>Other tongues: ' + Object.keys(a.tongues).filter(function (k) { return +k !== a.lang && a.tongues[k] > 0.02; }).map(function (k) { const op = w.peoples.filter(function (q) { return q.tongue === +k; })[0]; return esc(op ? op.name : '?') + ' ' + Math.round(a.tongues[k] * 100) + '%'; }).join(' · ') : '') + '</div>'; }
     h += '<div class="kv">' + (a.leader != null ? 'Follows ' + nameLink(a.leader) : 'Follows <b>no one</b>') + (fol.length ? ' · followed by ' + fol.map(function (o) { return nameLink(o.id); }).join(', ') : '') + (bd ? '<br>Band <b style="color:' + bd.color + '">' + esc(bd.name) + '</b> (' + bd.size + ')' : '') +
       '<br>Lore <b>' + (Math.round(a.lore * 10) / 10) + '</b> of ' + w.laws.magic.loreToCast + ' to work the world' + (a.arts.length ? ' · arts <b>' + esc(a.arts.join(', ')) + '</b>' : '') + (a.teachers.length ? ' · taught by ' + a.teachers.map(nameLink).join(', ') : '') + '</div>';
@@ -1528,7 +1529,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 16, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 17, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
