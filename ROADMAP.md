@@ -14,7 +14,7 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 17, to be watched and tuned
+## NOW: built in Generations 14 to 18, to be watched and tuned
 
 | Item | State |
 | --- | --- |
@@ -38,6 +38,13 @@ Knowledge is earned slowly, in ages. Later things need earlier ones, need materi
 | **Women and men;** girl-and-boy twins; children sooner in plenty | Built in 17 |
 | **Swimming narrow water;** seasons of plenty; animals that hold their numbers and return from the rim; deposits that refill | Built in 17 |
 | **Callings and desire,** kept weaker inside a band than across bands | Built in 17, as a first step toward the drama below |
+| **What a mind is offered, its body can do.** Claiming (with a name), venturing and telling reach the body; every act is checked through the mind's own path | Fixed in 18. Claiming and venturing had never worked for a real mind |
+| **Hunting and gathering as skills that grow with use; two together** bringing down what one cannot, sharing the kill, and safe from a beast that is not starving | Built in 18 |
+| **Grudges that last and kindness remembered.** A blow or a seen theft holds a bond at enmity until three gifts mend it; a gift in need or a healing holds it warm | Built in 18, as the first part of the item below |
+| **Telling by a fire,** which makes tales and opens lorekeeping | Built in 18 from the maker's request |
+| **Courting that holds for a day; children sooner under a roof, sooner still in a hall; reasons given** | Built in 18 |
+| **People added by hand** (one to ten) **and by the maker; newcomers below fourteen** | Built in 18 |
+| **Plans that last until the next thought;** forty thoughts a minute by default | Built in 18 |
 
 Answered by the seventh run: people do earn a following (nine pledges), and lessons from the dead do change plans. Still open, for the next run: does need bring storage before the first winter; do fewer starve; does anyone tell a tale, begin a teaching or take one up; does anyone tame an animal; do the peoples meet, trade or cross water.
 
@@ -45,11 +52,12 @@ Answered by the seventh run: people do earn a following (nine pledges), and less
 
 **From Nova's notes of 22 November, afternoon, in the order proposed:**
 
-- **Grudges and their healing.** Hatred that arises from defeat, theft or a stolen mate and lasts until healed or paid for with large compensation; other hard feelings flare and die down fast. **Peacemakers and peace ceremonies.** All of it rarer inside a family or band than across them, and arising from conflict, great differences in wealth, history, or charisma.
+- **Grudges and their healing** (the grudge itself, from a blow or a theft, and its mending by gifts: built in 18). Still to build: hatred that arises from defeat or a stolen mate and lasts until healed or paid for with large compensation; other hard feelings flare and die down fast. **Peacemakers and peace ceremonies.** All of it rarer inside a family or band than across them, and arising from conflict, great differences in wealth, history, or charisma.
 - **More of the drama:** jealousy of what others have, self-sacrifice for family or tribe, pride and over-confidence that help or harm, greed, and beside them kindness, generosity and charity. (Many of these already press on beings as drives; what is missing is acts and consequences that follow from them.)
 - **Rivalry for mates:** competition, mates won away or defecting, a child at once with the one who wins them.
 - **Heroes.** Standing and deeds that spread as lore; songs and poems about them; tribute from those who meet them; challenges and duels from the ambitious. The winner of a fight or duel takes four fifths of the loser's wealth and may take their mate.
-- **Fighting together.** Skills of hunting, fighting and defending as a group; calling for help and answering it as things that are learned.
+- **Fighting together** (hunting and standing against beasts together: built in 18 as something anyone can do and grows better at). Still to build: these as ways in the tree with their own discovery; fighting other people as a group; calling for help and answering it as things that are learned.
+- **A veiled rim for a world made before Generation 17,** so that Nova's long world can grow: land made beyond its edges that continues its rivers and shores, and every map re-indexed, tested on saved worlds.
 - **Talents and quests.** Skill in one way raising the pull and the chance of the next along its line (a first step exists: knowing neighbouring ways lowers what the next one takes). Learning what a way demands through dreams as skill grows, visions from certain herbs, or a shaman's prophecy; quests to gather the ways, practice and things it needs.
 - **Bandits** in new lands; stranger settlements that are plainly friendly or hostile, with things to trade.
 - **Herding and farming as a settlement's steady food:** farms, flocks kept and bred.
@@ -107,14 +115,15 @@ These run through every stage and are picked up as runs call for them.
 
 - **Starvation in winter.** Ten of seventeen over 41 days. Generation 15 brought storage, but on the eve of famine; Generation 16 answers with foresight in autumn, a land that no longer runs down, a milder winter and bodies that reach their stores.
 - **Peoples too small and too closely related to grow.** Generation 16 answered with newcomers, twins and longer lives, and the world went from six to twelve; Generation 17 adds women and men, which narrows who can pair, and bands of four to offset it.
-- **A carried-on world cannot grow at its edges.** Only a new world has the veiled rim.
+- **A carried-on world cannot grow at its edges.** Only a new world has the veiled rim. Now in NEXT.
+- **Acts that never reached a body.** `claim` and `venture` were unreachable for real minds in Generations 16 and 17 because tests called the body directly. Fixed in 18, with a check that reads the acts out of the prompt.
+- **Minds hunt very little:** 2 plan steps of 1,274 in the tenth run. Generation 18 points the hungry at prey; unknown whether they will go.
 - **Speed.** A world moment costs about 2.8 ms in the larger world, up from 2.
 - **Nothing passes between strangers.** In seven runs: no trade, no planned fight, no animal tamed, and peoples that meet a handful of times.
 - **No tale, song, myth or teaching has yet been made** by a real mind, though sayings and hard lessons spread and cross between peoples.
 - **The record of a run is too large to read from the store.** An interrupted run can be read only through its final state and, from Generation 15, the maker's own small document. A full analysis needs the downloaded run log.
 - **The later ages are sketches.** From about the fourth age the ways, minerals and buildings have names and looks but little that they do.
 - **Prompts are long and growing:** a middle of 24,000 characters and a longest of 36,800 in the eighth run.
-- **The maker reports that "times eaten" does not move between its visits.** The counter does count; unexplained.
 - **The maker's report that recipe counts did not update** in the sixth run: no fault found.
 
 ## Done, by generation

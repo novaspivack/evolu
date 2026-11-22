@@ -12,6 +12,62 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## What the tenth run showed (the same world carried on, days 51 to 66, on Generation 17; run `r7-mws0f6n0`, 478 thoughts)
+
+From the downloaded run log (`runs/generation-17-run-r7-mws0f6n0-day66.json`), counted with code. Nova's reading before I looked: halls planned and never claimed, hunger, plans empty or not followed, too few people, too few animals, no shroud at the edge, a world that felt stuck. Most of that was right, and the largest cause was a fault of mine.
+
+- **Fifteen alive at day 66, from twelve.** Four births in sixteen days (Namo; the twins Balash and Urog; Zurak, the first child of two peoples) and one death: Kragar, an elder, starved on day 63 amid plenty (1,756 food standing two days later). Over the whole world's life: five starved, two killed by beasts.
+- **Nobody could claim anything, and it was my fault.** `claim` (Generation 16) and `venture` (Generation 17) were written into the body and into what a mind is told it can do, and never into the list of acts a plan may hold. Every plan step that named them was thrown away before it reached the body, and the being was told only that a step "named no action your body knows". In the 27 sampled replies, 10 of 86 plan steps were `claim` and all 10 were dropped; 9 of the 27 prompts carried the notice. Twenty empty buildings of the dead stood unclaimed while Kenna, Kanna, Namo, Tugar, Ilyiel and Xaeth said for days that they would claim one. My tests for both acts had called the body directly, so they passed and showed nothing. Venturing would have failed the same way in a new world.
+- **Plans did run out.** A being was given a thought about every 84 moments (median), and its plans added up to 50. The rest of the time the body was on its reflexes. The limit was the pace I had set by default: 24 thoughts a minute for the whole world is 133 for each thousand moments, and the run shows 133.
+- **Hunting was almost never chosen.** Of 1,274 plan steps, `hunt` was 2 and `fish` 5; `goto` 381, `linger` 141, `gather` 105, `harvest` 103. Of 2,017 things eaten in the world's life, 80 were meat and 102 fish. Beasts took 80 animals, people 21. Nothing in a hungry being's prompt pointed at the animal standing near it.
+- **Courting mostly came to nothing.** 47 thoughts planned `mate`; three conceptions. Both had to court within 80 moments of each other, about one thought apart, and when a child did not come neither was told why.
+- **Couples could not become a band.** The rule that no one follows a person of lower standing refused Brokgan to Tugar and Ilyiel to Nyssa, who were courting or raising a child.
+- **No tale in 66 days.** The way of lorekeeping needs three tellings, and no act counted as telling, so it could never be reached. The maker asked for this three times.
+- **The maker's "times eaten" did move.** Its numbers "at your last visit" held the live tallies themselves, not a copy, so the old and the new always read the same. It concluded for twelve days that it could not judge any food it sowed.
+- **What did happen:** the first animals tamed (four, by an offered handful); 1,720 moments swum; the centres of the Garnbar and the Eiuys within two steps of each other, with understanding of other tongues at 35% and 49%. In the world's whole life: 97 gifts, and no fight, theft or trade.
+- **Animals:** 184 at the end (about 158 grazers and 12 hunters at day 65); plainsox, dunecat and ruhopper died out.
+- **No shroud** because this world was made before Generation 17: it has no veiled rim. Only a new world has one.
+- **Prompts:** 19,100 to 32,700 characters, middle 23,400. No failed calls.
+- **The maker** made five visits and kept every reviewed change: roots and canes sown where the thirsty stood (thirst fell from 66 to 0), the energy needed to conceive lowered from 75 to 68, hearing raised to 17 (not yet judged). Its eight requests are answered below.
+
+## Generation 18 (built, not yet run with real minds): what a mind is offered, its body can do
+
+Built from the tenth run, the maker's eight requests and Nova's notes of the evening of 22 November.
+
+**Claiming works, and names.** `claim`, `venture` and the new `tell` are acts a plan may hold. One who plans to claim walks to the empty building and holds it with every roof, wall and store of the dead around it; a name given with the step names the place, and the name the dead gave it gives way. When it cannot be done the being is told why: the builder still lives (and who), it is already yours, or none stands empty in sight. A new check reads the list of acts out of the prompt itself and fails if the body refuses any of them, and every new act is now tested through the mind's own path.
+
+**Hunting and gathering as skills that grow.** Every kill makes the next hunt likelier (up to +60% after fifteen), and a practised hand often picks two at once. A hungry being with empty hands is told what food grows nearest and what animal is near enough to hunt. A starving body with nothing growing near goes after an animal within six steps by reflex.
+
+**Two together.** One of your own beside you (band, kin, or someone you are warm toward) makes a blow in the hunt land almost twice as often (73 against 140 of 250 in the check), makes a wound from the quarry rarer, and gives each who stood in the hunt a share of the meat. The same holds against a beast that hunts people: two wound it far oftener than one, and a beast that is not starving will not come at two who stand together (it had already left company alone at night). The maker can turn this (`fight.packBonus`).
+
+**What is not forgotten.** A blow, or a theft that is seen, leaves a grudge: the bond is held at enmity however it is warmed, for forty days, unless the one who did it gives three gifts, which mends it. A gift to someone in need, or healing them, leaves a kindness: the bond is held warm for sixty days whatever else passes. Both are told to the being in its own words and shown in the inspector. Nova asked that hard feelings stay rare and die down fast apart from grudges; only these three acts leave one, and there were no blows or thefts in the last sixteen days.
+
+**Children.** Courting holds for a day, not a third of one, so two who want a child need not think in the same moment. Under a roof the wait before another child is three quarters as long, in a hall half. When both are willing and no child comes, each is told why and for how long. The world will not go past its sixty.
+
+**People.** A control in the toolbar adds one to ten people: they come in bands of up to four, on good ground in the homeland of whichever people has fewest living. Newcomers now come by themselves when the living fall below fourteen (it was ten), and the maker is told to bring them when there are fewer than about twenty.
+
+**Bands.** A pledge to someone you are warm toward (above 0.5), or have a child with, needs no proof of standing.
+
+**Telling.** Beside a fire with others near, anyone can tell of what has been. The telling becomes a tale made from what befell the teller's people; those who hear and understand it carry it and can retell it; three tellings bring lorekeeping within reach.
+
+**Plans that last.** Forty thoughts a minute by default, six at once (it was 24 and 4), which with fifteen beings is a thought about every 68 moments. Each mind is told how often its thoughts come and asked for a plan that lasts that long; a plan may hold five steps. Settings saved by Generation 17 are kept, and the pace moves only where it had not been changed.
+
+**More animals.** The level grazers hold is a third higher, so herds return from the rim sooner.
+
+**The maker's requests.** Telling: built. Pledges between the close: built (the other half, offering the lead to the one of higher standing, is not). Claim failing silently: found and fixed, with reasons. "Times eaten" frozen: found and fixed; it also now sees tellings, hunts made together, grudges and kindnesses. A lesson tied to its cause: one who sickens on raw meat or fish learns, with those near, that it is safe eaten beside a fire.
+
+**Heritage.** The energy needed to conceive is 68 for new worlds. Six lessons and three ideas are folded in. Hearing at 17 was not yet judged by the maker and is left at 13.
+
+**Checked.** 39 new checks in `tests/12-through-the-mind.js` with every earlier suite (381 in twelve files), the scripted mind, the ecology, and the page in headless Chrome at desktop and phone widths, where the Add people control is pressed and seven come in with minds. A world saved by Generation 17 loads and runs. Forty days on instinct alone, twelve seeds, Generation 17 against 18: alive 13.5 against 14.9 (one newcomer band in some worlds), deaths 1.5 against 1.1, grazers 183 against 193, plants 1,843 against 1,722, a world moment 2.2 ms against 2.4 on this machine (more are alive).
+
+**Not checked, and not built.**
+- No real mind has met Generation 18. Whether minds will now hunt, tell, claim and court to effect is what the next run is for. Instinct alone never hunts or mates, so the twelve-seed figures say nothing about either.
+- Forty thoughts a minute has not been tried against the real service. If calls begin to fail, lower it in Setup.
+- **An old world still has no veiled rim.** Giving it one means making land beyond its edges that continues its rivers and shores and re-indexing every map; it is in the roadmap, not built. The page now says so when such a world is opened.
+- Hunting and defending together are a bonus anyone has, and a skill that grows with use. They are not yet ways in the tree of knowledge with their own discovery.
+- Not built from Nova's notes: peacemakers and peace ceremonies, compensation other than gifts, grudges over a stolen mate. In the roadmap.
+- The music has never been heard by me.
+
 ## What the ninth run showed (the same world carried on to day 50, on Generation 16; run `r7-mws0f6n0`, 305 thoughts from day 41)
 
 Read from what the page had written to its store (the maker's own document and the run's summary line), since the run was stopped before a log was downloaded. The beings' thoughts for these nine days were not read.

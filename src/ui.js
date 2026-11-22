@@ -901,6 +901,7 @@ $('btnFit').onclick = fitWorld;
 $('btnFollow').onclick = toggleFollow;
 $('btnSound').onclick = toggleSound;
 $('btnMinds').onclick = function () { wakeMinds(false); };
+$('btnAdd').onclick = function () { const n = +$('selAdd').value || 4, made = SW.addPeople(w, n); if (made.length) { showNotice(made.length + ' newcomers are coming into the land: ' + made.map(function (o) { return o.name; }).join(', ') + '.'); U.keys.inspect = ''; U.keys.peoples = ''; } else showNotice('There is no room for more people in this world.'); };
 
 /* ---------- tabs ---------- */
 function setTab(name) {
@@ -1011,6 +1012,7 @@ function renderAgent(pane, id) {
   if (a) {
     const ids = Object.keys(a.rel).sort(function (p, q) { return a.rel[q] - a.rel[p]; });
     b += '<h3>Bonds</h3>' + (ids.length ? ids.map(function (o) { const v = a.rel[o]; return '<div class="bond">' + nameLink(+o) + '<div class="bar"><i style="left:' + (v >= 0 ? 50 : 50 + v * 50) + '%;width:' + Math.abs(v) * 50 + '%;background:' + (v >= 0 ? 'var(--life)' : 'var(--harm)') + '"></i></div><span class="num">' + (v > 0 ? '+' : '') + v.toFixed(1) + '</span></div>' + SWM.tiesOf(m, o).slice(-3).map(function (e) { return '<div class="tie">day ' + e.day + ' · ' + esc(e.text) + (e.n > 1 ? ' ×' + e.n : '') + '</div>'; }).join(''); }).join('') : '<p class="muted">No feelings toward anyone yet.</p>');
+    { const mk = a.marks || {}, mids = Object.keys(mk); if (mids.length) b += '<h3>Does not forget</h3>' + mids.map(function (o) { const q = mk[o]; return '<div class="tie">' + (q.k === 'grudge' ? 'a grudge: ' : 'a kindness: ') + nameLink(+o) + ' ' + esc(q.why.replace(/\byou\b/g, 'them').replace(/\byour\b/g, 'their')) + ', day ' + q.day + (q.k === 'grudge' && q.n ? ' · ' + q.n + ' gift' + (q.n > 1 ? 's' : '') + ' toward mending' : '') + '</div>'; }).join(''); }
   }
   if (m.heard && m.heard.length) b += '<h3>What others have told it</h3><ul class="events">' + m.heard.slice().reverse().map(function (q) { return '<li><b style="color:var(--accent);font-weight:600">' + esc(q.from) + '</b>: “' + esc(q.text) + '”</li>'; }).join('') + '</ul>';
   b += '<h3>Since its last thought</h3>' + (m.events.length ? '<ul class="events">' + m.events.slice().reverse().map(function (e) { return '<li>' + esc(e.text) + (e.n > 1 ? ' ×' + e.n : '') + '</li>'; }).join('') + '</ul>' : '<p class="muted">Nothing of note.</p>');
@@ -1444,7 +1446,7 @@ function renderSettings() {
     '<label for="setEvery">Reflect after every<small>everyday thoughts (sooner after a shock)</small></label><input type="number" id="setEvery" min="2" max="30" value="' + S.reflectEvery + '">' +
     '<label for="setFore">Foresight<small>Let a reflecting mind test new reflexes in an imagined copy of the world (costs extra calls)</small></label><select class="field" id="setFore"><option value="1"' + (S.foresight ? ' selected' : '') + '>on</option><option value="0"' + (S.foresight ? '' : ' selected') + '>off</option></select></div>' +
     '<h3>Pace and budget</h3><div class="form"><label for="setPM">Thoughts per minute<small>across all beings</small></label><input type="number" id="setPM" min="1" max="60" value="' + S.perMinute + '">' +
-    '<label for="setPar">At the same time</label><input type="number" id="setPar" min="1" max="6" value="' + S.parallel + '">' +
+    '<label for="setPar">At the same time</label><input type="number" id="setPar" min="1" max="8" value="' + S.parallel + '">' +
     '<label for="setBudget">Thought budget<small>minds fall asleep when it is spent</small></label><input type="number" id="setBudget" min="5" max="100000" value="' + S.budget + '">' +
     '<label for="setAuto">Wake the minds when the page opens<small>and after it reloads, so a long run carries on by itself</small></label><select class="field" id="setAuto"><option value="1"' + (S.autoWake ? ' selected' : '') + '>yes</option><option value="0"' + (S.autoWake ? '' : ' selected') + '>no</option></select>' +
     '<label for="setEndless">Keep thinking past the budget<small>for long runs: the minds never fall asleep by themselves</small></label><select class="field" id="setEndless"><option value="0"' + (S.endless ? '' : ' selected') + '>no</option><option value="1"' + (S.endless ? ' selected' : '') + '>yes</option></select></div>' +
@@ -1466,7 +1468,7 @@ function renderSettings() {
   bind('setStEvery', function (v) { S.story.every = clamp(Math.round(+v) || 3, 1, 30); }); bind('setStModel', function (v) { S.story.model = v; });
   bind('setMkOn', function (v) { S.maker.on = v === '1'; U.keys.maker = ''; }); bind('setMkEvery', function (v) { S.maker.every = clamp(Math.round(+v) || 4, 1, 30); }); bind('setMkModel', function (v) { S.maker.model = v; U.keys.maker = ''; });
   bind('setBounty', function (v) { w.laws.ecology.bounty = +v; U.keys.laws = ''; });
-  bind('setPar', function (v) { S.parallel = clamp(Math.round(+v) || 2, 1, 6); });
+  bind('setPar', function (v) { S.parallel = clamp(Math.round(+v) || 2, 1, 8); });
   bind('setBudget', function (v) { S.budget = clamp(Math.round(+v) || 40, 5, 100000); });
   bind('setEndless', function (v) { S.endless = v === '1'; });
   bind('setAuto', function (v) { S.autoWake = v === '1'; });
@@ -1529,7 +1531,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 17, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 18, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1628,6 +1630,7 @@ function start(data) {
   const wake = function () { if (!st || st.settings.sound === false) return; try { if (!SWA.on) SWA.start(w.seed); else if (SWA.ctx && SWA.ctx.state !== 'running') SWA.ctx.resume(); } catch (e) {} setTimeout(syncButtons, 150); if (soundUp()) ['pointerdown', 'pointerup', 'click', 'keydown', 'touchend'].forEach(function (k) { window.removeEventListener(k, wake, true); }); };
   ['pointerdown', 'pointerup', 'click', 'keydown', 'touchend'].forEach(function (k) { window.addEventListener(k, wake, true); });
   if (st.settings.sound !== false) { try { SWA.start(w.seed); if (SWA.ctx) SWA.ctx.onstatechange = function () { syncButtons(); }; } catch (e) {} }
+  if (!w.veil) setTimeout(function () { showNotice('This world was made before the world had an unknown rim to explore. It can be carried on, but only a new world (Setup, New world) has mist at its edges and land beyond.'); }, 1500);
   syncButtons(); setTab('inspect');
   requestAnimationFrame(frame);
 }

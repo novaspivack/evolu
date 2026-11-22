@@ -62,15 +62,15 @@ const run = (w, n, emit) => { for (let i = 0; i < n; i++) SW.step(w, emit); };
     const ex = M.exportRun(st), dg = JSON.stringify(ex.digest).length;
     ok('the digest of all beings fits in one document', dg < 200000 && ex.digest.beings.length === w.agents.length && ex.digest.beings[0].body.policy.length > 0, dg + ' bytes');
     const snap = JSON.parse(JSON.stringify(M.snapshot(st))); st.rec.chunk = 7; const snap2 = JSON.parse(JSON.stringify(M.snapshot(st))), st2 = M.restore(snap2);
-    ok('the run keeps its identity and chunk count across a reload', st2.runId === st.runId && st2.rec.chunk === 7 && st2.settings.budget === 3000 && st2.settings.v === 10);
+    ok('the run keeps its identity and chunk count across a reload', st2.runId === st.runId && st2.rec.chunk === 7 && st2.settings.budget === 3000 && st2.settings.v === 11);
     snap.settings = { routine: { model: 'claude-haiku-5-5', effort: '' }, deep: { model: 'claude-sonnet-5-5', effort: 'medium' }, perMinute: 10, parallel: 2, budget: 90, reflectEvery: 5, foresight: true };
     const st3 = M.restore(snap);
-    ok('settings saved before this generation give way to the new defaults', st3.settings.budget === 3000 && st3.settings.perMinute === 24 && st3.settings.routine.model === 'claude-sonnet-5-5');
+    ok('settings saved before this generation give way to the new defaults', st3.settings.budget === 3000 && st3.settings.perMinute === 40 && st3.settings.routine.model === 'claude-sonnet-5-5');
   }
   { /* beasts hunting beasts is an event, seen by witnesses, chronicled at most once a day */
     const w = SW.createWorld(11), st = M.createState(w); let kills = 0;
     for (let i = 0; i < 1500; i++) SW.step(w, e => { if (e.type === 'preykill') kills++; st.emit(e); });
-    const ch = st.chron.filter(c => c.kind === 'hunt').length;
+    const ch = st.chron.filter(c => c.kind === 'hunt' && /^A .* brought down a /.test(c.text)).length;
     ok('predators kill prey and the world records it', kills > 3 && ch >= 1 && ch <= 7, kills + ' kills, ' + ch + ' chronicle entries in ' + SW.day(w) + ' days');
   }
   console.log(fails ? 'FAILED ' + fails : 'ALL PASS');

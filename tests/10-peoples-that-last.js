@@ -26,10 +26,10 @@ const at = (w, o, i) => { o.x = i % w.W; o.y = Math.floor(i / w.W); o.px = o.x; 
   act(w, a, { do: 'build', what: 'shelter', ticks: 2 }, em); at(w, a, g + 1); act(w, a, { do: 'build', what: 'store', ticks: 2 }, em); a.carry = [{ k: 'berry', n: 14 }, { k: 'berry', n: 14 }]; act(w, a, { do: 'stash', ticks: 2 }, em); at(w, a, g + 2); act(w, a, { do: 'build', what: 'shelter', ticks: 2 }, em);
   ok(w.shelters[g] === a.id && w.stores[g + 1] && w.stores[g + 1].items.length === 2 && w.shelters[g + 2] === a.id, 'one being raises two roofs and a filled store');
   w.agents = w.agents.filter(o => o !== a); at(w, b, g + 5); still(b); SW.step(w, em);
-  const pr = M.buildPrompt(st, st.minds[b.id], 'routine'); ok(/AN EMPTY SHELTER stands at/.test(pr) && /claim \(take over an empty building/.test(M.buildPrompt(st, st.minds[b.id], 'deep') + pr), 'after it dies, another who comes near sees an empty building that belongs to no one');
+  const pr = M.buildPrompt(st, st.minds[b.id], 'routine'); ok(/AN EMPTY SHELTER stands at/.test(pr) && /claim \{name\?\} \(take over an empty building/.test(M.buildPrompt(st, st.minds[b.id], 'deep') + pr), 'after it dies, another who comes near sees an empty building that belongs to no one');
   act(w, b, { do: 'claim', ticks: 12 }, em, 8); const cl = ev.find(e => e.type === 'claimed');
   ok(cl && cl.n === 3 && w.shelters[g] === b.id && w.shelters[g + 2] === b.id && w.stores[g + 1].by === b.id && b.stats.claimed === 3 && st.chron.some(c => /took over what the dead had left/.test(c.text)), 'it walks there and claims it, and holds every roof and the store around it (' + JSON.stringify(cl && cl.kinds) + ')');
-  ev.length = 0; act(w, b, { do: 'claim', ticks: 2 }, em); ok(ev.some(e => e.type === 'fail' && /only what the dead raised/.test(e.text)), 'what the living hold cannot be claimed');
+  ev.length = 0; act(w, b, { do: 'claim', ticks: 2 }, em); ok(ev.some(e => e.type === 'fail' && /only what the dead (raised|left)|already yours/.test(e.text)), 'what the living hold cannot be claimed');
   b.carry = []; b.policy = []; b.plan = [{ do: 'goto', x: b.x + 30, y: b.y, ticks: 60 }]; b.intent = null; at(w, b, g + 3); b.e = 15; for (let k = 0; k < 6; k++) SW.step(w, em);
   ok(b.e > 20 && w.stores[g + 1].items.length < 2, 'starving, a body goes to its own store and eats from it, whatever its plan (energy 15 → ' + Math.round(b.e) + ')');
 }

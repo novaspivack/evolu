@@ -64,6 +64,13 @@ const srv = http.createServer((req, res) => {
   await page.screenshot({ path: SHOTS + '/' + steps + '-3-night.png' });
   await page.click('#btnFit'); await page.waitForTimeout(700); await page.screenshot({ path: SHOTS + '/' + steps + '-6-whole.png' });
   for (const t of ['culture', 'voices', 'chronicle', 'peoples', 'ways', 'kinds', 'laws', 'settings']) { await page.click('#tabs button[data-tab="' + t + '"]'); await page.waitForTimeout(500); await page.screenshot({ path: SHOTS + '/' + steps + '-tab-' + t + '.png', clip: { x: Math.max(0, (+(process.argv[3] || 1440)) - 420), y: 0, width: 420, height: +(process.argv[4] || 900) } }); }
+  { /* the Add people control: seven come in, each gets a mind, and one of them can be inspected with what it does not forget */
+    const before = await page.evaluate(() => window.SWdebug.st.world.agents.length);
+    await page.evaluate(() => { const s = document.getElementById('selAdd'); if (s) s.value = '7'; }); await page.click('#btnAdd'); await page.waitForTimeout(1500);
+    const added = await page.evaluate(() => { const d = window.SWdebug, w = d.st.world, a = w.agents[w.agents.length - 1], o = w.agents[0]; SW.mark(w, a, o, 'grudge', 'struck you'); return { n: w.agents.length, minds: w.agents.filter(q => d.st.minds[q.id]).length, opts: document.getElementById('selAdd').options.length }; });
+    if (added.n < before + 6 || added.minds !== added.n || added.opts !== 10) errs.push('ADD PEOPLE: ' + before + ' -> ' + JSON.stringify(added));
+    console.log('ADD', before, JSON.stringify(added)); await page.screenshot({ path: SHOTS + '/' + steps + '-7-added.png' });
+  }
   const info = await page.evaluate(() => { const d = window.SWdebug; return { devices: Object.keys(d.st.world.devices).length, sets: d.st.world.settlements.map(q => q.name).join(','), ways: d.st.world.agents.map(a => Object.keys(a.knows).join('/')).join(' '), tools: Object.keys(d.st.world.laws.tools).join(','), places: d.st.world.places.length, fires: d.st.world.fires.filter(f => f > d.st.world.tick).length, fields: d.st.world.fields.length, walls: d.st.world.walls.filter(Boolean).length, arts: d.st.world.agents.map(a => a.arts.join('+') + '/' + a.lore + '/L' + a.leader).join(' '), kinds: [...new Set(d.st.chron.map(c => c.kind))].join(','), tick: d.st.world.tick, used: d.st.used, voices: d.st.voices.length, chron: d.st.chron.length, agents: d.st.world.agents.length, on: d.st.on, notice: document.getElementById('noticeText').textContent, fps: 0 }; });
   console.log(JSON.stringify(info)); console.log('ERRORS', errs.length, errs.slice(0, 8).join('\n'));
   await browser.close(); srv.close();

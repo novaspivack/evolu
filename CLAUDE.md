@@ -41,10 +41,14 @@ The page writes each run to the artifact's store as it goes. With the artifact d
 - Watch prompt size (`M.buildPrompt`); the middle prompt was 24,000 characters in the eighth run and the longest 36,800.
 - A world may be carried on across generations (same run id). `SW.upgrade` moves a law to its re-tuned value only where the world still holds the old default; add to that table when you re-tune a law.
 - Measure balance changes on at least ten seeds before believing them: three seeds swing by several deaths either way. Survival on instinct alone cannot show what minds do with stores, fire and shelter.
-- Watch speed: a world moment costs about 2.8 ms since the world grew a veiled rim (Generation 17); do not let it rise further.
+- Watch speed: a world moment costs about 2.8 ms since the world grew a veiled rim (Generation 17); do not let it rise further. Compare generations on the same machine in the same sitting (`/tmp`-style script over twelve seeds): the cost rises with the number alive.
 - Terrain 9 is the unknown (`T.VOID`): impassable, nothing lives there, and the true ground is kept in `w.veil`. Anything that picks a tile by position and not by terrain must skip it. Animals and newcomers come in at `edgeSpot(w)`, not at the map's rim.
+- Settings: a bump of `settings.v` must carry the previous version's saved settings across (see `M.restore`), moving a default only where the saved value still equals the old default.
 - When Nova sends more ideas than a generation can hold, build what is cheap and safe, put the rest in `ROADMAP.md` in order, and say plainly which is which.
 - Do not put apostrophes inside single-quoted strings in `minds.js` prompts; it has broken the file three times.
+- **A new act is not done until a mind can reach it.** Add it to `SW.ACTIONS` as well as to `act()` and to the catalogue in `M.buildPrompt`, and test it by giving a mind a plan (`M.apply`), never by calling the body directly: `claim` and `venture` were unreachable for two generations because their tests called the body. `tests/12-through-the-mind.js` reads the acts out of the prompt and fails if the body refuses one.
+- Keep a copy, not a reference, of anything shown as "before": the maker's numbers at its last visit held live tallies and so never differed from the present.
+- When inserting into a list in a source file with a script, anchor on the exact closing text of that list and check the count afterwards; `],` also ends other things, and the result can still parse.
 - A patch of open grass of a given length may not exist: test helpers that look for one return undefined, and every position after that is NaN. Ask for eight tiles or fewer.
 - Beasts wander in from the edge of the map over time. A check that runs for hundreds of moments must keep clearing `w.creatures` if it needs beings to stay put.
 
@@ -55,7 +59,7 @@ tests/run-all.sh                                   # needs only Node
 PLAYWRIGHT=/path/to/node_modules/playwright tests/run-all.sh browser
 ```
 
-All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`12-...js`), with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
+All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`13-...js`), with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
 
 What the tests cannot show is how real minds behave. Say so in every report.
 
