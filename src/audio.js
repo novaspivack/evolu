@@ -1,4 +1,7 @@
-/* Evolu soundscape: everything is synthesized, nothing is recorded.
+/* Required Notice: Copyright (c) 2026 Nova Spivack (https://github.com/novaspivack/evolu)
+   Evolu is licensed under the PolyForm Noncommercial License 1.0.0: https://polyformproject.org/licenses/noncommercial/1.0.0
+
+   Evolu soundscape: everything is synthesized, nothing is recorded.
    There is no continuous tone. Quiet music drifts in and out: slow chords that swell and fade, and a few
    single notes, in a key that turns with the hour and the season. Weather is heard only when there is weather.
    Every event in the world has a voice, tuned to the same scale. */

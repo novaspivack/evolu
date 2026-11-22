@@ -39,8 +39,10 @@ const srv = http.createServer((req, res) => {
   const steps = process.argv[2] || 'a';
   await page.evaluate(() => { const d = window.SWdebug; d.st.settings.perMinute = 30; d.st.settings.reflectEvery = 2; d.st.world.agents.forEach((a, i) => { a.lore = 4.5; a.wood = 5; a.stone = 3; a.stats.wood = 6; a.stats.planted = 5; a.stats.crafted = 3; a.wood = 6; a.stone = 6; a.carry.push({ k: 'berry', n: 14 }); }); });
   await page.selectOption('#selSpeed', '8');
-  await page.click('#btnSound');
-  await page.click('#btnMinds');
+  const auto0 = await page.evaluate(() => ({ minds: document.getElementById('btnMinds').classList.contains('awake'), soundBeforeTouch: document.getElementById('btnSound').classList.contains('on') }));
+  await page.mouse.click(640, 520); await page.waitForTimeout(250);
+  await page.evaluate(() => { const b = document.getElementById('btnMinds'); if (!b.classList.contains('awake')) b.click(); });
+  const auto1 = await page.evaluate(() => ({ sound: document.getElementById('btnSound').classList.contains('on'), minds: document.getElementById('btnMinds').classList.contains('awake') })); console.log('AUTO', JSON.stringify(auto0), JSON.stringify(auto1), auto0.minds && auto1.sound && auto1.minds ? 'AUTO OK' : 'AUTO FAILED');
   await page.waitForTimeout(+(process.argv[5] || 9000));
   await page.screenshot({ path: SHOTS + '/' + steps + '-1-world.png' });
   // select first agent, zoom in
@@ -61,7 +63,7 @@ const srv = http.createServer((req, res) => {
   await page.waitForTimeout(1500);
   await page.screenshot({ path: SHOTS + '/' + steps + '-3-night.png' });
   await page.click('#btnFit'); await page.waitForTimeout(700); await page.screenshot({ path: SHOTS + '/' + steps + '-6-whole.png' });
-  for (const t of ['voices', 'chronicle', 'peoples', 'ways', 'kinds', 'laws', 'settings']) { await page.click('#tabs button[data-tab="' + t + '"]'); await page.waitForTimeout(500); await page.screenshot({ path: SHOTS + '/' + steps + '-tab-' + t + '.png', clip: { x: Math.max(0, (+(process.argv[3] || 1440)) - 420), y: 0, width: 420, height: +(process.argv[4] || 900) } }); }
+  for (const t of ['culture', 'voices', 'chronicle', 'peoples', 'ways', 'kinds', 'laws', 'settings']) { await page.click('#tabs button[data-tab="' + t + '"]'); await page.waitForTimeout(500); await page.screenshot({ path: SHOTS + '/' + steps + '-tab-' + t + '.png', clip: { x: Math.max(0, (+(process.argv[3] || 1440)) - 420), y: 0, width: 420, height: +(process.argv[4] || 900) } }); }
   const info = await page.evaluate(() => { const d = window.SWdebug; return { devices: Object.keys(d.st.world.devices).length, sets: d.st.world.settlements.map(q => q.name).join(','), ways: d.st.world.agents.map(a => Object.keys(a.knows).join('/')).join(' '), tools: Object.keys(d.st.world.laws.tools).join(','), places: d.st.world.places.length, fires: d.st.world.fires.filter(f => f > d.st.world.tick).length, fields: d.st.world.fields.length, walls: d.st.world.walls.filter(Boolean).length, arts: d.st.world.agents.map(a => a.arts.join('+') + '/' + a.lore + '/L' + a.leader).join(' '), kinds: [...new Set(d.st.chron.map(c => c.kind))].join(','), tick: d.st.world.tick, used: d.st.used, voices: d.st.voices.length, chron: d.st.chron.length, agents: d.st.world.agents.length, on: d.st.on, notice: document.getElementById('noticeText').textContent, fps: 0 }; });
   console.log(JSON.stringify(info)); console.log('ERRORS', errs.length, errs.slice(0, 8).join('\n'));
   await browser.close(); srv.close();

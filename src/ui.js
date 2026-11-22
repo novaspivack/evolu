@@ -1,4 +1,7 @@
-/* Evolu interface: camera, renderer, instruments and inspector. */
+/* Required Notice: Copyright (c) 2026 Nova Spivack (https://github.com/novaspivack/evolu)
+   Evolu is licensed under the PolyForm Noncommercial License 1.0.0: https://polyformproject.org/licenses/noncommercial/1.0.0
+
+   Evolu interface: camera, renderer, instruments and inspector. */
 (function () {
 'use strict';
 const $ = function (id) { return document.getElementById(id); };
@@ -747,6 +750,7 @@ function onWorldEvent(ev) {
     case 'healed': if (b) { burst(b.x, b.y, '#8fe08a', 12); soundAt('taught', b.x, b.y, voice); } break;
     case 'took': if (ev.raid) { addFx({ type: 'float', x: ev.x, y: ev.y, text: 'raid!', life: 1.8, color: '#ff8f6b' }); soundAt('stole', ev.x, ev.y); } break;
     case 'story': U.keys.story = ''; break;
+    case 'insight': U.keys.inspect = ''; break;
     case 'disaster': if (ev.x2 != null) addFx({ type: 'ring', x: ev.x2, y: ev.y2, r: 4, life: 3.5, color: 'rgba(230,230,240,0.9)' }); addFx({ type: 'ring', x: ev.x, y: ev.y, r: Math.max(4, ev.r), life: 3.5, color: ev.kind === 'wildfire' || ev.kind === 'volcano' ? 'rgba(255,120,40,0.95)' : ev.kind === 'locusts' ? 'rgba(190,200,90,0.9)' : 'rgba(230,230,240,0.9)' }); addFx({ type: 'float', x: ev.x, y: ev.y, text: ev.kind === 'quake' ? 'the earth shakes' : ev.kind === 'volcano' ? 'the mountain burns' : ev.kind, life: 4, color: '#ffb070' }); soundAt('lightning', ev.x, ev.y); U.keys.laws = ''; break;
     case 'maker': U.keys.maker = ''; U.keys.laws = ''; U.keys.kinds = ''; U.keys.ways = ''; if (ev.entry.ops.length) showNotice('The maker changed the world: ' + ev.entry.ops.join('; ') + '. See the Maker tab.'); break;
     case 'site': if (ev.first) { addFx({ type: 'ring', x: ev.x, y: ev.y, r: 5, life: 2.5, color: 'rgba(214,196,255,0.9)' }); soundAt('cast', ev.x, ev.y); } break;
@@ -866,8 +870,8 @@ mini.addEventListener('pointerup', function () { mini._d = false; });
 function togglePlay() { U.playing = !U.playing; syncButtons(); }
 function toggleFollow() { if (!U.sel || U.sel.t !== 'agent') { U.follow = false; } else U.follow = !U.follow; syncButtons(); }
 function toggleSound() {
-  if (SWA.on) SWA.stop(); else if (!SWA.start(w.seed)) showNotice('Sound could not start in this view.');
-  syncButtons();
+  if (SWA.on) { SWA.stop(); st.settings.sound = false; } else if (!SWA.start(w.seed)) showNotice('Sound could not start in this view.'); else st.settings.sound = true;
+  syncButtons(); save();
 }
 function wakeMinds(another) {
   if (st.on && !another) { st.on = false; syncButtons(); return; }
@@ -901,7 +905,7 @@ $('btnMinds').onclick = function () { wakeMinds(false); };
 function setTab(name) {
   U.tab = name;
   document.querySelectorAll('#tabs button').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.tab === name ? 'true' : 'false'); });
-  ['inspect', 'story', 'voices', 'chronicle', 'peoples', 'ways', 'kinds', 'laws', 'maker', 'settings'].forEach(function (n) { $('pane-' + n).hidden = n !== name; });
+  ['inspect', 'story', 'culture', 'voices', 'chronicle', 'peoples', 'ways', 'kinds', 'laws', 'maker', 'settings'].forEach(function (n) { $('pane-' + n).hidden = n !== name; });
   U.keys[name] = '';
 }
 $('tabs').addEventListener('click', function (e) { const b = e.target.closest('button'); if (b) setTab(b.dataset.tab); });
@@ -953,7 +957,7 @@ function renderAgent(pane, id) {
     h += '<div class="traits">' + ['bold', 'sociable', 'curious', 'gentle', 'honest', 'greedy'].map(function (k) { return '<div class="trait">' + k + bar(t[k], 'var(--accent)') + '</div>'; }).join('') + '</div>';
     h += '<div class="traits moods">' + ['anger', 'fear', 'grief', 'joy', 'lonely'].map(function (k) { return '<div class="trait">' + k + bar(a.mood[k], MOOD_COLOR[k]) + '</div>'; }).join('') + '</div>';
     const bd = bandCache[a.id], fol = w.agents.filter(function (o) { return o.leader === a.id; });
-    { const rl = SW.roleOf(w, a), md0 = st.minds[a.id]; h += '<div class="kv">Standing <b>' + SW.status(w, a).toFixed(1) + '</b>' + (rl ? ' · known as a <b>' + esc(rl) + '</b>' : '') + (a.shame > 0.05 ? ' · shame ' + a.shame : '') + (a.sung ? ' · sung of ' + a.sung + ' times' : '') + (md0 && md0.lessons && md0.lessons.length ? '<br>Learned from what befell others: ' + md0.lessons.slice(-3).map(function (q) { return esc(q.text); }).join(' · ') : '') + '</div>'; }
+    { const rl = SW.roleOf(w, a), md0 = st.minds[a.id]; h += '<div class="kv">Standing <b>' + SW.status(w, a).toFixed(1) + '</b>' + (rl ? ' · known as a <b>' + esc(rl) + '</b>' : '') + (a.shame > 0.05 ? ' · shame ' + a.shame : '') + (a.sung ? ' · sung of ' + a.sung + ' times' : '') + (a.faith && w.culture && w.culture.items[a.faith] ? '<br>Holds the teaching <b>“' + esc(w.culture.items[a.faith].title) + '”</b>' : '') + (a.press && Object.keys(a.press).length ? '<br>Pressed by: ' + Object.keys(a.press).sort(function (x, y) { return a.press[y] - a.press[x]; }).slice(0, 4).map(function (k) { return esc(SW.PRESSURES[k] || k) + ' ' + a.press[k].toFixed(1); }).join(' · ') : '') + (md0 && md0.lessons && md0.lessons.length ? '<br>Learned from what befell others: ' + md0.lessons.slice(-3).map(function (q) { return esc(q.text); }).join(' · ') : '') + '</div>'; }
     { const P0 = SW.peopleOf(w, a); if (P0) h += '<div class="kv">Of <b>' + esc(P0.name) + '</b> (' + esc(P0.noun) + ')' + (a.mixed ? ' · born of two peoples' : '') + ' · in ' + esc((SW.regionAt(w, a.x, a.y) || {}).name || '') + (a.genes ? '<br>Born with: ' + Object.keys(a.genes).map(function (g) { return esc(g) + ' ×' + a.genes[g]; }).join(' · ') : '') + (Object.keys(a.tongues || {}).filter(function (k) { return +k !== a.lang && a.tongues[k] > 0.02; }).length ? '<br>Other tongues: ' + Object.keys(a.tongues).filter(function (k) { return +k !== a.lang && a.tongues[k] > 0.02; }).map(function (k) { const op = w.peoples.filter(function (q) { return q.tongue === +k; })[0]; return esc(op ? op.name : '?') + ' ' + Math.round(a.tongues[k] * 100) + '%'; }).join(' · ') : '') + '</div>'; }
     h += '<div class="kv">' + (a.leader != null ? 'Follows ' + nameLink(a.leader) : 'Follows <b>no one</b>') + (fol.length ? ' · followed by ' + fol.map(function (o) { return nameLink(o.id); }).join(', ') : '') + (bd ? '<br>Band <b style="color:' + bd.color + '">' + esc(bd.name) + '</b> (' + bd.size + ')' : '') +
       '<br>Lore <b>' + (Math.round(a.lore * 10) / 10) + '</b> of ' + w.laws.magic.loreToCast + ' to work the world' + (a.arts.length ? ' · arts <b>' + esc(a.arts.join(', ')) + '</b>' : '') + (a.teachers.length ? ' · taught by ' + a.teachers.map(nameLink).join(', ') : '') + '</div>';
@@ -1067,6 +1071,8 @@ $('panel').addEventListener('click', function (e) {
   const act = el.dataset.act, s = U.sel;
   if (act === 'sel') { const id = +el.dataset.id; if (agentOf(id) || st.minds[id]) select({ t: 'agent', id: id }, !!agentOf(id)); }
   else if (act === 'follow') toggleFollow();
+  else if (act === 'cultp') { U.cultP = el.dataset.id === 'all' ? null : +el.dataset.id; U.keys.culture = ''; }
+  else if (act === 'cultv') { U.cultV = el.dataset.id; U.keys.culture = ''; }
   else if (act === 'old') { U.showOld = !U.showOld; }
   else if ((act === 'think' || act === 'reflect') && s && s.t === 'agent') {
     const m = st.minds[s.id];
@@ -1177,6 +1183,72 @@ function renderStory() {
     '<br>homes <b>' + n.settlements + '</b> · shelters <b>' + n.shelters + '</b> · stores <b>' + n.stores + '</b> · walls <b>' + n.walls + '</b> · wars <b>' + n.warsEver + '</b> (open <b>' + n.warsOpen + '</b>) · places of power <b>' + n.sites + '</b><br>ways known: ' + kv(n.waysKnown) + '<br>made designs <b>' + n.designs + '</b> · highest lore <b>' + n.loreHighest + '</b> · who can work the world <b>' + n.withArts + '</b>' +
     '<br>so far: ' + kv(n.events) + '<br>land: plants <b>' + n.plants + '</b>, food standing <b>' + n.foodStanding + '</b> · animals: ' + kv(n.creatures) + '<br>minds: thoughts <b>' + n.minds.thoughts + '</b>, going in circles <b>' + n.minds.circling + '%</b></div>';
   const pane = $('pane-story'), keep = pane.scrollTop; pane.innerHTML = h; pane.scrollTop = keep;
+}
+/* ---------- culture: what each people makes, holds and hands on, and how it spreads ---------- */
+const CULT_KINDS = { myth: 'Myths', tale: 'Tales', song: 'Songs', poem: 'Poems', belief: 'Teachings', saying: 'Sayings', lesson: 'Lessons from what befell', way: 'Ways' };
+function peopleDot(i) { const P = (w.peoples || [])[i]; return '<i class="pdot" style="background:' + (P ? 'hsl(' + (P.hue != null ? P.hue : (i * 97) % 360) + ' 55% 58%)' : 'var(--muted)') + '"></i>'; }
+function peopleName(i) { const P = (w.peoples || [])[i]; return P ? P.name : 'no people'; }
+function sparkOf(C, id, wd, hg) {
+  const pts = C.days.map(function (r) { return r.n[id] || 0; }); if (pts.length < 2) return '';
+  const mx = Math.max.apply(null, pts.concat([1])), n = pts.length, path = pts.map(function (v, i) { return (i ? 'L' : 'M') + (i / (n - 1) * (wd - 2) + 1).toFixed(1) + ' ' + (hg - 2 - v / mx * (hg - 4)).toFixed(1); }).join(' ');
+  return '<svg width="' + wd + '" height="' + hg + '" viewBox="0 0 ' + wd + ' ' + hg + '" aria-hidden="true"><path d="' + path + '" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+}
+function renderCulture() {
+  const C = w.culture || { items: {}, log: [], days: [], rites: {} }, day = SW.day(w), view = U.cultV || 'peoples', pf = U.cultP == null ? null : U.cultP;
+  const key = (C.rev || 0) + ':' + day + ':' + view + ':' + pf + ':' + (w.relics || []).length + ':' + w.agents.length;
+  if (U.keys.culture === key) return; U.keys.culture = key;
+  const live = {}, items = []; for (const id in C.items) { const it = C.items[id]; live[id] = SWM.cultLive(st, it); items.push(it); }
+  const cnt = {}; items.forEach(function (it) { if (live[it.id].n) cnt[it.kind] = (cnt[it.kind] || 0) + 1; });
+  const crossed = C.log.filter(function (e) { return e.k === 'crossed'; }).length, P = w.peoples || [];
+  let h = '<h2>Culture</h2><p class="note">What each people makes, holds and hands on: its myths, tales, songs and poems, its teachings, sayings and hard lessons, the ways it knows and what it calls them, the things it does together, and the things it prizes. Every idea is followed from the one who first held it to everyone who holds it now.</p>';
+  h += '<div class="nums">ideas held by the living <b>' + items.filter(function (it) { return live[it.id].n; }).length + '</b>: ' + (Object.keys(CULT_KINDS).filter(function (k) { return cnt[k]; }).map(function (k) { return CULT_KINDS[k].toLowerCase() + ' <b>' + cnt[k] + '</b>'; }).join(' · ') || 'none yet') +
+    '<br>teachings with followers <b>' + Object.keys(w.faiths || {}).filter(function (k) { return w.faiths[k].n > 1; }).length + '</b> · prized things made <b>' + (w.relics || []).length + '</b> · ideas that crossed between peoples <b>' + crossed + '</b></div>';
+  h += '<div class="cseg" role="group" aria-label="View">' + [['peoples', 'By people'], ['spread', 'How ideas spread'], ['between', 'Between peoples'], ['time', 'As it happened']].map(function (v) { return '<button data-act="cultv" data-id="' + v[0] + '" aria-pressed="' + (view === v[0]) + '">' + v[1] + '</button>'; }).join('') + '</div>';
+  const holdersLine = function (it) { const lv = live[it.id], ps = Object.keys(lv.p); return 'held by <b>' + lv.n + '</b>' + (ps.length > 1 || (ps.length === 1 && +ps[0] !== it.people) ? ' (' + ps.map(function (p) { return peopleDot(+p) + esc(peopleName(+p)) + ' ' + lv.p[p]; }).join(', ') + ')' : '') + (it.tellings ? ' · passed on ' + it.tellings + ' time' + (it.tellings > 1 ? 's' : '') : '') + (it.changed ? ' · changed in the telling ' + it.changed + ' time' + (it.changed > 1 ? 's' : '') : '') + (it.depth > 1 ? ' · ' + it.depth + ' mouths from its maker' : ''); };
+  const variant = function (it) { for (const hid in it.holders) { const m = st.minds[hid]; if (!m || m.dead || +hid === it.byId) continue; const t = (m.tales || []).filter(function (q) { return q.cid === it.id; })[0]; if (t && t.text !== it.text) return '<div class="alt">As ' + esc(st.names[hid] || 'another') + ' tells it now: “' + esc(t.text) + '”</div>'; } return ''; };
+  const card = function (it, p) { return '<div class="idea ' + it.kind + '"><div class="t"><span class="tag">' + esc(it.kind) + '</span>' + esc(it.title) + '</div><div class="m">' + (it.by ? 'first from ' + (it.byId != null ? nameLink(it.byId) : esc(it.by)) : 'older than memory') + ', day ' + it.day + (it.about ? ' · about ' + esc(it.about) : '') + (p != null && it.people != null && it.people !== p ? ' · came from ' + peopleDot(it.people) + esc(peopleName(it.people)) : '') + '</div>' + (it.text && it.kind !== 'lesson' && it.kind !== 'saying' ? '<blockquote>“' + esc(it.text) + '”</blockquote>' : '') + (['tale', 'song', 'poem', 'myth'].indexOf(it.kind) >= 0 ? variant(it) : '') + '<div class="m">' + holdersLine(it) + '</div></div>'; };
+  if (view === 'peoples') {
+    h += '<div class="cseg" role="group" aria-label="People"><button data-act="cultp" data-id="all" aria-pressed="' + (pf == null) + '">All</button>' + P.map(function (p, i) { return '<button data-act="cultp" data-id="' + i + '" aria-pressed="' + (pf === i) + '">' + peopleDot(i) + esc(p.name) + '</button>'; }).join('') + '</div>';
+    P.forEach(function (p, i) {
+      if (pf != null && pf !== i) return;
+      const mem = w.agents.filter(function (a) { return a.people === i; }), mine = items.filter(function (it) { return live[it.id].p[i] || (it.people === i && live[it.id].n === 0 && it.kind !== 'lesson' && it.kind !== 'way'); });
+      h += '<h3>' + peopleDot(i) + esc(p.name) + ' <small>' + esc(p.noun || '') + ' · ' + mem.length + ' living' + (w.regions[p.region] ? ' · ' + esc(w.regions[p.region].name) : '') + '</small></h3>';
+      if (p.custom) h += '<div class="idea"><div class="t"><span class="tag">custom</span>Held since before memory</div><blockquote>“' + esc(p.custom) + '”</blockquote></div>';
+      const sect = function (title, list, max) { if (!list.length) return ''; list.sort(function (x, y) { return live[y.id].n - live[x.id].n || y.day - x.day; }); return '<div class="m" style="margin:12px 0 6px;font-weight:600;color:var(--text)">' + title + '</div>' + list.slice(0, max).map(function (it) { return card(it, i); }).join('') + (list.length > max ? '<p class="muted">and ' + (list.length - max) + ' more</p>' : ''); };
+      const got = sect('Teachings', mine.filter(function (it) { return it.kind === 'belief'; }), 6) + sect('Myths, tales, songs and poems', mine.filter(function (it) { return ['myth', 'tale', 'song', 'poem'].indexOf(it.kind) >= 0; }), 10);
+      h += got;
+      const say = mine.filter(function (it) { return (it.kind === 'saying' || it.kind === 'lesson') && live[it.id].p[i]; }).sort(function (x, y) { return live[y.id].p[i] - live[x.id].p[i] || y.day - x.day; });
+      if (say.length) h += '<div class="m" style="margin:12px 0 6px;font-weight:600;color:var(--text)">Sayings and hard lessons</div><ul class="tl">' + say.slice(0, 8).map(function (it) { return '<li>“' + esc(it.text) + '” <span class="muted">· ' + (it.kind === 'saying' && it.by ? 'from ' + esc(it.by) + ' · ' : '') + 'day ' + it.day + ' · held by ' + live[it.id].p[i] + ' of ' + mem.length + '</span></li>'; }).join('') + '</ul>';
+      const ways = {}; mem.forEach(function (a) { for (const k in a.knows) { const q = ways[k] = ways[k] || { n: 0, names: {}, first: null }; q.n++; const nm = a.knows[k].name; if (nm && nm !== k) q.names[nm] = 1; if (a.knows[k].byName && !q.first) q.first = a.knows[k].byName; } });
+      const wk = Object.keys(ways).sort(function (x, y) { return ways[y].n - ways[x].n; });
+      if (wk.length) h += '<div class="m" style="margin:12px 0 6px;font-weight:600;color:var(--text)">Ways they know, and what they call them</div><ul class="tl">' + wk.map(function (k) { const q = ways[k], nm = Object.keys(q.names); return '<li><b>' + esc(k) + '</b>' + (nm.length ? ': “' + nm.slice(0, 3).map(esc).join('”, “') + '”' : '') + ' <span class="muted">· known by ' + q.n + ' of ' + mem.length + (q.first ? ' · first found by ' + esc(q.first) : ' · older than memory') + '</span></li>'; }).join('') + '</ul>';
+      const R = (C.rites || {})[i]; if (R && Object.keys(R).length) h += '<div class="m" style="margin:12px 0 6px;font-weight:600;color:var(--text)">Things they do together</div><ul class="tl">' + Object.keys(R).sort(function (x, y) { return R[y].n - R[x].n; }).map(function (k) { return '<li><b>' + esc(k) + '</b> <span class="muted">· ' + R[k].n + ' time' + (R[k].n > 1 ? 's' : '') + ' · first by ' + esc(R[k].by || '?') + ' on day ' + R[k].first + (w.laws.recipes[k] && w.laws.recipes[k].hint ? ' · ' + esc(String(w.laws.recipes[k].hint).slice(0, 90)) : '') + '</span></li>'; }).join('') + '</ul>';
+      const rel = (w.relics || []).filter(function (r) { return r.people === i; });
+      if (rel.length) h += '<div class="m" style="margin:12px 0 6px;font-weight:600;color:var(--text)">Things they prize</div>' + rel.slice(-8).reverse().map(function (r) { return '<div class="idea thing"><div class="t"><span class="tag">made</span>' + esc(r.kind) + '</div><div class="m">made by ' + esc(r.byName) + ' on day ' + r.day + (r.passes.length ? r.passes.map(function (q) { return ' → given to ' + esc(q.to) + (q.people !== i ? ' of ' + esc(peopleName(q.people)) : '') + ' (day ' + q.day + ')'; }).join('') : '') + ' · now with ' + esc(r.holderName) + (agentOf(r.holder) ? '' : ' (dead)') + (w.laws.goods[r.kind] && w.laws.goods[r.kind].hint ? ' · ' + esc(w.laws.goods[r.kind].hint) : '') + '</div></div>'; }).join('');
+      if (!got && !say.length && !rel.length && !(R && Object.keys(R).length)) h += '<p class="muted">Nothing of their own making yet beyond what they woke with.</p>';
+    });
+    const works = {}; for (const i in w.bkind) { const k = w.bkind[i]; if (['statue', 'pyramid', 'temple', 'stone', 'shrine', 'moot', 'observatory', 'library', 'school'].indexOf(k) >= 0) works[k] = (works[k] || 0) + 1; }
+    if (Object.keys(works).length || (w.marks || []).length) h += '<h3>Works and marks on the land</h3><div class="nums">' + (Object.keys(works).map(function (k) { return esc(k) + ' <b>' + works[k] + '</b>'; }).join(' · ') || 'no monuments') + ' · marks left <b>' + (w.marks || []).length + '</b>' + ((w.marks || []).length ? '<br>' + w.marks.slice(-4).map(function (m) { return '“' + esc(String(m.text || '').slice(0, 110)) + '”' + (m.name ? ' <span class="muted">(' + esc(m.name) + ')</span>' : ''); }).join('<br>') : '') + '</div>';
+  } else if (view === 'spread') {
+    const rows = items.filter(function (it) { return Object.keys(it.holders).length >= 2 || (live[it.id].n && it.kind !== 'lesson' && it.kind !== 'way'); }).sort(function (x, y) { return live[y.id].n - live[x.id].n || Object.keys(y.holders).length - Object.keys(x.holders).length; });
+    h += '<p class="note">Each line is one idea. The curve is how many of the living held it on each day; the dots are the peoples it has reached. An idea dies when the last one who holds it does.</p>';
+    h += rows.length ? '<table class="spread"><tbody>' + rows.slice(0, 40).map(function (it) { const ever = Object.keys(it.holders).length, peak = Math.max.apply(null, C.days.map(function (r) { return r.n[it.id] || 0; }).concat([live[it.id].n])); return '<tr><td><span class="tag">' + esc(it.kind) + '</span>' + esc(it.title.slice(0, 46)) + '<div class="muted" style="font-size:11.5px">' + (it.by ? esc(it.by) : 'older than memory') + ', day ' + it.day + ' · ' + Object.keys(it.reach).map(function (p) { return peopleDot(+p); }).join('') + '</div></td><td>' + sparkOf(C, it.id, 84, 22) + '</td><td class="n"><b style="color:var(--text)">' + live[it.id].n + '</b> now<br>' + peak + ' peak · ' + ever + ' ever</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">No idea has passed from one being to another yet.</p>';
+  } else if (view === 'between') {
+    h += '<h3>How much of each other they understand</h3>';
+    h += P.length > 1 ? '<ul class="tl">' + P.map(function (p, i) { return P.map(function (q, j) { if (i === j) return ''; const mem = w.agents.filter(function (a) { return a.people === i; }); if (!mem.length) return ''; const u = mem.reduce(function (sm, a) { return sm + SW.understands(a, q.tongue != null ? q.tongue : j); }, 0) / mem.length, best = mem.slice().sort(function (x, y) { return SW.understands(y, q.tongue != null ? q.tongue : j) - SW.understands(x, q.tongue != null ? q.tongue : j); })[0]; return '<li>' + peopleDot(i) + esc(p.name) + ' understand ' + peopleDot(j) + esc(q.name) + ': <b>' + Math.round(u * 100) + '%</b> <span class="muted">· best ' + esc(best.name) + ' ' + Math.round(SW.understands(best, q.tongue != null ? q.tongue : j) * 100) + '%</span></li>'; }).join(''); }).join('') + '</ul>' : '<p class="muted">One people only.</p>';
+    const T = w.tally || {}, met = T.met || [];
+    h += '<h3>What has passed between them</h3><div class="nums">meetings <b>' + met.length + '</b> · gifts across <b>' + (T.crossGifts || 0) + '</b> · things done together <b>' + (T.crossActs || 0) + '</b> · ideas crossed <b>' + crossed + '</b> · children of two peoples <b>' + w.agents.filter(function (a) { return a.mixed; }).length + '</b></div>';
+    const cx = C.log.filter(function (e) { return e.k === 'crossed'; });
+    if (cx.length) h += '<ul class="tl">' + cx.slice(-20).reverse().map(function (e) { return '<li><span class="d">day ' + e.day + '</span>the ' + esc(e.kind) + ' <b>“' + esc(e.title) + '”</b> of ' + peopleDot(e.of) + esc(peopleName(e.of)) + ' reached ' + peopleDot(e.people) + esc(peopleName(e.people)) + ', through ' + esc(e.who) + (e.from ? ', from ' + esc(e.from) : '') + '</li>'; }).join('') + '</ul>';
+    if (met.length) h += '<h3>First meetings</h3><ul class="tl">' + met.slice(-12).reverse().map(function (m) { return '<li><span class="d">day ' + m.day + '</span>' + esc(m.a) + ' and ' + esc(m.b) + ' <span class="muted">in ' + esc(m.land || 'the land') + '</span></li>'; }).join('') + '</ul>';
+    const xr = (w.relics || []).filter(function (r) { return r.passes.some(function (q) { return q.people !== r.people; }); });
+    if (xr.length) h += '<h3>Prized things that changed peoples</h3><ul class="tl">' + xr.slice(-10).map(function (r) { return '<li><b>' + esc(r.kind) + '</b> of ' + esc(r.byName) + ' → ' + r.passes.map(function (q) { return esc(q.to) + ' (day ' + q.day + ')'; }).join(' → ') + '</li>'; }).join('') + '</ul>';
+    if (!cx.length && !met.length) h += '<p class="muted">The peoples have not yet met.</p>';
+  } else {
+    const words = { made: 'arose', passed: 'was passed on', crossed: 'crossed to another people', retold: 'was retold in new words', rite: 'was first done', left: 'was given up' };
+    h += C.log.length ? '<ul class="tl">' + C.log.slice(-80).reverse().map(function (e) { return '<li><span class="d">day ' + e.day + '</span>' + (e.people != null && e.people >= 0 ? peopleDot(e.people) : '') + (e.k === 'rite' ? 'the shared act <b>“' + esc(e.title) + '”</b> was first done, by ' + esc(e.who || '?') : 'the ' + esc(e.kind) + ' <b>“' + esc(String(e.title).slice(0, 70)) + '”</b> ' + words[e.k] + (e.k === 'made' ? (e.who ? ' with ' + esc(e.who) : '') : e.k === 'passed' ? ' from ' + esc(e.from) + ' to ' + esc(e.who) + (e.changed ? ', and changed in the telling' : '') : e.k === 'crossed' ? ': ' + esc(e.who) + ' of ' + esc(peopleName(e.people)) + ' now holds it' : ' by ' + esc(e.who || '?'))) + '</li>'; }).join('') + '</ul>' : '<p class="muted">Nothing yet. Culture begins when someone makes a tale, a teaching or a thing worth keeping, or learns from what befell another.</p>';
+  }
+  const pane = $('pane-culture'), keep = pane.scrollTop; pane.innerHTML = h; pane.scrollTop = keep;
 }
 function renderMaker() {
   const Mk = SWK.ensure(st), C = st.settings.maker, key = (Mk.rev || 0) + ':' + (SWK.busy || '') + ':' + C.on + ':' + (SWK.error || '') + ':' + st.story.chapters.length;
@@ -1373,6 +1445,7 @@ function renderSettings() {
     '<h3>Pace and budget</h3><div class="form"><label for="setPM">Thoughts per minute<small>across all beings</small></label><input type="number" id="setPM" min="1" max="60" value="' + S.perMinute + '">' +
     '<label for="setPar">At the same time</label><input type="number" id="setPar" min="1" max="6" value="' + S.parallel + '">' +
     '<label for="setBudget">Thought budget<small>minds fall asleep when it is spent</small></label><input type="number" id="setBudget" min="5" max="100000" value="' + S.budget + '">' +
+    '<label for="setAuto">Wake the minds when the page opens<small>and after it reloads, so a long run carries on by itself</small></label><select class="field" id="setAuto"><option value="1"' + (S.autoWake ? ' selected' : '') + '>yes</option><option value="0"' + (S.autoWake ? '' : ' selected') + '>no</option></select>' +
     '<label for="setEndless">Keep thinking past the budget<small>for long runs: the minds never fall asleep by themselves</small></label><select class="field" id="setEndless"><option value="0"' + (S.endless ? '' : ' selected') + '>no</option><option value="1"' + (S.endless ? ' selected' : '') + '>yes</option></select></div>' +
     '<div class="row"><button class="btn" data-act="preset" data-id="quick">Quick: Haiku + Sonnet</button><button class="btn" data-act="preset" data-id="rich">Rich: Sonnet + Sonnet high</button><button class="btn" data-act="preset" data-id="richest">Richest: Sonnet + Opus</button></div>' +
     '<h3>The chronicler and the maker <small>the outer loop</small></h3><div class="form"><label for="setStEvery">Write a chapter every<small>days. One call each, on the chronicler\'s model</small></label><input type="number" id="setStEvery" min="1" max="30" value="' + S.story.every + '"><label for="setStModel">Chronicler\'s model</label><select class="field" id="setStModel">' + models(S.story.model) + '</select>' +
@@ -1395,6 +1468,7 @@ function renderSettings() {
   bind('setPar', function (v) { S.parallel = clamp(Math.round(+v) || 2, 1, 6); });
   bind('setBudget', function (v) { S.budget = clamp(Math.round(+v) || 40, 5, 100000); });
   bind('setEndless', function (v) { S.endless = v === '1'; });
+  bind('setAuto', function (v) { S.autoWake = v === '1'; });
   $('setVol').oninput = function () { SWA.setVolume(+this.value); };
 }
 
@@ -1431,7 +1505,7 @@ function updatePanels() {
   if (st.blocked && !U.toldBlocked && st.sample === null) U.toldBlocked = true;
   syncButtons();
   if (U.tab === 'inspect') renderInspect(); else if (U.tab === 'voices') renderVoices(); else if (U.tab === 'chronicle') renderChronicle();
-  else if (U.tab === 'kinds') renderKinds(); else if (U.tab === 'peoples') renderPeoples(); else if (U.tab === 'ways') renderWays(); else if (U.tab === 'laws') renderLaws(); else if (U.tab === 'story') renderStory(); else if (U.tab === 'maker') renderMaker(); else renderSettings();
+  else if (U.tab === 'kinds') renderKinds(); else if (U.tab === 'peoples') renderPeoples(); else if (U.tab === 'ways') renderWays(); else if (U.tab === 'laws') renderLaws(); else if (U.tab === 'story') renderStory(); else if (U.tab === 'culture') renderCulture(); else if (U.tab === 'maker') renderMaker(); else renderSettings();
 }
 
 /* ---------- saving ---------- */
@@ -1454,7 +1528,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 14, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 15, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1463,7 +1537,8 @@ function recState1() {
   if (!dbNS || recBusy) return; recBusy = true;
   const d = SWM.digest(st); let body = { digest: d };
   if (JSON.stringify(body).length > 230000) { d.beings.forEach(function (q) { q.ties = {}; if (q.body) q.body.policy = q.body.policy.slice(0, 6); }); body = { digest: d, trimmed: true }; }
-  dbNS.doc('runs/' + st.runId + '/state/latest').set(body).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; }).then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); });
+  let mk = null; try { const Mk = st.maker || {}; mk = { day: SW.day(w), visits: (Mk.log || []).slice(-8), requests: (st.rec ? st.rec.all : []).filter(function (r) { return r.t === 'request'; }).slice(-30), lessons: Mk.lessons || [], heritage: SWK.legacy(st), culture: SWK.stats(st).culture }; if (JSON.stringify(mk).length > 200000) mk.visits = mk.visits.slice(-3); } catch (e) { mk = null; }
+  dbNS.doc('runs/' + st.runId + '/state/latest').set(body).then(function () { return mk ? dbNS.doc('runs/' + st.runId + '/state/maker').set(mk) : null; }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; }).then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); });
 }
 function recDownload() {
   const ex = SWM.exportRun(st); ex.heritage = SWK.legacy(st);
@@ -1494,6 +1569,7 @@ function newWorld(seed) {
   const keep = st ? st.settings : null;
   const legacy = st ? SWK.legacy(st) : null;
   attach(SWM.createState(SW.createWorld(seed), keep || SWM.defaultSettings()));
+  if (st.settings.autoWake && st.sample) st.on = true;
   SWK.inherit(st, legacy);
   SWM.chron(st, 'birth', w.peoples.map(function (P) { return P.name + ' (' + P.noun + ') in ' + (w.regions[P.region] ? w.regions[P.region].name : 'the land'); }).join('; ') + ': ' + w.peoples.length + ' peoples woke in different lands of a new world, a sea between them (seed ' + seed + ').', []);
   $('notice').hidden = true; save(); setTab('inspect');
@@ -1538,6 +1614,7 @@ function start(data) {
   if (window.claude && window.claude.use) {
     window.claude.use('sample').then(function (s) {
       sampleFn = s; st.sample = s;
+      if (s && st.settings.autoWake && !st.on && st.used < st.settings.budget) { st.on = true; syncButtons(); }
       if (!s) { st.blocked = 'Claude is not available to this page in this view, so the beings run on reflexes alone.'; return; }
       if (s.limits) s.limits().then(function (l) { toolsOK = !!(l && l.tools); st.toolsOK = toolsOK; }).catch(function () {});
     }).catch(function () { sampleFn = null; });
@@ -1545,6 +1622,9 @@ function start(data) {
     window.claude.use('downloads').then(function (d) { dlNS = d; }).catch(function () {});
   } else recState = 'not offered';
   try { if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(function () { return SWM.snapshot(st); }); } catch (e) {}
+  /* sound is on unless turned off; a browser will only let it begin at the first touch or key */
+  const firstTouch = function () { if (st && st.settings.sound !== false && !SWA.on) { try { SWA.start(w.seed); } catch (e) {} syncButtons(); } if (SWA.on || (st && st.settings.sound === false)) { window.removeEventListener('pointerdown', firstTouch, true); window.removeEventListener('keydown', firstTouch, true); } };
+  window.addEventListener('pointerdown', firstTouch, true); window.addEventListener('keydown', firstTouch, true);
   syncButtons(); setTab('inspect');
   requestAnimationFrame(frame);
 }

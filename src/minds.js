@@ -1,4 +1,7 @@
-/* Evolu minds: each being's thinking is a call to Claude.
+/* Required Notice: Copyright (c) 2026 Nova Spivack (https://github.com/novaspivack/evolu)
+   Evolu is licensed under the PolyForm Noncommercial License 1.0.0: https://polyformproject.org/licenses/noncommercial/1.0.0
+
+   Evolu minds: each being's thinking is a call to Claude.
    Between thoughts the body runs on reflexes the mind wrote. A thought can speak, set an intent,
    remember, and (on deep reflection) rewrite its own reflexes, creed, memory and designs. */
 (function (root) {
@@ -13,7 +16,7 @@ M.MODELS = [
 ];
 M.defaultSettings = function () {
   return {
-    v: 9,
+    v: 10, autoWake: true, sound: true,
     routine: { model: 'claude-sonnet-5-5', effort: '' },
     deep: { model: 'claude-sonnet-5-5', effort: 'medium' },
     perMinute: 24, parallel: 4, budget: 3000, endless: false, reflectEvery: 4, foresight: true, record: true,
@@ -79,7 +82,7 @@ M.record = function (st, item) {
 M.digest = function (st) {
   const w = st.world;
   return {
-    run: st.runId, generation: 14, seed: w.seed, tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
+    run: st.runId, generation: 15, seed: w.seed, culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {} }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
     peoples: (w.peoples || []).map(function (P) { return { name: P.name, noun: P.noun, kind: P.kind, way: P.way, custom: P.custom, land: P.region != null && w.regions[P.region] ? w.regions[P.region].name : '', alive: w.agents.filter(function (a) { return a.people === P.id; }).length }; }), lands: (w.regions || []).map(function (R) { return { name: R.name, biome: R.biome, minerals: R.minerals || [], beings: w.agents.filter(function (a) { return w.region[a.y * w.W + a.x] === R.id; }).length }; }), tally: w.tally || {}, alive: w.agents.length, creatures: w.creatures.length, plants: w.plants.filter(Boolean).length, wars: w.wars, settlements: w.settlements.map(function (q) { return q.name; }), ways: Object.keys(w.laws.tree).filter(function (k) { return w.agents.some(function (a) { return a.knows[k]; }); }), designs: Object.keys(w.laws.tools),
     beings: Object.keys(st.minds).map(function (id) {
       const m = st.minds[id], a = agentById(w, +id);
@@ -411,11 +414,12 @@ M.onEvent = function (st, ev) {
       break;
     }
     case 'discovered':
+      if (a && a.knows[ev.node]) { const wi = cultNew(st, 'way', ev.name && ev.name !== ev.node ? ev.name + ' (' + ev.node + ')' : ev.node, ev.idea || '', a, { node: ev.node }); a.knows[ev.node].cid = wi.id; }
       tell(st, ev.a, 'You found a new way: ' + ev.node + '. You call yours "' + ev.name + '".', 2); story(st, ev.a, 'I discovered ' + ev.node + ' and called it "' + ev.name + '".');
       watch(st, a, 'found:' + ev.node, A + ' has worked out something new: "' + ev.name + '"' + (ev.idea ? ' (' + ev.idea + ')' : '') + '.', 5);
       chron(st, 'invention', A + ' discovered ' + ev.node + ': "' + ev.name + '"' + (ev.idea ? ' — ' + ev.idea : '') + '.', [ev.a], a);
       break;
-    case 'learned':
+    case 'learned': { const tc = st.world.agents.filter(function (o) { return o.id === ev.b; })[0], wi = tc && wayItem(st, tc, ev.node); if (wi && a && a.knows[ev.node]) { a.knows[ev.node].cid = wi.id; cultHold(st, wi.id, a, tc, false, ((wi.holders[tc.id] || {}).gen || 0) + 1); } }
       tell(st, ev.a, B + ' taught you ' + ev.node + ' ("' + ev.name + '"). You can use it now.', 5, true);
       chron(st, 'lore', B + ' taught ' + A + ' ' + ev.node + ' ("' + ev.name + '").', [ev.a, ev.b], a);
       break;
@@ -570,7 +574,9 @@ M.onEvent = function (st, ev) {
     case 'site':
       if (ev.first) { tell(st, ev.a, 'You came upon a strange ' + ev.kind + ' at (' + ev.x + ',' + ev.y + '): "' + ev.name + '". Something in it reached into you.', 7, true); story(st, ev.a, 'I found the ' + ev.kind + ' "' + ev.name + '".'); chron(st, 'magic', A + ' found the ' + ev.kind + ' "' + ev.name + '".', [ev.a], a); }
       break;
+    case 'insight': tell(st, ev.a, (ev.why ? 'What you have been through (' + ev.why + ') has shown you something. ' : 'What you have practised has come together. ') + 'The way of ' + ev.node + ' is within your grasp now: ' + clip(ev.hint, 130) + '. Take it at your next deep reflection ("discover").', 7, true); M.record(st, { t: 'insight', name: A, node: ev.node, why: ev.why || '' }); break;
     case 'made': {
+      { const C = cult(st), pk = a && a.people != null ? a.people : -1, R = C.rites[pk] = C.rites[pk] || {}; if (!R[ev.what]) { R[ev.what] = { n: 0, first: SW.day(st.world), by: A }; cultLog(st, { k: 'rite', title: ev.what, who: A, people: pk, kind: 'rite' }); } R[ev.what].n++; R[ev.what].last = SW.day(st.world); C.rev = (C.rev || 0) + 1; }
       const who = (ev.with || []).map(function (id) { return nameOf(st, id); });
       if (st.story) st.story.tally['made:' + ev.what] = (st.story.tally['made:' + ev.what] || 0) + 1;
       tell(st, ev.a, 'You did "' + ev.what + '"' + (ev.thing ? ' and now hold a ' + ev.thing : '') + '.', 2);
@@ -773,7 +779,7 @@ M.buildPrompt = function (st, mind, kind, lean) {
   const others = v.agents.slice(0, 8).map(function (o) {
     const r = a.rel[o.id] || 0, ob = SW.bandOf(w, agentById(w, o.id));
     const oa = agentById(w, o.id), op = oa && SW.peopleOf(w, oa), foreign = op && op.id !== a.people ? ' [of ' + op.name + ', ' + op.noun + ', NOT YOUR PEOPLE; you understand ' + (SW.understands(a, oa.lang) < 0.05 ? 'none' : 'about ' + Math.round(100 * SW.understands(a, oa.lang)) + '%') + ' of their speech]' : '';
-    return '- ' + o.name + foreign + ' at (' + o.x + ',' + o.y + '), ' + o.d + ' steps ' + o.dir + '; looks ' + (o.hp < 50 ? 'wounded' : o.e < 30 ? 'weak with hunger' : o.e > 70 ? 'strong' : 'well enough') + (o.young ? ', a child' : '') + (o.old ? ', old' : '') + (o.sick ? ', SICK' : '') + (o.suffer > 0.55 ? ', plainly SUFFERING' : o.happy > 0.6 ? ', content and at ease' : '') + (o.thirst > 75 ? ', parched' : '') + '; standing ' + (o.status || 0).toFixed(1) + (o.role ? ', known as a ' + o.role : '') + (o.mounted ? ', MOUNTED on an animal' : '') + (o.mood.anger > 0.5 ? ', furious' : o.mood.fear > 0.5 ? ', frightened' : o.mood.grief > 0.5 ? ', grieving' : o.mood.joy > 0.5 ? ', glad' : '') +
+    return '- ' + o.name + foreign + ' at (' + o.x + ',' + o.y + '), ' + o.d + ' steps ' + o.dir + '; looks ' + (o.hp < 50 ? 'wounded' : o.e < 30 ? 'weak with hunger' : o.e > 70 ? 'strong' : 'well enough') + (o.young ? ', a child' : '') + (o.old ? ', old' : '') + (o.sick ? ', SICK' : '') + (o.suffer > 0.55 ? ', plainly SUFFERING' : o.happy > 0.6 ? ', content and at ease' : '') + (o.thirst > 75 ? ', parched' : '') + '; standing ' + (o.status || 0).toFixed(1) + (o.role ? ', known as a ' + o.role : '') + (function () { const oa = w.agents.filter(function (q) { return q.id === o.id; })[0]; if (!oa) return ''; const kin = (a.parents || []).indexOf(oa.id) >= 0 ? 'YOUR PARENT' : (oa.parents || []).indexOf(a.id) >= 0 ? 'YOUR CHILD' : (a.parents || []).length && (oa.parents || []).some(function (q) { return a.parents.indexOf(q) >= 0; }) ? 'YOUR SIBLING' : ''; return (kin ? ', ' + kin + ' (close kin: no child can come of the two of you)' : '') + (a.faith && oa.faith === a.faith ? ', holds the teaching you hold' : oa.faith && (w.culture.items[oa.faith] || {}).title ? ', holds a teaching called "' + w.culture.items[oa.faith].title + '"' : ''); })() + (o.mounted ? ', MOUNTED on an animal' : '') + (o.mood.anger > 0.5 ? ', furious' : o.mood.fear > 0.5 ? ', frightened' : o.mood.grief > 0.5 ? ', grieving' : o.mood.joy > 0.5 ? ', glad' : '') +
       (o.tools.length ? '; carries ' + o.tools.join(', ') : '') + (o.stance === 'own' ? '; OF YOUR BAND' : ob ? '; of the band "' + ob.name + '"' + (o.stance !== 'neutral' ? ' (your band calls them ' + o.stance + ')' : '') + (o.theirs === 'enemy' ? ' (THEY call your people enemy)' : '') : '; follows no one') + '; ' + o.doing + '; carrying ' + o.carrying + ' food; you feel ' + warmth(r) + ' (' + r.toFixed(1) + ') toward them';
   });
   out.push('OTHERS OF YOUR KIND IN SIGHT:\n' + (others.length ? others.join('\n') : '- none'));
@@ -824,6 +830,9 @@ M.buildPrompt = function (st, mind, kind, lean) {
     const rc = L.recipes || {}, ks = Object.keys(rc).filter(function (k) { return !rc[k].way || a.knows[rc[k].way]; }).slice(-6);
     if (ks.length) out.push('THINGS THAT CAN BE MADE OR DONE (plan step make {what: name}):\n' + ks.map(function (k) { return '- ' + k + ': ' + clip(rc[k].hint || '', 110) + ' Needs ' + M.needsText(rc[k].needs) + '.'; }).join('\n'));
     const tl = mind.tales || [];
+    { const C = cult(st), mineF = a.faith && C.items[a.faith], hd = Object.keys(mind.heard || {}).filter(function (id) { return C.items[id] && id !== a.faith; }).slice(-3);
+      if (mineF) out.push('THE TEACHING YOU HOLD: "' + mineF.title + '"' + (mineF.byId === a.id ? ' (you began it)' : mineF.by ? ' (begun by ' + mineF.by + ')' : '') + ', held by ' + M.cultLive(st, mineF).n + ' of the living: ' + mineF.text);
+      if (hd.length) out.push('TEACHINGS YOU HAVE HEARD (you may take one up with "adopt", begin your own with "belief", or hold to none):\n' + hd.map(function (id) { const it = C.items[id]; return '- "' + it.title + '"' + (it.by ? ' of ' + it.by : '') + ', held by ' + M.cultLive(st, it).n + ': ' + it.text; }).join('\n')); }
     if (mind.lessons && mind.lessons.length) out.push('WHAT HAS BEFALLEN OTHERS (things your people saw happen or were told of; they are true, and the same will happen to you in the same case):\n' + mind.lessons.slice(-6).map(function (q) { return '- day ' + q.day + ': ' + q.text + (q.from ? ' (told to you by ' + q.from + ')' : ''); }).join('\n'));
     if (mind.seasons && mind.seasons.length) out.push('THE SEASONS YOU HAVE LIVED (plainly what you saw, in order. If something comes round again, that is yours to notice, to prepare for, to tell as a tale or to cut in a sign):\n' + mind.seasons.slice(-8).join('\n'));
     if (L.buildings && Object.keys(L.buildings).length && (kind === 'deep' || mind.thoughts % 3 === 0)) out.push('KINDS OF BUILDING you know how to raise (each is also a roof; build {what: its name} on bare ground; a great work is begun by one and finished by whoever carries wood and stone to it):\n' + Object.keys(L.buildings).filter(function (k) { return !L.buildings[k].way || a.knows[L.buildings[k].way]; }).slice(-9).map(function (k) { const B = L.buildings[k]; return '- ' + k + ' (' + (B.wood || 0) + ' wood, ' + (B.stone || 0) + ' stone): ' + (B.hint || ''); }).join('\n'));
@@ -840,7 +849,7 @@ M.buildPrompt = function (st, mind, kind, lean) {
   if (kind !== 'deep' && mind.thoughts > 6 && mind.thoughts % 3 !== 0) out[out.length - 1] = out[out.length - 1].replace(/ \((?![^()]{0,24}\))[^()]*\)/g, '') + ' (Every third thought lists what each action does and needs.)';
   out.push('Speech is heard by everyone within ' + L.body.hearing + ' steps and costs a little energy per letter. Others only know what you say aloud.');
   out.push('FOR THIS THOUGHT: your thought is your inner life, not an inventory. Do not list what is nearby or recite what you carry. Think as a creature with a past and a future: what you want and cannot yet have, whom you trust or resent and why, what you are afraid of, proud of or ashamed of, what you wonder about, what you mean to become. Let whatever presses on you hardest lead, and let it move you to DO something that changes your situation, with a plan that carries it out. A mind that only gathers and guards has not begun to live. Do not restate what you already know or have already said. "note" is only for something NEW, or something that CHANGED what you believed; otherwise leave it null.');
-  let fmt = 'Reply with ONLY one JSON object, no other text:\n{"thought": "your inner voice, 2-4 sentences: what you feel, want and intend, and why", "feeling": "one short sentence naming what you feel most strongly right now, and toward whom or what", "wonder": null (keep carrying your question) or "a new question, only once the old one has been answered", "say": null or {"to": "a name, or all", "text": "what you say aloud", "claim": optional {"food": a kind of food, "effect": "feeds" or "hurts"} if you are telling them what a food does (true or not)}, "plan": null (keep the current plan) or [up to 4 steps, each {"do": "action", ...its fields, "ticks": 1-240}] (replaces the current plan), "note": null or "one NEW fact or lesson", "feel": {"Name": change between -0.5 and 0.5}, "mood": null or {"anger": 0-1, "fear": 0-1, "grief": 0-1, "joy": 0-1}, "pledge": null or {"follow": "a name, or none", "band": "a name for your band, if you lead one"}, "teach": null or {"to": "a name within hearing", "lesson": "something you know, in your words", "reflex": number of one of your reflexes (optional), "tale": the title of a tale you carry, to tell it on (optional)' + (mind.method ? ', "method": true to pass on your way of thinking (optional)' : '') + (known.length ? ', "way": one of the ways you know (optional)' : '') + (Object.keys(a.designs).length ? ', "design": a thing you know how to make (optional)' : '') + (a.arts.length ? ', "art": one of your arts (optional)' : '') + '}, "habits": null or {"avoid": ["food kinds your body refuses"], "spare": 0-3}, "place": null or "a name you give the place where you stand", "aim": null (keep your aim) or "a new aim, only if the old one is achieved or has failed"' +
+  let fmt = 'Reply with ONLY one JSON object, no other text:\n{"thought": "your inner voice, 2-4 sentences: what you feel, want and intend, and why", "feeling": "one short sentence naming what you feel most strongly right now, and toward whom or what", "wonder": null (keep carrying your question) or "a new question, only once the old one has been answered", "say": null or {"to": "a name, or all", "text": "what you say aloud", "claim": optional {"food": a kind of food, "effect": "feeds" or "hurts"} if you are telling them what a food does (true or not)}, "plan": null (keep the current plan) or [up to 4 steps, each {"do": "action", ...its fields, "ticks": 1-240}] (replaces the current plan), "note": null or "one NEW fact or lesson", "feel": {"Name": change between -0.5 and 0.5}, "mood": null or {"anger": 0-1, "fear": 0-1, "grief": 0-1, "joy": 0-1}, "pledge": null or {"follow": "a name, or none", "band": "a name for your band, if you lead one"}, "teach": null or {"to": "a name within hearing", "lesson": "something you know, in your words", "reflex": number of one of your reflexes (optional), "tale": the title of a tale you carry, to tell it on (optional)' + (a.faith ? ', "belief": true to teach what you hold (optional)' : '') + (mind.method ? ', "method": true to pass on your way of thinking (optional)' : '') + (known.length ? ', "way": one of the ways you know (optional)' : '') + (Object.keys(a.designs).length ? ', "design": a thing you know how to make (optional)' : '') + (a.arts.length ? ', "art": one of your arts (optional)' : '') + '}, "habits": null or {"avoid": ["food kinds your body refuses"], "spare": 0-3}, "place": null or "a name you give the place where you stand", "aim": null (keep your aim) or "a new aim, only if the old one is achieved or has failed"' +
     (a.leader == null ? ', "stance": null or {"a name or band name": "ally" or "enemy" or "neutral"} (how your band stands toward another)' + (a.knows.customs ? ', "custom": null or "a custom your whole band must now live by"' : '') : '');
   if (kind === 'deep') {
     const paths = SW.pathsFor(w, a);
@@ -860,7 +869,7 @@ M.buildPrompt = function (st, mind, kind, lean) {
       (a.lore >= L.magic.loreToCast && a.arts.length ? '\n"spell": YOU CAN WORK THE WORLD ITSELF. null, or {"law": ' + (a.arts.length > 1 ? 'one of your arts, or a list of two of them woven together' : 'your art, ' + a.arts[0]) + ', "factor": 0.3 to 2.5, "radius": 1 to ' + (L.magic.maxRadius + (a.arts.length >= 3 ? 2 : 0)) + ', "name": "what you call this working"}. For about three days, within that many steps of where you stand right now, that law of the world is multiplied by your factor, for everyone and everything there, friend or enemy. growth: how fast plants grow and bear. cold: how hard cold bites. drain: how fast a body burns energy. harm: how hard blows land. It costs energy up front, more for wider and stronger: for example ' + SW.castCost(w, 2, 1.5) + ' for radius 2 at factor 1.5, ' + SW.castCost(w, 3, 2) + ' for radius 3 at factor 2. Other arts can only be learned from those who know them. Few can do this. It is power: use it as your nature dictates.' : '') +
       (SW.greatReady(w, a) ? '\n"great": YOU ARE A MASTER. With ' + L.magic.greatHelpers + ' of your own band standing within 3 steps of you (now: ' + SW.greatReady(w, a).helpers.length + '), you can lead a GREAT WORKING that bends a law of the WHOLE WORLD for about two days, for every being and creature in it. null, or {"law": one of [' + Object.keys(SW.GREAT_LAWS).map(function (k) { return k + ' (' + SW.GREAT_LAWS[k] + ')'; }).join('; ') + '], "factor": 0.7 to 1.4, "name": "what you call it"}. It costs you ' + L.magic.greatCost + ' energy and each helper ' + L.magic.helperCost + '. This is the deepest power there is.' : '') +
       (st.settings.foresight && st.toolsOK ? '\nYou have a tool, test_reflexes: imagine living by a candidate rule list for a day and a half and see whether you survive. Each use costs ' + L.body.foresightCost + ' energy and you can use it at most 3 times. Use it before you adopt new reflexes.' : ''));
-    fmt += ', "tale": null or {"title": "a few words", "kind": "tale" or "song" or "poem", "about": optional name of the one it is about, "text": "something you lived through, saw or were told, or how the world came to be, told the way you would tell it by a fire, at most 300 characters"} (make one when something deserves to be remembered; one that is about someone adds to their standing as it spreads; telling one you were told, in your own words, changes it), "reflexes": null or [...], "creed": null or "...", "method": null or "...", "notes": null or [...], "designs": null or {...}' + (SW.greatReady(w, a) ? ', "great": null or {...}' : '') + (paths.open.length ? ', "discover": null or {...}' : '') + (a.knows.tools ? ', "invent": null or {...}' : '') + (a.lore >= L.magic.loreToCast && a.arts.length ? ', "spell": null or {...}' : '');
+    fmt += ', "tale": null or {"title": "a few words", "kind": "tale" or "song" or "poem" or "myth" (a myth tells how the world, a people or a thing came to be), "about": optional name of the one it is about, "text": "something you lived through, saw or were told, or how the world came to be, told the way you would tell it by a fire, at most 300 characters"} (make one when something deserves to be remembered; one that is about someone adds to their standing as it spreads; telling one you were told, in your own words, changes it), "belief": null or {"name": "a few words", "tenets": "what you hold to be true about this world and how one should live in it, at most 240 characters"} (only if you have come to hold something others could hold too: it becomes a teaching with a name, which others may hear, take up or refuse; those who hold the same teaching are easier in company together, and one whose teaching is taken up gains standing), "adopt": null or "the name of a teaching you have heard" (to take it as your own), "renounce": null or true (to give up the teaching you hold), "reflexes": null or [...], "creed": null or "...", "method": null or "...", "notes": null or [...], "designs": null or {...}' + (SW.greatReady(w, a) ? ', "great": null or {...}' : '') + (paths.open.length ? ', "discover": null or {...}' : '') + (a.knows.tools ? ', "invent": null or {...}' : '') + (a.lore >= L.magic.loreToCast && a.arts.length ? ', "spell": null or {...}' : '');
   }
   out.push(fmt + '}');
   /* a lean prompt, for a second try when the first drew no answer: the same mind, without the lists it can do without */
@@ -941,10 +950,23 @@ M.apply = function (st, mind, kind, d, meta) {
   }
   if (d.tale && typeof d.tale === 'object' && d.tale.title && d.tale.text) {
     const tt = clip(d.tale.title, 40), tales = mind.tales = mind.tales || [], old = tales.filter(function (q) { return q.title.toLowerCase() === tt.toLowerCase(); })[0];
-    if (old) { old.text = clip(d.tale.text, 300); old.retold = (old.retold || 0) + 1; entry.changes.push('retold the tale "' + tt + '" in its own words'); }
-    else { const kd = ['song', 'poem'].indexOf(String(d.tale.kind)) >= 0 ? String(d.tale.kind) : 'tale', subj = d.tale.about ? SW.findAgentByName(w, String(d.tale.about)) : null; tales.push({ title: tt, text: clip(d.tale.text, 300), by: a.name, day: SW.day(w), kind: kd, about: subj ? subj.name : null }); if (subj && subj !== a) subj.sung = (subj.sung || 0) + 1; if (tales.length > 6) tales.shift(); entry.changes.push('made a tale: "' + tt + '"'); chron(st, 'lore', a.name + ' made a tale: "' + tt + '".', [a.id], a); }
+    if (old) { old.text = clip(d.tale.text, 300); old.retold = (old.retold || 0) + 1; entry.changes.push('retold the tale "' + tt + '" in its own words'); const ci0 = old.cid && cult(st).items[old.cid]; if (ci0) { ci0.changed++; cultLog(st, { k: 'retold', id: ci0.id, kind: ci0.kind, title: ci0.title, who: a.name, people: a.people }); } }
+    else { const kd = ['song', 'poem', 'myth'].indexOf(String(d.tale.kind)) >= 0 ? String(d.tale.kind) : 'tale', subj = d.tale.about ? SW.findAgentByName(w, String(d.tale.about)) : null, ci = cultNew(st, kd, tt, clip(d.tale.text, 300), a, { about: subj ? subj.name : null }); tales.push({ title: tt, text: clip(d.tale.text, 300), by: a.name, day: SW.day(w), kind: kd, about: subj ? subj.name : null, cid: ci.id }); if (subj && subj !== a) subj.sung = (subj.sung || 0) + 1; if (tales.length > 6) tales.shift(); entry.changes.push('made a tale: "' + tt + '"'); chron(st, 'lore', a.name + ' made a tale: "' + tt + '".', [a.id], a); }
     M.record(st, { t: 'tale', name: a.name, title: tt, text: clip(d.tale.text, 300), retold: !!old });
   }
+  if (d.belief && typeof d.belief === 'object' && d.belief.name && d.belief.tenets) {
+    const bn = clip(d.belief.name, 40), bt = clip(d.belief.tenets, 240), F = w.faiths = w.faiths || {}, mine = a.faith && cult(st).items[a.faith];
+    if (mine && mine.byId === a.id) { mine.text = bt; mine.changed++; cultLog(st, { k: 'retold', id: mine.id, kind: 'belief', title: mine.title, who: a.name, people: a.people }); entry.changes.push('restated the teaching "' + mine.title + '"'); }
+    else { if (a.faith) cultDrop(st, a.faith, a); const bi = cultNew(st, 'belief', bn, bt, a); a.faith = bi.id; F[bi.id] = { name: bi.title, by: a.id, n: 1 }; a.stat = null; entry.changes.push('began a teaching: "' + bn + '"'); chron(st, 'lore', a.name + ' began a teaching, "' + bn + '": ' + bt, [a.id], a); story(st, a.id, 'I began a teaching and called it "' + bn + '".'); M.record(st, { t: 'belief', name: a.name, title: bn, text: bt }); }
+  }
+  if (typeof d.adopt === 'string' && d.adopt.trim()) {
+    const want = d.adopt.trim().toLowerCase(), C = cult(st), hid = Object.keys(mind.heard || {}).filter(function (id) { return C.items[id] && C.items[id].title.toLowerCase() === want; })[0];
+    if (hid && a.faith !== hid) { const it = C.items[hid], src = w.agents.filter(function (o) { return o.name === mind.heard[hid].from; })[0] || null; if (a.faith) cultDrop(st, a.faith, a); a.faith = hid; cultHold(st, hid, a, src, false, src ? ((it.holders[src.id] || {}).gen || 0) + 1 : 1);
+      const F = w.faiths = w.faiths || {}; if (!F[hid]) F[hid] = { name: it.title, by: it.byId, n: 0 }; F[hid].n++; entry.changes.push('took up the teaching "' + it.title + '"'); chron(st, 'lore', a.name + ' took up the teaching "' + it.title + '"' + (it.by ? ', begun by ' + it.by : '') + '.', [a.id], a); story(st, a.id, 'I took up the teaching "' + it.title + '".');
+      if (it.byId != null && it.byId !== a.id) { tell(st, it.byId, a.name + ' has taken up your teaching, "' + it.title + '".', 6); const fo = w.agents.filter(function (o) { return o.id === it.byId; })[0]; if (fo) fo.stat = null; } }
+    else if (!hid) entry.changes.push('wished to take up "' + clip(d.adopt, 40) + '", a teaching it has not heard');
+  }
+  if (d.renounce === true && a.faith) { const it = cult(st).items[a.faith]; cultDrop(st, a.faith, a); if (it) { chron(st, 'lore', a.name + ' gave up the teaching "' + it.title + '".', [a.id], a); cultLog(st, { k: 'left', id: it.id, kind: 'belief', title: it.title, who: a.name, people: a.people }); } a.faith = null; entry.changes.push('gave up its teaching'); }
   if (d.teach && typeof d.teach === 'object' && d.teach.to) {
     const t = SW.findAgentByName(w, d.teach.to), tm = t && st.minds[t.id];
     if (t && tm && t !== a) {
@@ -952,7 +974,7 @@ M.apply = function (st, mind, kind, d, meta) {
       if (res.why === 'too far to hear') tell(st, a.id, 'You tried to teach ' + t.name + ', but they were too far away to hear.', 1);
       else {
         const got = [];
-        if (typeof d.teach.lesson === 'string' && d.teach.lesson.trim()) { if (addNote(tm, 'Taught by ' + a.name + ': ' + d.teach.lesson, 220)) got.push('a lesson: "' + clip(d.teach.lesson, 160) + '"'); else got.push('a lesson you already knew'); }
+        if (typeof d.teach.lesson === 'string' && d.teach.lesson.trim()) { const sy = cultNew(st, 'saying', clip(d.teach.lesson, 60), clip(d.teach.lesson, 220), a, null, true); cultHold(st, sy.id, t, a, false, ((sy.holders[a.id] || {}).gen || 0) + 1, true); if (addNote(tm, 'Taught by ' + a.name + ': ' + d.teach.lesson, 220)) got.push('a lesson: "' + clip(d.teach.lesson, 160) + '"'); else got.push('a lesson you already knew'); }
         const ri = Math.round(Number(d.teach.reflex)) - 1;
         if (ri >= 0 && a.policy[ri]) { const txt = JSON.stringify(a.policy[ri]); if (addNote(tm, 'Reflex taught by ' + a.name + ' (adopt it when you reflect, if you wish): ' + txt, 300)) got.push('a reflex'); }
         const way = d.teach.way || d.teach.path;
@@ -962,12 +984,13 @@ M.apply = function (st, mind, kind, d, meta) {
         /* what the teacher knows of foods passes too */
         for (const fk in mind.foods) if (!tm.foods[fk] && !mind.foods[fk].seen) tm.foods[fk] = { n: 0, gain: mind.foods[fk].gain, fx: mind.foods[fk].fx, seen: a.name + "'s teaching" };
         for (const fk in (mind.felt || {})) { tm.felt = tm.felt || {}; if (!tm.felt[fk]) tm.felt[fk] = clip(mind.felt[fk], 90) + ' (so ' + a.name + ' says)'; }
+        if (d.teach.belief && a.faith && cult(st).items[a.faith]) { const it = cult(st).items[a.faith]; tm.heard = tm.heard || {}; if (t.faith !== a.faith) { tm.heard[it.id] = { from: a.name, day: SW.day(w) }; got.push('the teaching "' + it.title + '": ' + it.text + ' (to take it as your own, reply with adopt: "' + it.title + '" at a deep reflection)'); tm.wantDeep = true; } }
         if (d.teach.tale) {
           const want = String(d.teach.tale).toLowerCase(), tl = (mind.tales || []).filter(function (q) { return q.title.toLowerCase() === want; })[0];
           if (tl) { a.stats.told = (a.stats.told || 0) + 1;
             /* a tale changes a little in every mouth: a part is dropped, a number grows */
             const drift = function (txt) { let o = txt; const parts = o.split(/(?<=[.!?;])\s+/); if (parts.length > 2 && Math.random() < 0.3) { parts.splice(1 + Math.floor(Math.random() * (parts.length - 1)), 1); o = parts.join(' '); } if (Math.random() < 0.3) o = o.replace(/\b(two|three|four|five|six|seven)\b/, function (n) { return { two: 'three', three: 'four', four: 'five', five: 'seven', six: 'nine', seven: 'ten' }[n]; }); return o; };
-            const pass = function (hm, hname, hid) { if (!hm || hm.dead) return false; hm.tales = hm.tales || []; if (hm.tales.some(function (q) { return q.title === tl.title; })) return false; hm.tales.push({ title: tl.title, text: drift(tl.text), by: tl.by, from: a.name, day: SW.day(w), kind: tl.kind || 'tale', about: tl.about || null, gen: (tl.gen || 0) + 1 }); if (hm.tales.length > 6) hm.tales.shift(); const sj = tl.about ? SW.findAgentByName(w, tl.about) : null; if (sj && sj.id !== hid) sj.sung = (sj.sung || 0) + 1; hm.rev++; return true; };
+            const pass = function (hm, hname, hid) { if (!hm || hm.dead) return false; hm.tales = hm.tales || []; if (hm.tales.some(function (q) { return q.title === tl.title; })) return false; const nt = drift(tl.text), ho = w.agents.filter(function (q) { return q.id === hid; })[0]; hm.tales.push({ title: tl.title, text: nt, by: tl.by, from: a.name, day: SW.day(w), kind: tl.kind || 'tale', about: tl.about || null, gen: (tl.gen || 0) + 1, cid: tl.cid || null }); if (tl.cid && ho) cultHold(st, tl.cid, ho, a, nt !== tl.text, (tl.gen || 0) + 1); if (hm.tales.length > 6) hm.tales.shift(); const sj = tl.about ? SW.findAgentByName(w, tl.about) : null; if (sj && sj.id !== hid) sj.sung = (sj.sung || 0) + 1; hm.rev++; return true; };
             if (a.knows.lorekeeping) w.agents.forEach(function (o) { if (o !== a && o !== t && SW.cheb(o.x, o.y, a.x, a.y) <= w.laws.body.hearing && SW.understands(o, a.lang) >= 0.5 && pass(st.minds[o.id], o.name, o.id)) tell(st, o.id, a.name + ' told the ' + (tl.kind || 'tale') + ' "' + tl.title + '" aloud, and you heard it: ' + clip(tl.text, 200), 4); });
             tm.tales = tm.tales || []; if (!tm.tales.some(function (q) { return q.title === tl.title; })) { pass(tm, t.name, t.id); if (false) tm.tales.push({ title: tl.title, text: tl.text, by: tl.by, from: a.name, day: SW.day(w) }); if (tm.tales.length > 6) tm.tales.shift(); got.push('the tale "' + tl.title + '"'); chron(st, 'lore', a.name + ' told ' + t.name + ' the tale "' + tl.title + '".', [a.id, t.id], a); } }
         }
@@ -1144,13 +1167,65 @@ M.think = async function (st, mind, kind) {
 /* a community learns from what happens to its own: a death and how it came, a sickness and its cause, a thing that worked.
    Those who saw it or belong with the one it happened to carry it at once; from them it passes, mouth to mouth, to anyone who understands their speech. */
 function community(st, a, reach) { const w = st.world, out = []; if (!a) return out; w.agents.forEach(function (o) { if (o === a || o.dead) return; const d = SW.cheb(o.x, o.y, a.x, a.y); if (SW.rootOf(w, o) === SW.rootOf(w, a) || (a.parents || []).indexOf(o.id) >= 0 || (o.parents || []).indexOf(a.id) >= 0 || (o.people === a.people && d <= (reach || 30)) || d <= w.laws.body.sight) out.push(o.id); }); return out; }
-function lesson(st, ids, text) { (ids || []).forEach(function (id) { const m = st.minds[id]; if (!m || m.dead) return; m.lessons = m.lessons || []; if (m.lessons.some(function (q) { return q.text === text; })) return; m.lessons.push({ day: SW.day(st.world), text: text }); if (m.lessons.length > 10) m.lessons.shift(); m.rev++; }); if (ids && ids.length) { st.world.tally.lessons = (st.world.tally.lessons || 0) + 1; M.record(st, { t: 'lesson', text: text, to: ids.length }); } }
+function lesson(st, ids, text) { const w0 = st.world, first = (ids || []).map(function (id) { return w0.agents.filter(function (o) { return o.id === id; })[0]; }).filter(Boolean), ci = first.length ? cultNew(st, 'lesson', text, text, first[0], null, false) : null; if (ci) first.forEach(function (o) { cultHold(st, ci.id, o, null, false, 0, true); });
+  (ids || []).forEach(function (id) { const m = st.minds[id]; if (!m || m.dead) return; m.lessons = m.lessons || []; if (m.lessons.some(function (q) { return q.text === text; })) return; m.lessons.push({ day: SW.day(st.world), text: text, cid: ci ? ci.id : null }); if (m.lessons.length > 10) m.lessons.shift(); m.rev++; }); if (ids && ids.length) { st.world.tally.lessons = (st.world.tally.lessons || 0) + 1; M.record(st, { t: 'lesson', text: text, to: ids.length }); } }
 M.lesson = lesson;
+/* ---------- culture: what is made, held and handed on. Every idea has an origin, holders, and a path by which it spread. ---------- */
+function cult(st) { const w = st.world; return w.culture || (w.culture = { seq: 1, items: {}, log: [], days: [], rites: {} }); }
+function cultLog(st, e) { const C = cult(st); e.day = SW.day(st.world); C.log.push(e); if (C.log.length > 400) C.log.splice(0, C.log.length - 400); C.rev = (C.rev || 0) + 1; }
+function cultNew(st, kind, title, text, a, extra, quiet) {
+  const w = st.world, C = cult(st), key = kind + ':' + String(text || title).toLowerCase(); C.byText = C.byText || {};
+  if (C.byText[key] && C.items[C.byText[key]]) { const it0 = C.items[C.byText[key]]; if (a && !it0.holders[a.id]) cultHold(st, it0.id, a, null, false, 0, true); return it0; }
+  const id = 'c' + (C.seq++), it = { id: id, kind: kind, title: clip(title, 60), text: clip(text || '', 320), by: a ? a.name : null, byId: a ? a.id : null, people: a ? a.people : null, day: SW.day(w), holders: {}, reach: {}, tellings: 0, changed: 0, depth: 0 };
+  if (extra) for (const k in extra) it[k] = extra[k];
+  C.items[id] = it; C.byText[key] = id; if (a) { it.holders[a.id] = { day: it.day, gen: 0 }; if (a.people != null) it.reach[a.people] = it.day; }
+  if (!quiet) cultLog(st, { k: 'made', id: id, kind: kind, title: it.title, who: it.by, people: it.people });
+  const ids = Object.keys(C.items); if (ids.length > 280) { const alive = {}; w.agents.forEach(function (o) { alive[o.id] = 1; }); for (let i = 0; i < ids.length && Object.keys(C.items).length > 240; i++) { const q = C.items[ids[i]]; if (q.kind === 'lesson' && !Object.keys(q.holders).some(function (h) { return alive[h]; })) delete C.items[ids[i]]; } }
+  C.rev = (C.rev || 0) + 1; return it;
+}
+function cultHold(st, id, o, from, changed, gen, quiet) {
+  const w = st.world, C = cult(st), it = C.items[id]; if (!it || !o || it.holders[o.id]) return false;
+  const day = SW.day(w); it.holders[o.id] = { day: day, from: from ? from.name : null, gen: gen || 0 }; if (from) it.tellings++; if (changed) it.changed++; if ((gen || 0) > it.depth) it.depth = gen;
+  if (o.people != null && it.reach[o.people] == null) { it.reach[o.people] = day; if (it.people != null && o.people !== it.people) { cultLog(st, { k: 'crossed', id: id, kind: it.kind, title: it.title, who: o.name, from: from ? from.name : null, people: o.people, of: it.people }); w.tally.crossIdeas = (w.tally.crossIdeas || 0) + 1; quiet = true; } }
+  if (!quiet && from) cultLog(st, { k: 'passed', id: id, kind: it.kind, title: it.title, who: o.name, from: from.name, people: o.people, changed: !!changed });
+  C.rev = (C.rev || 0) + 1; return true;
+}
+function cultDrop(st, id, o) { const it = cult(st).items[id]; if (it && o && it.holders[o.id]) { delete it.holders[o.id]; cult(st).rev++; } }
+/* once a day, how many living beings of each people hold each idea: the curve of its spread */
+function cultSnap(st) {
+  const w = st.world, C = cult(st), day = SW.day(w); if (C.snapDay === day) return; C.snapDay = day;
+  const pe = {}; w.agents.forEach(function (o) { pe[o.id] = o.people == null ? -1 : o.people; });
+  const row = { day: day, n: {}, p: {} };
+  for (const id in C.items) { const it = C.items[id]; let n = 0; const bp = {}; for (const h in it.holders) if (pe[h] != null) { n++; bp[pe[h]] = (bp[pe[h]] || 0) + 1; } if (n) { row.n[id] = n; row.p[id] = bp; } }
+  C.days.push(row); if (C.days.length > 120) C.days.shift();
+  const F = w.faiths = w.faiths || {}; for (const f in F) F[f].n = 0; w.agents.forEach(function (o) { if (o.faith && F[o.faith]) F[o.faith].n++; });
+}
+/* a way that was known before memory, or found, as an idea with holders */
+function wayItem(st, a, node) {
+  const w = st.world, k = a.knows[node]; if (!k) return null; const C = cult(st);
+  if (k.cid && C.items[k.cid]) return C.items[k.cid];
+  const founder = k.by != null ? k.by : 'p' + a.people, key = 'way:' + node + ':' + founder; C.ways = C.ways || {};
+  let it = C.ways[key] && C.items[C.ways[key]];
+  if (!it) { const src = k.by != null ? { name: k.byName || nameOf(st, k.by), id: k.by, people: a.people } : null; it = cultNew(st, 'way', (k.name && k.name !== node ? k.name + ' (' + node + ')' : node), k.idea || (k.by == null ? 'held since before memory' : ''), null, { node: node, by: src ? src.name : null, byId: src ? src.id : null, people: a.people }, k.by == null); C.ways[key] = it.id; if (a.people != null) it.reach[a.people] = it.day; }
+  k.cid = it.id; if (!it.holders[a.id]) it.holders[a.id] = { day: SW.day(w), gen: 0 };
+  return it;
+}
+M.cult = { get: cult, make: cultNew, hold: cultHold, drop: cultDrop, snap: cultSnap, way: wayItem };
+/* how many of the living hold an idea, and of which peoples */
+M.cultLive = function (st, it) { const w = st.world; let n = 0; const p = {}; for (let i = 0; i < w.agents.length; i++) { const o = w.agents[i]; if (it.holders[o.id]) { n++; p[o.people] = (p[o.people] || 0) + 1; } } return { n: n, p: p }; };
+/* a teaching one being holds reaches the ears of those who live beside it; taking it up is their own choice */
+function hearFaiths(st) {
+  const w = st.world, hr = w.laws.body.hearing, C = cult(st);
+  for (let i = 0; i < w.agents.length; i++) { const a = w.agents[i]; if (!a.faith || !C.items[a.faith]) continue; const it = C.items[a.faith];
+    for (let j = 0; j < w.agents.length; j++) { const o = w.agents[j], om = st.minds[o.id]; if (o === a || !om || om.dead || o.faith === a.faith || SW.cheb(a.x, a.y, o.x, o.y) > hr || SW.understands(o, a.lang) < 0.5) continue;
+      om.heard = om.heard || {}; if (om.heard[it.id]) continue; if (((w.tick >> 4) + a.id * 3 + o.id * 5) % 4) continue;
+      om.heard[it.id] = { from: a.name, day: SW.day(w) }; tell(st, o.id, a.name + ' lives by a teaching called "' + it.title + '": ' + it.text + ' You have heard it now. Whether to take it as your own is yours to decide.', 3); } }
+}
 function gossip(st) {
   const w = st.world, hr = w.laws.body.hearing;
   for (let i = 0; i < w.agents.length; i++) { const a = w.agents[i], m = st.minds[a.id]; if (!m || !m.lessons || !m.lessons.length) continue;
     for (let j = 0; j < w.agents.length; j++) { const o = w.agents[j], om = st.minds[o.id]; if (o === a || !om || om.dead || SW.cheb(a.x, a.y, o.x, o.y) > hr || SW.understands(o, a.lang) < 0.5) continue; om.lessons = om.lessons || []; const have = {}; om.lessons.forEach(function (q) { have[q.text] = 1; });
-      for (let k = m.lessons.length - 1; k >= 0; k--) if (!have[m.lessons[k].text]) { om.lessons.push({ day: m.lessons[k].day, text: m.lessons[k].text, from: a.name }); if (om.lessons.length > 10) om.lessons.shift(); om.rev++; break; } } }
+      for (let k = m.lessons.length - 1; k >= 0; k--) if (!have[m.lessons[k].text]) { om.lessons.push({ day: m.lessons[k].day, text: m.lessons[k].text, from: a.name, cid: m.lessons[k].cid }); if (m.lessons[k].cid) cultHold(st, m.lessons[k].cid, o, a, false, 1, true); if (om.lessons.length > 10) om.lessons.shift(); om.rev++; break; } } }
 }
 function seasonSaw(st, id, what) { const m = st.minds[id]; if (!m || m.dead) return; if (!m.sea) m.sea = { n: 0, hungry: 0, hurt: 0, sick: 0, roof: 0, sky: {}, saw: [] }; if (m.sea.saw.length < 5 && m.sea.saw.indexOf(what) < 0) m.sea.saw.push(what); }
 M.seasonSaw = seasonSaw;
@@ -1175,7 +1250,8 @@ function seasonKeep(st) {
 }
 M.tick = function (st) {
   seasonKeep(st);
-  if (st.world.tick % 80 === 13) gossip(st);
+  if (st.world.tick % 80 === 13) { gossip(st); hearFaiths(st); }
+  if (st.world.tick % st.world.laws.time.dayLength === 7) cultSnap(st);
   const ags = st.world.agents;
   for (let k = 0; k < ags.length; k++) {
     const a = ags[k], m = st.minds[a.id]; if (!m || m.dead) continue;

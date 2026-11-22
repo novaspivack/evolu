@@ -1,6 +1,6 @@
 # Evolu roadmap
 
-Set by Nova Spivack; sequenced so that the world is not asked to hold everything at once. Last updated with Generation 14 (22 November 2026).
+Set by Nova Spivack; sequenced so that the world is not asked to hold everything at once. Last updated with Generation 15 (22 November 2026).
 
 ## How this file is used
 
@@ -14,7 +14,7 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generation 14, to be watched and tuned
+## NOW: built in Generations 14 and 15, to be watched and tuned
 
 | Item | State |
 | --- | --- |
@@ -25,14 +25,19 @@ Knowledge is earned slowly, in ages. Later things need earlier ones, need materi
 | **Bridges; weapons for the hand and for a siege** (bow, shield, armour, ram, catapult, musket, cannon); defence | Built as things with properties. No siege as a planned act yet |
 | **The old workings of the world weaken** as the ages of knowledge advance | Built |
 | **Bodies that do not die by plan; kin; childhood; tongues learned by dealing with each other** | Built from the sixth run |
-| **A much larger thought budget, and runs that continue on their own** | Built: 3,000 by default, up to 100,000, and a setting to keep thinking past it |
+| **A much larger thought budget, and runs that continue on their own** | Built: 3,000 by default, up to 100,000, a setting to keep thinking past it, and minds that wake by themselves when the page opens or reloads |
+| **Necessity as the mother of invention.** What beings suffer sharpens them toward the ways that answer it; knowing neighbouring ways helps; the maker can set which hardships spur which way | Built in 15. Unknown whether it brings storage before the first winter |
+| **Culture that can be read and followed.** Every tale, song, poem, myth, teaching, saying, lesson and way is an idea with an origin, holders and a path of spread; a Culture tab shows each people's culture, how ideas spread, and what crosses between peoples | Built in 15 |
+| **Teachings** that can be begun, heard, taken up and given up, with real effect on those who share one | Built in 15, as a first step toward religions and schools of thought |
+| **Talismans and carved figures;** every prized thing remembered with its maker and each hand it passes to | Built in 15 |
+| **Bodies that reach safety and food;** animals that come to trust the hand that feeds them | Built in 15 from the seventh run |
 
-Questions the next run should answer: does anyone earn a following; do the starving get fed; do lessons change behaviour; do the peoples begin to understand each other; does anyone tame, trade or cross water.
+Answered by the seventh run: people do earn a following (nine pledges), and lessons from the dead do change plans. Still open, for the next run: does need bring storage before the first winter; do fewer starve; does anyone tell a tale, begin a teaching or take one up; does anyone tame an animal; do the peoples meet, trade or cross water.
 
 ## NEXT: once NOW is seen working
 
-- **Objects of culture** with real benefits and trade value: sculptures, special gems, talismans. **Secret manuscripts** holding spells, knowledge or cures.
-- **Religious figures, sages with followers, cults, schools of thought and religions** that form and compete, some of the light and some of the dark. Benefits, secrets, abilities and costs for those who belong, in some cases sacrifice. Shrines, temples and churches that members pay toward.
+- **Objects of culture** beyond the first talismans and carvings: special gems, named relics that gather a history. **Secret manuscripts** holding spells, knowledge or cures.
+- **Religious figures, sages with followers, cults, schools of thought and religions** growing out of teachings, that form and compete, some of the light and some of the dark. Benefits, secrets, abilities and costs for those who belong, in some cases sacrifice. Shrines, temples and churches that members pay toward.
 - **Tribute and taxes** for the common good: stores, works, defence. **Guilds and secret societies** that give benefit and take dues.
 - **Schools** for children and the young, later universities: skills learned faster than alone.
 - **Trade between lands and across water; ports and docks; colonies** as a named act. **Diplomats, spies, saboteurs; alliances** open and secret.
@@ -80,12 +85,13 @@ These run through every stage and are picked up as runs call for them.
 
 ## Known open problems
 
-- **Nothing passes between strangers.** In six runs: no trade, no theft answered, no planned fight, no animal tamed. Generation 14 lowers several of the barriers; whether that is enough is unknown.
-- **Leaders gather few followers.** Standing is the new attempt.
+- **Starvation in the first winter.** Six of sixteen in the seventh run. Generation 15 answers with need-driven discovery of storage, flight that ends at a roof, and bodies that go to food.
+- **Nothing passes between strangers.** In seven runs: no trade, no planned fight, no animal tamed, and peoples that meet a handful of times.
+- **No tale has yet been told to anyone** by a real mind.
+- **The record of a run is too large to read from the store.** An interrupted run can be read only through its final state and, from Generation 15, the maker's own small document. A full analysis needs the downloaded run log.
 - **The later ages are sketches.** From about the fourth age the ways, minerals and buildings have names and looks but little that they do.
-- **Prompts are long** (about 20,000 characters in the last run). More sections were added in Generation 14.
+- **Prompts are long** (about 17,000 characters for an everyday thought and 24,000 for a deep reflection in a young Generation 15 world).
 - **The maker's report that recipe counts did not update** in the sixth run: no fault found.
-- **Housekeeping for Generation 15:** put the required notice at the head of each file in `src/`. Bring `K.SEED` into step with the few items this file adds (later roles, new materials, recycling plants).
 
 ## Done, by generation
 
@@ -102,3 +108,4 @@ A short index; the detail is in the design log.
 | 12 | Thirst, wellbeing, buildings with uses, great weather, milk, wool, riding |
 | 13 | Nine lands and a sea, three peoples with bodies and tongues, 45 ways in five ages, deposits, great works, vessels, roads |
 | 14 | Standing and roles, songs and tales, community learning, kin and childhood, bridges, worn goods and weapons, land that wears, the sciences, 68 ways in six ages; renamed Evolu |
+| 15 | Discovery driven by need, the Culture tab, ideas with holders and paths of spread, teachings, talismans and relics, flight to shelter, taming by trust, minds awake and sound on by default |

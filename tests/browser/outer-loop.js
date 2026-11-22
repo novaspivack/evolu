@@ -21,7 +21,7 @@ const srv = http.createServer((req, res) => { const f = path.join(dir, req.url =
   });
   await page.goto('http://localhost:8128/'); await page.waitForTimeout(800);
   await page.evaluate(() => { const d = window.SWdebug; d.st.settings.perMinute = 60; d.st.settings.story.every = 1; d.st.settings.maker.every = 1; });
-  await page.selectOption('#selSpeed', '8'); await page.click('#btnMinds');
+  await page.selectOption('#selSpeed', '8'); await page.evaluate(() => { const b = document.getElementById('btnMinds'); if (!b.classList.contains('awake')) b.click(); });
   await page.waitForTimeout(34000);
   await page.keyboard.press('Escape');
   await page.click('#tabs button[data-tab="story"]'); await page.waitForTimeout(700); await page.screenshot({ path: SHOTS + '/g9-story.png', clip: { x: 1020, y: 0, width: 420, height: 900 } });

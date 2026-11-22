@@ -12,7 +12,7 @@ const land = (w, t, far) => { const f = SW.waterField(w); let best = -1; for (le
   const m = st.minds[w.agents[0].id]; w.agents[0].thirst = 80; ok(M.drives(st, m, w.agents[0], SW.look(w, w.agents[0])).some(q => q.k === 'thirst') && /THIRST: PARCHED/.test(M.buildPrompt(st, m, 'routine')), 'thirst is a drive and is in the prompt');
 }
 { // wellbeing
-  const { w, st, ev, em } = fresh(11); w.creatures = []; const a = w.agents[0], b = w.agents[1]; a.policy = [{ if: [], do: 'linger' }]; b.policy = [{ if: [], do: 'linger' }]; b.x = a.x + 1; b.y = a.y; a.rel[b.id] = 0.6; b.rel[a.id] = 0.6;
+  const { w, st, ev, em } = fresh(11); w.creatures = []; for (let i = 0; i < w.plants.length; i++) w.plants[i] = null; const a = w.agents[0], b = w.agents[1]; a.policy = [{ if: [], do: 'linger' }]; b.policy = [{ if: [], do: 'linger' }]; b.x = a.x + 1; b.y = a.y; a.rel[b.id] = 0.6; b.rel[a.id] = 0.6;
   for (let k = 0; k < 200; k++) { a.e = 12; a.hp = 30; b.e = 90; b.hp = 100; b.mood.fear = 0; b.x = a.x + 1; b.y = a.y; SW.step(w, em); } b.x = a.x + 1; b.y = a.y;
   const wa = SW.wellbeing(a), wb = SW.wellbeing(b); ok(wa.suffering > 0.6 && wa.suffering > wb.suffering + 0.3 && wa.happiness < wb.happiness, 'the starving and hurt suffer (' + wa.suffering.toFixed(2) + ' against ' + wb.suffering.toFixed(2) + ')');
   ok(b.mood.grief > 0.04, 'a friend beside them takes on grief (' + b.mood.grief.toFixed(2) + ')');

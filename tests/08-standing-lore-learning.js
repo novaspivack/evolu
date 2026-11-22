@@ -84,7 +84,7 @@ const fresh0 = a => { a.stat = null; };
   const a = w.agents[0]; const r2 = K.applyOp(w, { op: 'site', name: 'Near Stone', kind: 'stone', near: a.name, r: 2, fx: [{ on: 'joy', by: 0.2 }] }); const q2 = w.sites.find(z => z.name === 'Near Stone'); ok(r2.ok && SW.cheb(q2.x, q2.y, a.x, a.y) <= 6 && SW.cheb(q2.x, q2.y, a.x, a.y) >= 3, 'or a few steps from someone');
   ok(K.applyOp(w, { op: 'law', group: 'status', key: 'leadNeeds', value: 0.8 }).ok && w.laws.status.leadNeeds === 0.8, 'the maker can tune what standing takes');
   for (let i = 0; i < 100; i++) { SW.step(w, em); M.tick(st); } const s = K.stats(st); ok(s.camps.length >= 3 && Object.keys(s.stepsBetweenPeoples).length === 3 && s.standing.length && typeof s.landsVisited === 'string' && s.acrossPeoples && s.ageOfTheWorld === 1 && s.powerOfTheOldWorkings === 1, 'it sees where each people is, how far apart, who stands highest, who has wandered, and what crossed between peoples');
-  ok(st.settings.budget === 3000 && st.settings.endless === false, 'the budget is 3,000 thoughts, with a setting to keep thinking past it');
+  ok(st.settings.budget === 3000 && st.settings.endless === false && st.settings.autoWake === true, 'the budget is 3,000 thoughts, with a setting to keep thinking past it');
 }
 { // the long run on instinct
   for (const seed of [7, 11, 42]) { const w = SW.createWorld(seed); const d = {}; for (let k = 0; k < 7200; k++) SW.step(w, e => { if (e.type === 'death') d[e.cause] = (d[e.cause] || 0) + 1; }); ok(w.agents.length >= 7 && w.creatures.length >= 60, 'seed ' + seed + ': 30 days without minds: ' + w.agents.length + ' of 12 alive, ' + w.creatures.length + ' animals, deaths ' + JSON.stringify(d)); }

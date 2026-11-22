@@ -7,6 +7,8 @@ Exported records of real runs: worlds whose beings thought with Claude. Each fil
 | `generation-12-run-r7-mwrsw065-day20.json` | 12 | 20 days, 553 thoughts | A comfortable world: no deaths, no children, knowledge far too fast. Led to Generation 13. |
 | `generation-13-run-r7-mwrxhd1y-day30.json` | 13 | 30 days, 883 thoughts | Twelve births, seven starved, kin mating with kin, no dealings between peoples. Led to Generation 14. |
 
+The seventh run (Generation 14, `r7-mws0f6n0`, 19 days, 605 thoughts) was cut short before its log was downloaded; what could be read of it from the artifact's store is in the design log.
+
 The analysis of each is in [`docs/design-log.md`](../docs/design-log.md). Earlier runs were recorded but their files are not kept here.
 
 ## What a run file holds

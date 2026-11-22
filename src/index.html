@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Evolu</title>
+<!-- Required Notice: Copyright (c) 2026 Nova Spivack (https://github.com/novaspivack/evolu)
+     Evolu is licensed under the PolyForm Noncommercial License 1.0.0: https://polyformproject.org/licenses/noncommercial/1.0.0 -->
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -190,6 +192,15 @@ select.btn { padding-right: 6px; }
 .mk .v.kept { color: var(--life); } .mk .v.undone { color: var(--harm); } .mk .v.pending { color: var(--accent); }
 .mk ul { margin: 4px 0; padding-left: 18px; } .mk .q { color: var(--muted); margin-top: 3px; }
 .idea { font-size: 12.5px; padding: 2px 0; } .idea.done { color: var(--life); } .idea.dropped { color: var(--muted); text-decoration: line-through; }
+.cseg { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+.cseg button { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line, rgba(255,255,255,0.14)); background: transparent; color: var(--muted); cursor: pointer; }
+.cseg button[aria-pressed="true"] { background: var(--panel-2); color: var(--text); border-color: var(--accent); }
+.cseg button i, .pdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }
+.idea { border-left: 2px solid var(--accent); padding: 2px 0 2px 11px; margin: 0 0 13px; font-size: 13px; }
+.idea.belief { border-left-color: var(--mind); } .idea.way { border-left-color: var(--life); } .idea.thing { border-left-color: var(--muted); }
+.idea .t { font-weight: 600; } .idea .m { font-size: 11.5px; color: var(--muted); margin-top: 2px; } .idea blockquote { margin: 4px 0 2px; padding: 0; font-style: italic; line-height: 1.45; } .idea .alt { color: var(--muted); font-size: 12.5px; margin-top: 3px; }
+.spread { width: 100%; border-collapse: collapse; font-size: 12.5px; } .spread td { padding: 4px 4px 4px 0; vertical-align: middle; border-top: 1px solid var(--line, rgba(255,255,255,0.08)); } .spread td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted); } .spread svg { display: block; }
+.tl { list-style: none; margin: 0; padding: 0; font-size: 12.5px; } .tl li { padding: 4px 0; border-top: 1px solid var(--line, rgba(255,255,255,0.08)); } .tl li b { font-weight: 600; } .tl .d { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 6px; }
 .nums { font-size: 12.5px; line-height: 1.7; color: var(--muted); } .nums b { color: var(--text); font-weight: 600; }
 .thought .feel { font-size: 12.5px; color: var(--mind); font-style: italic; margin-top: 3px; }
 .thought .feel .rut { font-style: normal; color: var(--harm); font-size: 11px; border: 1px solid currentColor; border-radius: 6px; padding: 0 5px; margin-left: 4px; }
@@ -272,6 +283,7 @@ input[type="range"] { accent-color: var(--accent); padding: 0; }
     <nav id="tabs" role="tablist">
       <button role="tab" data-tab="inspect" aria-selected="true">Inspect</button>
       <button role="tab" data-tab="story" aria-selected="false">Story</button>
+      <button role="tab" data-tab="culture" aria-selected="false">Culture</button>
       <button role="tab" data-tab="voices" aria-selected="false">Voices</button>
       <button role="tab" data-tab="chronicle" aria-selected="false">Events</button>
       <button role="tab" data-tab="peoples" aria-selected="false">Peoples</button>
@@ -289,6 +301,7 @@ input[type="range"] { accent-color: var(--accent); padding: 0; }
     <div class="pane" id="pane-kinds" hidden></div>
     <div class="pane" id="pane-laws" hidden></div>
     <div class="pane" id="pane-story" hidden></div>
+    <div class="pane" id="pane-culture" hidden></div>
     <div class="pane" id="pane-maker" hidden></div>
     <div class="pane" id="pane-settings" hidden></div>
   </aside>

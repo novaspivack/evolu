@@ -12,6 +12,53 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## What the seventh run showed (Generation 14, 605 thoughts, 19 days, run `r7-mws0f6n0`, cut short)
+
+The run stopped at day 19 when the page reloaded and the minds did not wake again by themselves. This reading is from the state the page had written to its store (the final state of every being and the tallies). The record's thoughts and the maker's visits were too large to read through the conversation, so the maker's requests from this run are not answered here.
+
+- **Sixteen lived, six starved, ten were alive.** Four children were born. The deaths began in the first winter (days 10 to 13) and went on after it. In their own words: "My reflexes fled for 90% of a day and never fed me"; "Setha starved because I carried no food"; "Fleeing eats half my time, so a roof must come before rest."
+- **Storage was never found, though they knew they needed it.** Five beings wrote that they needed a store before winter. The way demanded tools, understanding 1 and four things built; the best builder had built three. Seven ways were known in the world by day 19: tools, fire, fishing, farming, medicine, weaving, mining.
+- **Following worked for the first time.** Nine pledges: three to Ssaua, three to Bruwen, two to Minna after Bruwen died, one to Kragar. In five earlier runs following never passed three.
+- **A community did learn from its dead.** 21 lessons were recorded, and they changed plans: "Setha starved alone with no roof and no store in winter; that same fate waits for me unless I build a shelter and keep stores near kin." "The band is how I live through winter. Zhieth and Aeiel starved alone with no roof and no store."
+- **The kin rule held and was understood** ("Balar and I are kin, so there will be no child"), but two grown children courted a parent before learning it.
+- **Taming was tried and failed.** Bruwen offered food to a tusker again and again: "it takes food from the hand but shies off". Each offering stood alone at 15 percent.
+- **Peoples still hardly met:** two first meetings across peoples, on days 11 and 18. Minerals were given as gifts inside peoples (flint 3, salt 4, amber 1, shell 2).
+- **Built:** 15 shelters, 2 halls, 3 longhalls, two named settlements. **Done together:** sharing 15 times, watchfire 5, hallwelcome 4, amberknot 3.
+- **No tale was told to anyone,** and no one became a bard. One being said "sing with me" at a fire.
+
+## Generation 15 (built, not yet run with real minds): culture and necessity
+
+Built from the seventh run and from Nova's notes of 11:13 and 11:18 am.
+
+**How a way is found (Nova asked).** It was never chance. A way opens when a being knows the ways before it, understands enough, and has practised enough of one thing (storage: building). Having watched it done halves that. A way that is open is taken at a deep reflection. That is why storage was not found: nobody had built four things.
+
+**Necessity.** What a being suffers now presses on it and fades over days: hunger, hunger in the lean season, cold, thirst, sickness, the teeth of beasts, the deaths of its own, water it could not cross, blows from its own kind, storm, speech it could not understand. Each way answers some of these (storage answers the lean season; fire answers cold and beasts; medicine sickness; rafts and bridges water; lorekeeping loss). A pressed being needs less understanding and less practice for the ways that answer what presses on it, down to 35 percent of the full demand. A death presses on everyone who saw it and on the dead one's band. Knowing neighbouring ways of the same line helps a little (4 percent each, 20 at most). Storage now asks three builds, and one hungry season brings that to two. When a way comes within reach the being is told at once, with what brought it, and is moved to reflect.
+
+**Bodies.** Chased, a being runs for a roof, a fire or home if one is near, and stops there, since beasts do not come under a roof or to a fire; it no longer flees all day. A starving body with nothing in hand goes to food it can see, whatever its plan, unless teeth are upon it. An animal remembers the hand that feeds it: each offering raises the chance, and it stays calm instead of shying off.
+
+**Culture: a new tab after Story.** Every tale, song, poem, myth, teaching, saying, lesson and way is now an idea with an origin, holders and a path. The tab has four views. *By people:* the custom each people woke with, its teachings, its myths, tales, songs and poems in full (with how another now tells them, where the telling has drifted), its sayings and hard lessons, the ways it knows and what it calls them, what it does together, and the things it prizes with their history. *How ideas spread:* one line per idea, with the curve of living holders day by day and the peoples it has reached. *Between peoples:* how much of each other's tongue each understands, what has crossed, first meetings, prized things that changed peoples. *As it happened:* the cultural record in order.
+
+**Teachings.** A being can put what it holds into a named teaching. Others hear it when taught, or by living beside one who holds it, and may take it up, refuse it, or later give it up. Those who hold the same teaching are less alone and less afraid in each other's company, and one whose teaching is taken up gains standing. Each sees which teaching others hold. Nothing is said about what a teaching should contain.
+
+**Things.** Talismans of flint, shell and obsidian (worn, each with a small lasting benefit) and carved stone figures. Every prized thing made is remembered with its maker and each hand it passes to.
+
+**Kin are shown.** Parent, child and sibling are marked in what a being sees, with the note that no child can come of it.
+
+**The maker.** It can set which hardships spur a way and how much need counts, and it sees what presses on each people, which ways are within whose reach, and the culture: ideas by kind, the most widely held, teachings and their followers, what has crossed between peoples. Its own state (visits, requests, lessons, heritage) is now also written to the store as one small document, so an interrupted run can still be learned from.
+
+**On opening.** The minds wake by themselves when the page opens and after it reloads, so a long run carries on; sound is on from the first touch or key (a browser will not start it sooner). Both can be turned off in Setup.
+
+**Housekeeping.** The required notice is at the head of every source file. The roadmap in the maker's notebook matches `ROADMAP.md`.
+
+**Checked.** 35 new checks pass with every earlier suite (300 in nine files), the scripted mind runs, the ecology, and the page in headless Chrome at desktop and phone size, including the Culture tab in all four views filled through the real paths. A world saved by Generation 14 loads and runs. Thirty days on instinct alone over sixteen seeds: 164 of 192 alive, against 153 for Generation 14; deaths by beasts fell from 16 to 8 and by starvation from 23 to 20. Two variants were measured the same way and rejected (letting a starving body ignore beasts four steps off instead of two: 159; no running for shelter: 156).
+
+**Not checked, and not built.**
+- No real mind has met Generation 15. Whether need now brings storage before the first winter, whether anyone begins or takes up a teaching, whether tales are told at all: unknown.
+- The maker's requests from the seventh run were not read (see above).
+- "Hallwelcome", which the seventh run's maker made and people used four times, is not in the heritage, because its definition was in the part of the record I could not read. It will carry over by itself if the next world is started in the same browser.
+- Manuscripts, religions with dues and rites, and the rest of NEXT are not built.
+- The music has never been heard by me.
+
 ## What the sixth run showed (Generation 13, 883 thoughts, 30 days, run `r7-mwrxhd1y`)
 
 - **Children at last, and then deaths.** Twelve births, the first on day 1; 23 beings ever lived; seven starved between days 18 and 30; sixteen were alive at the end. In the five runs before this one, two children were born in all.
@@ -23,7 +70,7 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **Prompts** ran to a median of 19,861 characters and a largest of 29,754. Two calls of 883 failed (one upstream error, one reply that was not valid JSON).
 - **The maker** made seven visits and kept every change. It wrote thirteen requests for things it could not build from its own parts: where each camp is and how far apart the peoples are; which lands each being has visited; tongues that grow from gifts, shared acts and nearness, not only from hearing; a record of meetings; a place of power set in a named land or near a settlement; a count of gifts across peoples; a count of tools used; held things with lasting effects; taming shown as an option beside an animal; food weighed before a child; a cry from the starving; food that keeps on the trail. All are answered in Generation 14 except its report that "times made" was not counting, where I found no fault.
 
-## Generation 14 (built, first run under way): the world is renamed Evolu
+## Generation 14 (built; run once, cut short at day 19: see the seventh run above): the world is renamed Evolu
 
 Built from the sixth run, from the maker's thirteen requests, and from Nova's long list of 9:52 to 10:20 am, which was sorted into what to build now and what the maker's notebook should hold for later (see `ROADMAP.md`).
 

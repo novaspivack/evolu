@@ -23,7 +23,7 @@ const srv = http.createServer((req, res) => { const f = path.join(dir, req.url =
   });
   await page.goto('http://localhost:8127/'); await page.waitForTimeout(800);
   await page.evaluate(() => { const d = window.SWdebug; d.st.settings.perMinute = 60; d.st.settings.parallel = 6; });
-  await page.selectOption('#selSpeed', '8'); await page.click('#btnSound'); await page.click('#btnMinds');
+  await page.selectOption('#selSpeed', '8'); await page.mouse.click(640, 520); await page.waitForTimeout(250); await page.evaluate(() => { const b = document.getElementById('btnMinds'); if (!b.classList.contains('awake')) b.click(); });
   await page.waitForTimeout(12000);
   await page.click('#tabs button[data-tab="settings"]'); await page.waitForTimeout(400);
   const note1 = await page.textContent('#recNote');
