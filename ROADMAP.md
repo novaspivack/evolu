@@ -74,7 +74,19 @@ Answered by the seventh run: people do earn a following (nine pledges), and less
 
 ## NEXT: once NOW is seen working
 
-**Next in order (agreed with Nova on 23 November, after Generation 25):** a day that goes round the world; then hatred that lasts, peacemakers, rivalry for mates, heroes and duels. Left out by Nova's choice: flood in the season of rains.
+**Next in order (Nova, 23 November, after Generation 25):**
+
+1. **A community raises better buildings** (near term; below).
+2. **The big round: the trees, and what is built from them** (its own section, after this one).
+3. Then, as agreed earlier the same day: a day that goes round the world; hatred that lasts, peacemakers, rivalry for mates, heroes and duels.
+
+Left out by Nova's choice: flood in the season of rains. Farther out: the sim in groups, peoples, planets (the section SCALE, below).
+
+**A community raises better buildings (Nova, 23 November; near term).** Nova's rule: it follows the tree; it takes at least two members of the community who hold the new knowledge; and when the new building stands, the whole community has that knowledge.
+
+- *What exists today.* Knowledge belongs to one being and passes by teaching, one to one. A building of a later age can be raised by anyone who knows its way, on bare ground; nothing is ever raised in place of an older building, and nothing a settlement builds changes what its other members know. Of 36 kinds of building all but three do something (a bond, an effect on those inside, longer-lasting tools, sight, water, a yield) or are needed for a recipe. In the fourteenth run, sixty days and forty-three alive, the people held ways of the second and third ages (smelting 3, boats 9, wells 1, sailing 1, alchemy 1) and built only shelters (32), stores (16), halls (14), workshops (8), igloos (6), longhalls (5) and one wall: no forge, well, school or dock. Until Generation 25 a being who knew many ways was shown only the last nine kinds of building.
+- *To build.* A settlement as the holder of knowledge: a way counts as the settlement's when two who live there hold it. Then any member may raise that way's buildings, and may raise one in place of an older building of the line it improves (a line of descent between kinds: shelter, hall, longhall; workshop, forge, factory; store, granary), keeping what the old one held. When it stands, every member of the settlement learns the way. The better building must be worth it: measure what each kind gives before and after.
+- *To be seen.* The building looks different on the map when it is raised, and the settlement's age shows.
 
 **From Nova's notes of 22 November, evening, after the globe was built:**
 
@@ -104,6 +116,24 @@ Answered by the seventh run: people do earn a following (nine pledges), and less
 - **Kinds of rule:** councils and votes, shared holding, private holding, rule by the armed.
 - **Later roles:** alchemists, scholars, scientists, as ways and standing allow. (The names exist; little yet depends on them.)
 
+## THE NEXT BIG ROUND: the trees, and what is built from them (Nova, 23 November)
+
+The purpose: that progress along the trees really happens, that the trees work together, and that it can be seen. The sim should be able to go all the way to advanced societies.
+
+**First an audit, with numbers from the runs, before anything is changed.**
+
+- *What there is.* 68 ways in four trees (craft 31, mind 18, society 9, life 10) over six ages. A way comes within reach by practice (a count of something done) and by the ways it needs, and opens at a deep reflection; hardship brings some nearer. It then passes by teaching and by being watched.
+- *What to find out.* How far each run got and how fast; which ways were never reached and why (the practice never done, a needed way missing, never offered); whether a band advances together or one being runs ahead; whether a way once found changes what its holder does; which ways have nothing behind them (from about the fourth age the ways, minerals and buildings have names and looks and little that they do); how the four trees lean on one another, and where they do not but should.
+- *The same for the other systems that touch them:* recipes, tools and designs, buildings, minerals and goods, standing and roles, culture and teaching, the maker's heritage.
+
+**Then, from what the audit shows:**
+
+- Progress that works for a band and a settlement, not only for one being (the near-term item above is its first step).
+- **Buildings and other structures that change to the eye as the ages pass,** and more kinds in the library where a line of descent has gaps.
+- **The maker designs structures from building blocks,** each block with its attributes (what it shelters, holds, yields, teaches, defends, what it costs and needs), in step with the trees, when needed or wanted. Today the maker can add a kind of building as data with effects; it cannot compose one.
+- **Libraries by age:** the trees, resources, structures and recipes of each later age kept in files of their own and loaded when a world reaches that age, so the early world is not weighed down by the late one and each age can be designed properly when its time comes.
+- **Not yet designed at all, to be designed in this round:** roads, vehicles, transport by sea and by air; and settlements that depend on one another (what one makes and another needs, and what carries it between them).
+
 ## LATER: ages three and four
 
 - **Monsters.** Dragons and great beasts that wander in rarely, attack, and can be killed only by a band acting together; slaying one gives much food and boons. With high skill they can be captured, tamed and bred as weapons of war or defence. They breed from eggs without mating, need a great deal of food, and the eggs hatch slowly, must be guarded, can be stolen and stolen back. Everyone wants them: those who learn of them organise to steal them, and their owners to defend them.
@@ -123,6 +153,21 @@ Answered by the seventh run: people do earn a following (nine pledges), and less
 - **The knowledge of what makes a body:** changing animals and oneself.
 - **Weapons beyond guns.**
 - **New materials far down the tree:** plastics, silicon, rare earths.
+
+## SCALE: from individuals to groups, to peoples, to planets (Nova, 23 November; farther out)
+
+**The problem.** Claude allows a page only so many thoughts in a given time, whatever the number of beings. At forty-five alive the clock of the world already runs at a third to under a half of its pace. Hundreds cannot each have a mind, let alone thousands or millions.
+
+**Nova's direction.** Past some population the sim deals in groups: the statistical life of a group, and the thoughts, dealings, culture and story of the group, in place of each individual. Later the same step again: a planet and its species dealing with another planet, with other species on it; then several star systems in a galaxy, where species (AI and cyborgs among them) contend. Each is a change of mode. Design for it now.
+
+**How I would build it (Claude's view, for Nova to accept or change).**
+
+- *Resolution by attention, not one switch for the whole world.* The number of minds stays fixed (thirty to forty), whatever the population. They are given to those who matter to the story: leaders, the notable, whoever the watcher looks at. Everyone else lives as a member of a group (a household, a band, a settlement) that runs on the world's laws in aggregate, with one mind for the group that thinks about the group's needs, quarrels and plans. A member becomes an individual when attention falls on them and folds back when it leaves, with what happened to them kept.
+- *The two grains must agree.* The rates a group runs on (births, deaths, food, learning, quarrels) are measured from worlds run as individuals, so that a settlement lived as a group comes out like the same settlement lived person by person. That is a test that can be written.
+- *The same step repeats.* Group to people or nation, to planet and species, to star system: each time the unit that thinks grows and what is below it becomes numbers. If the first step is built as a general one (a thing that has members, state, knowledge, culture and a mind), the later ones are the same thing again with larger units.
+- *What it must not lose.* What is interesting in Evolu is that beings have inner lives. Faces are kept: any member can be called up as a person, drawn from what the group is, and stays that person from then on.
+- *First steps that are useful now.* The settlement as a holder of knowledge and stores (the near-term item) is already a group with state. A chronicle of each band and settlement. The save written so that a world has levels.
+- *When.* Not before the trees work. A reasonable trigger is about sixty alive, where the clock is at a third.
 
 ## LAST
 
