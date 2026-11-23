@@ -62,7 +62,7 @@ const run = (w, n, emit) => { for (let i = 0; i < n; i++) SW.step(w, emit); };
     const ex = M.exportRun(st), dg = JSON.stringify(ex.digest).length;
     ok('the digest of all beings fits in one document', dg < 200000 && ex.digest.beings.length === w.agents.length && ex.digest.beings[0].body.policy.length > 0, dg + ' bytes');
     const snap = JSON.parse(JSON.stringify(M.snapshot(st))); st.rec.chunk = 7; const snap2 = JSON.parse(JSON.stringify(M.snapshot(st))), st2 = M.restore(snap2);
-    ok('the run keeps its identity and chunk count across a reload', st2.runId === st.runId && st2.rec.chunk === 7 && st2.settings.budget === 3000 && st2.settings.v === 12);
+    ok('the run keeps its identity and chunk count across a reload', st2.runId === st.runId && st2.rec.chunk === 7 && st2.settings.budget === 3000 && st2.settings.v >= 12);
     snap.settings = { routine: { model: 'claude-haiku-5-5', effort: '' }, deep: { model: 'claude-sonnet-5-5', effort: 'medium' }, perMinute: 10, parallel: 2, budget: 90, reflectEvery: 5, foresight: true };
     const st3 = M.restore(snap);
     ok('settings saved before this generation give way to the new defaults', st3.settings.budget === 3000 && st3.settings.perMinute === 40 && st3.settings.routine.model === 'claude-sonnet-5-5');

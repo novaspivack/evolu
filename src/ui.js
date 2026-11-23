@@ -953,6 +953,10 @@ function onWorldEvent(ev) {
     case 'dismantled': burst(ev.x, ev.y, '#b98a55', 8); soundAt('wood', ev.x, ev.y); break;
     case 'stashed': burst(ev.x, ev.y, '#d9c08a', 4); soundAt('stashed', ev.x, ev.y); break;
     case 'tamed': if (a) { glyph(a.x, a.y, '\u2665 ' + ev.kind, '#ffb3c7', 2.6); motes(a.x, a.y, '#ffb3c7', 6); soundAt('tamed', a.x, a.y, voice); } break;
+    case 'penned': if (a) { glyph(a.x, a.y, (ev.out ? 'out of the pen: ' : 'penned: ') + ev.n + ' ' + ev.kind, '#cdbb96', 2.8); motes(a.x, a.y, '#cdbb96', 6); soundAt('herd', a.x, a.y); } break;
+    case 'drove': addFx({ type: 'ring', x: ev.x, y: ev.y, r: 4, life: 3, color: 'rgba(205,187,150,0.8)' }); glyph(ev.x, ev.y, ev.n + ' ' + ev.kind + ' driven in', '#cdbb96', 3); soundAt('herd', ev.x, ev.y); break;
+    case 'strayed': glyph(ev.x, ev.y, 'a ' + ev.kind + ' breaks out', '#e0a070', 2.6); break;
+    case 'tended': if (a) { glyph(ev.x, ev.y, ev.took ? '+' + ev.took + ' ' + ev.food : 'tending the ' + ev.kind, '#a8d08d', 2.2); motes(ev.x, ev.y, '#a8d08d', 4); } break;
     case 'fed': if (a) motes(a.x, a.y, '#ffd9a0', 3); break;
     case 'rode': if (a && !ev.off) { burst(a.x, a.y, '#cdbb96', 4); soundAt('rode', a.x, a.y); } break;
     case 'telling': if (a) { motes(a.x, a.y, '#ffc67a', 12); glyph(a.x, a.y, '\u266a', '#ffe9a0', 2.6); addFx({ type: 'ring', x: a.x, y: a.y, r: 3, life: 2.4, color: 'rgba(255,198,122,0.7)' }); soundAt('telling', a.x, a.y, voice); } break;
@@ -1665,6 +1669,7 @@ function renderSettings() {
     '<label for="setWait">The world waits for the minds<small>when there are more beings than Claude can think for in time, the clock slows so that each still thinks about this often; nothing in the world is cut</small></label><select class="field" id="setWait"><option value="1"' + (S.wait !== false ? ' selected' : '') + '>yes</option><option value="0"' + (S.wait === false ? ' selected' : '') + '>no, keep the clock steady</option></select>' +
     '<label for="setFocus">The world waits for<small>everyone, or only those you are looking at. Nothing is ever frozen: beings out of view go on living on their reflexes and think less than half as often, so the ones you watch get more of the thoughts and the clock runs faster</small></label><select class="field" id="setFocus"><option value="all"' + (S.focus !== 'view' ? ' selected' : '') + '>everyone</option><option value="view"' + (S.focus === 'view' ? ' selected' : '') + '>those in view</option></select>' +
     '<label for="setThink">Each being thinks about every<small>moments of the world (a day is 240)</small></label><input type="number" id="setThink" min="30" max="480" value="' + (S.thinkEvery || 90) + '">' +
+    '<label for="setPlanWait">A being in the middle of a plan waits for it, up to<small>moments, unless something happens to it. 0: think on the clock alone, as before Generation 25</small></label><input type="number" id="setPlanWait" min="0" max="600" value="' + (S.planWait || 0) + '">' +
     '<label for="setBudget">Thought budget<small>minds fall asleep when it is spent</small></label><input type="number" id="setBudget" min="5" max="100000" value="' + S.budget + '">' +
     '<label for="setAuto">Wake the minds when the page opens<small>and after it reloads, so a long run carries on by itself</small></label><select class="field" id="setAuto"><option value="1"' + (S.autoWake ? ' selected' : '') + '>yes</option><option value="0"' + (S.autoWake ? '' : ' selected') + '>no</option></select>' +
     '<label for="setEndless">Keep thinking past the budget<small>for long runs: the minds never fall asleep by themselves</small></label><select class="field" id="setEndless"><option value="0"' + (S.endless ? '' : ' selected') + '>no</option><option value="1"' + (S.endless ? ' selected' : '') + '>yes</option></select></div>' +
@@ -1682,7 +1687,7 @@ function renderSettings() {
   bind('setRM', function (v) { S.routine.model = v; }); bind('setRE', function (v) { S.routine.effort = v; });
   bind('setDM', function (v) { S.deep.model = v; }); bind('setDE', function (v) { S.deep.effort = v; });
   bind('setEvery', function (v) { S.reflectEvery = clamp(Math.round(+v) || 5, 2, 30); });
-  bind('setWait', function (v) { S.wait = v === '1'; }); bind('setFocus', function (v) { S.focus = v === 'view' ? 'view' : 'all'; }); bind('setThink', function (v) { S.thinkEvery = clamp(Math.round(+v) || 90, 30, 480); });
+  bind('setWait', function (v) { S.wait = v === '1'; }); bind('setFocus', function (v) { S.focus = v === 'view' ? 'view' : 'all'; }); bind('setPlanWait', function (v) { S.planWait = clamp(Math.round(+v) || 0, 0, 600); }); bind('setThink', function (v) { S.thinkEvery = clamp(Math.round(+v) || 90, 30, 480); });
   bind('setFore', function (v) { S.foresight = v === '1'; });
   bind('setPM', function (v) { S.perMinute = clamp(Math.round(+v) || 6, 1, 60); });
   bind('setRec', function (v) { S.record = v === '1'; });
@@ -1752,7 +1757,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 24, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 25, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1818,7 +1823,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 24, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 25, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }

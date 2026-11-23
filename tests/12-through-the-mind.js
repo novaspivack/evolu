@@ -83,11 +83,11 @@ const run = (w, em, n, keep) => { for (let k = 0; k < n; k++) { w.creatures = []
 { // the pace of thought, and plans long enough to last until the next one
   const { w, st } = fresh(7); const a = w.agents[0], m = st.minds[a.id];
   think(st, a, 'routine', { plan: [{ do: 'rest', ticks: 10 }] }); w.tick += 90; think(st, a, 'routine', { plan: null }); w.tick += 110; think(st, a, 'routine', { plan: null });
-  ok(m.gap === 100 && /YOUR THOUGHTS COME about once every 100 moments\. When you make a plan, let its steps add up to at least that long \(up to 5 steps\)/.test(M.buildPrompt(st, m, 'routine')), 'a mind is told how often its thoughts come, so that a plan can last until the next one');
+  ok(m.gap === 100 && /YOUR NEXT THOUGHT comes when your plan has run out[^\n]*Lately your thoughts have come about every 100 moments\. So plan as far as you can see \(up to 5 steps/.test(M.buildPrompt(st, m, 'routine')), 'a mind is told how often its thoughts come, so that a plan can last until the next one');
   think(st, a, 'routine', { plan: [1, 2, 3, 4, 5, 6].map(() => ({ do: 'rest', ticks: 20 })) }); ok(a.plan.length + (a.intent ? 1 : 0) === 5, 'and a plan may hold five steps');
-  const d = M.defaultSettings(); ok(d.v === 12 && d.perMinute === 40 && d.parallel === 4, 'by default forty thoughts a minute, four at once');
+  const d = M.defaultSettings(); ok(d.v >= 12 && d.perMinute === 40 && d.parallel === 4, 'by default forty thoughts a minute, four at once');
   const snap = JSON.parse(JSON.stringify(M.snapshot(st))); snap.settings = Object.assign({}, snap.settings, { v: 10, perMinute: 24, parallel: 4, budget: 9000, sound: false }); const st2 = M.restore(snap);
-  ok(st2.settings.v === 12 && st2.settings.perMinute === 40 && st2.settings.parallel === 4 && st2.settings.budget === 9000 && st2.settings.sound === false, 'settings saved by Generation 17 are kept, and its pace moves to the new one where it had not been changed');
+  ok(st2.settings.v >= 12 && st2.settings.perMinute === 40 && st2.settings.parallel === 4 && st2.settings.budget === 9000 && st2.settings.sound === false, 'settings saved by Generation 17 are kept, and its pace moves to the new one where it had not been changed');
   snap.settings = Object.assign({}, snap.settings, { v: 10, perMinute: 12, parallel: 2 }); const st3 = M.restore(snap); ok(st3.settings.perMinute === 12 && st3.settings.parallel === 2, 'a pace the owner chose is left alone');
 }
 console.log(fails ? fails + ' FAILED' : 'ALL PASS');

@@ -16,10 +16,10 @@ M.MODELS = [
 ];
 M.defaultSettings = function () {
   return {
-    v: 12, autoWake: true, sound: true,
+    v: 13, autoWake: true, sound: true,
     routine: { model: 'claude-sonnet-5-5', effort: '' },
     deep: { model: 'claude-sonnet-5-5', effort: 'medium' },
-    perMinute: 40, parallel: 4, budget: 3000, endless: false, reflectEvery: 4, foresight: true, record: true, wait: true, thinkEvery: 90, focus: 'all',
+    perMinute: 40, parallel: 4, budget: 3000, endless: false, reflectEvery: 4, foresight: true, record: true, wait: true, thinkEvery: 90, planWait: 180, focus: 'all',
     story: { model: 'claude-sonnet-5-5', effort: 'medium', every: 3 },
     maker: { on: true, model: 'claude-opus-5-5', effort: 'high', every: 4 }
   };
@@ -83,7 +83,7 @@ M.record = function (st, item) {
 M.digest = function (st) {
   const w = st.world;
   return {
-    run: st.runId, generation: 24, seed: w.seed, culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {} }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
+    run: st.runId, generation: 25, seed: w.seed, culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {} }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
     peoples: (w.peoples || []).map(function (P) { return { name: P.name, noun: P.noun, kind: P.kind, way: P.way, custom: P.custom, land: P.region != null && w.regions[P.region] ? w.regions[P.region].name : '', alive: w.agents.filter(function (a) { return a.people === P.id; }).length }; }), lands: (w.regions || []).map(function (R) { return { name: R.name, biome: R.biome, minerals: R.minerals || [], beings: w.agents.filter(function (a) { return w.region[a.y * w.W + a.x] === R.id; }).length }; }), tally: w.tally || {}, alive: w.agents.length, creatures: w.creatures.length, plants: w.plants.filter(Boolean).length, wars: w.wars, settlements: w.settlements.map(function (q) { return q.name; }), ways: Object.keys(w.laws.tree).filter(function (k) { return w.agents.some(function (a) { return a.knows[k]; }); }), designs: Object.keys(w.laws.tools),
     beings: Object.keys(st.minds).map(function (id) {
       const m = st.minds[id], a = agentById(w, +id);
@@ -374,7 +374,7 @@ function chron(st, kind, text, ids, at) {
   st.chron.push({ tick: st.world.tick, kind: kind, text: text, ids: ids || [], x: at ? at.x : null, y: at ? at.y : null });
   if (st.chron.length > M.CHRON.hold) { const cut = st.chron.length - M.kept(st, st.chron, M.CHRON.hold, M.CHRON.most).length; if (cut > 0) st.chron.splice(0, cut); }
 }
-M.chron = chron;
+M.chron = chron; M.tell = tell;
 /* The chronicle in hand. The chronicler writes each chapter from everything recorded since the chapter before, so nothing recorded since then is let
    go until that chapter is written: not from memory, and not from a saved world. (Before, memory held the last 300 entries and a save the last 120,
    while forty-five beings record about 95 a day and a chapter covers three days or, when the chronicler cannot get through, many more.) There is a
@@ -685,7 +685,11 @@ M.onEvent = function (st, ev) {
       chron(st, 'discovery', A + ' went past the edge of the known world and found new land' + (ev.land ? ', part of ' + ev.land : '') + (what ? ': ' + what : '') + '.', [ev.a], a);
       if (a) lesson(st, community(st, a, 40), A + ' pushed past the edge of the known world near (' + a.x + ',' + a.y + ') and found new land' + (what ? ' with ' + what : '') + '.');
       M.record(st, { t: 'opened', name: A, tiles: ev.tiles, found: ev.found || [], herd: ev.herd || '', land: ev.land || '' }); break; }
-    case 'herdcame': chron(st, 'hunt', 'A herd of ' + ev.kind + ' came into the land from beyond its edge.', []); break;
+    case 'herdcame': chron(st, 'hunt', ev.sea ? ev.kind + ' came in again from the open sea.' : 'A herd of ' + ev.kind + ' came into the land from beyond its edge.', []); break;
+    case 'penned': if (a) { tell(st, ev.a, ev.out ? 'You led ' + ev.n + ' ' + ev.kind + ' out of the pen. They follow you again.' : 'You put ' + ev.n + ' ' + ev.kind + ' in the pen. They stay there now and no longer trail you, and a pair kept together breeds sooner than in the wild. They graze what grows within a few steps of the pen; if that runs out they break out. Whoever holds the pen keeps the herd.', 3); if (!ev.out) { story(st, ev.a, 'I penned ' + ev.n + ' ' + ev.kind + '.'); watch(st, a, 'pen', 'You watched ' + A + ' shut ' + ev.kind + ' in a pen, where they stayed.', 2); chron(st, 'craft', A + ' put ' + ev.n + ' ' + ev.kind + ' in a pen.', [ev.a], a); } } break;
+    case 'drove': if (a) { lesson(st, community(st, a, 30).concat([ev.a]), A + ' drove a wild herd of ' + ev.kind + ' into a pen' + (ev.helpers ? ' with others driving beside them' : '') + ', and the animals that reached it were kept.'); tell(st, ev.a, 'You drove ' + ev.n + ' wild ' + ev.kind + ' into the pen. They are yours and your band\'s now, and stay there while they find grazing.', 5, true); story(st, ev.a, 'I drove ' + ev.n + ' ' + ev.kind + ' into our pen.'); chron(st, 'hunt', A + ' drove ' + ev.n + ' wild ' + ev.kind + ' into a pen' + (ev.helpers ? ', with ' + ev.helpers + ' driving beside' : '') + '.', [ev.a], a); } break;
+    case 'strayed': if (ev.a != null) tell(st, ev.a, 'A ' + ev.kind + ' of yours broke out of the pen: for too long it had found nothing to eat within reach. It is still yours and will trail you again when you are near.', 3); break;
+    case 'tended': if (a) { tell(st, ev.a, 'You tended the ' + ev.kind + '.' + (ev.took ? ' You took the ' + ev.took + ' ' + ev.food + ' it had kept.' : '') + (ev.season ? ' While someone tends it every day or two it lays ' + ev.food + ' in the nearest store of yours or of your band within eight steps; with no such store it keeps only a little here.' : ' It gives nothing in this season, and will again when its season comes if it is tended then.'), ev.first ? 3 : 0); if (ev.first) { story(st, ev.a, 'I tended a ' + ev.kind + ' for the first time.'); chron(st, 'craft', A + ' began to tend a ' + ev.kind + '.', [ev.a], a); } } break;
     case 'telling': { const mt = st.minds[ev.a]; if (mt && a) { const src = (mt.lessons || []).slice(-1)[0] || null, lf = (mt.life || []).slice(-1)[0] || null, text = clip(src ? src.text : lf ? lf.text.replace(/^I /, A + ' ') : A + ' sat by the fire and spoke of the days gone by.', 300), title = clip(text.split(' ').slice(0, 5).join(' '), 40);
         mt.tales = mt.tales || []; let tl = mt.tales.filter(function (q) { return q.text === text; })[0];
         if (!tl) { const ci = cultNew(st, 'tale', title, text, a, null); tl = { title: title, text: text, by: A, day: SW.day(st.world), kind: 'tale', about: null, cid: ci.id }; mt.tales.push(tl); if (mt.tales.length > 6) mt.tales.shift(); chron(st, 'lore', A + ' told a tale by the fire: "' + title + '".', [ev.a].concat(ev.near || []), a); M.record(st, { t: 'tale', name: A, title: title, text: text, told: true }); }
@@ -795,6 +799,28 @@ M.ruleText = function (r, i) {
   if (r.x != null) p.push('(' + r.x + ',' + r.y + ')');
   return (i != null ? (i + 1) + '. ' : '') + 'IF ' + c + ' THEN ' + r.do + (p.length ? ' [' + p.join(', ') + ']' : '') + (r.urgent ? ' (urgent)' : '');
 };
+/* What a being is shown of what it knows how to make. Before, it was shown the last six recipes in the order they were added to the world, so every
+   recipe added later (the maker's deeds: sharing, amberknot, nightsong) pushed the older ones out of sight, and in fourteen runs no one was ever told
+   that a raft, a cloak, a basket or a sled could be made: 162 thoughts of the fourteenth run speak of rafts and boats and not one plan made one.
+   Now nothing it knows is hidden. The eight that matter most are shown in full, each with what the being lacks for it this moment: first what it has
+   never made, a vessel when water presses on it and it has none, what it could make now; what it has made often and what it already holds come last.
+   The rest are named. */
+M.makeable = function (st, a) {
+  const w = st.world, L = w.laws, rc = L.recipes || {}, G = L.goods || {}, th = a.things || {}, made = a.mk || {}, keys = Object.keys(rc), out = [];
+  const afloat = SW.floatOf(w, a) > 0, wet = (a.press && a.press.water) || 0;
+  keys.forEach(function (k, i) {
+    const R = rc[k]; if (R.way && !a.knows[R.way]) return;
+    const lack = SW.lacks(w, a, k) || [], gives = R.gives && R.gives.thing, n = made[k] || 0;
+    let s = i / 1000; /* all else equal, the newer deed first, as it was */
+    if (!n) s += 2; else s -= Math.min(2, n * 0.4);
+    if (!lack.length) s += 1.5; else s -= Math.min(1.5, lack.length * 0.4);
+    if (gives && G[gives] && G[gives].float) s += afloat ? -2 : 2 + Math.min(3, wet * 2);
+    else if (gives && th[gives] > 0) s -= 1.5;
+    out.push({ k: k, s: s, lack: lack.map(function (t) { return t.replace(/ \(you have \d+\)/, ''); }) });
+  });
+  out.sort(function (p, q) { return q.s - p.s; });
+  return { full: out.slice(0, 8), more: out.slice(8, 40).map(function (q) { return q.k; }) };
+};
 M.needsText = function (N) {
   N = N || {}; const p = [];
   ['wood', 'stone', 'ore', 'clay'].forEach(function (k) { if (N[k]) p.push(N[k] + ' ' + k); });
@@ -872,7 +898,8 @@ M.buildPrompt = function (st, mind, kind, lean) {
     (v.wars.length ? '\nAT WAR: ' + v.wars.map(function (q) { return 'with ' + q.name + ' for ' + q.days + ' days, ' + q.dead + ' dead'; }).join('; ') + '. Only a leader ends a war, by declaring the other side neutral or ally.' : '') +
     (a.tools.length ? '\nTOOLS YOU CARRY: ' + a.tools.map(function (q) { const d = L.tools[q.k]; return d ? q.k + ' (for ' + d.use + ', strength x' + d.power + ', ' + q.wear + ' uses left)' : q.k; }).join('; ') + '. A tool works by itself whenever you do its kind of work.' : '') +
     (Object.keys(a.designs).length ? '\nTHINGS YOU KNOW HOW TO MAKE: ' + Object.keys(a.designs).filter(function (k) { return L.tools[k]; }).map(function (k) { const d = L.tools[k]; return k + ' (for ' + d.use + ', x' + d.power + ', costs ' + d.wood + ' wood + ' + d.stone + ' stone' + (d.by === a.id ? ', your own invention' : ', invented by ' + d.byName) + ')'; }).join('; ') + '.' : '') + '\n' +
-    'YOUR PLAN: ' + (a.intent ? 'now doing ' + stepText(a.intent) + (a.plan.length ? '; then ' + a.plan.map(stepText).join('; then ') : '') + '. THIS PLAN IS STILL RUNNING' + (a.plan.length ? ' and ' + a.plan.length + ' step' + (a.plan.length > 1 ? 's have' : ' has') + ' not begun' : '') + '. A new plan throws the rest of it away. Answer "plan": null to let it finish, unless something has changed' : 'empty. Your body is on reflexes (just now: ' + a.doing + ').') + (mind.gap > 20 ? '\nYOUR THOUGHTS COME about once every ' + Math.round(mind.gap / 10) * 10 + ' moments. When you make a plan, let its steps add up to at least that long (up to 5 steps), with the most needed first: a plan that runs out early leaves your body on reflexes until you next think.' : ''));
+    'YOUR PLAN: ' + (a.intent ? 'now doing ' + stepText(a.intent) + (a.plan.length ? '; then ' + a.plan.map(stepText).join('; then ') : '') + '. THIS PLAN IS STILL RUNNING' + (a.plan.length ? ' and ' + a.plan.length + ' step' + (a.plan.length > 1 ? 's have' : ' has') + ' not begun' : '') + '. A new plan throws the rest of it away. Answer "plan": null to let it finish, unless something has changed' : 'empty. Your body is on reflexes (just now: ' + a.doing + ').') + (st.settings.planWait > 0 ? '\nYOUR NEXT THOUGHT comes when your plan has run out, or sooner if something happens that matters (you are spoken to, hurt, hungry, or a step fails); while a plan is running and nothing happens, not for up to ' + st.settings.planWait + ' moments.' + (mind.gap > 20 ? ' Lately your thoughts have come about every ' + Math.round(mind.gap / 10) * 10 + ' moments.' : '') + ' So plan as far as you can see (up to 5 steps, the most needed first, ' + Math.max(st.settings.thinkEvery || 90, 120) + ' moments or more in all): a plan that runs out early leaves your body on reflexes until you next think.'
+      : mind.gap > 20 ? '\nYOUR THOUGHTS COME about once every ' + Math.round(mind.gap / 10) * 10 + ' moments. When you make a plan, let its steps add up to at least that long (up to 5 steps), with the most needed first: a plan that runs out early leaves your body on reflexes until you next think.' : ''));
   if (mind.actN > 20) {
     const acts = Object.keys(mind.act).filter(function (k) { return mind.act[k] / mind.actN >= 0.03; }).sort(function (p, q) { return mind.act[q] - mind.act[p]; }).slice(0, 5).map(function (k) { return k + ' ' + Math.round(100 * mind.act[k] / mind.actN) + '%'; });
     out.push('WHAT YOUR BODY HAS ACTUALLY BEEN DOING since your last thought (' + mind.actN + ' moments): ' + acts.join(', ') + '. Energy went from ' + Math.round(mind.e0) + ' to ' + Math.round(a.e) + '.');
@@ -971,22 +998,29 @@ M.buildPrompt = function (st, mind, kind, lean) {
       (pn.length ? (pick.length ? '\n' : '') + 'WAYS YOU SENSE BUT HAVE NOT FOUND (practice brings one within reach; it then opens at a deep reflection): ' + pn.map(function (o) { return o.id + ' (' + clip(o.hint, 80) + '), needs ' + o.missing; }).join('; ') + '.' : ''));
   }
   {
-    const rc = L.recipes || {}, ks = Object.keys(rc).filter(function (k) { return !rc[k].way || a.knows[rc[k].way]; }).slice(-6);
-    if (ks.length) out.push('THINGS THAT CAN BE MADE OR DONE (plan step make {what: name}):\n' + ks.map(function (k) { return '- ' + k + ': ' + clip(rc[k].hint || '', 110) + ' Needs ' + M.needsText(rc[k].needs) + '.'; }).join('\n'));
+    const rc = L.recipes || {}, mk = M.makeable(st, a);
+    if (mk.full.length) out.push('THINGS THAT CAN BE MADE OR DONE (plan step make {what: name}). Those you have never made come first:\n' + mk.full.map(function (q) { return '- ' + q.k + ': ' + clip(rc[q.k].hint || '', 110) + ' Needs ' + M.needsText(rc[q.k].needs) + '. ' + (q.lack.length ? 'You lack: ' + q.lack.join(', ') + '.' : 'YOU HAVE ALL IT NEEDS NOW.'); }).join('\n') +
+      (mk.more.length ? '\nYou also know how to make: ' + mk.more.join(', ') + ' (name one in a plan step make and you are told what it needs).' : ''));
     const tl = mind.tales || [];
     { const C = cult(st), mineF = a.faith && C.items[a.faith], hd = Object.keys(mind.heard || {}).filter(function (id) { return C.items[id] && id !== a.faith; }).slice(-3);
       if (mineF) out.push('THE TEACHING YOU HOLD: "' + mineF.title + '"' + (mineF.byId === a.id ? ' (you began it)' : mineF.by ? ' (begun by ' + mineF.by + ')' : '') + ', held by ' + M.cultLive(st, mineF).n + ' of the living: ' + mineF.text);
       if (hd.length) out.push('TEACHINGS YOU HAVE HEARD (you may take one up with "adopt", begin your own with "belief", or hold to none):\n' + hd.map(function (id) { const it = C.items[id]; return '- "' + it.title + '"' + (it.by ? ' of ' + it.by : '') + ', held by ' + M.cultLive(st, it).n + ': ' + it.text; }).join('\n')); }
     if (mind.lessons && mind.lessons.length) out.push('WHAT HAS BEFALLEN OTHERS (things your people saw happen or were told of; they are true, and the same will happen to you in the same case):\n' + mind.lessons.slice(-6).map(function (q) { return '- day ' + q.day + ': ' + q.text + (q.from ? ' (told to you by ' + q.from + ')' : ''); }).join('\n'));
     if (mind.seasons && mind.seasons.length) out.push('THE SEASONS YOU HAVE LIVED (plainly what you saw, in order. If something comes round again, that is yours to notice, to prepare for, to tell as a tale or to cut in a sign):\n' + mind.seasons.slice(-4).join('\n'));
-    if (L.buildings && Object.keys(L.buildings).length && (kind === 'deep' || mind.thoughts % 3 === 0)) out.push('KINDS OF BUILDING you know how to raise (each is also a roof; build {what: its name} on bare ground; a great work is begun by one and finished by whoever carries wood and stone to it):\n' + Object.keys(L.buildings).filter(function (k) { return !L.buildings[k].way || a.knows[L.buildings[k].way]; }).slice(-9).map(function (k) { const B = L.buildings[k]; return '- ' + k + ' (' + (B.wood || 0) + ' wood, ' + (B.stone || 0) + ' stone): ' + (B.hint || ''); }).join('\n'));
+    if (L.buildings && Object.keys(L.buildings).length && (kind === 'deep' || mind.thoughts % 3 === 0)) out.push('KINDS OF BUILDING you know how to raise (each is also a roof; build {what: its name} on bare ground; a great work is begun by one and finished by whoever carries wood and stone to it):\n' + (function () {
+      /* every kind it knows is before it: nine in full, turning with each listing so that all are seen in time, the rest by name. (Before, the last
+         nine added to the world were shown and the rest never.) */
+      const ks = Object.keys(L.buildings).filter(function (k) { return !L.buildings[k].way || a.knows[L.buildings[k].way]; }), n = ks.length, o = n > 9 ? (Math.floor(mind.thoughts / 3) * 9) % n : 0;
+      const full = n > 9 ? ks.slice(o).concat(ks.slice(0, o)).slice(0, 9) : ks, rest = ks.filter(function (k) { return full.indexOf(k) < 0; });
+      return full.map(function (k) { const B = L.buildings[k]; return '- ' + k + ' (' + (B.wood || 0) + ' wood, ' + (B.stone || 0) + ' stone): ' + (B.hint || ''); }).join('\n') + (rest.length ? '\nYou also know how to raise: ' + rest.join(', ') + ' (each is told in full in turn).' : '');
+    })());
     if (tl.length) out.push('TALES YOU CARRY (yours, and those told to you; a tale is how the absent and the dead are remembered, and it can be told on by teaching):\n' + tl.slice(-4).map(function (q) { return '- ' + (q.kind && q.kind !== 'tale' ? q.kind + ' ' : '') + '"' + q.title + '"' + (q.about ? ', about ' + q.about : '') + (q.from ? ' (told to you by ' + q.from + ', first told by ' + q.by + (q.gen > 1 ? ', through ' + q.gen + ' mouths' : '') + ')' : ' (your own)') + ': ' + clip(q.text, 170); }).join('\n'));
   }
   out.push('YOUR REFLEXES (run every moment the plan is empty; the first rule whose condition holds and whose action is possible wins; urgent rules override even the plan):\n' + a.policy.map(function (r, i) { return M.ruleText(r, i) + (r.why ? '  // ' + r.why : ''); }).join('\n'));
   out.push('HABITS: your body refuses to eat: ' + (a.habits.avoid.length ? a.habits.avoid.join(', ') : 'nothing') + '. You leave ' + (a.habits.spare || 0) + ' food on a plant when you eat from it.');
   out.push('ACTIONS for plan steps (each step runs until it finishes, becomes impossible, or its "ticks" run out; ticks 1-240, a day is 240):\n' +
     'eat (what you carry, or the plant you stand on; with neither, your body walks to the nearest plant in sight that bears) | harvest {what?: plant kind} (pick food to carry; if nothing bears where you stand, your body walks to the nearest plant in sight that does, and goes on picking) | drop {what?: food kind} (throw away carried food; with no kind, everything your body refuses) | plant {what?: seed kind} | gather (wood if you stand on forest, stone if on rock, clay if in marsh or shallows; some rock holds ore) | fish (beside water; a catch is food you carry) | craft {what: name of a thing you know how to make} | make {what: something from the list of what can be made or done} | place {what: name of a device you know how to make} (sets it in the ground where you stand) | build {what: shelter|wall|fire|store, or a kind of building you know} (here; shelter ' + L.build.shelterWood + ' wood, wall ' + L.build.wallWood + ', fire 1, store 2; fire and store must first be discovered or learned; walls stop animals and everyone outside your band) | raze (tear down a wall, shelter or store beside you that is not your band\'s) | rest | linger (stay put) | wander | hunt | tame (offer carried plant food to a wild grazing animal within two steps; it may become yours) | ' +
-    'seek {target: food|prey|tree|shelter|fire|store|home|water|agent|friend|foe|leader|enemy|ally, name?} | flee {from: predator|agent|foe|enemy} | attack {target: agent|foe|enemy|predator, name?} | steal {name} (food they carry; they may or may not notice) | milk | shear | ride (each needs a grown tame animal of yours beside you, of a kind that gives it, and the way of herding or riding) | pave (lay road, if you know roads) | bridge {dir?: N|NE|E|SE|S|SW|W|NW} (lay a span over water beside you, 3 wood, if you know bridges) | dismantle (take down something you built, here or beside you, and keep half its wood and stone) | claim {name?} (take over an empty building whose builders are dead: walk to it and it becomes yours, with every roof, wall and store of theirs around it; give a name to name the place) | tell (beside a fire with others near: tell of what has been; it becomes a tale that those who hear it carry and retell) | venture (at the edge of the known world, push into the unknown: it may open new land, and what is found first is often rich; a band has three tries, then its will must return over some days) | muster {what: hunt|gather} (call others to hunt or to gather WITH you, now: those who follow you drop what they do and come, and others of your band, your kin and your friends within earshot come if their hands are idle; then you go with them. A kill made by several is far surer and feeds all who took part; great beasts should never be hunted alone) | rally {name?} (only if you lead: every grown follower within earshot drops everything and attacks the one you name, or the nearest enemy of your band, and so do you) | goto {x, y} | explore {dir: N|NE|E|SE|S|SW|W|NW} (walk that way) | follow {name?} (your leader if no name) | ' +
+    'seek {target: food|prey|tree|shelter|fire|store|home|water|agent|friend|foe|leader|enemy|ally, name?} | flee {from: predator|agent|foe|enemy} | attack {target: agent|foe|enemy|predator, name?} | steal {name} (food they carry; they may or may not notice) | milk | shear | ride (each needs a grown tame animal of yours beside you, of a kind that gives it, and the way of herding or riding) | pen {what?: out} (with kept animals loose within six steps and a pen within two: they stay and breed there and no longer trail you; out leads them out again) | drive (the way of herding: move the wild herd within eight steps toward the nearest pen of yours or of your band; others driving beside you make it surer, and those that reach the pen are kept) | tend (beside a weir or a field: it yields only while tended every day or two) | pave (lay road, if you know roads) | bridge {dir?: N|NE|E|SE|S|SW|W|NW} (lay a span over water beside you, 3 wood, if you know bridges) | dismantle (take down something you built, here or beside you, and keep half its wood and stone) | claim {name?} (take over an empty building whose builders are dead: walk to it and it becomes yours, with every roof, wall and store of theirs around it; give a name to name the place) | tell (beside a fire with others near: tell of what has been; it becomes a tale that those who hear it carry and retell) | venture (at the edge of the known world, push into the unknown: it may open new land, and what is found first is often rich; a band has three tries, then its will must return over some days) | muster {what: hunt|gather} (call others to hunt or to gather WITH you, now: those who follow you drop what they do and come, and others of your band, your kin and your friends within earshot come if their hands are idle; then you go with them. A kill made by several is far surer and feeds all who took part; great beasts should never be hunted alone) | rally {name?} (only if you lead: every grown follower within earshot drops everything and attacks the one you name, or the nearest enemy of your band, and so do you) | goto {x, y} | explore {dir: N|NE|E|SE|S|SW|W|NW} (walk that way) | follow {name?} (your leader if no name) | ' +
     'give {name, what: food|seed|wood|stone|ore|clay|tool|the name of a thing you hold} | trade {name, what: one thing you give, want: one thing you want} (one for one: food, seed, wood, stone, ore, clay, or the name of any thing held, such as amber or a made thing. They are told of your offer and it stands for a day; it is done when they plan the matching trade toward you, or you toward them when they have offered) | mate {name} (a child comes only if you both plan mate toward each other, each with energy 60 or more) | ' +
     'mark {text} (leave a mark; 1 wood. If you know signs it can hold a long text that any who know signs will read: a record, a count of days, a warning, a tale, what a season brought. Cut on rock, in your shelter or beside your own building, it outlasts many seasons) | cultivate {what: seed kind, aim: richer|faster|fuller|spreading|hardy, name} (breed a new plant from two seeds of one kind) | heal {name?} (needs a healing plant carried, and the knowledge) | stash (put carried food into the store you stand on) | take (take food from the store you stand on). ' +
     'A named being out of sight is sought where you last saw them.');
@@ -1245,6 +1279,7 @@ const HIDE = { not_granted: 1, sampling_disabled: 1, not_declared: 1, capability
 M.think = async function (st, mind, kind) {
   const w = st.world, a = agentById(w, mind.id);
   if (!a || mind.busy || !st.sample) return null;
+  mind.cameAt = { left: M.planLeft(a), urge: Math.round(mind.urge * 10) / 10, gap: mind.lastT != null ? w.tick - mind.lastT : null }; /* what brought this thought: how much plan was still ahead, how strong the wish, how long since the last */
   const cfg = kind === 'deep' ? st.settings.deep : st.settings.routine;
   const model = M.MODELS.filter(function (m) { return m.id === cfg.model; })[0];
   const opts = { cache: false, modelTier: model ? model.tier : 'default', onText: function (u) { mind.stream = u.text; } };
@@ -1290,7 +1325,7 @@ M.think = async function (st, mind, kind) {
     entry = M.apply(st, mind, kind, d, { model: used + (cfg.effort && kind === 'deep' ? ', ' + cfg.effort + ' effort' : ''), ms: Date.now() - t0, tests: tests });
     st.errStreak = 0;
     { const me = agentById(st.world, mind.id);
-      M.record(st, { t: 'thought', id: mind.id, name: mind.name, kind: kind, model: entry.model, ms: entry.ms, thought: entry.thought, feeling: entry.feeling || '', say: entry.say || null, changes: entry.changes, rut: entry.rut || 0, e: me ? Math.round(me.e) : null, hp: me ? Math.round(me.hp) : null, at: me ? [me.x, me.y] : null, plan: me ? (me.intent ? [me.intent] : []).concat(me.plan).map(stepText) : [], drives: me ? M.drives(st, mind, me, SW.look(st.world, me)).map(function (q) { return q.k + ' ' + q.s; }) : [] });
+      M.record(st, { t: 'thought', id: mind.id, name: mind.name, kind: kind, model: entry.model, ms: entry.ms, thought: entry.thought, feeling: entry.feeling || '', say: entry.say || null, changes: entry.changes, rut: entry.rut || 0, came: mind.cameAt || null, e: me ? Math.round(me.e) : null, hp: me ? Math.round(me.hp) : null, at: me ? [me.x, me.y] : null, plan: me ? (me.intent ? [me.intent] : []).concat(me.plan).map(stepText) : [], drives: me ? M.drives(st, mind, me, SW.look(st.world, me)).map(function (q) { return q.k + ' ' + q.s; }) : [] });
       if (st.used % (st.used > 600 ? 60 : 15) === 1) M.record(st, { t: 'prompt', id: mind.id, name: mind.name, kind: kind, prompt: prompt, reply: String(res.text || '').slice(0, 6000) }); }
     st.ui({ type: 'thought', a: mind.id, entry: entry });
   } catch (e) {
@@ -1405,15 +1440,28 @@ M.tick = function (st) {
   seasonKeep(st);
   if (st.world.tick % 80 === 13) { gossip(st); hearFaiths(st); }
   if (st.world.tick % st.world.laws.time.dayLength === 7) cultSnap(st);
-  const ags = st.world.agents;
+  const ags = st.world.agents, wait = +st.settings.planWait || 0;
   for (let k = 0; k < ags.length; k++) {
     const a = ags[k], m = st.minds[a.id]; if (!m || m.dead) continue;
-    m.urge += st.settings.focus === 'view' && typeof st.inView === 'function' && !st.inView(a) ? 0.012 : 0.03; /* out of the watcher's view a mind comes to think less than half as often, unless something happens to it */
+    let rate = st.settings.focus === 'view' && typeof st.inView === 'function' && !st.inView(a) ? 0.012 : 0.03; /* out of the watcher's view a mind comes to think less than half as often, unless something happens to it */
+    /* A being in the middle of a plan waits for it. In the thirteenth and fourteenth runs three thoughts in five came while the plan of the thought
+       before was still running (a third of the prompts kept from three runs show a plan in hand), and nearly every one threw that plan away. Now,
+       while steps of a plan are still ahead, it takes a stronger wish to bring a thought (M.WEIGHTY, where 1 serves a being with no plan), and the
+       wish grows by itself only fast enough to reach that after settings.planWait moments. Something weighty that happens to the being still brings
+       a thought at once, small things bring it nearer, and a plan that runs out brings one at once (M.ready). */
+    if (wait > 0 && (a.intent || a.plan.length) && M.planLeft(a) > 0) rate = Math.min(rate, M.WEIGHTY / wait);
+    m.urge += rate;
     /* a being can look back on what its own body has been doing */
     const d = a.doing.replace(/\s*\(.*$/, '').split(' ').slice(0, 3).join(' ');
     m.act[d] = (m.act[d] || 0) + 1; m.actN++;
   }
 };
+/* how many moments of its plan a body still has ahead of it */
+M.planLeft = function (a) { let n = a.intent ? Math.max(0, +a.intent.ticks || 0) : 0; for (let i = 0; i < a.plan.length; i++) n += Math.max(0, +a.plan[i].ticks || 0); return n; };
+/* Is this mind waiting to think? One whose body has a plan in hand waits for something weighty; one whose plan has run out, or who never had one, is
+   waiting as soon as the wish is there. */
+M.WEIGHTY = 3;
+M.ready = function (st, m, a) { return m.urge >= ((+st.settings.planWait || 0) > 0 && a && (a.intent || a.plan.length) && M.planLeft(a) > 0 ? M.WEIGHTY : 1); };
 M.kindFor = function (st, mind) {
   if (mind.thoughts === 0) return 'routine';
   if (mind.sinceDeep >= st.settings.reflectEvery) return 'deep';
@@ -1427,7 +1475,7 @@ M.pace = function (st) {
   if (!st.on || !st.sample || st.blocked || st.settings.wait === false) return 1;
   const w = st.world, G = Math.max(20, st.settings.thinkEvery || 90); let n = 0, late = 0;
   const near = (st.settings.focus === 'view' || st.narrow) && typeof st.inView === 'function' ? st.inView : null; /* the watcher may ask the world to wait only for those in view; the rest still live and think, less often */
-  for (let k = 0; k < w.agents.length; k++) { const m = st.minds[w.agents[k].id]; if (!m || m.dead) continue; if (m.lastT == null) m.lastT = w.tick; if (near && !near(w.agents[k])) continue; n++; if (!m.busy && w.tick - m.lastT > G) late++; }
+  for (let k = 0; k < w.agents.length; k++) { const m = st.minds[w.agents[k].id]; if (!m || m.dead) continue; if (m.lastT == null) m.lastT = w.tick; if (near && !near(w.agents[k])) continue; n++; if (!m.busy && w.tick - m.lastT > G && M.ready(st, m, w.agents[k])) late++; } /* the world waits only for those who are waiting to think: one in the middle of a plan is not */
   if (!n) return 1; const f = late / n;
   return f <= 0.1 ? 1 : Math.max(0.1, Math.round((1 - (f - 0.1) * 2.5) * 100) / 100);
 };
@@ -1468,9 +1516,10 @@ M.pump = function (st) {
     const m = st.minds[id];
     const ag = m.dead || m.busy ? null : agentById(st.world, m.id); if (!ag) continue;
     if (narrow && !st.inView(ag)) continue;
+    if (!M.ready(st, m, ag)) continue;
     if (!best || m.urge > best.urge) best = m;
   }
-  if (best && best.urge >= 1) M.think(st, best, M.kindFor(st, best));
+  if (best) M.think(st, best, M.kindFor(st, best));
 };
 
 /* ---------- saving ---------- */
@@ -1488,7 +1537,7 @@ M.snapshot = function (st) {
 M.restore = function (snap) {
   if (!snap || snap.v !== 4 || !snap.world || !snap.world.laws || snap.world.v !== 2) return null;
   const base = M.defaultSettings(), got = snap.settings || {};
-  if (got.v === base.v || got.v === 10 || got.v === 11) { for (const k in got) if (k in base) base[k] = got[k]; if (got.v === 10 && got.perMinute === 24) base.perMinute = 40; if (got.v === 11 && got.parallel === 6) base.parallel = 4; /* six at once was more than Claude allows a page */ base.v = 12; } /* settings from the generation before are kept, and its pace moves to the new one where it was never changed; older settings give way to the defaults */
+  if (got.v === base.v || got.v === 10 || got.v === 11 || got.v === 12) { for (const k in got) if (k in base) base[k] = got[k]; if (got.v === 10 && got.perMinute === 24) base.perMinute = 40; if (got.v === 11 && got.parallel === 6) base.parallel = 4; /* six at once was more than Claude allows a page */ base.v = 13; } /* settings from the generation before are kept, and its pace moves to the new one where it was never changed; older settings give way to the defaults */
   SW.upgrade(snap.world);
   const st = M.createState(snap.world, base);
   st.minds = snap.minds || {}; st.names = snap.names || {}; st.chron = snap.chron || []; st.voices = snap.voices || []; st.deepKept = Array.isArray(snap.deep) ? snap.deep : [];

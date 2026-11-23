@@ -25,7 +25,7 @@ const at = (w, o, i) => { o.x = i % w.W; o.y = Math.floor(i / w.W); o.px = o.x; 
   ok(E.chance === 0.35 && E.depth === 6 && E.gapDays === 1 && E.restDays === 3, 'carried on, it takes the slower ones, and keeps what its maker had set itself');
   for (let i = 0; i < 200; i++) SW.step(st.world, st.emit); ok(st.world.tick === snap.world.tick + 200, 'and it runs');
   s2.settings = Object.assign({}, snap.settings, { v: 11, perMinute: 40, parallel: 6, budget: 7000 }); const st3 = M.restore(JSON.parse(JSON.stringify(s2)));
-  ok(st3.settings.v === 12 && st3.settings.parallel === 4 && st3.settings.perMinute === 40 && st3.settings.budget === 7000, 'settings saved by Generation 18 are kept, and six at once becomes four');
+  ok(st3.settings.v >= 12 && st3.settings.parallel === 4 && st3.settings.perMinute === 40 && st3.settings.budget === 7000, 'settings saved by Generation 18 are kept, and six at once becomes four');
   s2.settings.parallel = 3; ok(M.restore(JSON.parse(JSON.stringify(s2))).settings.parallel === 3, 'a number the owner chose is left alone');
 }
 (async () => { // easing off
@@ -47,7 +47,8 @@ const at = (w, o, i) => { o.x = i % w.W; o.y = Math.floor(i / w.W); o.px = o.x; 
     s2.settings.wait = false; ok(M.pace(s2) === 1, 'the owner can keep the clock steady'); s2.settings.wait = true; s2.on = false; ok(M.pace(s2) === 1, 'and with the minds asleep the world runs on its reflexes at full speed');
     const d0 = M.defaultSettings(); ok(d0.wait === true && d0.thinkEvery === 90 && d0.focus === 'all', 'by default the world waits for everyone, so that each being thinks about every 90 moments');
     s2.on = true; s2.settings.focus = 'view'; const watched = w2.agents[0]; s2.inView = o => o === watched; ms.forEach((m, k) => { m.lastT = k ? w2.tick - 500 : w2.tick; m.urge = 0; }); ok(M.pace(s2) === 1, 'asked to wait only for those in view, the world does not slow for the others, however far behind they are');
-    ms[0].lastT = w2.tick - 500; ok(M.pace(s2) === 0.1, 'and does slow for the one who is watched');
+    ms[0].lastT = w2.tick - 500; ms[0].urge = 1.5; watched.plan = []; watched.intent = null; ok(M.pace(s2) === 0.1, 'and does slow for the one who is watched, once it is waiting to think');
+    w2.agents.forEach(o => { o.plan = []; o.intent = null; }); ms.forEach(m => { m.urge = 0; }); /* with no plan in hand: one in the middle of a plan waits for it (Generation 25) */
     M.tick(s2); ok(Math.abs(ms[0].urge - 0.03) < 1e-9 && Math.abs(ms[1].urge - 0.012) < 1e-9, 'out of view a mind comes to think less than half as often; nothing is frozen'); s2.settings.focus = 'all'; s2.on = false;
     s2.on = true; s2.par = 2; s2.easeT = Date.now() - 200000; s2.hold = 0; s2.lastStart = Date.now(); M.pump(s2); ok(s2.par === 3, 'after three quiet minutes the minds try one more at a time again');
   }

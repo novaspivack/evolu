@@ -66,6 +66,12 @@ SW.defaultLaws = function () {
        (once a day), bonds made between those gathered there, sight from its top, longer-lasting tools made beside it. Recipes may require one. */
     buildings: {
       igloo: { wood: 0, stone: 0, on: 'snow', effort: 14, fx: [{ on: 'warmth', times: 1.8, for: 480 }, { on: 'fear', by: -0.15 }], hint: 'a house of cut snow, raised on snow with nothing but your hands and some strength: a roof where there is no wood, and far warmer than the open ice' },
+      /* Generation 25: what lets a settlement feed itself. A pen keeps a herd where its keepers live. A weir and a field are works that yield:
+         tended every day or two they lay food in the nearest store of whoever holds them or of that one's band. All three are data; the maker
+         can make more (yields: { food, every, tend, holds, seasons }). */
+      pen: { way: 'herding', wood: 5, stone: 0, hint: 'a fenced ground for kept animals. With them beside it, plan step pen, and they stay and breed there while you go where you will; whoever holds the pen keeps the herd. They must find grazing within its reach or they break out' },
+      weir: { way: 'fishing', wood: 4, stone: 0, beside: 'water', yields: { food: 'fish', every: 60, tend: 480, holds: 6 }, hint: 'stakes set at the edge of the water that gather fish by themselves. Tend it (plan step tend) every day or two and its catch goes into the nearest store of yours or of your band, for all who live there' },
+      field: { way: 'farming', wood: 2, stone: 0, yields: { food: 'grain', every: 80, tend: 480, holds: 6, seasons: [1, 2] }, hint: 'ground broken and sown beside a home. Tend it (plan step tend) every day or two, and through summer and autumn its grain goes into the nearest store of yours or of your band' },
       hall: { wood: 6, stone: 2, bond: 0.05, fx: [{ on: 'joy', by: 0.2 }, { on: 'lonely', by: -0.4 }], hint: 'a great roof where a band gathers: those who spend time in it together grow closer' },
       shrine: { wood: 2, stone: 4, fx: [{ on: 'fear', by: -0.4 }, { on: 'grief', by: -0.3 }, { on: 'joy', by: 0.2 }], hint: 'a still place set apart: it eases fear and grief in one who spends time there' },
       workshop: { way: 'tools', wood: 5, stone: 2, craft: 0.6, fx: [{ on: 'learning', times: 1.3, for: 240 }], hint: 'a place for making: tools crafted in or beside it last much longer' },
@@ -101,9 +107,9 @@ SW.defaultLaws = function () {
     weather: { meanDuration: 200, rainGrowth: 1.6, droughtGrowth: 0.35, rainCold: 0.015, stormCold: 0.08, snowCold: 0.03, droughtThirst: 0.02, strikeChance: 0.006, strikeDamage: 24, fogSight: 4, bloom: 0.08, blight: 0.05, herd: 0.05, pack: 0.03, disaster: 0.04 },
     mood: { decay: 0.996 },
     device: { life: 3600, wood: 2, stone: 1, strike: 9, holdMax: 6 },
-    home: { minStructures: 2, reach: 4, margin: 3, heal: 1.5 },
+    home: { minStructures: 2, reach: 4, margin: 3, heal: 1.5, larder: 35 },
     magic: { wane: 0.22, loreToCast: 5, loreToLearnArt: 2.5, cost: 6, duration: 720, maxRadius: 5, maxFields: 12, teachGain: 0.25, greatLore: 10, greatArts: 2, greatHelpers: 2, greatCost: 50, helperCost: 10, greatDuration: 480 },
-    ecology: { seeding: 0.75, bounty: 0.6, springBreeding: 1.4, grazerTarget: 135, richSpread: 2, richBreed: 1.6, herdFollow: 0.5, herdReturn: 0.012, lodeRegrow: 0.01, tameChance: 0.3, leash: 4, pairRange: 5, milkEnergy: 12, rideCost: 0.4, rideCarry: 4, grazeWear: 0.006, pastureHeal: 0.0005, crowding: 4, dormantSeeds: 0.12, wildMutation: 0.004, maxPlantKinds: 44, maxCreatureKinds: 30, grazerCap: 280, hunterCap: 20 },
+    ecology: { seeding: 0.75, bounty: 0.6, springBreeding: 1.4, grazerTarget: 135, richSpread: 2, richBreed: 1.6, herdFollow: 0.5, herdReturn: 0.012, penReach: 3, penBreed: 1.4, driveChance: 0.55, driveReach: 8, seaReturn: 0.008, lodeRegrow: 0.01, tameChance: 0.3, leash: 4, pairRange: 5, milkEnergy: 12, rideCost: 0.4, rideCarry: 4, grazeWear: 0.006, pastureHeal: 0.0005, crowding: 4, dormantSeeds: 0.12, wildMutation: 0.004, maxPlantKinds: 44, maxCreatureKinds: 30, grazerCap: 280, hunterCap: 20 },
     craft: { cultivateSkill: 3, cultivateCost: 8, markWood: 1, markLife: 2400, signLife: 5, fireLife: 360, fireWarmth: 0.3, fireReach: 2, cookBonus: 1.5, storeMax: 20, farmGrowth: 1.6, sturdy: 0.4, toolPower: 1.3, toolGrowth: 1.15, toolLore: 0.12, toolWear: 60, maxTools: 3, maxDesigns: 60, stoneMax: 6, oreMax: 4, clayMax: 4, oreChance: 0.35, metalPower: 1.25, metalWear: 3, potWater: 3, potCarry: 2, potMax: 2, potClay: 2 },
     /* what lies in the ground, each in its own kind of land. Deep ones cannot be won by hand. Every one is a thing that can be carried, given, traded and made into other things. */
     minerals: {
@@ -1433,6 +1439,44 @@ function wanderHome(w, c, s) {
   if (s.biomes && c.owner == null && w.regions.length > 1) { const R = w.regions[w.region[idx(w, c.x, c.y)]], R0 = w.regions[w.region[idx(w, ox, oy)]]; if (R && R0 && s.biomes.indexOf(R.biome) < 0 && s.biomes.indexOf(R0.biome) >= 0 && rnd(w) < 0.8) { c.x = ox; c.y = oy; return false; } } /* and to its own kind of country */
   return true;
 }
+/* A kept animal put in a pen stays within reach of it and no longer trails its keeper. Whoever holds the pen keeps what is in it, so a herd outlives
+   the one who tamed it. It grazes what grows within reach; an animal that has gone hungry there for a while breaks out. */
+function keepPenned(w, c, s, emit) {
+  const L = w.laws, i = c.pen, px = i % w.W, py = Math.floor(i / w.W);
+  if (buildingAt(w, i) !== 'pen') { c.pen = null; return; }
+  const holder = w.shelters[i];
+  if (holder > 0 && c.keeper !== holder && isAlive(w, holder)) { const h = agentById(w, holder); c.keeper = holder; c.owner = h ? rootOf(w, h).id : holder; }
+  if (c.e < s.maxEnergy * 0.3) {
+    const p = w.plants[idx(w, c.x, c.y)];
+    if (p && p.g >= 1 && L.plants[p.sp].nutrition > 0 && p.food >= 1) c.hungryIn = 0;
+    else if ((c.hungryIn = (c.hungryIn || 0) + 1) > 40) { c.pen = null; c.hungryIn = 0; emit({ type: 'strayed', a: c.keeper, kind: c.sp, x: c.x, y: c.y }); return; }
+  }
+  if (cheb(c.x, c.y, px, py) > (L.ecology.penReach || 3)) { const r0 = c.rush; c.rush = 1; stepToward(w, c, px, py); c.rush = r0; } /* it comes back even when it is standing calm */
+}
+/* Works that yield (a weir, a field): while tended, each lays food by at its own pace, into the nearest store within eight steps that belongs to its
+   holder or to one of the holder's band, or else keeps a little at the work for whoever tends it next. */
+function yieldItem(w, food) { const L = w.laws; return { k: food, n: food === 'fish' ? L.water.fishFood : L.plants[food] ? L.plants[food].nutrition : 10 }; }
+function stepYields(w, emit) {
+  const T0 = w.tended; if (!T0) return; const L = w.laws, ssn = SW.season(w);
+  for (const key in T0) {
+    const i = +key, t = T0[key], K = buildingAt(w, i), Y = K && L.buildings[K].yields;
+    if (!Y) { delete T0[key]; continue; }
+    if (w.tick - t.at > (Y.tend || 480)) continue;
+    if (Y.seasons && Y.seasons.indexOf(ssn) < 0) { t.last = w.tick; continue; }
+    if (w.tick - t.last < (Y.every || 60)) continue;
+    t.last = w.tick;
+    const holder = w.shelters[i], h = holder > 0 ? agentById(w, holder) : null, x = i % w.W, y = Math.floor(i / w.W); let best = -1, bd = 9;
+    for (let dy = -8; dy <= 8; dy++) for (let dx = -8; dx <= 8; dx++) {
+      if (!inb(w, x + dx, y + dy)) continue; const j = idx(w, x + dx, y + dy), so = w.stores[j]; if (!so || so.items.length >= L.craft.storeMax) continue;
+      if (so.by && so.by !== holder && !(h && allied(w, h, so.by))) continue;
+      const d = Math.max(Math.abs(dx), Math.abs(dy)); if (d < bd) { bd = d; best = j; }
+    }
+    if (best >= 0) { const so = w.stores[best]; so.items.push(yieldItem(w, Y.food)); so.put = (so.put || 0) + 1; w.tally.storeIn = (w.tally.storeIn || 0) + 1; }
+    else if (t.has < (Y.holds || 6)) t.has++;
+    else continue;
+    w.tally.yielded = w.tally.yielded || {}; w.tally.yielded[K] = (w.tally.yielded[K] || 0) + 1;
+  }
+}
 function stepCreatures(w, emit) {
   const L = w.laws, counts = {}, AS = Math.max(1, (w.openTiles || w.W * w.H) / 6144);
   const cls = { 0: 0, 1: 0 };
@@ -1487,20 +1531,37 @@ function stepCreatures(w, emit) {
       } else if (moves && rnd(w) < 0.25) wanderHome(w, c, s);
     }
     /* a tamed animal keeps near its keeper; walls hold it where it is penned */
-    if (c.owner != null) { let kp = null; for (let k = 0; k < w.agents.length; k++) if (w.agents[k].id === c.keeper) kp = w.agents[k]; if (!kp || kp.dead) { c.owner = null; c.keeper = null; } else if (kp.mount === c.id) { c.px = c.x; c.py = c.y; c.x = kp.x; c.y = kp.y; } else if (cheb(c.x, c.y, kp.x, kp.y) > (L.ecology.leash || 4) && rnd(w) < 0.8) stepToward(w, c, kp.x, kp.y); }
+    if (c.pen != null) keepPenned(w, c, s, emit);
+    else if (c.owner != null) { let kp = null; for (let k = 0; k < w.agents.length; k++) if (w.agents[k].id === c.keeper) kp = w.agents[k]; if (!kp || kp.dead) { c.owner = null; c.keeper = null; } else if (kp.mount === c.id) { c.px = c.x; c.py = c.y; c.x = kp.x; c.y = kp.y; } else if (cheb(c.x, c.y, kp.x, kp.y) > (L.ecology.leash || 4) && rnd(w) < 0.8) stepToward(w, c, kp.x, kp.y); }
     let mate = null;
-    if (c.e > s.breedAt && c.age > s.matureAge && cls[s.predator ? 1 : 0] < (s.predator ? L.ecology.hunterCap : L.ecology.grazerCap) && rnd(w) < 1.7 * s.breedChance * sprB * (s.predator ? prF : grF * (richArr(w)[idx(w, c.x, c.y)] ? (L.ecology.richBreed || 1) : 1)) * Math.max(0, 1 - (counts[c.sp] || 0) / ((s.room || 40) * AS))) for (let k = 0; k < list.length && !mate; k++) { const o = list[k]; if (o !== c && !o.dead && o.sp === c.sp && o.age > s.matureAge && cheb(o.x, o.y, c.x, c.y) <= (L.ecology.pairRange || 4)) mate = o; }
+    if (c.e > s.breedAt && c.age > s.matureAge && cls[s.predator ? 1 : 0] < (s.predator ? L.ecology.hunterCap : L.ecology.grazerCap) && rnd(w) < 1.7 * s.breedChance * sprB * (c.pen != null ? (L.ecology.penBreed || 1) : 1) * (s.predator ? prF : grF * (richArr(w)[idx(w, c.x, c.y)] ? (L.ecology.richBreed || 1) : 1)) * Math.max(0, 1 - (counts[c.sp] || 0) / ((s.room || 40) * AS))) for (let k = 0; k < list.length && !mate; k++) { const o = list[k]; if (o !== c && !o.dead && o.sp === c.sp && o.age > s.matureAge && cheb(o.x, o.y, c.x, c.y) <= (L.ecology.pairRange || 4)) mate = o; }
     if (mate) {
       c.e -= s.breedCost;
       const m = function (v) { return clamp(v * (0.92 + 0.16 * rnd(w)), 0.6, 1.6); };
       let kind = c.sp;
       if (rnd(w) < L.ecology.wildMutation * 6) { const v = creatureVariety(w, c.sp); if (v) { kind = v; w.fresh.push({ kind: v, from: c.sp, x: c.x, y: c.y, flora: false }); } }
-      const kid = newCreature(w, kind, c.x, c.y, { e: s.breedCost * 0.9, age: 0, size: m((c.size + mate.size) / 2), quick: m((c.quick + mate.quick) / 2) }); if (c.owner != null && c.owner === mate.owner) { kid.owner = c.owner; kid.keeper = c.keeper; }
+      const kid = newCreature(w, kind, c.x, c.y, { e: s.breedCost * 0.9, age: 0, size: m((c.size + mate.size) / 2), quick: m((c.quick + mate.quick) / 2) }); if (c.owner != null && c.owner === mate.owner) { kid.owner = c.owner; kid.keeper = c.keeper; if (c.pen != null && c.pen === mate.pen) kid.pen = c.pen; }
       wanderStep(w, kid); kid.px = c.x; kid.py = c.y; born.push(kid); cls[s.predator ? 1 : 0]++; counts[kind] = (counts[kind] || 0) + 1;
     }
   }
   w.creatures = list.filter(function (c) { return !c.dead; }).concat(born);
   /* when grazers are few, a herd comes in from the rim; when hunters are few for the prey there is, a pair follows */
+  /* the sea gives back what was fished and hunted out of it: a kind of the sea that has fallen below its least number comes in again on open water */
+  if ((L.ecology.seaReturn || 0) > 0 && w.tick % 60 === 41) { /* looked at once in sixty moments, by a chance of its own, so the world's own stream of chance is left as it was */
+    const ks = Object.keys(L.creatures).filter(function (k) { const q = L.creatures[k]; return q.sea && !q.retired && (counts[k] || 0) < (q.minPop || 2); });
+    if (ks.length) {
+      const keep = w.rng; w.rng = (Math.imul(w.seed | 0, 0x9E3779B1) + Math.imul(w.tick, 40503)) | 0;
+      if (rnd(w) < L.ecology.seaReturn * 60) {
+        const k = ks[ri(w, ks.length)];
+        for (let t = 0; t < 60; t++) {
+          const X = ri(w, w.W), Y = ri(w, w.H), i = idx(w, X, Y); if (w.terrain[i] !== T.WATER || (t < 40 && w.narrow && w.narrow[i])) continue;
+          let n = 0; for (let q = 0; q < 6 && n < 2; q++) { const x2 = X + ri(w, 3) - 1, y2 = Y + ri(w, 3) - 1; if (inb(w, x2, y2) && w.terrain[idx(w, x2, y2)] === T.WATER) { w.creatures.push(newCreature(w, k, wrapX(w, x2), y2, { age: L.creatures[k].matureAge })); n++; } }
+          if (n) { w.tally.seaReturned = (w.tally.seaReturned || 0) + n; emit({ type: 'herdcame', kind: k, n: n, x: X, y: Y, sea: true }); break; }
+        }
+      }
+      w.rng = keep;
+    }
+  }
   if (cls[0] < 0.6 * gTarget && rnd(w) < (L.ecology.herdReturn || 0)) { const ks = Object.keys(L.creatures).filter(function (k) { return !L.creatures[k].predator && !L.creatures[k].retired && L.creatures[k].minPop; }); for (let t = 0; t < 20 && ks.length; t++) { const es = edgeSpot(w), k = ks[ri(w, ks.length)], sp0 = L.creatures[k]; if (!passable(w, es.x, es.y) || !fitsLand(w, sp0, es.x, es.y)) continue; let n = 0; for (let q = 0; q < 12 && n < 6; q++) { const X = es.x + ri(w, 7) - 3, Y = es.y + ri(w, 7) - 3; if (passable(w, X, Y) && fitsLand(w, sp0, X, Y)) { w.creatures.push(newCreature(w, k, X, Y, { age: sp0.matureAge })); n++; } } if (n) emit({ type: 'herdcame', kind: k, n: n, x: es.x, y: es.y }); break; } }
   if (cls[0] > 60 * AS && cls[1] < cls[0] / 14 && cls[1] < L.ecology.hunterCap && rnd(w) < (L.ecology.herdReturn || 0) * 0.4) { const ks = Object.keys(L.creatures).filter(function (k) { return L.creatures[k].predator && !L.creatures[k].retired && L.creatures[k].minPop; }); for (let t = 0; t < 20 && ks.length; t++) { const es = edgeSpot(w), k = ks[ri(w, ks.length)]; if (passable(w, es.x, es.y) && fitsLand(w, L.creatures[k], es.x, es.y)) { w.creatures.push(newCreature(w, k, es.x, es.y, { age: L.creatures[k].matureAge })); w.creatures.push(newCreature(w, k, es.x, es.y, { age: L.creatures[k].matureAge })); break; } } }
   for (const sp in L.creatures) {
@@ -1592,7 +1653,7 @@ SW.VARS = ['energy', 'health', 'age', 'food_carried', 'seeds', 'wood', 'stone', 
   'food_dist', 'prey_dist', 'predator_dist', 'agent_dist', 'friend_dist', 'foe_dist', 'leader_dist', 'tree_dist', 'shelter_dist', 'crowd', 'followers', 'random',
   'anger', 'fear', 'grief', 'joy', 'lonely', 'wet', 'storm', 'fog', 'drought', 'lore', 'in_working', 'enemy_dist', 'ally_dist', 'band_near', 'fire_dist', 'store_dist', 'home_dist', 'in_home', 'sick', 'water_dist', 'ore', 'clay', 'thirst', 'suffering', 'happiness', 'satisfaction'];
 SW.OPS = ['<', '<=', '>', '>=', '==', '!='];
-SW.ACTIONS = ['eat', 'harvest', 'plant', 'gather', 'build', 'raze', 'rest', 'wander', 'hunt', 'seek', 'flee', 'attack', 'steal', 'goto', 'explore', 'follow', 'give', 'trade', 'mate', 'mark', 'cultivate', 'heal', 'stash', 'take', 'linger', 'craft', 'place', 'fish', 'drop', 'make', 'tame', 'rally', 'milk', 'shear', 'ride', 'pave', 'bridge', 'dismantle', 'claim', 'venture', 'tell', 'muster'];
+SW.ACTIONS = ['eat', 'harvest', 'plant', 'gather', 'build', 'raze', 'rest', 'wander', 'hunt', 'seek', 'flee', 'attack', 'steal', 'goto', 'explore', 'follow', 'give', 'trade', 'mate', 'mark', 'cultivate', 'heal', 'stash', 'take', 'linger', 'craft', 'place', 'fish', 'drop', 'make', 'tame', 'rally', 'milk', 'shear', 'ride', 'pave', 'bridge', 'dismantle', 'claim', 'venture', 'tell', 'muster', 'pen', 'drive', 'tend'];
 SW.AIMS = ['richer', 'faster', 'fuller', 'spreading', 'hardy'];
 
 function test(vars, c) {
@@ -1784,6 +1845,22 @@ SW.upgrade = function (w) {
   return w;
 };
 /* the best vessel a being holds: the cost of a step on deep water with it, or 0 if it has none */
+/* What a being lacks, this moment, of what a thing or a deed needs: the words it is told when it tries, and what its mind is shown beforehand. */
+function lacks(w, a, rc) {
+  const L = w.laws, N = (rc && rc.needs) || {}, lack = [], th = a.things || {}, here = idx(w, a.x, a.y);
+  ['wood', 'stone', 'ore', 'clay'].forEach(function (k) { if (N[k] && (a[k] || 0) < N[k]) lack.push(N[k] + ' ' + k + ' (you have ' + (a[k] || 0) + ')'); });
+  if (N.food) { const have = a.carry.filter(function (c) { return N.food === 'any' || c.k === N.food; }).length; if (have < (N.foodN || 1)) lack.push((N.foodN || 1) + ' ' + (N.food === 'any' ? 'food of any kind' : N.food) + ' carried'); }
+  if (N.thing && (th[N.thing] || 0) < (N.thingN || 1)) lack.push((N.thingN || 1) + ' ' + N.thing);
+  if (N.tool && !a.tools.some(function (q) { return L.tools[q.k] && L.tools[q.k].use === N.tool; })) lack.push('a tool for ' + N.tool + ' in your hands');
+  if (N.at && !nearB(w, a, null, N.at)) lack.push('to be in or beside a ' + N.at);
+  if (N.fire && !fireNear(w, a.x, a.y, 1)) lack.push('a fire beside you');
+  if (N.water && !waterBeside(w, a)) lack.push('water beside you');
+  if (N.night && !SW.isNight(w)) lack.push('night');
+  if (N.on && SW.TERRAIN[w.terrain[here]] !== N.on) lack.push('to stand on ' + N.on);
+  if (N.beings) { let near = 0; for (let k = 0; k < w.agents.length; k++) { const o = w.agents[k]; if (o !== a && !o.dead && cheb(o.x, o.y, a.x, a.y) <= 2) near++; } if (near < N.beings) lack.push(N.beings + ' others within two steps (' + near + ' are)'); }
+  return lack;
+}
+SW.lacks = function (w, a, key) { use(w); const rc = (w.laws.recipes || {})[key]; return rc ? lacks(w, a, rc) : null; };
 function floatOf(w, a) { let f = 0; const G = w.laws.goods; if (a.things && G) for (const k in G) if (G[k].float && a.things[k] > 0 && (!f || G[k].float < f)) f = G[k].float; return f; }
 SW.floatOf = floatOf;
 /* standing: how others weigh a being. Earned by what one holds, has done, knows, has built, by children, followers, giving and renown; lost through shame. */
@@ -1812,7 +1889,7 @@ SW.roleOf = function (w, a) {
 SW.eraOf = function (w) { if (w.eraT != null && w.tick - w.eraT < 240) return w.eraMax || 1; let e = 1; for (let k = 0; k < w.agents.length; k++) for (const id in w.agents[k].knows) e = Math.max(e, (w.laws.tree[id] || {}).era || 1); w.eraMax = e; w.eraT = w.tick; return e; };
 SW.magicFactor = function (w) { return clamp(1 - (w.laws.magic.wane || 0) * Math.max(0, SW.eraOf(w) - 2), 0.15, 1); };
 function buildingAt(w, i) { const k = w.bkind && w.shelters[i] ? w.bkind[i] : null; return k && w.laws.buildings && w.laws.buildings[k] ? k : null; }
-SW.buildingAt = buildingAt;
+SW.buildingAt = buildingAt; SW.newCreature = newCreature;
 /* the strongest of some property among the special buildings within a step (or the kind, if asked by name) */
 function nearB(w, a, prop, kind) { let v = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const x = a.x + dx, y = a.y + dy; if (!inb(w, x, y)) continue; const k = buildingAt(w, idx(w, x, y)); if (!k) continue; if (kind) { if (k === kind) v = 1; } else v = Math.max(v, w.laws.buildings[k][prop] || 0); } return v; }
 SW.wellbeing = function (a) { return { suffering: a.suffer || 0, happiness: a.happy == null ? 0.4 : a.happy, satisfaction: a.sat == null ? 0.5 : a.sat }; };
@@ -1957,6 +2034,12 @@ function foodEffects(a, s) {
 }
 function act(w, a, r, S, emit) {
   const L = w.laws, here = idx(w, a.x, a.y);
+  /* A mind that says "build a raft" or "craft a cloak" means make it. A thing that has a recipe and is neither a building nor a tool is made,
+     whatever word was used for it. (Before, "build raft" raised a shelter: the one plan in five thousand that ever named a vessel.) */
+  if ((r.do === 'build' || r.do === 'craft') && r.what) {
+    const key = String(r.what).toLowerCase().trim();
+    if (L.recipes && L.recipes[key] && !(L.buildings && L.buildings[key]) && !(L.tools && L.tools[key]) && ['wall', 'fire', 'store', 'shelter', 'pot'].indexOf(key) < 0) r.do = 'make';
+  }
   switch (r.do) {
     case 'eat': {
       const p = w.plants[here];
@@ -1995,18 +2078,8 @@ function act(w, a, r, S, emit) {
     case 'make': {
       const key = String(r.what || '').toLowerCase().trim(), rc = (L.recipes || {})[key];
       if (!rc || (rc.way && !a.knows[rc.way])) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You do not know how to make or do "' + key + '".' }); return false; }
-      const N = rc.needs || {}, lack = [], th = a.things = a.things || {};
-      ['wood', 'stone', 'ore', 'clay'].forEach(function (k) { if (N[k] && (a[k] || 0) < N[k]) lack.push(N[k] + ' ' + k + ' (you have ' + (a[k] || 0) + ')'); });
-      if (N.food) { const have = a.carry.filter(function (c) { return N.food === 'any' || c.k === N.food; }).length; if (have < (N.foodN || 1)) lack.push((N.foodN || 1) + ' ' + N.food + ' carried'); }
-      if (N.thing && (th[N.thing] || 0) < (N.thingN || 1)) lack.push((N.thingN || 1) + ' ' + N.thing);
-      if (N.tool && !a.tools.some(function (q) { return L.tools[q.k] && L.tools[q.k].use === N.tool; })) lack.push('a tool for ' + N.tool + ' in your hands');
-      if (N.at && !nearB(w, a, null, N.at)) lack.push('to be in or beside a ' + N.at);
-      if (N.fire && !fireNear(w, a.x, a.y, 1)) lack.push('a fire beside you');
-      if (N.water && !waterBeside(w, a)) lack.push('water beside you');
-      if (N.night && !SW.isNight(w)) lack.push('night');
-      if (N.on && SW.TERRAIN[w.terrain[here]] !== N.on) lack.push('to stand on ' + N.on);
+      const N = rc.needs || {}, th = a.things = a.things || {}, lack = lacks(w, a, rc);
       const near = w.agents.filter(function (o) { return o !== a && !o.dead && cheb(o.x, o.y, a.x, a.y) <= 2; });
-      if (N.beings && near.length < N.beings) lack.push(N.beings + ' others within two steps (' + near.length + ' are)');
       if (lack.length) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You tried "' + key + '", but it needs ' + lack.join(', ') + '.' }); return false; }
       ['wood', 'stone', 'ore', 'clay'].forEach(function (k) { if (N[k]) a[k] -= N[k]; });
       if (N.food) { let n = N.foodN || 1; for (let q = a.carry.length - 1; q >= 0 && n > 0; q--) if (N.food === 'any' || a.carry[q].k === N.food) { a.carry.splice(q, 1); n--; } }
@@ -2017,6 +2090,7 @@ function act(w, a, r, S, emit) {
       if (G.food) for (let q = 0; q < (G.food.count || 1) && a.carry.length < cap(w, a); q++) a.carry.push({ k: G.food.k, n: G.food.n });
       w.tally.made[key] = (w.tally.made[key] || 0) + 1;
       a.fin = 1; a.stats.made = (a.stats.made || 0) + 1; a.doing = 'making ' + key;
+      a.mk = a.mk || {}; a.mk[key] = (a.mk[key] || 0) + 1; /* what this one has made, and how often: what it is shown of what can be made turns on it */
       emit({ type: 'made', a: a.id, what: key, thing: G.thing || '', with: N.beings ? near.map(function (o) { return o.id; }) : [], x: a.x, y: a.y });
       if (G.fx) applyFx(w, a, G.fx, emit, '"' + key + '"');
       if (G.fxAll) near.concat([a]).forEach(function (o) { applyFx(w, o, G.fxAll, emit, '"' + key + '", done together'); if (o !== a) { o.rel[a.id] = clamp((o.rel[a.id] || 0) + 0.1, -1, 1); a.rel[o.id] = clamp((a.rel[o.id] || 0) + 0.1, -1, 1); if (o.people !== a.people) { SW.learnTongue(w, a, o, 0.05); SW.learnTongue(w, o, a, 0.05); w.tally.crossActs = (w.tally.crossActs || 0) + 1; } } });
@@ -2043,6 +2117,48 @@ function act(w, a, r, S, emit) {
       const tt = w.terrain[here]; if (tt === T.WATER || tt === T.SHALLOWS || w.roads[here] || a.stone < 1) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: w.roads[here] ? 'This ground is already paved. Step on and pave the next.' : a.stone < 1 ? 'Paving takes 1 stone a step and you have none.' : 'Water cannot be paved.' }); return false; }
       a.stone--; w.roads[here] = 1; if (w.plants[here] && !w.plants[here].t) w.plants[here] = null; a.stats.paved = (a.stats.paved || 0) + 1; a.fin = 1; a.doing = 'paving a road';
       emit({ type: 'paved', a: a.id, x: a.x, y: a.y, n: a.stats.paved }); return true;
+    }
+    case 'pen': { /* put the loose animals you keep into the pen beside you, or (what: out) lead them out to follow you again */
+      const say = function (t) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: t }); return false; }, out = r.what === 'out';
+      let pi = -1; for (let dy = -2; dy <= 2 && pi < 0; dy++) for (let dx = -2; dx <= 2 && pi < 0; dx++) if (inb(w, a.x + dx, a.y + dy) && buildingAt(w, idx(w, a.x + dx, a.y + dy)) === 'pen') pi = idx(w, a.x + dx, a.y + dy);
+      if (pi < 0) return say('You tried to pen animals, but no pen stands within two steps. A pen is a kind of building (build {what: pen}), of the way of herding.');
+      const mine = w.creatures.filter(function (c) { return !c.dead && c.owner != null && (c.keeper === a.id || allied(w, a, c.keeper)) && (out ? c.pen === pi : c.pen == null && cheb(c.x, c.y, a.x, a.y) <= 6); });
+      if (!mine.length) return say(out ? 'No animal of yours or of your band is in this pen.' : 'You tried to pen animals, but no loose animal of yours or of your band is within six steps. Tame one first, or drive a wild herd here.');
+      mine.forEach(function (c) { if (out) { c.pen = null; c.keeper = a.id; } else { c.pen = pi; c.hungryIn = 0; if (a.mount === c.id) a.mount = null; } });
+      if (!out) { w.tally.penned = (w.tally.penned || 0) + mine.length; a.stats.penned = (a.stats.penned || 0) + mine.length; }
+      a.fin = 1; a.doing = out ? 'leading animals out of the pen' : 'penning animals';
+      emit({ type: 'penned', a: a.id, n: mine.length, kind: mine[0].sp, out: out, x: a.x, y: a.y }); return true;
+    }
+    case 'drive': { /* drive a wild herd toward a pen of yours or of your band: the animals near move ahead of you, likelier with others driving beside you */
+      const say = function (t) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: t }); return false; };
+      if (!a.knows.herding) return say('You do not yet know how to drive a herd. That is the way of herding, which comes to those who have tamed animals.');
+      let pi = -1, pd = 61; for (const k in (w.bkind || {})) if (w.bkind[k] === 'pen' && w.shelters[k] > 0 && (w.shelters[k] === a.id || allied(w, a, w.shelters[k]))) { const d = cheb(+k % w.W, Math.floor(+k / w.W), a.x, a.y); if (d < pd) { pd = d; pi = +k; } }
+      if (pi < 0) return say('You tried to drive a herd, but neither you nor your band holds a pen within sixty steps to drive it to. Build one first (build {what: pen}).');
+      const reach = L.ecology.driveReach || 8, wild = function (c) { const sc = L.creatures[c.sp]; return !c.dead && sc && !sc.predator && !sc.sea && c.owner == null; };
+      let lead = null, ld = reach + 1; for (let k = 0; k < w.creatures.length; k++) { const c = w.creatures[k]; if (!wild(c)) continue; const d = cheb(c.x, c.y, a.x, a.y); if (d < ld) { ld = d; lead = c; } }
+      if (!lead) return say('You tried to drive a herd, but no wild grazing animal is within ' + reach + ' steps of you.');
+      const px = pi % w.W, py = Math.floor(pi / w.W); let helpers = 0, got = 0, left = 0;
+      for (let k = 0; k < w.agents.length; k++) { const o = w.agents[k]; if (o !== a && !o.dead && o.intent && o.intent.do === 'drive' && cheb(o.x, o.y, a.x, a.y) <= 6) helpers++; }
+      const p = clamp((L.ecology.driveChance || 0.55) + 0.15 * helpers, 0, 0.95), R = L.ecology.penReach || 3;
+      for (let k = 0; k < w.creatures.length; k++) {
+        const c = w.creatures[k]; if (!wild(c) || c.sp !== lead.sp || cheb(c.x, c.y, lead.x, lead.y) > 4) continue;
+        if (cheb(c.x, c.y, px, py) <= R) { c.owner = rootOf(w, a).id; c.keeper = a.id; c.pen = pi; c.hungryIn = 0; c.calm = 30; got++; continue; }
+        left++; if (rnd(w) < p) { const r0 = c.rush; c.rush = 1; stepToward(w, c, px, py); c.rush = r0; } /* a driven animal moves though it would rather stand */
+      }
+      if (cheb(a.x, a.y, lead.x, lead.y) > 2) move(w, a, pathToward(w, a, lead.x, lead.y, 0));
+      a.doing = 'driving ' + lead.sp + ' toward the pen';
+      if (got) { w.tally.driven = (w.tally.driven || 0) + got; a.stats.driven = (a.stats.driven || 0) + got; emit({ type: 'drove', a: a.id, n: got, kind: lead.sp, helpers: helpers, x: px, y: py }); if (!left) a.fin = 1; }
+      return true;
+    }
+    case 'tend': { /* tend a work that yields (a weir, a field): it gives only while someone has tended it lately */
+      const say = function (t) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: t }); return false; };
+      let ti = -1; for (let dy = -1; dy <= 1 && ti < 0; dy++) for (let dx = -1; dx <= 1 && ti < 0; dx++) if (inb(w, a.x + dx, a.y + dy)) { const j = idx(w, a.x + dx, a.y + dy), K0 = buildingAt(w, j); if (K0 && L.buildings[K0].yields) ti = j; }
+      if (ti < 0) return say('You tried to tend, but no weir or field stands beside you. Each is a kind of building (build {what: weir} at the edge of water, build {what: field}).');
+      const K = buildingAt(w, ti), Y = L.buildings[K].yields; w.tended = w.tended || {};
+      const t = w.tended[ti] = w.tended[ti] || { last: w.tick, has: 0 }; t.at = w.tick; t.by = a.id;
+      let took = 0; while (t.has > 0 && a.carry.length < cap(w, a)) { a.carry.push(yieldItem(w, Y.food)); t.has--; took++; }
+      a.fin = 1; a.doing = 'tending the ' + K; a.stats.tended = (a.stats.tended || 0) + 1; w.tally.tendings = (w.tally.tendings || 0) + 1;
+      emit({ type: 'tended', a: a.id, kind: K, took: took, food: Y.food, first: a.stats.tended === 1, season: !Y.seasons || Y.seasons.indexOf(SW.season(w)) >= 0, x: ti % w.W, y: Math.floor(ti / w.W) }); return true;
     }
     case 'tame': {
       let c = null, bd = 3, far = null, fd = 9;
@@ -2182,7 +2298,8 @@ function act(w, a, r, S, emit) {
       }
       if (L.buildings && L.buildings[r.what]) {
         const B = L.buildings[r.what], bw = B.wood || 0, bs = B.stone || 0, say = function (t) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: t }); return false; };
-        if (B.way && !a.knows[B.way] && !(w.works[here] && w.works[here].kind === r.what)) return say('You tried to raise a ' + r.what + ', but you do not know how. It belongs to the way of ' + B.way + '.'); /* anyone may carry to a work that one who knows has begun */
+        if (B.way && !a.knows[B.way] && !(w.works[here] && w.works[here].kind === r.what)) return say('You tried to raise a ' + r.what + ', but you do not know how. It belongs to the way of ' + B.way + '.');
+        if (B.beside === 'water' && !waterBeside(w, a)) return say('A ' + r.what + ' must stand at the edge of water. There is none beside you here.'); /* anyone may carry to a work that one who knows has begun */
         const taken = w.shelters[here] || w.walls[here] || w.stores[here] || w.plants[here] || w.fires[here] > w.tick;
         if (bw + bs > 14) { /* a great work: begun by one, finished by whoever brings wood and stone to it */
           let W0 = w.works[here];
@@ -2279,7 +2396,7 @@ function act(w, a, r, S, emit) {
       if (cheb(a.x, a.y, c.x, c.y) <= 1) {
         const s = L.creatures[c.sp];
         const pack = packOf(w, a, c.x, c.y), skill = 1 + Math.min(0.6, (a.stats.hunted || 0) * 0.04); /* two together overwhelm what one cannot; each hunt teaches the next */
-        if (rnd(w) < L.fight.huntChance * (1 + (L.fight.packBonus == null ? 0.8 : L.fight.packBonus) * pack) * skill * useTool(w, a, 'hunt', emit) * boon(a, 'luck') * (c.owner != null && c.owner === rootOf(w, a).id ? 4 : 1) / c.quick) {
+        if ((c.pen != null && c.keeper != null && (c.keeper === a.id || allied(w, a, c.keeper))) || rnd(w) < L.fight.huntChance * (1 + (L.fight.packBonus == null ? 0.8 : L.fight.packBonus) * pack) * skill * useTool(w, a, 'hunt', emit) * boon(a, 'luck') * (c.owner != null && c.owner === rootOf(w, a).id ? 4 : 1) / c.quick) {
           c.wounds = (c.wounds || 0) + 1;
           if (c.wounds >= (s.tough || 1)) {
             c.dead = true; const n = Math.max(1, Math.round(s.meat * c.size));
@@ -2573,7 +2690,8 @@ function stepAgents(w, emit) {
     a.sheltered = S.vars.sheltered;
     let done = false;
     if (a.e < 18 && (a.carry.some(function (q) { return a.habits.avoid.indexOf(q.k) < 0; }) || S.vars.plant_here >= 1)) { done = act(w, a, { do: 'eat' }, S, emit); if (done) a.doing += ' (starving: the body ate by itself)'; }
-    if (!done && a.e < 22 && !a.carry.length && S.near.store) { const sj = idx(w, S.near.store.x, S.near.store.y), so = w.stores[sj]; if (so && so.items && so.items.length && (a.e < 12 || !so.by || allied(w, a, so.by) || !isAlive(w, so.by))) { if (S.near.store.d === 0) { done = act(w, a, { do: 'take' }, S, emit); if (done) a.doing = 'taking from the store, starving'; } else if (move(w, a, pathToward(w, a, S.near.store.x, S.near.store.y, 0))) { done = true; a.doing = 'making for the store, starving'; } } }
+    /* a store kept by one's own is a larder: its people eat from it when they are hungry (home.larder), not only when they starve */
+    if (!done && a.e < Math.max(22, w.laws.home.larder || 0) && !a.carry.length && S.near.store) { const sj = idx(w, S.near.store.x, S.near.store.y), so = w.stores[sj], own = !!(so && so.by && (so.by === a.id || allied(w, a, so.by))); if (so && so.items && so.items.length && (a.e < 22 ? (a.e < 12 || !so.by || own || !isAlive(w, so.by)) : own)) { if (S.near.store.d === 0) { done = act(w, a, { do: 'take' }, S, emit); if (done) a.doing = a.e < 22 ? 'taking from the store, starving' : 'eating from the larder'; } else if (move(w, a, pathToward(w, a, S.near.store.x, S.near.store.y, 0))) { done = true; a.doing = 'making for the store, starving'; } } }
     if (!done && a.e < 20 && !a.carry.length && !S.near.food && !(S.near.predator && cheb(a.x, a.y, S.near.predator.x, S.near.predator.y) <= 2)) { /* nothing to eat in sight, but someone in sight carries food: a starving body goes to them and asks */
       let g = null, gd = L.body.sight + 1; for (let j = 0; j < w.agents.length; j++) { const o = w.agents[j]; if (o === a || o.dead || !o.carry.length || o.e < 30 || a.stances[rootOf(w, o).id] === 'enemy') continue; const dd = cheb(a.x, a.y, o.x, o.y); if (dd < gd) { gd = dd; g = o; } }
       if (g) { if (gd > 1) { if (move(w, a, pathToward(w, a, g.x, g.y, 1))) { done = true; a.doing = 'making for ' + g.name + ', who carries food, starving'; } }
@@ -2727,6 +2845,7 @@ SW.step = function (w, emit) {
   stepPlants(w);
   stepCreatures(w, emit);
   stepAgents(w, emit);
+  if (w.tended && w.tick % 20 === 3) stepYields(w, emit);
   { const AR = w.laws.arrivals; if (AR && AR.floor > 0 && w.tick % w.laws.time.dayLength === 5 && w.agents.length < AR.floor && w.agents.length < w.laws.mate.maxPopulation && w.tick - (w.lastArrival == null ? -1e9 : w.lastArrival) >= (AR.gapDays || 4) * w.laws.time.dayLength && w.tick > w.laws.time.dayLength * 2) SW.arrive(w, AR.size, null, emit); }
   if (w.tick % w.laws.time.dayLength === 9) { const rg = w.laws.ecology.lodeRegrow || 0; if (rg > 0) { for (const li in w.lodes) { const l = w.lodes[li]; if (l.m == null) l.m = l.n; if (l.n < l.m) l.n = Math.min(l.m, l.n + Math.max(1, Math.round(l.m * rg))); } if (w.spent && w.spent.length) w.spent = w.spent.filter(function (q) { if (w.tick - q.t > 8 * w.laws.time.dayLength && !w.lodes[q.i] && rnd(w) < 0.2) { w.lodes[q.i] = { k: q.k, n: Math.max(2, Math.round(q.m * 0.1)), m: q.m }; return false; } return true; }); } }
   if (w.arrivedQ && w.arrivedQ.length) { const q = w.arrivedQ; w.arrivedQ = []; q.forEach(function (e) { emit({ type: 'arrived', ids: e.ids, people: e.people }); }); }

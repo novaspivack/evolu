@@ -12,6 +12,60 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## Generation 25 (built, not yet run with real minds): what can be made, pens, weirs and fields, thought by plan
+
+Built on 23 November from the list Nova approved (fewer thoughts; a pen and driven herds; a settlement that feeds itself; why no one crosses water; sea creatures that return), without the flood, which he left out. There was no new run file: the findings below come from the thirteenth and fourteenth runs, read again with these questions.
+
+### Why no vessel was ever made
+
+**The cause was in the prompt, not in the world.** A being was shown the things it knows how to make as the last six recipes in the order they were added to the world (`.slice(-6)`). The maker's deeds are added last (sharing, watchfire, amberknot, fangcharm, hallwelcome, nightsong), so they pushed every older recipe out of sight. In the fourteenth run eighteen of forty-three beings knew the way of rafts; nineteen prompts of such beings were kept and the raft is in the list of none of them. 162 thoughts speak of rafts and boats ("Six wood is not a raft", "I am eighty-three years gone and still talk of a raft while holding six wood"), and of 5,692 plan steps one named a vessel: Zichi's `build [what raft]` on day 33. `build` did not know the word and raised a shelter. What was made in that run is exactly the tail of the list: sharing 223, amberknot 108, nightsong 34, bead 9, watchfire 3, hallwelcome 3, roast 2, fangcharm 1. No cloak, basket, bow, sled, trailcake, saltmeat or raft has ever been made by a mind. It is the same fault as the chronicler's: a list cut to a fixed tail.
+
+**Built.**
+- *Everything a being knows how to make is before it* (`M.makeable`): eight in full, each with what it needs and what the being lacks for it this moment ("YOU HAVE ALL IT NEEDS NOW"), the rest by name. First come what it has never made, a vessel when water presses on it and it has none, and what it could make now; what it has made often or already holds comes last (`a.mk` counts what each has made).
+- *"build raft" and "craft cloak" make them* (`act`): a thing with a recipe that is neither a building nor a tool is made, whatever word was used.
+- *The kinds of building* had the same cut (the last nine). All are now shown in turn, nine at a time, the rest named.
+- `SW.lacks(w, a, key)` is the one place that says what a making lacks, for the body and for the mind.
+
+**A second finding, not changed:** inside the known land almost all water can be swum. Of about 2,000 water tiles in a new world some 150 are open water (the heart of a lake); the rest lie within two steps of a shore or of shallows. A vessel spares the strength of swimming, carries cargo, reaches what swims far out and the heart of a lake, and will matter at the sea when the mist opens on it. Whether that is enough reason for beings to make one, a run will show.
+
+### Fewer thoughts
+
+**Measured, and smaller than I first said.** By the time a plan was given, 61% and 64% of thoughts came before it had run out. But steps finish early, so that overstates it: of the prompts kept in three runs, 32%, 35% and 37% show a plan still in hand, about half of them on its last step. Only 5% to 6% of thoughts changed nothing. If every thought that came in the middle of a plan had waited, thoughts would be at most a third fewer; some of those answered something real, so the saving is likely 10% to 15% at the plans minds write now, and more if they plan further ahead, which the prompt now asks.
+
+**Built.** While steps of a plan are still ahead, it takes a stronger wish to bring a thought (`M.WEIGHTY`, 3, against 1 for a being with no plan) and the wish grows by itself only fast enough to reach that after `settings.planWait` moments (180; 0 turns it off). Being spoken to, hurt, a first taste, a meeting bring a thought at once; small things bring it nearer; a plan that runs out brings one at once. The clock of the world waits only for those who are waiting (`M.ready`, `M.pace`). The mind is told when its next thought will come. Each thought's record now says how much plan was ahead and how strong the wish was (`came`), so the next run file answers this directly.
+
+### A pen, and herds that are driven
+
+- **A pen** is a building of the way of herding (5 wood). With kept animals beside it, the plan step `pen` shuts them in: they stay within `ecology.penReach` (3) of it, no longer trail the keeper, and a pair breeds sooner (`penBreed` 1.4). Whoever holds the pen keeps the herd, so a herd outlives the one who tamed it. They graze what grows within reach; one that finds nothing for long breaks out and its keeper is told why. A penned animal is a sure kill for its own people.
+- **Drive** (way of herding): the wild herd within `driveReach` (8) moves toward the nearest pen of the driver or the driver's band, each animal with a chance (`driveChance` 0.55, more for each other driving beside); those that reach the pen are kept.
+
+### A settlement that feeds itself
+
+- **Works that yield.** A building with `yields: { food, every, tend, holds, seasons }` lays food by while someone has tended it lately (plan step `tend`): into the nearest store within eight steps that belongs to its holder or one of the holder's band, or a little at the work itself. Two are in the registry: a **weir** (way of fishing, 4 wood, at the edge of water: a fish every 60 moments) and a **field** (way of farming, 2 wood: grain every 80 moments in summer and autumn). Untended for two days they stop. They are data, so the maker can make more.
+- **The larder.** A store kept by one's own is eaten from when hungry (`home.larder`, energy 35), not only when starving; a stranger still takes only when starving.
+
+### Sea creatures return
+
+A kind of the sea that has fallen below its least number comes in again on open water (`ecology.seaReturn`), as land herds do from the rim.
+
+### Measured
+
+- **On instinct, twelve seeds, forty days, against Generation 24:** alive 15.1 (14.7), deaths 0.3 (0.3), starved 0.3 (0.3), grazers 279 (279), hunters 25.4 (22.0, the sea's hunters coming back), plants 2,545 (2,472). With the sea's return switched off the two generations are the same world moment for moment (it draws on a chance of its own), so nothing else moved. Bodies on instinct build no pens, weirs or fields, so this says nothing of those.
+- **Speed:** 2.28 ms a moment against 2.20 for Generation 24 in the same sitting (2.24 with the sea's return off).
+- **Prompt:** the list of what can be made is 1,700 characters where it was about 1,050, and the note on when the next thought comes is some 150 longer.
+
+### Tested
+
+`tests/21-what-can-be-made-pens-fields-thought-by-plan.js`, 48 checks, through the mind's own path (a plan given to a mind, never the body called directly): the fault and its cure for what can be made; make, build and craft of a recipe; a raft carrying one to the heart of a lake where one without never comes; waiting for a plan, weighty and small events, the plan running out, the clock, the setting at 0, the record, settings carried from the generation before; raising a pen, penning, the keeper walking away against one left loose, the pen passing to another, the keeper dying, breeding, breaking out; driving against a herd left alone; the weir away from water and at it, untended, tended with and without a store, left untended; the larder for one's own and for a stranger; a field in summer and in winter; the sea with the law at nothing and not.
+
+Two of my own checks passed for the wrong reason before I caught them: the raft crossing sent the being to (0,0) because a plan step `goto` takes `x` and `y`, not `target`, and the water I had chosen could be swum. Both now fail if the crossing does not happen. A third froze the animals it was meant to watch (`calm`), which also showed that a driven or penned animal standing calm would not have moved; the engine now moves it. Four older checks were steadied: two that rested on how the wish to think grows, one on the old wording of the prompt, one on the settings version.
+
+### Not built, and not known
+
+- **The heritage of the short sitting of Generation 24** (days 61 to 63 of Nova's world) is not folded in: there is no run file, and the store's copy is too large to read whole. It comes with the next file.
+- No picture of its own for a pen, a weir or a field on the page: each is drawn as a plain roof.
+- Whether minds will make rafts now that they are told they can, whether they pen and drive, whether a weir and a field change who starves, and how many thoughts the waiting saves: none of this can be shown without real minds.
+
 ## After Generation 24: the chronicler is handed the whole span
 
 Nova, with his world at day 63, asked why chapter 13 (days 37 to 61) said "the record for days 37 to 61 is thin until days 59 and 60, when almost everything it holds took place", and whether the memory files of Generation 24 had caused it. They had not; the chronicler's code was as it had been since Generation 20.
