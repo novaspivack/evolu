@@ -18,6 +18,7 @@ Source: <https://github.com/novaspivack/evolu>
 ## Contents
 
 - [What happens in a run](#what-happens-in-a-run)
+- [A world in pictures](#a-world-in-pictures)
 - [How it works](#how-it-works)
 - [Why it is interesting](#why-it-is-interesting)
 - [Inspiration, and how Evolu differs](#inspiration-and-how-evolu-differs)
@@ -50,6 +51,40 @@ The known world ends in mist. The land does not end there; it has only not been 
 <img src="docs/images/evolu-culture.png" alt="The Culture tab: one people's custom, a teaching held across two peoples, and a myth with the way another now tells it" width="420">
 
 *The Culture tab, filled by the browser test through the same paths real minds use.*
+
+## A world in pictures
+
+These were taken by Nova from one world, Wenenvale, on days 36 to 38 of its life, with real minds playing every being (Generation 22). Nothing in them was staged.
+
+<a href="docs/images/run-day-spring.jpg"><img src="docs/images/run-day-spring.jpg" alt="Day 37, the first day of spring: snow still lying in the north, green country and rainforest to the south, named homes, and three beings thinking and speaking" width="100%"></a>
+
+*Day 37, the first day of spring. Snow still lies on the northern lands; the Ixra Rainforest and the warm belt are green. The dark boxes are thoughts and the pale ones are words said aloud. One reads: "Coni is starving to the east, and my hands are empty".*
+
+<table>
+<tr>
+<td width="50%" valign="top"><a href="docs/images/run-night-winter.jpg"><img src="docs/images/run-night-winter.jpg" alt="Day 36, a winter night: fires and homes glowing on the snow in the north, the desert and rainforest dark to the south" width="100%"></a><br><sub>Day 36, a winter night. Fires and homes glow on the Essoss Snows. "Huatli, you are gaunt. Take meat from my hand, I give it freely."</sub></td>
+<td width="50%" valign="top"><a href="docs/images/run-globe.jpg"><img src="docs/images/run-globe.jpg" alt="The same world from far off: a globe among the stars, with the northern ice at the top and a dot for every being" width="100%"></a><br><sub>The same world from far off. Scroll out and it becomes a globe; each dot is a being, coloured by its people.</sub></td>
+</tr>
+</table>
+
+The panel beside the map has a tab for each way of reading the world. Click any of these for the full picture.
+
+<table>
+<tr>
+<td align="center" valign="top" width="20%"><a href="docs/images/panel-story.png"><img src="docs/images/panel-story.png" alt="The Story tab: the chronicler's chapters, written from the record" width="160"></a><br><b>Story</b><br><sub>The chronicler's chapters, written from the record</sub></td>
+<td align="center" valign="top" width="20%"><a href="docs/images/panel-culture.png"><img src="docs/images/panel-culture.png" alt="The Culture tab: customs, sayings and hard lessons, and who holds them" width="160"></a><br><b>Culture</b><br><sub>Customs, sayings and hard lessons, and who holds them</sub></td>
+<td align="center" valign="top" width="20%"><a href="docs/images/panel-voices.png"><img src="docs/images/panel-voices.png" alt="The Voices tab: everything said aloud, and who was near enough to hear" width="160"></a><br><b>Voices</b><br><sub>Everything said aloud, and who was near enough to hear</sub></td>
+<td align="center" valign="top" width="20%"><a href="docs/images/panel-events.png"><img src="docs/images/panel-events.png" alt="The Events tab: the living over time, and what has happened" width="160"></a><br><b>Events</b><br><sub>The living over time, and what has happened</sub></td>
+<td align="center" valign="top" width="20%"><a href="docs/images/panel-peoples.png"><img src="docs/images/panel-peoples.png" alt="The Peoples tab: bands, their homes and what they know" width="160"></a><br><b>Peoples</b><br><sub>Bands, their homes and what they know</sub></td>
+</tr>
+<tr>
+<td align="center" valign="top" width="20%"><a href="docs/images/panel-bonds.png"><img src="docs/images/panel-bonds.png" alt="The Bonds and families tab: trust and enmity between every pair; who was born to whom" width="160"></a><br><b>Bonds and families</b><br><sub>Trust and enmity between every pair; who was born to whom</sub></td>
+<td align="center" valign="top" width="20%"><a href="docs/images/panel-ways.png"><img src="docs/images/panel-ways.png" alt="The Ways tab: ways of doing things, and the names each finder gave them" width="160"></a><br><b>Ways</b><br><sub>Ways of doing things, and the names each finder gave them</sub></td>
+<td align="center" valign="top" width="20%"><a href="docs/images/panel-kinds.png"><img src="docs/images/panel-kinds.png" alt="The Kinds tab: every kind of living thing and how many are alive" width="160"></a><br><b>Kinds</b><br><sub>Every kind of living thing and how many are alive</sub></td>
+<td align="center" valign="top" width="20%"><a href="docs/images/panel-laws.png"><img src="docs/images/panel-laws.png" alt="The Laws tab: the laws of the world, every one of them a number that can be changed" width="160"></a><br><b>Laws</b><br><sub>The laws of the world, every one of them a number that can be changed</sub></td>
+<td align="center" valign="top" width="20%"><a href="docs/images/panel-maker.png"><img src="docs/images/panel-maker.png" alt="The Maker tab: what the maker saw, changed and expected at each visit" width="160"></a><br><b>Maker</b><br><sub>What the maker saw, changed and expected at each visit</sub></td>
+</tr>
+</table>
 
 ## How it works
 
@@ -200,7 +235,7 @@ There is one engine and every check runs against it. The numbered files are grou
 ## What is and is not verified
 
 - The tests show that the mechanics work and that the page runs without errors. They cannot show how real minds behave: those calls only happen when the page runs inside Claude.
-- What real minds did is known from thirteen recorded runs, described in the design log. The globe has been run for twenty-five days, the last thirteen under Generation 21; Generation 22 (a slow collapse from hunger, feeding one's own, rich ground, the muster, herds that follow) had not yet been run with real minds when this was written.
+- What real minds did is known from thirteen recorded runs, described in the design log. The globe has been run for twenty-five days, the last thirteen under Generation 21; Generation 22 (a slow collapse from hunger, feeding one's own, rich ground, the muster, herds that follow) was in its first run with real minds when this was written: the pictures above are from it, and its record has not yet been analysed.
 - Saved worlds live in the browser (IndexedDB, with one older slot as a fallback). They do not travel between browsers or devices; the run log does.
 - Only a world begun under Generation 20 or later is a globe. Older worlds keep their edges.
 - An act can pass every check on the body and still never be reachable by a mind: claiming and venturing were in that state for two generations. The last suite now drives each act through the mind's own path, and reads the list of acts out of the prompt to check the body accepts every one.
