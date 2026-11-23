@@ -14,10 +14,15 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 21, to be watched and tuned
+## NOW: built in Generations 14 to 22, to be watched and tuned
 
 | Item | State |
 | --- | --- |
+| **Hunger that can be answered:** an empty body fails over a day and can be fed back; those with food feed their own; the starving go to stores and to those who carry food and beg | Built in 22 (laws `body.starveHarm`, `culture.succour`). Watch: who still starves, and whether anyone was near with food |
+| **Mending when half fed, and faster in the warm** | Built in 22 (laws `body.healLow`, `body.healWarm`). Watch: do the hurt on the ice now mend by a fire |
+| **Rich ground:** rounds where food plants spread fast and herds breed; one near each people and in every land | Built in 22 (laws `ecology.richSpread`, `ecology.richBreed`; maker event `rich`). Watch: does anyone settle by it; is there game near homes |
+| **A call to hunt or gather together** (`muster`); **a herd that follows its lead** when one of it is tamed; **a gift that answers an offer** | Built in 22. Watch: is a mammoth still hunted alone; does anyone walk with a herd; does a first trade happen |
+| **A chart that can be read; notices that pass; verse that is verse** | Built in 22. For Nova's eye and ear |
 | **A warm belt about the equator, and a sky that belongs to a place:** no snow or cold season in the belt whatever the country; its winter is a season of rain; rain falls as snow on the ice | Built in 21 (laws `climate.belt`, `climate.rains`). Watch: do those in the belt live differently; is the belt the right width |
 | **Food that can be found:** a mind is shown the nearest plant that bears; eat and harvest walk to it | Built in 21, after four starved beside food in the twelfth run. Watch: does anyone still starve in sight of food |
 | **Trade of anything held,** on an offer that stands a day | Built in 21 (law `trade.window`). Watch: does a first trade happen, and of what |
@@ -65,6 +70,8 @@ Answered by the seventh run: people do earn a following (nine pledges), and less
 **From Nova's notes of 22 November, evening, after the globe was built:**
 
 - **Local time** (Nova's second mode: run only what is in view and pause the rest). Not built, and advised against: the world itself costs about 2 ms a moment, so pausing it saves nothing that can be felt; what is scarce is thoughts, and Generation 20 lets the world wait only for those in view while the rest live on and think less often. Pausing people outright would put them out of step with the seasons and with neighbours who walk in and out of view, and would make every run depend on where the watcher looked, so that two runs could no longer be compared. If the lighter choice proves not enough in a real run, this is where to look next.
+- **A pen for a herd, and herds that are driven:** a place at a settlement where kept animals stay and breed when their keeper walks away, and a way to drive a wild herd toward it. (Generation 22 made a herd follow its lead when one of it is tamed; it still lives where its keeper lives.)
+- **A settlement that feeds itself as a settlement:** fields, a fishing place and a larder that belong to those who live there, so that a settlement is better at food than its members are alone. To be designed from what the next run shows of stores and rich ground.
 - **Flood in the season of rains:** rivers that rise, and floods that take what is built too near them. (The season of rains itself was built in Generation 21; flood changes the ground under buildings and paths and waits to see the rains run first.)
 - **A day that goes round the world,** so that the sun lights one side of the globe and it is morning in one country while it is evening in another.
 - **The ice and the rainforest as places to live:** more of what Nova named for them as beings reach them (more craft from hide and bone, fishing through ice, tree-dwellings), from what real runs show is missing.
@@ -173,3 +180,4 @@ A short index; the detail is in the design log.
 | 19 | A rim that opens slowly, a view past the edge, minds that ease off, worlds with names and a choice on opening |
 | 20 | A world that goes round and is seen as a globe; three climates; two different poles; the sea's own creatures; the rainforest; three new peoples and the pull of the homeland; the dog, sled, igloo, canoe and kayak |
 | 21 | A warm belt about the equator and a season of rains; a sky that belongs to a place; food shown by what bears, and eat and harvest that walk to it; trade of anything held; signs and sounds for 29 kinds of event; a wind that does not pulse; hardships in words and sowings that say why they failed, for the maker |
+| 22 | Hunger that can be answered (a slow collapse, feeding one's own, begging, any store at the edge of death); mending in the warm; rich ground; more game; a call to hunt or gather together; a herd that follows its lead; a gift that answers an offer; a chart that can be read, notices that pass, verse that is verse; stores, sowings and hunger made visible to the maker |

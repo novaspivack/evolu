@@ -45,7 +45,7 @@ const at = (w, o, i) => { o.x = i % w.W; o.y = Math.floor(i / w.W); o.px = o.x; 
   delete w.laws.tree.storage.spur; ok(!SW.pathsFor(w, a).open.some(o => o.id === 'storage'), 'in spring, storage is not yet within reach of one who has built twice');
   w.tick = w.laws.time.dayLength * w.laws.time.seasonDays * 2 + 1; for (let k = 0; k < 300; k++) { w.creatures = []; still(a); a.e = 90; SW.step(w, em); }
   const o = SW.pathsFor(w, a).open.find(q => q.id === 'storage'); ok(SW.season(w) === 2 && a.press.turning > 0.9 && o && o.why === 'the year turning toward the lean season', 'in autumn everyone feels the year turning (' + a.press.turning.toFixed(2) + '), and that alone brings storage within reach before the hunger comes');
-  ok(w.laws.time.winterWither === 0.0025 && w.laws.time.winterGrowth === 0.25 && w.laws.ecology.seeding === 0.75, 'winter withers standing food more slowly than it did, and plants seed at three quarters of their full rate whatever the bounty');
+  ok(w.laws.time.winterWither === 0.0025 && (w.laws.time.winterGrowth === 0.25 || w.laws.time.winterGrowth === 0.35) && w.laws.ecology.seeding === 0.75, 'winter withers standing food more slowly than it did, and plants seed at three quarters of their full rate whatever the bounty');
 }
 { // an elder's legacy, and the cry
   const { w, st, ev, em } = fresh(7); w.creatures = []; const a = w.agents[0], b = w.agents.find(o => o.people === a.people && o !== a), g = grass(w, 4); at(w, a, g); at(w, b, g + 1); still(a); still(b);

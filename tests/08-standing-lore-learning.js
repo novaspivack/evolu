@@ -61,7 +61,8 @@ const fresh0 = a => { a.stat = null; };
 }
 { // a community learns
   const { w, st, ev, em } = fresh(7); w.creatures = []; const a = w.agents[0], b = w.agents[1], c = w.agents[2], g = grass(w, 3); at(w, a, g); at(w, b, g + 1); still(b); a.mateT = w.tick; a.policy = []; a.plan = []; a.carry = []; a.e = 0.2; w.plants[g] = null;
-  for (let k = 0; k < 10 && !ev.some(e => e.type === 'death'); k++) { a.e = Math.min(a.e, 0.05); SW.step(w, em); }
+  w.laws.culture.succour = 0; /* no one feeds them, and the body is already failing: an empty body no longer dies at once */
+  for (let k = 0; k < 10 && !ev.some(e => e.type === 'death'); k++) { a.e = Math.min(a.e, 0.05); a.hp = Math.min(a.hp, 0.2); a.carry = []; SW.step(w, em); }
   const ls = (st.minds[b.id].lessons || []).map(q => q.text).join(' | '); ok(/starved/.test(ls) && /after making a child/.test(ls), 'a death and how it came is learned by the community: ' + ls.slice(0, 170));
   ok(/WHAT HAS BEFALLEN OTHERS/.test(M.buildPrompt(st, st.minds[b.id], 'routine')), 'and stands in their minds');
   const far = w.agents.find(o => o.people === b.people && o !== b && !(st.minds[o.id].lessons || []).length) || c; st.minds[far.id].lessons = []; at(w, far, g + 2); far.lang = b.lang; for (let k = 0; k < 170; k++) { still(b); still(far); at(w, far, g + 2); at(w, b, g + 1); SW.step(w, em); M.tick(st); }

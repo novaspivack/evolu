@@ -35,6 +35,29 @@ const errs = []; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m)
   ok(fx.fished.ripple === 1 && fx.drank.ripple === 1, 'a line cast and a drink taken leave rings on the water');
   ok(fx.tamed.mote >= 6 && fx.made.mote >= 10 && fx.healed.mote >= 12 && fx.arrived.ring === 1 && fx.arrived.mote >= 14 && fx.claimed.ring === 1 && fx.claimed.float === 1, 'taming, a rite, a healing, newcomers and a claim each have their sign');
   ok(['felled', 'stashed', 'bridged', 'paved', 'dismantled'].every(t => fx[t].dot >= 4) && fx.herdcame.ring === 1 && fx.aged.mote >= 5 && fx.rallied.ring === 1 && fx.crafted.spark >= 3 && fx.sick.float === 1 && fx.mended.slash === 1 && fx.rode.dot >= 4, 'and so do the small works of a day: felling, storing, paving, a herd coming, coming of age, a rally, a thing made');
+  /* Generation 22: the signs of hunger and of a call; verse in lines */
+  const fx2 = await page.evaluate(() => { const d = window.SWdebug, w = d.st.world, a = w.agents[0], b = w.agents[1], o = {}; const kinds = function (ev) { d.U.fx.length = 0; d.event(ev); const q = {}; d.U.fx.forEach(function (f) { q[f.type] = (q[f.type] || 0) + 1; }); return q; };
+    o.mustered = kinds({ type: 'mustered', a: a.id, ids: [b.id], what: 'hunt' }); o.begged = kinds({ type: 'begged', a: a.id, b: b.id }); o.succoured = kinds({ type: 'succoured', a: a.id, b: b.id, what: 'berry' }); o.faint = kinds({ type: 'faint', a: a.id });
+    o.verse = d.verse('The ice was thin, the night was long / we kept the fire, we kept the song'); o.plain = d.verse('a <b> tale / of one'); return o; });
+  ok(fx2.mustered.ring === 1 && fx2.mustered.float === 1 && fx2.begged.float === 1 && fx2.succoured.slash === 1 && fx2.succoured.mote >= 10 && fx2.faint.float === 1 && fx2.faint.ring === 1, 'a call to hunt, a beggar, a feeding of the starving and a collapse each have their sign');
+  ok(fx2.verse === 'The ice was thin, the night was long<br>we kept the fire, we kept the song' && fx2.plain === 'a &lt;b&gt; tale<br>of one', 'a song written with / between its lines is shown line by line, and nothing in it can become markup');
+  /* the chart of the living */
+  const eco = await page.evaluate(async () => { const d = window.SWdebug, w = d.st.world; d.U.hist.length = 0; for (let k = 0; k < 30; k++) d.U.hist.push({ d: 1 + Math.floor(k / 6), a: 15 + (k % 4), h: 240 + k, s: 20 + (k % 3), p: 2000 - k * 5 });
+    d.setTab('chronicle'); await new Promise(r => setTimeout(r, 400)); d.drawEco(); const c = document.getElementById('eco'), q = c.getBoundingClientRect(), txt = id => (document.getElementById(id) || {}).textContent;
+    const cols = Array.from(document.querySelectorAll('.legend i')).map(i => i.style.background), now = { a: txt('ecoN_a'), h: txt('ecoN_h'), s: txt('ecoN_s'), p: txt('ecoN_p'), day: txt('ecoDay') };
+    c.dispatchEvent(new PointerEvent('pointermove', { clientX: q.left + 34 + (q.width - 42) * 6 / 29, clientY: q.top + 20, bubbles: true })); const then = { a: txt('ecoN_a'), h: txt('ecoN_h'), p: txt('ecoN_p'), day: txt('ecoDay') };
+    c.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true })); const g = c.getContext('2d'), px = (v, col) => { /* is the line of this colour drawn at the height the ratio scale gives? */ return 1; };
+    return { cols: cols, now: now, then: then, back: txt('ecoDay'), legend: document.querySelector('.legend').textContent }; });
+  ok(new Set(eco.cols).size === 4 && !/÷/.test(eco.legend), 'the four lines of the chart have four different colours, and plants are no longer shown divided by ten: ' + eco.cols.join(' '));
+  ok(eco.now.a === '16' && eco.now.h === '269' && eco.now.s === '22' && eco.now.p === '1855' && /^now, day 5/.test(eco.now.day), 'under the chart the count of each stands in its own colour: ' + JSON.stringify(eco.now));
+  ok(eco.then.a === '17' && eco.then.h === '246' && eco.then.p === '1970' && eco.then.day === 'day 2' && /^now/.test(eco.back), 'pointing at the chart reads the counts of that day (' + JSON.stringify(eco.then) + '), and leaving it returns to now');
+  await page.screenshot({ path: path.join(SHOTS, 'chart-of-the-living.png') });
+  /* a notice passes by itself */
+  await page.evaluate(() => { window.SWdebug.notice('A notice with nothing to do.'); }); const shown = await page.evaluate(() => !document.getElementById('notice').hidden);
+  await page.waitForTimeout(10600); const gone = await page.evaluate(() => document.getElementById('notice').hidden);
+  await page.evaluate(() => { window.SWdebug.notice('A notice with something to do.', { label: 'Do it', run: function () {} }); }); await page.waitForTimeout(10600); const stays = await page.evaluate(() => !document.getElementById('notice').hidden);
+  ok(shown && gone && stays, 'a notice passes by itself after ten seconds; one that offers something to do stays for thirty');
+  await page.evaluate(() => { document.getElementById('notice').hidden = true; window.SWdebug.setTab('inspect'); });
   await page.waitForTimeout(700); /* the signs are drawn for a while: an error in drawing one would show here */
   /* sound */
   const snd = await page.evaluate(async () => {

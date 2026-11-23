@@ -5,6 +5,7 @@
 (function () {
 'use strict';
 const $ = function (id) { return document.getElementById(id); };
+const verse = function (s) { return esc(s).replace(/\s+\/\s+/g, '<br>'); }; /* a song or poem is written with / between its lines */
 const esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
 const clamp = SW.clamp;
 const SAVE_KEY = 'seedworld.save.v4'; /* the key keeps the world's first name so that worlds saved before the renaming still load */
@@ -866,6 +867,10 @@ function onWorldEvent(ev) {
     case 'awakened': if (a) { burst(a.x, a.y, '#ffffff', 30); addFx({ type: 'ring', x: a.x, y: a.y, r: 4, life: 2.4, color: 'rgba(255,255,255,0.9)' }); soundAt('awakened', a.x, a.y, voice); } break;
     case 'stole': if (a) { addFx({ type: 'float', x: a.x, y: a.y, text: ev.seen ? 'thief!' : '…', life: 1.6, color: ev.seen ? '#ff8f6b' : '#9aa7ad' }); soundAt('stole', a.x, a.y, voice); } break;
     case 'traded': if (a && b) { addFx({ type: 'slash', x: a.x, y: a.y, x2: b.x, y2: b.y, life: 0.9, color: '#8fe0c0' }); glyph(a.x, a.y, ev.gave + ' for ' + ev.got, '#8fe0c0', 2.6); motes(b.x, b.y, '#8fe0c0', 5); soundAt('traded', a.x, a.y, voice); } break;
+    case 'mustered': if (a) { addFx({ type: 'ring', x: a.x, y: a.y, r: w.laws.body.hearing + 4, life: 1.6, color: 'rgba(255,214,140,0.7)' }); glyph(a.x, a.y, (ev.what === 'hunt' ? 'to the hunt!' : 'come and gather!') + ((ev.ids || []).length ? ' +' + ev.ids.length : ''), '#ffd68c', 2.6); soundAt('rallied', a.x, a.y); } break;
+    case 'begged': if (a) { glyph(a.x, a.y, 'begs for food', '#ff9d7a', 2.6); soundAt('sick', a.x, a.y, voice); } break;
+    case 'succoured': if (a && b) { addFx({ type: 'slash', x: a.x, y: a.y, x2: b.x, y2: b.y, life: 1.2, color: '#ffd9a0' }); motes(b.x, b.y, '#ffd9a0', 10); glyph(b.x, b.y, 'fed', '#ffd9a0', 2.4); soundAt('shared', b.x, b.y); } break;
+    case 'faint': if (a) { glyph(a.x, a.y, 'collapsed from hunger', '#ff6b5a', 3.2); addFx({ type: 'ring', x: a.x, y: a.y, r: 1.6, life: 2.2, color: 'rgba(255,107,90,0.8)' }); soundAt('sick', a.x, a.y, voice); } break;
     case 'offer': if (a) { glyph(a.x, a.y, ev.give + ' for ' + ev.want + '?', '#8fe0c0', 2.2); soundAt('offer', a.x, a.y, voice); } break;
     case 'mined': sparks(ev.x, ev.y, '#ffe9a0', ev.first ? 6 : 3); soundAt('mined', ev.x, ev.y, voice); if (ev.first && a) glyph(a.x, a.y, ev.kind, '#ffe9a0', 2.4); break;
     case 'felled': burst(ev.x, ev.y, '#b98a55', 5); soundAt('wood', ev.x, ev.y); break;
@@ -1006,7 +1011,8 @@ function wakeMinds(another) {
 function showNotice(text, action) {
   $('noticeText').textContent = text; $('notice').hidden = false;
   const b = $('noticeBtn'); b.textContent = action ? action.label : 'Dismiss';
-  b.onclick = function () { $('notice').hidden = true; if (action) action.run(); };
+  b.onclick = function () { $('notice').hidden = true; clearTimeout(U.noticeT); if (action) action.run(); };
+  clearTimeout(U.noticeT); U.noticeT = setTimeout(function () { $('notice').hidden = true; }, action ? 30000 : 10000); /* a notice passes by itself: ten seconds, or thirty when it offers something to do */
 }
 function syncButtons() {
   $('btnPlay').textContent = U.playing ? '❚❚' : '▶'; $('btnPlay').classList.toggle('on', !U.playing);
@@ -1105,7 +1111,7 @@ function renderAgent(pane, id) {
   { const th = a.things ? Object.keys(a.things).filter(function (k) { return a.things[k] > 0; }) : [];
     if (th.length) b += '<div class="kv" style="font-size:13px"><span class="muted">holds</span> ' + th.map(function (k) { return esc(k) + ' ×' + a.things[k]; }).join(', ') + '</div>';
     if (a.boons && a.boons.length) b += '<div class="kv" style="font-size:13px"><span class="muted">at work in its body</span> ' + a.boons.map(function (q) { return esc(q.k) + ' ×' + q.v + ' <span class="muted">(' + esc(q.src) + ')</span>'; }).join(', ') + '</div>';
-    if (m.tales && m.tales.length) b += '<h3>Tales it carries</h3>' + m.tales.map(function (q) { return '<div class="mk"><b>' + esc(q.title) + '</b> <span class="v">' + (q.from ? 'told by ' + esc(q.from) + ', first by ' + esc(q.by) : 'its own') + (q.retold ? ' · retold' : '') + '</span><div class="q">' + esc(q.text) + '</div></div>'; }).join(''); }
+    if (m.tales && m.tales.length) b += '<h3>Tales it carries</h3>' + m.tales.map(function (q) { return '<div class="mk"><b>' + esc(q.title) + '</b> <span class="v">' + (q.from ? 'told by ' + esc(q.from) + ', first by ' + esc(q.by) : 'its own') + (q.retold ? ' · retold' : '') + '</span><div class="q">' + verse(q.text) + '</div></div>'; }).join(''); }
   if (m.aim) b += '<h3>Aim</h3><div class="kv" style="font-size:13.5px;color:var(--text)">' + esc(m.aim) + '</div>';
   if (m.life && m.life.length) b += '<h3>Its life so far</h3><ul class="events">' + m.life.map(function (e) { return '<li><span class="muted">' + esc(when(e.tick).split(',')[0]) + '</span> ' + esc(e.text) + '</li>'; }).join('') + '</ul>';
   if (m.method) b += '<h3>How it has taught itself to think</h3><div class="creed" style="border-left-color:var(--mind);font-size:14px">' + esc(m.method) + '</div>';
@@ -1242,29 +1248,39 @@ function renderVoices() {
   $('pane-voices').innerHTML = h + '</div>'; paintPending($('pane-voices'));
   $('onlySel').onchange = function () { U.onlySel = this.checked; U.keys.voices = ''; };
 }
+const ECO = [['a', '#f2b84b', 'beings'], ['h', '#5fb6e6', 'grazers'], ['s', '#e0667a', 'hunters'], ['p', '#6fd38b', 'plants']];
 function drawEco() {
   const c = $('eco'); if (!c) return;
   const r = c.getBoundingClientRect(), g = c.getContext('2d'), d = Math.min(2, window.devicePixelRatio || 1);
   c.width = r.width * d; c.height = r.height * d; g.setTransform(d, 0, 0, d, 0, 0);
-  const Wd = r.width, Hd = r.height, hist = U.hist, pad = { l: 26, r: 8, t: 8, b: 16 };
-  let max = 10; hist.forEach(function (q) { max = Math.max(max, q.a, q.h, q.s, q.p / 10); }); max = Math.ceil(max / 10) * 10;
+  const Wd = r.width, Hd = r.height, hist = U.hist, pad = { l: 34, r: 8, t: 8, b: 16 };
+  if (!c._hov) { c._hov = 1; /* pointing at the chart reads the counts of that day */
+    const at = function (e) { const q = c.getBoundingClientRect(), n = U.hist.length; U.ecoAt = n > 1 ? Math.max(0, Math.min(n - 1, Math.round((e.clientX - q.left - 34) / (q.width - 42) * (n - 1)))) : -1; drawEco(); };
+    c.addEventListener('pointermove', at); c.addEventListener('pointerdown', at); c.addEventListener('pointerleave', function () { U.ecoAt = -1; drawEco(); }); }
+  /* a scale of ratios (5, 10, 30, 100, 300, 1000, 3000), so that thirty beings and two thousand plants can both be read */
+  let top = 30; hist.forEach(function (q) { top = Math.max(top, q.a, q.h, q.s, q.p); });
+  const lo = Math.log(5), hi = Math.log(top * 1.15), Y = function (v) { return pad.t + (Hd - pad.t - pad.b) * (1 - (Math.log(Math.max(5, v)) - lo) / (hi - lo)); };
   g.strokeStyle = '#1c2a32'; g.lineWidth = 1; g.fillStyle = '#8ea3a1'; g.font = '10px "JetBrains Mono", monospace'; g.textAlign = 'right'; g.textBaseline = 'middle';
-  [0, 0.5, 1].forEach(function (f) { const y = pad.t + (Hd - pad.t - pad.b) * (1 - f); g.beginPath(); g.moveTo(pad.l, y); g.lineTo(Wd - pad.r, y); g.stroke(); g.fillText(String(Math.round(max * f)), pad.l - 5, y); });
-  if (hist.length < 2) return;
-  const X = function (i) { return pad.l + (Wd - pad.l - pad.r) * i / (hist.length - 1); }, Y = function (v) { return pad.t + (Hd - pad.t - pad.b) * (1 - v / max); };
-  [['p', '#6fd38b', 10], ['h', '#c9a877', 1], ['s', '#a68bd8', 1], ['a', '#f2b84b', 1]].forEach(function (s) {
-    g.strokeStyle = s[1]; g.lineWidth = s[0] === 'a' ? 2.2 : 1.4; g.beginPath();
-    hist.forEach(function (q, i) { const y = Y(q[s[0]] / s[2]); if (i) g.lineTo(X(i), y); else g.moveTo(X(i), y); });
+  [5, 10, 30, 100, 300, 1000, 3000, 10000].forEach(function (v) { if (v > top * 1.15) return; const y = Y(v); g.beginPath(); g.moveTo(pad.l, y); g.lineTo(Wd - pad.r, y); g.stroke(); g.fillText(String(v), pad.l - 5, y); });
+  const n = hist.length, at = U.ecoAt >= 0 && U.ecoAt < n ? U.ecoAt : n - 1, shown = n ? hist[at] : null;
+  ECO.forEach(function (s) { const el = $('ecoN_' + s[0]); if (el) el.textContent = shown ? String(shown[s[0]]) : ''; });
+  { const el = $('ecoDay'); if (el) el.textContent = shown ? (at === n - 1 ? 'now, day ' + shown.d : 'day ' + shown.d) : ''; }
+  if (n < 2) return;
+  const X = function (i) { return pad.l + (Wd - pad.l - pad.r) * i / (n - 1); };
+  ECO.slice().reverse().forEach(function (s) {
+    g.strokeStyle = s[1]; g.lineWidth = s[0] === 'a' ? 2.4 : 1.6; g.beginPath();
+    hist.forEach(function (q, i) { const y = Y(q[s[0]]); if (i) g.lineTo(X(i), y); else g.moveTo(X(i), y); });
     g.stroke();
-    const last = hist[hist.length - 1]; g.fillStyle = s[1]; g.beginPath(); g.arc(X(hist.length - 1), Y(last[s[0]] / s[2]), 2.6, 0, 6.2832); g.fill();
+    g.fillStyle = s[1]; g.beginPath(); g.arc(X(at), Y(hist[at][s[0]]), 3, 0, 6.2832); g.fill();
   });
-  g.fillStyle = '#8ea3a1'; g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillText('day ' + hist[0].d, pad.l, Hd - 3); g.textAlign = 'right'; g.fillText('day ' + hist[hist.length - 1].d, Wd - pad.r, Hd - 3);
+  if (at !== n - 1) { g.strokeStyle = 'rgba(232,240,236,0.35)'; g.beginPath(); g.moveTo(X(at), pad.t); g.lineTo(X(at), Hd - pad.b); g.stroke(); }
+  g.fillStyle = '#8ea3a1'; g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillText('day ' + hist[0].d, pad.l, Hd - 3); g.textAlign = 'right'; g.fillText('day ' + hist[n - 1].d, Wd - pad.r, Hd - 3);
 }
 function renderChronicle() {
   const key = st.chron.length + ':' + (st.chron.length ? st.chron[st.chron.length - 1].tick : 0);
   if (U.keys.chronicle !== key) {
     U.keys.chronicle = key;
-    let h = '<h2>Chronicle</h2><h3>The living, over time</h3><canvas id="eco"></canvas><div class="legend"><span><i style="background:#f2b84b"></i>beings</span><span><i style="background:#c9a877"></i>grazers</span><span><i style="background:#a68bd8"></i>hunters</span><span><i style="background:#6fd38b"></i>plants ÷ 10</span></div><h3>What has happened</h3>';
+    let h = '<h2>Chronicle</h2><h3>The living, over time</h3><canvas id="eco"></canvas><div class="legend">' + ECO.map(function (q) { return '<span><i style="background:' + q[1] + '"></i>' + q[2] + ' <b id="ecoN_' + q[0] + '" style="color:' + q[1] + '"></b></span>'; }).join('') + '<span id="ecoDay" class="m"></span></div><div class="m" style="margin-top:4px">Point at the chart to read the counts of any day. The scale is one of ratios, so small numbers can be read beside large ones.</div><h3>What has happened</h3>';
     const rows = [];
     for (let i = st.chron.length - 1; i >= 0 && rows.length < 120; i--) { const c = st.chron[i]; rows.push('<div class="line jump" data-act="chron" data-i="' + i + '"><span class="tag ' + esc(c.kind) + '">' + esc(c.kind) + '</span>' + esc(c.text) + ' <span class="when">' + esc(when(c.tick)) + '</span></div>'); }
     $('pane-chronicle').innerHTML = h + (rows.length ? rows.join('') : '<p class="empty">Nothing worth recording yet.</p>');
@@ -1332,7 +1348,7 @@ function renderCulture() {
   h += '<div class="cseg" role="group" aria-label="View">' + [['peoples', 'By people'], ['spread', 'How ideas spread'], ['between', 'Between peoples'], ['time', 'As it happened']].map(function (v) { return '<button data-act="cultv" data-id="' + v[0] + '" aria-pressed="' + (view === v[0]) + '">' + v[1] + '</button>'; }).join('') + '</div>';
   const holdersLine = function (it) { const lv = live[it.id], ps = Object.keys(lv.p); return 'held by <b>' + lv.n + '</b>' + (ps.length > 1 || (ps.length === 1 && +ps[0] !== it.people) ? ' (' + ps.map(function (p) { return peopleDot(+p) + esc(peopleName(+p)) + ' ' + lv.p[p]; }).join(', ') + ')' : '') + (it.tellings ? ' · passed on ' + it.tellings + ' time' + (it.tellings > 1 ? 's' : '') : '') + (it.changed ? ' · changed in the telling ' + it.changed + ' time' + (it.changed > 1 ? 's' : '') : '') + (it.depth > 1 ? ' · ' + it.depth + ' mouths from its maker' : ''); };
   const variant = function (it) { for (const hid in it.holders) { const m = st.minds[hid]; if (!m || m.dead || +hid === it.byId) continue; const t = (m.tales || []).filter(function (q) { return q.cid === it.id; })[0]; if (t && t.text !== it.text) return '<div class="alt">As ' + esc(st.names[hid] || 'another') + ' tells it now: “' + esc(t.text) + '”</div>'; } return ''; };
-  const card = function (it, p) { return '<div class="idea ' + it.kind + '"><div class="t"><span class="tag">' + esc(it.kind) + '</span>' + esc(it.title) + '</div><div class="m">' + (it.by ? 'first from ' + (it.byId != null ? nameLink(it.byId) : esc(it.by)) : 'older than memory') + ', day ' + it.day + (it.about ? ' · about ' + esc(it.about) : '') + (p != null && it.people != null && it.people !== p ? ' · came from ' + peopleDot(it.people) + esc(peopleName(it.people)) : '') + '</div>' + (it.text && it.kind !== 'lesson' && it.kind !== 'saying' ? '<blockquote>“' + esc(it.text) + '”</blockquote>' : '') + (['tale', 'song', 'poem', 'myth'].indexOf(it.kind) >= 0 ? variant(it) : '') + '<div class="m">' + holdersLine(it) + '</div></div>'; };
+  const card = function (it, p) { return '<div class="idea ' + it.kind + '"><div class="t"><span class="tag">' + esc(it.kind) + '</span>' + esc(it.title) + '</div><div class="m">' + (it.by ? 'first from ' + (it.byId != null ? nameLink(it.byId) : esc(it.by)) : 'older than memory') + ', day ' + it.day + (it.about ? ' · about ' + esc(it.about) : '') + (p != null && it.people != null && it.people !== p ? ' · came from ' + peopleDot(it.people) + esc(peopleName(it.people)) : '') + '</div>' + (it.text && it.kind !== 'lesson' && it.kind !== 'saying' ? '<blockquote>“' + verse(it.text) + '”</blockquote>' : '') + (['tale', 'song', 'poem', 'myth'].indexOf(it.kind) >= 0 ? variant(it) : '') + '<div class="m">' + holdersLine(it) + '</div></div>'; };
   if (view === 'peoples') {
     h += '<div class="cseg" role="group" aria-label="People"><button data-act="cultp" data-id="all" aria-pressed="' + (pf == null) + '">All</button>' + P.map(function (p, i) { return '<button data-act="cultp" data-id="' + i + '" aria-pressed="' + (pf === i) + '">' + peopleDot(i) + esc(p.name) + '</button>'; }).join('') + '</div>';
     P.forEach(function (p, i) {
@@ -1660,7 +1676,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 21, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 22, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1712,7 +1728,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 21, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 22, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }
@@ -1760,7 +1776,7 @@ function attach(state) {
   if (w.agents.length) { cam.x = w.agents.reduce(function (s, a) { return s + a.x; }, 0) / w.agents.length + 0.5; cam.y = w.agents.reduce(function (s, a) { return s + a.y; }, 0) / w.agents.length + 0.5; }
   else { cam.x = w.W / 2; cam.y = w.H / 2; }
   clampCam(); syncButtons();
-  window.SWdebug = { st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere };
+  window.SWdebug = { st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco };
 }
 function newWorld(seed) {
   const keep = st ? st.settings : null;

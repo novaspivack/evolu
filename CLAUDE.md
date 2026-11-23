@@ -47,6 +47,11 @@ The page writes each run to the artifact's store as it goes. With the artifact d
 - Climate (`SW.climate`: 1 warm, 2 ice, 0 between) comes from the biome of the region and, on a round world, from latitude: a warm belt about the equator whatever the country (law `climate.belt`). It is kept beside the world in a `WeakMap` (`climArr`), never in it, and is made again when the belt or the regions change. It acts in `stepPlants`, in the cold on a body, and in the snow and leaf veils the page paints.
 - The sky belongs to a place: use `skyAt(w, i)` / `SW.skyAt(w, x, y)` for anything a body, a plant or a viewer feels (snow is rain in the belt, rain is snow on the ice, the belt's winter is rain). `w.weather.kind` is only the weather of the world as a whole.
 - When an act now does more for a mind's plan (as `eat` and `harvest` walk to food), gate it on `r === a.intent`, so a body on instinct alone behaves as before and balance can still be compared with the generation before.
+- Terrain numbers are not in the order one would guess: `T.SAND` is 1, `T.ROCK` 4, `T.SHALLOWS` 5, `T.MARSH` 6, `T.DESERT` 7, `T.SNOW` 8. Water is 0 and 5. Never write a bare number for a terrain without looking at `T` (a check for "not water" as `0 or 1` shipped in a test and nearly in the maker in Generation 22).
+- Rich ground is a list of rounds in the world (`w.rich`); which tiles they cover is kept beside it (`richArr`, like the climate). It is placed by a chance of its own (`seedRich`), so adding it did not move the world's stream of chance at creation; keep new furniture of the land that way.
+- An empty body collapses and drains (`body.starveHarm`); it no longer dies at once. A check that needs a death by hunger sets `hp` low or the law high. A check that needs a being to stay hungry and still must hold its place and empty its hands each moment: a starving body follows the smell of food, begs, takes from stores and is fed by its own.
+- A plan step from a mind keeps only the fields `SW.sanitizeRule` knows (`name`, `what`, `want`, `target`, `from`, ...). A new act must take its options in one of those, or the option is silently dropped: `muster` takes `what`, not `for`.
+- A law re-tune in `SW.upgrade` gets its own flag on the world (`w.rich22`); do not move `w.tuned2` forward to skip a block, which also skips the older blocks for older worlds.
 - Plants are stepped every other moment at double rates. A new per-moment rate in `stepPlants` must be doubled.
 - On the page, `sx()` wraps and `toWorld()` returns a wrapped x; whole-map images are laid with `lay()`. The globe (`drawSpace`) is used when `isGlobe()`.
 - When a script edits a document, end it by writing the file and check the result: the README said Generation 18 through Generation 19 because an edit was computed and never written.
@@ -72,7 +77,7 @@ tests/run-all.sh                                   # needs only Node
 PLAYWRIGHT=/path/to/node_modules/playwright tests/run-all.sh browser
 ```
 
-All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`16-...js`), with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
+All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`17-...js`); do not pin the generation number or the size of the heritage with `===` in it, or the next generation breaks it, with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
 
 What the tests cannot show is how real minds behave. Say so in every report.
 

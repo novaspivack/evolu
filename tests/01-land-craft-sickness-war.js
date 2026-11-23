@@ -113,7 +113,7 @@ for (const seed of [7, 11, 42, 99]) {
 /* 8. herds move with the seasons */
 {
   const mean = (w) => { const l = w.creatures.filter(c => c.sp === 'hornback'); return l.length ? l.reduce((s, c) => s + c.y, 0) / l.length : null; };
-  const w = SW.createWorld(11); w.agents = [];
+  const w = SW.createWorld(11); w.agents = []; w.rich = []; /* rich ground holds herds where they are; this check is of the pull of the seasons alone */
   const year = 4 * w.laws.time.seasonDays * w.laws.time.dayLength, ys = [];
   for (let q = 0; q < 8; q++) { run(w, year / 4); ys.push(Math.round(mean(w) * 10) / 10); }
   ok('hornback herds stand further south at winter\'s end than at summer\'s end', ys[3] > ys[1], ys.join(' '));
@@ -122,7 +122,7 @@ for (const seed of [7, 11, 42, 99]) {
 /* 9. a world saved by generation 5 opens and runs here */
 {
   /* a world saved by the generation before this one (400 moments old) must still load and run */
-  const snap = JSON.parse(require('zlib').gunzipSync(require('fs').readFileSync(require('path').join(__dirname, 'fixtures', 'save-generation-20.json.gz'))).toString());
+  const snap = JSON.parse(require('zlib').gunzipSync(require('fs').readFileSync(require('path').join(__dirname, 'fixtures', 'save-generation-21.json.gz'))).toString());
   const SW6 = SW, M6 = M;
   let st6 = null, err = null;
   try { st6 = M6.restore(snap); for (let i = 0; i < 1500; i++) SW6.step(st6.world, st6.emit); st6.world.agents.forEach(a => M6.buildPrompt(st6, st6.minds[a.id], 'deep')); } catch (e) { err = e; }
