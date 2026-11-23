@@ -12,6 +12,49 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## Generation 20 (built, not yet run with real minds): a globe
+
+Built from Nova's notes of the evening of 22 November, which came while it was being built: a world that wraps and is seen as a globe; polar ice with its own life; igloos, sleds, kayaks and canoes; dogs; a warm belt with rainforest and its own peoples and creatures; peoples and animals that keep to their own kind of country; two poles that differ; and climate that differs by zone. No run stands between Generation 19 and this one.
+
+**The world goes round.** A new world is 216 from east round to east again and 124 from pole to pole, and its east edge joins its west. Every distance, direction, path, sighting and chase goes the short way round; the land is grown from noise that itself goes round, so the ground joins where east meets west. North and south end at the poles: there is nowhere beyond. The middle 144 by 96 is known at first, as before; the unknown now lies round the back of the world and toward both poles, and strips opened east and west meet each other behind the world (nine pushes from one side, in the check). A world made before this stays flat, with edges.
+
+**Seen from far off it is a globe.** Scroll out past the point where the whole world would fit across the view (or press Whole world) and the map gives way to a ball among stars, turned by dragging and turning slowly by itself when left alone. The unknown lies under cloud. The living show as points of their peoples' colours, and fires show at night. By day the sun climbs and sinks on one side of the sky; by night the moon does on the other, waxing and waning over twelve days; the globe is lit by day and dark by night all over at once, because the world has one day and one night for everyone (a line of shadow crossing the ball would be a lie about the world as it is). Scroll in and the ball comes down to the flat map at the place it was facing.
+
+**Three climates.** The warm belt (rainforest and desert) has no winter: no snow is drawn there, no cold season bites, the leaves do not turn, plants do not wither, and in the rainforest growth runs as if it rained most days. The ice is cold all the year, a little less in summer, and little grows there but what is hardy. Between them the seasons are as they were. In the check, at the end of winter a soft plant of the rainforest still bears 2.85 and one of the woodland 1.38. A being is told which climate it stands in.
+
+**The two ends of the world are different countries.** The North Ice: caribou, mammoths, wolves and white bears; snowberry and frostcap. The South Ice: penguins, great seals and stormbirds that fish at the water's edge, and no hunter on the land; windroot, glowcap and kelp. Whales in both seas, and orcas that hunt them and the fishers on the shore.
+
+**What lives in the sea keeps to it.** Whales and orcas (and the rivermaw of the rainforest rivers) cannot leave the water, are fed by it, and are prey only to one who can go on the water: a whale far out is nothing to a hunter on the shore.
+
+**The rainforest.** A new kind of country in the warm belt: nine tenths under trees, with goldfruit, canopynut, vinebean, feverbark (which cures sickness) and firepod; tree-apes, skybirds and mudsnouts; and shadowcats, coilsnakes and rivermaws that hunt there.
+
+**Three new peoples,** invented like every people of this world: the Canopy-folk of the rainforest (small of stature, born knowing the plants that heal), the Ice-folk of the north (herders, hardy against cold) and the Floe-folk of the south (fishers). Nova's words were "Indian tribes, pygmies"; I have not modelled real peoples, only given the rainforest a people of its own with the traits asked for. They arise as strangers found in newly opened country of their kind, or as one of the three founding peoples where the known world holds rainforest.
+
+**The homeland.** One who is away from the kind of country its people are made for feels a pull that grows by the day, at once and strongly for the Ice-folk in warm country or the Canopy-folk on ice or sand: they go out to see the world and are drawn back. Animals that stray out of their own kind of country mostly turn back.
+
+**The dog.** Found in most country from the start; won with offered food about twice as readily as other animals (96 of 150 tries against 49); one that is yours counts as one of your own beside you in the hunt and against beasts; and with a sled it, or a caribou, draws its keeper over snow.
+
+**Igloo, canoe, kayak, sled.** An igloo is raised on snow with no wood or stone, at a cost in strength, and is far warmer than the open ice. A canoe (four wood and a tool) and a kayak (two wood and the hides of two kills) are craft for one, quicker than a raft, made anywhere by one who knows rafts. A sled (four wood) needs herding, snow, and a dog or caribou of one's own.
+
+**Speed.** Each plant is now tended every other moment for two moments' worth, and the search for the nearest animal rules most out by north-south distance alone. Over forty days on twelve seeds a world moment costs 2.33 ms on this machine against 2.22 for Generation 19, though the world is 7% larger and holds a third more animals.
+
+**Balance, on instinct alone** (twelve seeds, forty days, Generation 19 against 20): alive 14.9 against 14.8; deaths 1.1 against 1.6 for each world, nearly all by hunger; grazers 193 against 259; hunters 18 against 22; plants 1,722 against 2,119. The extra deaths were among peoples founded in cold country (a globe has it at both ends) and among those who fled the rainforest's hunters until they starved; peoples now seldom begin in cold country and the rainforest starts with fewer hunters, which brought it from 1.9 to 1.6. Instinct says little about what minds will do.
+
+**Whose thoughts the world waits for** (Nova's question about running only what is in view). Setup has a choice: the world waits for everyone (as before, the default) or only for those in view. Nothing is frozen in either: out of view, beings live on their reflexes and come to think less than half as often unless something happens to them, so the ones being watched get more of the thoughts and the clock runs faster. The world itself always runs whole.
+
+**Old worlds** learn of the dog and of the far animals and plants (dogs will wander in), the igloo, the kayak and the sled; they keep their edges and have no globe.
+
+**Checked.** 39 new checks in `tests/14-a-world-that-goes-round.js` (448 in fourteen files) and a browser suite, `globe.js` (8 checks). About fifteen older checks had to be steadied because the land of every seed is new: where they depended on a chance of the old land (a storm, a beast, a thirst) I fixed the chance, not the thing checked. I looked at the globe by day, from its far side, and at the flat map across the line where east meets west.
+
+**Not checked, and not built.**
+- No real mind has met Generation 20, and nothing in it has been balanced by a run: how many die to wolves, bears and snakes, whether anyone reaches the ice, whether dogs are kept.
+- **Rain and flood in the rainforest as weather that can be seen and suffered** (Nova asked for a rainy season with flooding): not built. The rainforest only grows as if it rained.
+- **The sun's light falling on one side of the globe:** not built, for the reason above. To have it, the world would need a day that moves round it, so that it is morning in one country while it is evening in another.
+- The cloud over the unknown shows a faint line where east meets west. The far animals are drawn from simple shapes; the whale and the orca do not look like much.
+- Whales could die out in a small sea and would not return. Sea creatures do not come in from the rim as land animals do.
+- The climate has no lever for the maker yet.
+- Truly local time (pausing the world out of view) is not built, and I advise against it: see the roadmap.
+
 ## What the eleventh run showed (a new world on Generation 18, four days, run `r7-mwsfrgn7`, 130 thoughts)
 
 From the downloaded run log (`runs/generation-18-run-r7-mwsfrgn7-day4.json`). The first run of a world with a veiled rim, and the first in which `claim`, `venture` and `tell` could reach a body.

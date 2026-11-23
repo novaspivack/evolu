@@ -37,7 +37,7 @@ let fails = 0; const ok = (n, c, x) => { console.log((c ? 'PASS ' : 'FAIL ') + n
     const trial = (setup) => { let bites = 0; for (const seed of [7, 11, 42]) { const w = SW.createWorld(seed); const a = w.agents[0]; w.agents = [a]; a.policy = [{ if: [], do: 'linger' }]; a.plan = []; a.intent = null;
         w.creatures = w.creatures.filter(c => w.laws.creatures[c.sp].predator).slice(0, 1); const c = w.creatures[0]; c.x = a.x + 3; c.y = a.y; c.e = 10; setup(w, a);
         const hx = a.x, hy = a.y; while (!SW.isNight(w)) { a.e = 90; a.hp = 100; a.x = hx; a.y = hy; a.spook = 0; c.x = (hx + 40) % w.W; c.y = hy; c.e = 60; SW.step(w); } c.x = hx + 3; c.y = hy;
-        for (let i = 0; i < 40; i++) { a.e = 90; a.x = hx; a.y = hy; a.spook = 0; c.e = 10; if (SW.cheb(c.x, c.y, hx, hy) > 4) { c.x = hx + 3; c.y = hy; } SW.step(w, e => { if (e.type === 'bitten' && e.stalked) bites++; }); if (!w.agents.length) break; } } return bites; };
+        for (let i = 0; i < 40; i++) { a.e = 90; a.x = hx; a.y = hy; a.spook = 0; c.e = 10; setup(w, a); /* a storm may have taken the roof or the fire: put it back */ if (SW.cheb(c.x, c.y, hx, hy) > 4) { c.x = hx + 3; c.y = hy; } SW.step(w, e => { if (e.type === 'bitten' && e.stalked) bites++; }); if (!w.agents.length) break; } } return bites; };
     const open = trial(() => {}), roof = trial((w, a) => { w.shelters[SW.idx(w, a.x, a.y)] = a.id; }), fire = trial((w, a) => { w.fires[SW.idx(w, a.x, a.y)] = w.tick + 9999; });
     ok('alone in the open at night: stalked and bitten', open >= 3, open + ' bites');
     ok('under a roof: left alone', roof === 0, roof + ' bites');

@@ -6,7 +6,7 @@ Evolu is an experimental world game that runs as a single page inside Claude. A 
 
 Nothing in Evolu is hard-coded to happen. Things are made possible, and the beings find them or do not.
 
-Created by **Nova Spivack**, built with Claude. Generation 18, November 2026.
+Created by **Nova Spivack**, built with Claude. Generation 20, November 2026.
 Source: <https://github.com/novaspivack/evolu>
 
 > Evolu was called Seedworld until Generation 14.
@@ -40,6 +40,10 @@ From there it is theirs. In real runs so far they have built shelters and halls,
 Peoples are meant to last. When the living grow few, a band comes into the land from beyond its edge. What the dead built stands empty until someone claims it and gives it a name of their own. You can bring people in yourself: **Add people** in the toolbar adds one to ten, in bands of up to four.
 
 Some things are learned by doing and done better together. Every hunt makes the next likelier; two who stand together bring down what one cannot, share the kill, and are left alone by a beast that is not starving. A blow or a theft is not forgotten until gifts mend it, and neither is a kindness in a time of need.
+
+<img src="docs/images/evolu-globe.png" alt="The world from far off: a globe among the stars, with the known lands in view and the sun at the left" width="420">
+
+The world is a globe. Its east joins its west, and it ends at two poles of ice that are different countries: white bears, wolves, caribou and mammoths in the north; penguins, seals and seabirds in the south; whales and orcas in both seas. Between the ice and the middle lands, which have seasons, lies a warm belt of rainforest and desert that has no winter. Each kind of country has its own plants, animals and people, and both people and animals are drawn back to their own. Scroll out and the map becomes a ball among the stars, with the sun by day and the moon by night; drag to turn it, scroll in to come down.
 
 The known world ends in mist. The land does not end there; it has only not been seen. Whoever stands at the edge can venture in, and sometimes a wide strip of new country opens, continuing the rivers and shores it joins, richer and wilder than home, and now and then already lived in by strangers. Every few days a chronicler writes the next chapter of the world's story, and the maker visits, reads the numbers, changes something, predicts what will follow, and checks its prediction on the next visit.
 
@@ -115,7 +119,7 @@ Each thought is a call to Claude on your account. The models are chosen in Setup
 1. **The first time you open it, a new world begins**, from a chance seed, with a name of its own (shown beside the title; change it in Setup), and runs. Every world is kept under its name in your browser. When you come back, a panel offers each saved world to continue and a new one to begin; a tab that is only reloaded carries on without asking. Setup lists the saved worlds, to continue or to forget.
 2. **The minds are awake from the moment the page opens** and wake again by themselves if the page reloads, so thoughts are being spent as soon as you open it. **Minds awake** (top right) puts them to sleep and wakes them.
 3. **Sound is on** from the start. Some browsers hold a page silent until it is first touched; the button then reads "Sound on · click to hear", and any click or key lets it through. The button turns sound off.
-4. **Space** pauses, drag pans, scroll zooms, click inspects, **F** follows.
+4. **Space** pauses, drag pans, scroll zooms, click inspects, **F** follows. **Scroll all the way out**, or press **Whole world**, to see the globe; drag turns it.
 5. Open **Setup** to choose the models, how often beings think, the pace (forty thoughts a minute across all beings by default, four at once; if Claude refuses for too many calls at once the minds ease off by themselves), whether **the world waits for the minds** (by default it does: with more beings than Claude can think for in time, the clock slows so that each still thinks about every 90 moments, and the meter shows "time ×0.5"), the **thought budget** (3,000 by default), whether to **keep thinking past the budget** for long runs, and whether the minds wake when the page opens. A new world can be started from a seed there.
 6. Watch. The tabs are Inspect, Story, Culture, Voices, Events, Peoples, Ways, Kinds, Laws, Maker and Setup.
 7. Let it run for some days of world time. Twenty to thirty days and several hundred thoughts is enough to learn from.
@@ -191,14 +195,14 @@ tests/run-all.sh            engine, minds and maker (about three minutes, needs 
 tests/run-all.sh browser    the same, then the page in headless Chrome (needs Playwright and Chrome)
 ```
 
-There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore, culture and necessity, peoples that last, a world with edges, what a mind is offered, and a rim that opens slowly. Together they are a regression suite of 406 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds.
+There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore, culture and necessity, peoples that last, a world with edges, what a mind is offered, a rim that opens slowly, and a world that goes round. Together they are a regression suite of 448 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds.
 
 ## What is and is not verified
 
 - The tests show that the mechanics work and that the page runs without errors. They cannot show how real minds behave: those calls only happen when the page runs inside Claude.
-- What real minds did is known from eleven recorded runs, described in the design log. Generation 19 had not yet been run with real minds when this was written.
+- What real minds did is known from eleven recorded runs, described in the design log. Generations 19 and 20 had not yet been run with real minds when this was written, and Generation 20 (the globe, the poles, the rainforest, the new animals and peoples) was built without a run between: none of it has been balanced by play.
 - Saved worlds live in the browser (IndexedDB, with one older slot as a fallback). They do not travel between browsers or devices; the run log does.
-- The map is finite. Land opened at its last row ends in a straight line; a world that can be gone around is first in the roadmap.
+- Only a world begun under Generation 20 or later is a globe. Older worlds keep their edges.
 - An act can pass every check on the body and still never be reachable by a mind: claiming and venturing were in that state for two generations. The last suite now drives each act through the mind's own path, and reads the list of acts out of the prompt to check the body accepts every one.
 - A world made before Generation 17 has no veiled rim and cannot grow at its edges; only a new world can.
 - The later ages of the knowledge tree (roughly the fourth onward) are sketched: the ways, minerals and buildings exist, but few have mechanics behind them yet.

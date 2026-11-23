@@ -5,7 +5,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); 
 const fresh = seed => { const w = SW.createWorld(seed), st = M.createState(w); K.inherit(st, null); const ev = []; return { w, st, ev, em: e => { ev.push(e); st.emit(e); } }; };
 const still = a => { a.policy = [{ if: [], do: 'linger' }]; a.plan = []; a.intent = null; a.e = 90; a.thirst = 0; };
 const think = (st, a, kind, d) => M.apply(st, st.minds[a.id], kind, Object.assign({ thought: 'x' }, d), {});
-const edge = (w, side) => { const V = w.veil; if (side === 'W') { for (let y = 30; y < w.H - 30; y++) { const i = y * w.W + 20; if (V.t[i - 1] != null && [0, 5, 9].indexOf(w.terrain[i]) < 0) return i; } } else { for (let y = 30; y < w.H - 30; y++) { const i = y * w.W + (w.W - 21); if (V.t[i + 1] != null && [0, 5, 9].indexOf(w.terrain[i]) < 0) return i; } } };
+const edge = (w, side) => { const V = w.veil; if (side === 'W') { for (let y = 30; y < w.H - 30; y++) { const i = y * w.W + V.m; if (V.t[i - 1] != null && [0, 5, 9].indexOf(w.terrain[i]) < 0) return i; } } else { for (let y = 30; y < w.H - 30; y++) { const i = y * w.W + (w.W - V.m - 1); if (V.t[i + 1] != null && [0, 5, 9].indexOf(w.terrain[i]) < 0) return i; } } };
 const at = (w, o, i) => { o.x = i % w.W; o.y = Math.floor(i / w.W); o.px = o.x; o.py = o.y; };
 { // one strip, then the mist lies thick
   const { w, st, ev, em } = fresh(7); w.creatures = []; const a = w.agents[0], b = w.agents.find(o => o.people !== a.people), L = w.laws.explore;
@@ -45,7 +45,10 @@ const at = (w, o, i) => { o.x = i % w.W; o.y = Math.floor(i / w.W); o.px = o.x; 
     ms.forEach((m, k) => { m.lastT = k ? w2.tick : w2.tick - 500; }); ok(M.pace(s2) === 1, 'one being behind does not hold the world back');
     ms.forEach(m => { m.lastT = w2.tick - 500; m.busy = true; }); ok(M.pace(s2) === 1, 'beings who are thinking now are not counted as waiting'); ms.forEach(m => { m.busy = false; });
     s2.settings.wait = false; ok(M.pace(s2) === 1, 'the owner can keep the clock steady'); s2.settings.wait = true; s2.on = false; ok(M.pace(s2) === 1, 'and with the minds asleep the world runs on its reflexes at full speed');
-    const d0 = M.defaultSettings(); ok(d0.wait === true && d0.thinkEvery === 90, 'by default the world waits, so that each being thinks about every 90 moments');
+    const d0 = M.defaultSettings(); ok(d0.wait === true && d0.thinkEvery === 90 && d0.focus === 'all', 'by default the world waits for everyone, so that each being thinks about every 90 moments');
+    s2.on = true; s2.settings.focus = 'view'; const watched = w2.agents[0]; s2.inView = o => o === watched; ms.forEach((m, k) => { m.lastT = k ? w2.tick - 500 : w2.tick; m.urge = 0; }); ok(M.pace(s2) === 1, 'asked to wait only for those in view, the world does not slow for the others, however far behind they are');
+    ms[0].lastT = w2.tick - 500; ok(M.pace(s2) === 0.1, 'and does slow for the one who is watched');
+    M.tick(s2); ok(Math.abs(ms[0].urge - 0.03) < 1e-9 && Math.abs(ms[1].urge - 0.012) < 1e-9, 'out of view a mind comes to think less than half as often; nothing is frozen'); s2.settings.focus = 'all'; s2.on = false;
     s2.on = true; s2.par = 2; s2.easeT = Date.now() - 200000; s2.hold = 0; s2.lastStart = Date.now(); M.pump(s2); ok(s2.par === 3, 'after three quiet minutes the minds try one more at a time again');
   }
   const e2 = new Error('limit'); e2.code = 'rate_limited'; e2.reason = 'usage_limit'; st.on = true; st.notice = ''; st.sample = async function () { throw e2; }; await M.think(st, m, 'routine'); ok(st.on === false && /usage limit/.test(st.notice), 'a usage limit still puts them to sleep at once');

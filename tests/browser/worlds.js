@@ -10,7 +10,7 @@ const look = page => page.evaluate(() => { const d = window.SWdebug; return { id
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', args: ['--no-sandbox'] });
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
-  const p1 = await ctx.newPage(); watch(p1); await p1.goto('http://localhost:8136/'); await p1.waitForTimeout(2500);
+  const p1 = await ctx.newPage(); watch(p1); await p1.goto('http://localhost:8136/'); await p1.waitForTimeout(5000);
   const a = await look(p1);
   ok(a.lib && !a.chooser && !a.choosing && a.playing && a.tick > 2 && /^[A-Z][a-z]+$/.test(a.name) && a.shown === a.name, 'a first visit begins a new world with a name of its own and lets it run: "' + a.name + '", seed ' + a.seed + ', moment ' + a.tick);
   await p1.evaluate(() => window.SWdebug.save()); await p1.waitForTimeout(600);

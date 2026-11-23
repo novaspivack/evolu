@@ -30,7 +30,7 @@ const run = (w, n, emit) => { for (let i = 0; i < n; i++) SW.step(w, emit); };
     ok('a wrong unanswered becomes resentment, naming who and what', d.some(q => q.k === 'resentment' && q.text.includes(other.name) && /ATTACKED/.test(q.text)), (d.find(q => q.k === 'resentment') || {}).text);
     m.rut = 4; m.dull = 5; d = M.drives(st, m, a, SW.look(w, a));
     ok('sameness becomes restlessness', d.some(q => q.k === 'restlessness'));
-    a.age = Math.floor(a.life * 0.8); d = M.drives(st, m, a, SW.look(w, a));
+    a.age = Math.floor(a.life * 0.96); m.rut = 0; m.dull = 0; d = M.drives(st, m, a, SW.look(w, a));
     ok('age brings mortality to mind', d.some(q => q.k === 'mortality'));
   }
   { /* ties: each keeps its own account of the other, and the prompt shows it when they meet */

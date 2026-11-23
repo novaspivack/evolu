@@ -19,7 +19,7 @@ M.defaultSettings = function () {
     v: 12, autoWake: true, sound: true,
     routine: { model: 'claude-sonnet-5-5', effort: '' },
     deep: { model: 'claude-sonnet-5-5', effort: 'medium' },
-    perMinute: 40, parallel: 4, budget: 3000, endless: false, reflectEvery: 4, foresight: true, record: true, wait: true, thinkEvery: 90,
+    perMinute: 40, parallel: 4, budget: 3000, endless: false, reflectEvery: 4, foresight: true, record: true, wait: true, thinkEvery: 90, focus: 'all',
     story: { model: 'claude-sonnet-5-5', effort: 'medium', every: 3 },
     maker: { on: true, model: 'claude-opus-5-5', effort: 'high', every: 4 }
   };
@@ -83,7 +83,7 @@ M.record = function (st, item) {
 M.digest = function (st) {
   const w = st.world;
   return {
-    run: st.runId, generation: 19, seed: w.seed, culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {} }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
+    run: st.runId, generation: 20, seed: w.seed, culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {} }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
     peoples: (w.peoples || []).map(function (P) { return { name: P.name, noun: P.noun, kind: P.kind, way: P.way, custom: P.custom, land: P.region != null && w.regions[P.region] ? w.regions[P.region].name : '', alive: w.agents.filter(function (a) { return a.people === P.id; }).length }; }), lands: (w.regions || []).map(function (R) { return { name: R.name, biome: R.biome, minerals: R.minerals || [], beings: w.agents.filter(function (a) { return w.region[a.y * w.W + a.x] === R.id; }).length }; }), tally: w.tally || {}, alive: w.agents.length, creatures: w.creatures.length, plants: w.plants.filter(Boolean).length, wars: w.wars, settlements: w.settlements.map(function (q) { return q.name; }), ways: Object.keys(w.laws.tree).filter(function (k) { return w.agents.some(function (a) { return a.knows[k]; }); }), designs: Object.keys(w.laws.tools),
     beings: Object.keys(st.minds).map(function (id) {
       const m = st.minds[id], a = agentById(w, +id);
@@ -226,6 +226,14 @@ M.drives = function (st, mind, a, v) {
     if (wb.satisfaction > 0.62 && wb.suffering < 0.2) add('contentment', 0.25 + (wb.satisfaction - 0.62) * 2, 'Contentment: your life is good as it is. You want to keep what you have, and you have enough to be generous.');
     if (a.leader == null && !followers && (wb.suffering > 0.35 || (a.e < 45) || (!a.stats.built && SW.season(w) >= 2))) { let patron = null; v.agents.forEach(function (o) { const oa = agentById(w, o.id); if (!oa || patron || (a.rel[o.id] || 0) < -0.1) return; if (o.e > a.e + 15 && (o.carrying >= 2 || oa.stats.built >= 2 || w.agents.some(function (q) { return q.leader === o.id; }))) patron = o; }); if (patron) add('deference', 0.45 + wb.suffering * 0.6 - t.bold * 0.35, 'Deference: ' + patron.name + ' is doing better than you: stronger, better provided. To pledge yourself to ' + patron.name + ' would put you in a band, with others bound to stand with you. Pride says no. Your body says yes.'); }
   }
+  { /* the kind of country one's people are made for pulls at one who is long away from it: they go out to see the world, and they come back */
+    const Pp = SW.peopleOf(w, a), R0 = Pp && Pp.region != null ? w.regions[Pp.region] : null, Rh = SW.regionAt(w, a.x, a.y);
+    if (R0 && Rh && SW.BIOMES[R0.biome]) {
+      if (Rh.biome === R0.biome) a.awayT = w.tick;
+      else { if (a.awayT == null) a.awayT = w.tick; const away = (w.tick - a.awayT) / w.laws.time.dayLength, cold = !!(Pp.genes && Pp.genes.warmth >= 1.5), warm = cold && ['desert', 'rainforest', 'steppe', 'lakeland', 'marsh'].indexOf(Rh.biome) >= 0, wet = R0.biome === 'rainforest' && ['tundra', 'arctic', 'antarctic', 'desert', 'highland'].indexOf(Rh.biome) >= 0, hard = warm || wet;
+        if (away > 1 || hard) add('homeland', Math.min(0.85, (hard ? 0.3 : 0.1) + away * (hard ? 0.12 : 0.06)), 'Homeland: you are of the ' + Pp.noun + ', and your people are made for ' + SW.BIOMES[R0.biome].say.split(';')[0].split(':').pop().trim() + '. You have been ' + (away < 1 ? 'less than a day' : Math.floor(away) + ' days') + ' in ' + Rh.name + ', which is another kind of country' + (warm ? ', and too warm for a body like yours' : wet ? ', and nothing like the forest your body knows' : '') + '. ' + R0.name + ' lies ' + SW.cheb(a.x, a.y, R0.x, R0.y) + ' steps ' + SW.compass(R0.x - a.x, R0.y - a.y) + '. It is good to have seen this; and your own country calls you back.'); }
+    }
+  }
   { const q = SW.siteQuality(w, a.x, a.y), mySet = w.settlements.filter(function (z) { return z.root === SW.rootOf(w, a).id; })[0], here2 = mySet && SW.cheb(a.x, a.y, mySet.x, mySet.y) <= mySet.r;
     if (!mySet && (q.water > 6 || q.food < 4) && a.e > 40) add('homeseeking', 0.4 + 0.2 * t.curious, 'Unsettled: this is poor ground to stay on (water ' + q.water + ' steps off, ' + q.food + ' food plants near). Somewhere there is a place with water, food, wood and stone close together. It is worth walking to find, before winter decides for you.');
     else if (!mySet && q.water <= 4 && q.food >= 8 && q.wood >= 6) add('homeseeking', 0.35, 'This is good ground: water close, food and wood near' + (q.riches.length ? ', and ' + q.riches.join(' and ') + ' in the earth' : '') + '. A place like this is worth building on and calling yours.');
@@ -311,6 +319,7 @@ function witnesses(st, x, y, except) {
   return out;
 }
 M.onEvent = function (st, ev) {
+  SW.use(st.world);
   const w = st.world, A = nameOf(st, ev.a), B = nameOf(st, ev.b), a = agentById(w, ev.a), L0 = w.laws;
   ties(st, ev);
   switch (ev.type) {
@@ -587,8 +596,8 @@ M.onEvent = function (st, ev) {
     case 'arrived': { const ids = ev.ids || [], names = []; ids.forEach(function (id) { const o = st.world.agents.filter(function (q) { return q.id === id; })[0]; if (!o) return; if (!st.minds[id]) st.minds[id] = M.newMind(o); st.names[id] = o.name; names.push(o.name); story(st, id, 'I came into this land from beyond its edge, with a few of my own.'); });
       const P = (st.world.peoples || [])[ev.people]; chron(st, 'birth', 'A small band' + (P ? ' of ' + P.name : '') + ' came into the land from beyond its edge: ' + names.join(', ') + '.', ids);
       st.world.agents.forEach(function (o) { if (ids.indexOf(o.id) < 0 && P && o.people === P.id) tell(st, o.id, 'Word reaches you that others of your people have come into the land: ' + names.join(', ') + '. They are not your kin by blood.', 4); }); break; }
-    case 'opened': { const what = [(ev.found || []).length ? 'in the ground, ' + ev.found.join(', ') : '', ev.herd ? 'a herd of ' + ev.herd + ' that has never seen your kind' : '', ev.beasts ? 'and beasts that hunt, for unknown land is wilder' : '', ev.strangers ? 'and people: ' + ev.strangers + ' live there, strangers with their own tongue and ways' : ''].filter(Boolean).join('; ');
-      tell(st, ev.a, 'You pushed into the mist and it gave way. New land lies open' + (ev.land ? ', part of ' + ev.land : '') + ', from (' + ev.x0 + ',' + ev.y0 + ') to (' + ev.x1 + ',' + ev.y1 + ')' + (what ? ': ' + what : '') + '. No one has stood there before you.', 8, true); story(st, ev.a, 'I went past the edge of the known world and found new land' + (ev.land ? ' in ' + ev.land : '') + '.');
+    case 'opened': { const what = [(ev.found || []).length ? 'in the ground, ' + ev.found.join(', ') : '', ev.herd ? 'a herd of ' + ev.herd + ' that has never seen your kind' : '', ev.sea ? 'great beasts in its waters, ' + ev.sea + ', which only one who goes on the water could hunt' : '', ev.beasts ? 'and beasts that hunt, for unknown land is wilder' : '', ev.strangers ? 'and people: ' + ev.strangers + ' live there, strangers with their own tongue and ways' : ''].filter(Boolean).join('; ');
+      tell(st, ev.a, 'You pushed into the mist and it gave way. New land lies open' + (ev.land ? ', part of ' + ev.land : '') + ', from (' + SW.wrapX(w, ev.x0) + ',' + ev.y0 + ') to (' + SW.wrapX(w, ev.x1) + ',' + ev.y1 + ')' + (what ? ': ' + what : '') + '. No one has stood there before you.', 8, true); story(st, ev.a, 'I went past the edge of the known world and found new land' + (ev.land ? ' in ' + ev.land : '') + '.');
       chron(st, 'discovery', A + ' went past the edge of the known world and found new land' + (ev.land ? ', part of ' + ev.land : '') + (what ? ': ' + what : '') + '.', [ev.a], a);
       if (a) lesson(st, community(st, a, 40), A + ' pushed past the edge of the known world near (' + a.x + ',' + a.y + ') and found new land' + (what ? ' with ' + what : '') + '.');
       M.record(st, { t: 'opened', name: A, tiles: ev.tiles, found: ev.found || [], herd: ev.herd || '', land: ev.land || '' }); break; }
@@ -730,7 +739,7 @@ M.buildPrompt = function (st, mind, kind, lean) {
   out.push('Your body: you spend energy every moment and die at 0. Eating restores it. Wounds lower health; you die at 0. You age, and will die of old age.');
   out.push('HOW YOUR BODY MOVES: your body does only what your "plan" says, one step after another. When the plan is empty it falls back on your REFLEXES, which keep you fed and otherwise keep you where you stand. Thinking or saying "I will go north" moves nothing. If this thought decides to do something, the plan must contain it. Leaving "plan" null lets the plan you already have keep running.');
   out.push('This world has no referee. Beings here share, trade, teach, lie, threaten, steal, hoard, lead, follow, betray, fight, kill and eat one another; they also protect, forgive and love. Nothing is forbidden, and everything has consequences. Stay true to your creed, your temperament and what you feel, including the ugly parts. Do not be kinder, calmer or more reasonable than ' + a.name + ' truly is.');
-  { const Rr = SW.sight(w); let rb = null, rbd = 99; for (let dy = -Rr; dy <= Rr; dy++) for (let dx = -Rr; dx <= Rr; dx++) { const x = a.x + dx, y = a.y + dy; if (x < 0 || y < 0 || x >= w.W || y >= w.H) continue; const j = y * w.W + x; if (w.shelters[j] > 0 && !SW.isAlive(w, w.shelters[j])) { const dd = Math.max(Math.abs(dx), Math.abs(dy)); if (dd < rbd) { rbd = dd; rb = { x: x, y: y, kind: (w.bkind && w.bkind[j]) || 'shelter' }; } } }
+  { const Rr = SW.sight(w); let rb = null, rbd = 99; for (let dy = -Rr; dy <= Rr; dy++) for (let dx = -Rr; dx <= Rr; dx++) { const x = SW.wrapX(w, a.x + dx), y = a.y + dy; if (x < 0 || y < 0 || x >= w.W || y >= w.H) continue; const j = y * w.W + x; if (w.shelters[j] > 0 && !SW.isAlive(w, w.shelters[j])) { const dd = Math.max(Math.abs(dx), Math.abs(dy)); if (dd < rbd) { rbd = dd; rb = { x: x, y: y, kind: (w.bkind && w.bkind[j]) || 'shelter' }; } } }
     if (rb) out.push('AN EMPTY ' + String(rb.kind).toUpperCase() + ' stands at (' + rb.x + ',' + rb.y + '), ' + rbd + ' steps ' + SW.compass(rb.x - a.x, rb.y - a.y) + '. Those who raised it are dead and it belongs to no one. Whoever stands at it and claims it (plan step claim) holds it, with every roof, wall and store of theirs around it: a home ready made, for you or to add to what your band holds.'); }
   out.push('You are a ' + (SW.stage(w, a) === 'child' ? (a.sex === 'f' ? 'girl' : 'boy') : (a.sex === 'f' ? 'woman' : 'man')) + '. A child comes only of a woman and a man together who are not close kin. A grown body can swim water that is narrow (a river up to four steps across) at a cost in strength; lakes and the sea need a vessel or a bridge. An animal within reach can be hunted for meat (plan step hunt); with one of your own beside you a kill is far likelier and a wound far less likely, and every hunt makes you better at the next.' + ((a.stats.hunted || 0) + (a.stats.picked || 0) > 0 ? ' What practice has taught your hands: ' + [(a.stats.hunted ? 'hunting (' + a.stats.hunted + ' kills' + (a.stats.huntedWith ? ', ' + a.stats.huntedWith + ' of them with others' : '') + ')' : ''), (a.stats.picked ? 'gathering (' + a.stats.picked + ' pickings; a practised hand often picks two at once)' : '')].filter(Boolean).join(', ') + '.' : ''));
   if (a.marks && Object.keys(a.marks).length) out.push('WHAT YOU DO NOT FORGET:\n' + Object.keys(a.marks).map(function (id) { const m = a.marks[id]; return '- ' + (m.name || nameOf(st, +id)) + ' ' + m.why + ' on day ' + m.day + (m.k === 'grudge' ? ': a grudge. It will not ease by itself for a long time; three gifts from them would mend it.' : ': a kindness you hold to.'); }).join('\n'));
@@ -759,7 +768,7 @@ M.buildPrompt = function (st, mind, kind, lean) {
   out.push('LORE (your grasp of how this world works underneath): ' + r2(a.lore) + '.' + (a.arts.length ? ' ARTS you know: ' + a.arts.join(', ') + '.' : '') + (known.length ? '\nWAYS YOU KNOW: ' + known.join(', ') + '.' : ''));
   mind.seenSeq = st.seq || 0;
   const lay = Object.keys(v.around).map(function (d) { return d + ' ' + v.around[d]; }).join(', ');
-  out.push('NOW: day ' + SW.day(w) + ', ' + SW.SEASONS[SW.season(w)] + ', ' + SW.phaseName(w) + ' (' + (night ? 'dawn' : 'night') + ' in about ' + until + ' moments; a full day is ' + L.time.dayLength + ').' + (SW.season(w) === 2 ? ' The air is turning. Something in your body says lean, cold days are coming.' : SW.season(w) === 3 ? ' It is winter: the plants bear almost nothing and what hung on them is withering.' : '') + ' Weather: ' + w.weather.kind + (w.weather.kind === 'fog' ? ' (you can see only ' + SW.sight(w) + ' steps)' : '') + '. You stand at (' + a.x + ',' + a.y + ') on ' + v.terrain + '. The world spans x 0-' + (w.W - 1) + ' (west to east), y 0-' + (w.H - 1) + ' (north to south).\nTen steps off, the land is: ' + lay + '.' +
+  out.push('NOW: day ' + SW.day(w) + ', ' + SW.SEASONS[SW.season(w)] + ', ' + SW.phaseName(w) + ' (' + (night ? 'dawn' : 'night') + ' in about ' + until + ' moments; a full day is ' + L.time.dayLength + ').' + (function () { const cl = SW.climate(w, a.x, a.y), sn = SW.season(w); if (cl === 1) return ' Here in the warm belt of the world there is no winter: no snow and no cold season, and what grows goes on growing' + ((SW.regionAt(w, a.x, a.y) || {}).biome === 'rainforest' ? '; it rains most days' : '') + '.'; if (cl === 2) return ' Here on the ice it is cold all the year; ' + (sn === 1 ? 'summer eases it a little and some snow melts' : sn === 3 ? 'and now, in winter, it is at its worst' : 'only summer eases it') + '. Little grows, and what does is hardy.'; return sn === 2 ? ' The air is turning. Something in your body says lean, cold days are coming.' : sn === 3 ? ' It is winter: the plants bear almost nothing and what hung on them is withering.' : ''; })() + ' Weather: ' + w.weather.kind + (w.weather.kind === 'fog' ? ' (you can see only ' + SW.sight(w) + ' steps)' : '') + '. You stand at (' + a.x + ',' + a.y + ') on ' + v.terrain + '. The world spans x 0-' + (w.W - 1) + ' (west to east), y 0-' + (w.H - 1) + ' (north to south).' + (w.wrap ? ' It goes round: east of x ' + (w.W - 1) + ' comes x 0 again, and at the far north and south it ends in ice.' : '') + '\nTen steps off, the land is: ' + lay + '.' +
     (v.settlements.length ? '\nSettlements: ' + v.settlements.slice(0, 3).map(function (q) { return '"' + q.name + '" at (' + q.x + ',' + q.y + '), ' + (q.inside ? 'YOU ARE INSIDE IT' : q.d + ' steps ' + q.dir) + (q.mine ? ' (YOUR HOME)' : ' (ground of ' + nameOf(st, q.root) + "'s people)"); }).join('; ') + '.' : '') +
     (v.places.length ? '\nNamed places: ' + v.places.slice(0, 3).map(function (p) { return '"' + p.name + '" at (' + p.x + ',' + p.y + '), ' + p.d + ' steps ' + p.dir + ' (named by ' + p.byName + ')'; }).join('; ') + '.' : ''));
   const carry = {}; a.carry.forEach(function (c) { carry[c.k] = (carry[c.k] || 0) + 1; });
@@ -935,6 +944,7 @@ M.parseReply = function (text) {
 
 /* ---------- applying a thought to the being and the world ---------- */
 M.apply = function (st, mind, kind, d, meta) {
+  SW.use(st.world);
   const w = st.world, a = agentById(w, mind.id), L = w.laws;
   const entry = { tick: w.tick, day: SW.day(w), kind: kind, thought: clip(d.thought, kind === 'deep' ? 3000 : 1500), changes: [], model: meta.model, ms: meta.ms, tests: meta.tests || [] };
   if (!a) { entry.changes.push('died before the thought finished'); mind.log.push(entry); mind.rev++; return entry; }
@@ -1286,13 +1296,14 @@ function seasonKeep(st) {
   });
 }
 M.tick = function (st) {
+  SW.use(st.world);
   seasonKeep(st);
   if (st.world.tick % 80 === 13) { gossip(st); hearFaiths(st); }
   if (st.world.tick % st.world.laws.time.dayLength === 7) cultSnap(st);
   const ags = st.world.agents;
   for (let k = 0; k < ags.length; k++) {
     const a = ags[k], m = st.minds[a.id]; if (!m || m.dead) continue;
-    m.urge += 0.03;
+    m.urge += st.settings.focus === 'view' && typeof st.inView === 'function' && !st.inView(a) ? 0.012 : 0.03; /* out of the watcher's view a mind comes to think less than half as often, unless something happens to it */
     /* a being can look back on what its own body has been doing */
     const d = a.doing.replace(/\s*\(.*$/, '').split(' ').slice(0, 3).join(' ');
     m.act[d] = (m.act[d] || 0) + 1; m.actN++;
@@ -1310,7 +1321,8 @@ M.kindFor = function (st, mind) {
 M.pace = function (st) {
   if (!st.on || !st.sample || st.blocked || st.settings.wait === false) return 1;
   const w = st.world, G = Math.max(20, st.settings.thinkEvery || 90); let n = 0, late = 0;
-  for (let k = 0; k < w.agents.length; k++) { const m = st.minds[w.agents[k].id]; if (!m || m.dead) continue; n++; if (m.lastT == null) m.lastT = w.tick; if (!m.busy && w.tick - m.lastT > G) late++; }
+  const near = st.settings.focus === 'view' && typeof st.inView === 'function' ? st.inView : null; /* the watcher may ask the world to wait only for those in view; the rest still live and think, less often */
+  for (let k = 0; k < w.agents.length; k++) { const m = st.minds[w.agents[k].id]; if (!m || m.dead) continue; if (m.lastT == null) m.lastT = w.tick; if (near && !near(w.agents[k])) continue; n++; if (!m.busy && w.tick - m.lastT > G) late++; }
   if (!n) return 1; const f = late / n;
   return f <= 0.1 ? 1 : Math.max(0.1, Math.round((1 - (f - 0.1) * 2.5) * 100) / 100);
 };

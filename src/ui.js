@@ -294,7 +294,7 @@ function buildTerrain() {
     const cv = document.createElement('canvas'); cv.width = sw; cv.height = shh; const g = cv.getContext('2d'), im = g.createImageData(sw, shh), q = im.data;
     for (let py = 0; py < shh; py++) for (let qx = 0; qx < sw; qx++) {
       const fx = (qx + 0.5) / SS, fy = (py + 0.5) / SS, jx = fx + (vnoise(fx * 1.4, fy * 1.4, 11) - 0.5), jy = fy + (vnoise(fx * 1.4, fy * 1.4, 12) - 0.5);
-      const t = w.terrain[clamp(Math.floor(jy), 0, Ht - 1) * Wt + clamp(Math.floor(jx), 0, Wt - 1)], v = t === 9 ? [0, 0, 0, 0] : fn(t, fx, fy, hash(qx, py, 71)), k = (py * sw + qx) * 4;
+      const t = w.terrain[clamp(Math.floor(jy), 0, Ht - 1) * Wt + clamp(Math.floor(jx), 0, Wt - 1)], ti = clamp(Math.floor(jy), 0, Ht - 1) * Wt + clamp(Math.floor(jx), 0, Wt - 1), v = t === 9 || (w.regions.length > 1 && SW.climate(w, ti % Wt, Math.floor(ti / Wt)) === 1) ? [0, 0, 0, 0] : fn(t, fx, fy, hash(qx, py, 71)), k = (py * sw + qx) * 4; /* no snow falls and no leaf turns in the warm belt */
       q[k] = v[0]; q[k + 1] = v[1]; q[k + 2] = v[2]; q[k + 3] = v[3];
     }
     g.putImageData(im, 0, 0); return cv;
@@ -326,22 +326,33 @@ function resize() {
   lightCv.width = Math.ceil(W / 3); lightCv.height = Math.ceil(H / 3);
   if (w) { cam.fit = Math.min(W / w.W, H / w.H); clampCam(); }
 }
+/* A world that goes round is seen two ways. Close, it is a flat map that runs on east and west without end. From far enough that all of it would
+   fit across the view (cam.z below zGlobe) it is a globe in space, turned by dragging. */
+function zGlobe() { return w && w.wrap ? W / w.W : 0; }
+function isGlobe() { return !!(w && w.wrap && cam.z < zGlobe() * 0.999); }
+function wrapd(d) { if (w && w.wrap) { const Wd = w.W; if (d > Wd / 2) d -= Wd; else if (d < -Wd / 2) d += Wd; } return d; }
 function clampCam() {
+  if (w.wrap) {
+    cam.z = clamp(cam.z, zGlobe() * 0.3, 110); cam.x = ((cam.x % w.W) + w.W) % w.W;
+    const hh = H / cam.z / 2, oy = hh * 0.7; cam.y = isGlobe() ? clamp(cam.y, w.H * 0.12, w.H * 0.88) : hh - oy >= w.H - hh + oy ? w.H / 2 : clamp(cam.y, hh - oy, w.H - hh + oy);
+    return;
+  }
   cam.z = clamp(cam.z, cam.fit * 0.85, 110);
   const hw = W / cam.z / 2, hh = H / cam.z / 2, ox = hw * 0.7, oy = hh * 0.7; /* the view may run past the rim by most of half a screen */
   cam.x = hw - ox >= w.W - hw + ox ? w.W / 2 : clamp(cam.x, hw - ox, w.W - hw + ox);
   cam.y = hh - oy >= w.H - hh + oy ? w.H / 2 : clamp(cam.y, hh - oy, w.H - hh + oy);
 }
-function sx(tx) { return (tx + 0.5 - cam.x) * cam.z + W / 2; }
+function sx(tx) { return wrapd(tx + 0.5 - cam.x) * cam.z + W / 2; }
 function sy(ty) { return (ty + 0.5 - cam.y) * cam.z + H / 2; }
-function toWorld(px, py) { return { x: (px - W / 2) / cam.z + cam.x - 0.5, y: (py - H / 2) / cam.z + cam.y - 0.5 }; }
+function toWorld(px, py) { let x = (px - W / 2) / cam.z + cam.x - 0.5; if (w.wrap) x = ((x + 0.5) % w.W + w.W) % w.W - 0.5; return { x: x, y: (py - H / 2) / cam.z + cam.y - 0.5 }; }
 function zoomAt(px, py, k) {
-  const before = toWorld(px, py); cam.z = clamp(cam.z * k, cam.fit * 0.85, 110);
-  const after = toWorld(px, py); cam.x += before.x - after.x; cam.y += before.y - after.y; clampCam();
+  if (w.wrap) { const was = isGlobe(); if (was || cam.z * k < zGlobe()) { cam.z = cam.z * k; clampCam(); if (was && !isGlobe()) cam.z = Math.max(cam.z, zGlobe() * 1.02); return; } } /* to and from the globe, the middle of the view stays put */
+  const before = toWorld(px, py); cam.z = clamp(cam.z * k, w.wrap ? zGlobe() * 0.3 : cam.fit * 0.85, 110);
+  const after = toWorld(px, py); cam.x += wrapd(before.x - after.x); cam.y += before.y - after.y; clampCam();
 }
-function fitWorld() { cam.z = cam.fit; cam.x = w.W / 2; cam.y = w.H / 2; U.follow = false; syncButtons(); }
+function fitWorld() { if (w.wrap) { cam.z = zGlobe() * 0.62; cam.y = w.H / 2; clampCam(); } else { cam.z = cam.fit; cam.x = w.W / 2; cam.y = w.H / 2; } U.follow = false; syncButtons(); }
 function frac() { return U.playing ? Math.min(1, U.acc) : 1; }
-function ex(e) { const f = frac(); return e.px + (e.x - e.px) * f; }
+function ex(e) { const f = frac(); return e.px + wrapd(e.x - e.px) * f; }
 function ey(e) { const f = frac(); return e.py + (e.y - e.py) * f; }
 function agentOf(id) { return SWM.agentById(w, id); }
 function nightLevel() {
@@ -359,17 +370,96 @@ function refreshBands() {
   w.agents.forEach(function (a) { const r = SW.rootOf(w, a); (roots[r.id] = roots[r.id] || { root: r, members: [] }).members.push(a); });
   for (const id in roots) { const b = roots[id]; if (b.members.length < 2) continue; const color = SW.hslToHex(b.root.hue, 0.85, 0.6), name = b.root.bandName || b.root.name + "'s band"; b.members.forEach(function (a) { bandCache[a.id] = { color: color, leader: b.root.id, name: name, size: b.members.length }; }); }
 }
+/* ---------- the world from far off: a globe among the stars ---------- */
+const SPACE = { stars: null, cv: null, gc: null, tex: null, tw: 0, th: 0, texAt: -99, texOf: null, row: null, lon: null, shade: null, edge: null, tilt: 99, out: null, last: 0 };
+const GLOBE_PX = 220; /* the globe is painted at this radius and laid at whatever size the view asks */
+function globeR() { return Math.min(W, H) * 0.5 * clamp(0.4 + 0.52 * (cam.z / zGlobe() - 0.3) / 0.7, 0.4, 0.92); }
+function spaceTexture() { /* the whole world as one small picture, with the season lying on it */
+  const tw = w.W * 2, th = w.H * 2; if (!SPACE.cv) SPACE.cv = document.createElement('canvas'); const cv2 = SPACE.cv; if (cv2.width !== tw || cv2.height !== th) { cv2.width = tw; cv2.height = th; }
+  const g = cv2.getContext('2d', { willReadFrequently: true }); g.globalAlpha = 1; g.clearRect(0, 0, tw, th); g.drawImage(terrainBmp, 0, 0, tw, th);
+  const sv = seasonVeils(); if (sv.leaf > 0.02 && leafBmp) { g.globalAlpha = sv.leaf; g.drawImage(leafBmp, 0, 0, tw, th); } if (sv.snow > 0.02 && snowBmp) { g.globalAlpha = sv.snow; g.drawImage(snowBmp, 0, 0, tw, th); } g.globalAlpha = 1;
+  SPACE.tex = g.getImageData(0, 0, tw, th).data; SPACE.tw = tw; SPACE.th = th; SPACE.texAt = U.time; SPACE.texOf = terrainBmp;
+  if (!SPACE.mask || SPACE.mask.length !== tw * th) SPACE.mask = new Uint8Array(tw * th); /* where the world is still unknown */
+  for (let y = 0; y < th; y++) { const ro = (y >> 1) * w.W; for (let x = 0; x < tw; x++) SPACE.mask[y * tw + x] = w.terrain[ro + (x >> 1)] === 9 ? 1 : 0; }
+}
+function spaceTables(tilt) { /* for each point of the painted disc: which row of the world it shows, and how far east of the middle */
+  const R = GLOBE_PX, D = 2 * R, n = D * D, ct = Math.cos(tilt), stl = Math.sin(tilt);
+  if (!SPACE.row) { SPACE.row = new Int16Array(n); SPACE.lon = new Float32Array(n); SPACE.shade = new Float32Array(n); SPACE.edge = new Uint8Array(n); }
+  for (let py = 0; py < D; py++) for (let px = 0; px < D; px++) {
+    const k = py * D + px, x = (px + 0.5 - R) / R, y = (py + 0.5 - R) / R, r2 = x * x + y * y;
+    if (r2 >= 1) { SPACE.row[k] = -1; continue; }
+    const z = Math.sqrt(1 - r2), up = -y, yw = up * ct + z * stl, zw = -up * stl + z * ct;
+    SPACE.row[k] = Math.min(SPACE.th - 1, Math.max(0, Math.floor((0.5 - Math.asin(clamp(yw, -1, 1)) / 3.14159265) * SPACE.th)));
+    SPACE.lon[k] = Math.atan2(x, zw) / 6.2831853; SPACE.shade[k] = 0.3 + 0.7 * Math.pow(z, 0.55); SPACE.edge[k] = Math.round(255 * clamp((1 - Math.sqrt(r2)) * R, 0, 1));
+  }
+  SPACE.tilt = tilt;
+}
+function drawSpace(alpha) {
+  const c = cx; c.setTransform(DPR, 0, 0, DPR, 0, 0); c.globalAlpha = alpha; c.fillStyle = '#02030a'; c.fillRect(0, 0, W, H);
+  /* the stars */
+  if (!SPACE.stars) { SPACE.stars = []; let sd = 20261122; const r = function () { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296; }; for (let i = 0; i < 520; i++) SPACE.stars.push({ x: r(), y: r(), m: r(), p: r() * 6.28, h: r() }); }
+  for (let i = 0; i < SPACE.stars.length; i++) { const q = SPACE.stars[i], tw = reduceMotion ? 1 : 0.6 + 0.4 * Math.sin(U.time * (0.5 + q.m) + q.p), sz = q.m > 0.95 ? 2 : q.m > 0.72 ? 1.4 : 0.9; c.globalAlpha = alpha * (0.2 + 0.8 * q.m * q.m) * tw; c.fillStyle = q.h < 0.14 ? '#ffd9b0' : q.h > 0.86 ? '#bcd4ff' : '#ffffff'; c.fillRect(q.x * W, q.y * H, sz, sz); }
+  c.globalAlpha = alpha;
+  /* the sun by day and the moon by night, far off, rising on one side and setting on the other as the world's own day goes */
+  const ph = SW.dayPhase(w), n0 = 1 - w.laws.time.nightFraction, day = ph < n0, t = day ? ph / n0 : (ph - n0) / (1 - n0), bx = day ? W * (0.04 + 0.1 * t) : W * (0.96 - 0.1 * t), by = H * (0.62 - 0.44 * Math.sin(3.14159 * t)), vis = Math.pow(Math.sin(3.14159 * t), 0.4); /* the sun climbs and sinks on one side of the world, the moon on the other */
+  if (day) {
+    const g1 = c.createRadialGradient(bx, by, 0, bx, by, 90); g1.addColorStop(0, 'rgba(255,244,200,' + 0.95 * vis + ')'); g1.addColorStop(0.12, 'rgba(255,225,140,' + 0.55 * vis + ')'); g1.addColorStop(0.4, 'rgba(255,190,90,' + 0.12 * vis + ')'); g1.addColorStop(1, 'rgba(255,170,60,0)');
+    c.fillStyle = g1; c.beginPath(); c.arc(bx, by, 90, 0, 6.2832); c.fill(); c.fillStyle = 'rgba(255,250,226,' + vis + ')'; c.beginPath(); c.arc(bx, by, 11, 0, 6.2832); c.fill();
+  } else {
+    const g2 = c.createRadialGradient(bx, by, 0, bx, by, 46); g2.addColorStop(0, 'rgba(210,222,245,' + 0.4 * vis + ')'); g2.addColorStop(1, 'rgba(180,200,240,0)'); c.fillStyle = g2; c.beginPath(); c.arc(bx, by, 46, 0, 6.2832); c.fill();
+    const mp = ((SW.day(w) % 12) / 12) * 2 - 1; /* the moon waxes and wanes over twelve days */
+    c.save(); c.beginPath(); c.arc(bx, by, 10, 0, 6.2832); c.clip(); c.fillStyle = 'rgba(226,232,244,' + vis + ')'; c.fillRect(bx - 11, by - 11, 22, 22); c.fillStyle = 'rgba(8,10,22,' + 0.92 * vis + ')'; c.beginPath(); c.arc(bx + mp * 16, by, 11.5, 0, 6.2832); c.fill(); c.restore();
+  }
+  /* the globe */
+  if (!SPACE.tex || SPACE.texOf !== terrainBmp || U.time - SPACE.texAt > 3) spaceTexture();
+  const R = GLOBE_PX, D = 2 * R, tilt = (0.5 - cam.y / w.H) * 3.14159265 * 0.9; if (!SPACE.row || Math.abs(tilt - SPACE.tilt) > 0.003) spaceTables(tilt);
+  if (!SPACE.gc) { SPACE.gc = document.createElement('canvas'); SPACE.gc.width = D; SPACE.gc.height = D; SPACE.out = SPACE.gc.getContext('2d').createImageData(D, D); }
+  const out = SPACE.out.data, tex = SPACE.tex, mask = SPACE.mask, tw = SPACE.tw, row = SPACE.row, lon = SPACE.lon, shd = SPACE.shade, edg = SPACE.edge, u0 = cam.x / w.W + 8, night = nightLevel(), lit = 1 - 0.6 * night, nb = 1 + 0.25 * night;
+  for (let k = 0, n = D * D; k < n; k++) {
+    const o = k * 4, rw = row[k]; if (rw < 0) { out[o + 3] = 0; continue; }
+    let u = u0 + lon[k]; u -= Math.floor(u); const ti = (rw * tw + Math.min(tw - 1, Math.floor(u * tw))) * 4, sh = shd[k] * lit;
+    if (mask[ti >> 2]) { out[o] = (tex[ti] * 1.5 + 78) * sh; out[o + 1] = (tex[ti + 1] * 1.5 + 84) * sh; out[o + 2] = Math.min(255, (tex[ti + 2] * 1.5 + 100) * sh * nb); } /* the unknown lies under cloud */
+    else { out[o] = tex[ti] * sh; out[o + 1] = tex[ti + 1] * sh; out[o + 2] = Math.min(255, tex[ti + 2] * sh * nb); }
+    out[o + 3] = edg[k];
+  }
+  SPACE.gc.getContext('2d').putImageData(SPACE.out, 0, 0);
+  const Rg = globeR(), gx = W / 2, gy = H / 2 + 6;
+  const halo = c.createRadialGradient(gx, gy, Rg * 0.96, gx, gy, Rg * 1.16); halo.addColorStop(0, 'rgba(120,175,255,' + (0.42 - 0.2 * night) + ')'); halo.addColorStop(1, 'rgba(90,140,255,0)'); c.fillStyle = halo; c.beginPath(); c.arc(gx, gy, Rg * 1.16, 0, 6.2832); c.fill();
+  c.imageSmoothingEnabled = true; c.drawImage(SPACE.gc, gx - Rg, gy - Rg, Rg * 2, Rg * 2);
+  /* the living, and their fires at night */
+  const ct = Math.cos(tilt), stl = Math.sin(tilt), l0 = cam.x / w.W * 6.2831853, spot = function (tx, ty) { const lo = (tx + 0.5) / w.W * 6.2831853 - l0, la = (0.5 - (ty + 0.5) / w.H) * 3.14159265, xw = Math.cos(la) * Math.sin(lo), yw = Math.sin(la), zw = Math.cos(la) * Math.cos(lo), up = yw * ct - zw * stl, zv = yw * stl + zw * ct; return zv > 0.05 ? { x: gx + xw * Rg, y: gy - up * Rg, z: zv } : null; };
+  if (night > 0.3) { c.fillStyle = 'rgba(255,190,90,' + 0.85 * night + ')'; for (let i = 0; i < w.fires.length; i++) if (w.fires[i] > w.tick) { const q = spot(i % w.W, Math.floor(i / w.W)); if (q) { c.beginPath(); c.arc(q.x, q.y, 1.6, 0, 6.2832); c.fill(); } } }
+  for (let i = 0; i < w.agents.length; i++) { const a = w.agents[i], q = spot(a.x, a.y); if (!q) continue; c.fillStyle = SW.hslToHex(a.hue, 0.85, 0.66); c.beginPath(); c.arc(q.x, q.y, 2.3, 0, 6.2832); c.fill(); }
+  /* its name */
+  c.textAlign = 'center'; c.fillStyle = 'rgba(232,236,244,' + 0.9 * alpha + ')'; c.font = '600 ' + Math.round(clamp(Rg * 0.085, 14, 26)) + 'px "Bricolage Grotesque", sans-serif'; c.fillText(w.name || 'Evolu', gx, Math.min(H - 64, gy + Rg + 34));
+  c.fillStyle = 'rgba(160,170,190,' + 0.8 * alpha + ')'; c.font = '13px Inter, sans-serif'; c.fillText('day ' + SW.day(w) + ' · ' + w.agents.length + ' living · drag to turn it, scroll in to come down', gx, Math.min(H - 44, gy + Rg + 54)); c.textAlign = 'left';
+  c.globalAlpha = 1;
+}
 function draw() {
+  if (w.wrap) {
+    const far = isGlobe(), tg = far ? 1 : 0, now = U.time, dt = Math.min(0.1, now - (SPACE.last || now)); SPACE.last = now;
+    U.globeT = (U.globeT || 0) + (tg - (U.globeT || 0)) * 0.2; if (Math.abs(tg - U.globeT) < 0.02) U.globeT = tg;
+    if (far && !ptr.down && !reduceMotion && now > (U.spinAt || 0)) cam.x = (cam.x + dt * 1.2) % w.W; /* left alone, it turns: once round in three minutes */
+    if (U.globeT < 1) drawFlat();
+    if (U.globeT > 0) drawSpace(U.globeT);
+    return;
+  }
+  drawFlat();
+}
+function drawFlat() {
   const c = cx, z = cam.z;
   c.setTransform(DPR, 0, 0, DPR, 0, 0);
   c.fillStyle = w.veil ? '#20232f' : '#05080b'; c.fillRect(0, 0, W, H); /* past the rim of a world with an unknown, more mist */
   c.imageSmoothingEnabled = true;
-  c.drawImage(terrainBmp, sx(-0.5), sy(-0.5), w.W * z, w.H * z);
+  const mapX = (-cam.x) * z + W / 2, mapW = w.W * z, lay = function (bmp) { c.drawImage(bmp, mapX, sy(-0.5), mapW, w.H * z); if (w.wrap) { if (mapX > 0) c.drawImage(bmp, mapX - mapW, sy(-0.5), mapW, w.H * z); if (mapX + mapW < W) c.drawImage(bmp, mapX + mapW, sy(-0.5), mapW, w.H * z); } };
+  lay(terrainBmp);
   { const sv = seasonVeils(); c.imageSmoothingEnabled = true;
-    if (sv.leaf > 0.02 && leafBmp) { c.globalAlpha = sv.leaf; c.drawImage(leafBmp, sx(-0.5), sy(-0.5), w.W * z, w.H * z); }
-    if (sv.snow > 0.02 && snowBmp) { c.globalAlpha = sv.snow; c.drawImage(snowBmp, sx(-0.5), sy(-0.5), w.W * z, w.H * z); }
+    if (sv.leaf > 0.02 && leafBmp) { c.globalAlpha = sv.leaf; lay(leafBmp); }
+    if (sv.snow > 0.02 && snowBmp) { c.globalAlpha = sv.snow; lay(snowBmp); }
     c.globalAlpha = 1; }
-  const x0 = Math.max(0, Math.floor(toWorld(0, 0).x) - 1), x1 = Math.min(w.W - 1, Math.ceil(toWorld(W, 0).x) + 1);
+  let x0 = Math.floor((0 - W / 2) / z + cam.x - 0.5) - 1, x1 = Math.ceil((W - W / 2) / z + cam.x - 0.5) + 1;
+  if (w.wrap && (x0 < 0 || x1 > w.W - 1)) { x0 = 0; x1 = w.W - 1; } /* the view lies across the line where east meets west: every column is asked, and each is drawn where it falls */
+  x0 = Math.max(0, x0); x1 = Math.min(w.W - 1, x1);
   const y0 = Math.max(0, Math.floor(toWorld(0, 0).y) - 1), y1 = Math.min(w.H - 1, Math.ceil(toWorld(0, H).y) + 1);
   const season = SW.season(w), L = w.laws;
 
@@ -751,7 +841,7 @@ function onWorldEvent(ev) {
     case 'took': if (ev.raid) { addFx({ type: 'float', x: ev.x, y: ev.y, text: 'raid!', life: 1.8, color: '#ff8f6b' }); soundAt('stole', ev.x, ev.y); } break;
     case 'story': U.keys.story = ''; break;
     case 'insight': U.keys.inspect = ''; break;
-    case 'opened': buildTerrain(); U.keys.kinds = ''; addFx({ type: 'ring', x: (ev.x0 + ev.x1) / 2, y: (ev.y0 + ev.y1) / 2, r: 10, life: 4, color: 'rgba(250,236,170,0.9)' }); showNotice('New land has been found beyond the edge of the known world' + (ev.land ? ', in ' + ev.land : '') + '.'); break;
+    case 'opened': buildTerrain(); SPACE.tex = null; U.keys.kinds = ''; addFx({ type: 'ring', x: (ev.x0 + ev.x1) / 2, y: (ev.y0 + ev.y1) / 2, r: 10, life: 4, color: 'rgba(250,236,170,0.9)' }); showNotice('New land has been found beyond the edge of the known world' + (ev.land ? ', in ' + ev.land : '') + '.'); break;
     case 'disaster': if (ev.x2 != null) addFx({ type: 'ring', x: ev.x2, y: ev.y2, r: 4, life: 3.5, color: 'rgba(230,230,240,0.9)' }); addFx({ type: 'ring', x: ev.x, y: ev.y, r: Math.max(4, ev.r), life: 3.5, color: ev.kind === 'wildfire' || ev.kind === 'volcano' ? 'rgba(255,120,40,0.95)' : ev.kind === 'locusts' ? 'rgba(190,200,90,0.9)' : 'rgba(230,230,240,0.9)' }); addFx({ type: 'float', x: ev.x, y: ev.y, text: ev.kind === 'quake' ? 'the earth shakes' : ev.kind === 'volcano' ? 'the mountain burns' : ev.kind, life: 4, color: '#ffb070' }); soundAt('lightning', ev.x, ev.y); U.keys.laws = ''; break;
     case 'maker': U.keys.maker = ''; U.keys.laws = ''; U.keys.kinds = ''; U.keys.ways = ''; if (ev.entry.ops.length) showNotice('The maker changed the world: ' + ev.entry.ops.join('; ') + '. See the Maker tab.'); break;
     case 'site': if (ev.first) { addFx({ type: 'ring', x: ev.x, y: ev.y, r: 5, life: 2.5, color: 'rgba(214,196,255,0.9)' }); soundAt('cast', ev.x, ev.y); } break;
@@ -777,12 +867,12 @@ function onWorldEvent(ev) {
 /* ---------- picking ---------- */
 function pick(px, py) {
   const p = toWorld(px, py); let best = null, bd = 0.85;
-  for (let k = 0; k < w.agents.length; k++) { const a = w.agents[k], d = Math.hypot(ex(a) - p.x, ey(a) - 0.1 - p.y); if (d < bd) { bd = d; best = { t: 'agent', id: a.id }; } }
+  for (let k = 0; k < w.agents.length; k++) { const a = w.agents[k], d = Math.hypot(wrapd(ex(a) - p.x), ey(a) - 0.1 - p.y); if (d < bd) { bd = d; best = { t: 'agent', id: a.id }; } }
   if (best) return best;
   bd = 0.6;
-  for (let k = 0; k < w.creatures.length; k++) { const c = w.creatures[k], d = Math.hypot(ex(c) - p.x, ey(c) - p.y); if (d < bd) { bd = d; best = { t: 'creature', id: c.id }; } }
+  for (let k = 0; k < w.creatures.length; k++) { const c = w.creatures[k], d = Math.hypot(wrapd(ex(c) - p.x), ey(c) - p.y); if (d < bd) { bd = d; best = { t: 'creature', id: c.id }; } }
   if (best) return best;
-  const tx = Math.round(p.x), ty = Math.round(p.y);
+  const tx = w.wrap ? ((Math.round(p.x) % w.W) + w.W) % w.W : Math.round(p.x), ty = Math.round(p.y);
   if (tx < 0 || ty < 0 || tx >= w.W || ty >= w.H) return null;
   return { t: 'tile', x: tx, y: ty };
 }
@@ -829,22 +919,22 @@ cv.addEventListener('pointermove', function (e) {
   }
   if (ptr.down) {
     const dx = e.offsetX - ptr.lx, dy = e.offsetY - ptr.ly; ptr.moved += Math.abs(dx) + Math.abs(dy);
-    if (ptr.moved > 4) { cam.x -= dx / cam.z; cam.y -= dy / cam.z; U.follow = false; clampCam(); syncButtons(); }
+    if (ptr.moved > 4) { if (isGlobe()) { const Rg = globeR(); cam.x -= dx / Rg * w.W / 6.2832; cam.y -= dy / Rg * w.H / 3.1416; U.spinAt = U.time + 8; } else { cam.x -= dx / cam.z; cam.y -= dy / cam.z; } U.follow = false; clampCam(); syncButtons(); }
     ptr.lx = e.offsetX; ptr.ly = e.offsetY; $('tip').hidden = true;
   } else {
-    const s = pick(e.offsetX, e.offsetY), html = describe(s), tip = $('tip');
+    const s = isGlobe() ? null : pick(e.offsetX, e.offsetY), html = s ? describe(s) : '', tip = $('tip');
     if (html) { tip.innerHTML = html; tip.hidden = false; tip.style.left = Math.min(W - 270, e.offsetX + 14) + 'px'; tip.style.top = Math.min(H - 40, e.offsetY + 16) + 'px'; } else tip.hidden = true;
   }
 });
 function endPtr(e) {
   delete ptr.pts[e.pointerId]; cv.classList.remove('drag');
-  if (ptr.down && ptr.moved <= 4 && e.type === 'pointerup') select(pick(e.offsetX, e.offsetY), false);
+  if (ptr.down && ptr.moved <= 4 && e.type === 'pointerup' && !isGlobe()) select(pick(e.offsetX, e.offsetY), false);
   if (!Object.keys(ptr.pts).length) ptr.down = false;
   ptr.pinch = 0;
 }
 cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
 cv.addEventListener('pointerleave', function () { $('tip').hidden = true; });
-cv.addEventListener('dblclick', function (e) { zoomAt(e.offsetX, e.offsetY, 1.8); });
+cv.addEventListener('dblclick', function (e) { if (isGlobe()) { cam.z = zGlobe() * 1.6; clampCam(); } else zoomAt(e.offsetX, e.offsetY, 1.8); });
 cv.addEventListener('wheel', function (e) { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, Math.exp(-e.deltaY * 0.0016)); }, { passive: false });
 window.addEventListener('keydown', function (e) {
   const tag = (e.target.tagName || '').toLowerCase(); if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
@@ -1450,6 +1540,7 @@ function renderSettings() {
     '<h3>Pace and budget</h3><div class="form"><label for="setPM">Thoughts per minute<small>across all beings</small></label><input type="number" id="setPM" min="1" max="60" value="' + S.perMinute + '">' +
     '<label for="setPar">At the same time</label><input type="number" id="setPar" min="1" max="8" value="' + S.parallel + '">' +
     '<label for="setWait">The world waits for the minds<small>when there are more beings than Claude can think for in time, the clock slows so that each still thinks about this often; nothing in the world is cut</small></label><select class="field" id="setWait"><option value="1"' + (S.wait !== false ? ' selected' : '') + '>yes</option><option value="0"' + (S.wait === false ? ' selected' : '') + '>no, keep the clock steady</option></select>' +
+    '<label for="setFocus">The world waits for<small>everyone, or only those you are looking at. Nothing is ever frozen: beings out of view go on living on their reflexes and think less than half as often, so the ones you watch get more of the thoughts and the clock runs faster</small></label><select class="field" id="setFocus"><option value="all"' + (S.focus !== 'view' ? ' selected' : '') + '>everyone</option><option value="view"' + (S.focus === 'view' ? ' selected' : '') + '>those in view</option></select>' +
     '<label for="setThink">Each being thinks about every<small>moments of the world (a day is 240)</small></label><input type="number" id="setThink" min="30" max="480" value="' + (S.thinkEvery || 90) + '">' +
     '<label for="setBudget">Thought budget<small>minds fall asleep when it is spent</small></label><input type="number" id="setBudget" min="5" max="100000" value="' + S.budget + '">' +
     '<label for="setAuto">Wake the minds when the page opens<small>and after it reloads, so a long run carries on by itself</small></label><select class="field" id="setAuto"><option value="1"' + (S.autoWake ? ' selected' : '') + '>yes</option><option value="0"' + (S.autoWake ? '' : ' selected') + '>no</option></select>' +
@@ -1468,7 +1559,7 @@ function renderSettings() {
   bind('setRM', function (v) { S.routine.model = v; }); bind('setRE', function (v) { S.routine.effort = v; });
   bind('setDM', function (v) { S.deep.model = v; }); bind('setDE', function (v) { S.deep.effort = v; });
   bind('setEvery', function (v) { S.reflectEvery = clamp(Math.round(+v) || 5, 2, 30); });
-  bind('setWait', function (v) { S.wait = v === '1'; }); bind('setThink', function (v) { S.thinkEvery = clamp(Math.round(+v) || 90, 30, 480); });
+  bind('setWait', function (v) { S.wait = v === '1'; }); bind('setFocus', function (v) { S.focus = v === 'view' ? 'view' : 'all'; }); bind('setThink', function (v) { S.thinkEvery = clamp(Math.round(+v) || 90, 30, 480); });
   bind('setFore', function (v) { S.foresight = v === '1'; });
   bind('setPM', function (v) { S.perMinute = clamp(Math.round(+v) || 6, 1, 60); });
   bind('setRec', function (v) { S.record = v === '1'; });
@@ -1500,7 +1591,7 @@ function drawMini() {
   if (nightLevel() > 0.3) { g.fillStyle = 'rgba(6,10,38,0.45)'; g.fillRect(0, 0, mw, mh); }
   w.agents.forEach(function (a) { g.fillStyle = SW.hslToHex(a.hue, 0.8, 0.62); g.beginPath(); g.arc((a.x + 0.5) * k, (a.y + 0.5) * k, U.sel && U.sel.id === a.id ? 6 : 4.5, 0, 6.2832); g.fill(); g.strokeStyle = '#05080b'; g.lineWidth = 1.5; g.stroke(); });
   const hw = W / cam.z / 2, hh = H / cam.z / 2;
-  g.strokeStyle = '#f2b84b'; g.lineWidth = 2; g.strokeRect((cam.x - hw) * k, (cam.y - hh) * k, hw * 2 * k, hh * 2 * k);
+  g.strokeStyle = '#f2b84b'; g.lineWidth = 2; if (!isGlobe()) { g.strokeRect((cam.x - hw) * k, (cam.y - hh) * k, hw * 2 * k, hh * 2 * k); if (w.wrap) { g.strokeRect((cam.x - hw - w.W) * k, (cam.y - hh) * k, hw * 2 * k, hh * 2 * k); g.strokeRect((cam.x - hw + w.W) * k, (cam.y - hh) * k, hw * 2 * k, hh * 2 * k); } } else { g.beginPath(); g.moveTo(cam.x * k, 0); g.lineTo(cam.x * k, mh); g.stroke(); }
 }
 $('panel').addEventListener('pointerdown', function () { U.panelDown = Date.now(); });
 window.addEventListener('pointerup', function () { setTimeout(function () { U.panelDown = 0; }, 60); });
@@ -1538,7 +1629,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 19, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 20, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1590,7 +1681,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 19, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 20, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }
@@ -1630,6 +1721,7 @@ function attach(state) {
   st = state; w = st.world; if (!w.name) w.name = worldName(st.runId); $('worldName').textContent = w.name;
   st.sample = sampleFn; st.toolsOK = toolsOK;
   st.ui = onWorldEvent;
+  st.inView = function (a) { if (isGlobe() || (U.sel && U.sel.t === 'agent' && U.sel.id === a.id)) return true; return Math.abs(wrapd(a.x + 0.5 - cam.x)) * cam.z < W / 2 + 3 * cam.z && Math.abs(a.y + 0.5 - cam.y) * cam.z < H / 2 + 3 * cam.z; };
   U.sel = null; U.follow = false; U.bubbles = []; U.fx = []; U.hist = []; U.keys = {}; U.acc = 0; U.flash = 0;
   buildTerrain(); resize();
   /* open on the band of beings, filling the stage */
@@ -1637,7 +1729,7 @@ function attach(state) {
   if (w.agents.length) { cam.x = w.agents.reduce(function (s, a) { return s + a.x; }, 0) / w.agents.length + 0.5; cam.y = w.agents.reduce(function (s, a) { return s + a.y; }, 0) / w.agents.length + 0.5; }
   else { cam.x = w.W / 2; cam.y = w.H / 2; }
   clampCam(); syncButtons();
-  window.SWdebug = { st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam };
+  window.SWdebug = { st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld };
 }
 function newWorld(seed) {
   const keep = st ? st.settings : null;

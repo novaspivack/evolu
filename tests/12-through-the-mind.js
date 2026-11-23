@@ -29,7 +29,7 @@ const run = (w, em, n, keep) => { for (let k = 0; k < n; k++) { w.creatures = []
 }
 { // hunting together, and skill
   const { w, st, ev, em } = fresh(7); const a = w.agents[0], b = w.agents.find(o => o.people === a.people && o !== a), g = grass(w, 5); const sp = Object.keys(w.laws.creatures).find(k => !w.laws.creatures[k].predator && (w.laws.creatures[k].tough || 1) >= 2) || 'hornback'; let kills = [0, 0];
-  [0, 1].forEach(j => { for (let n = 0; n < 250; n++) { const c = { id: w.nextId++, sp: sp, x: 0, y: 0, e: 60, age: 900, size: 1, quick: 1, owner: null }; at(w, a, g); c.x = a.x + 1; c.y = a.y; w.creatures = [c]; at(w, b, j ? g + w.W : g + 40); still(b); a.rel[b.id] = 0.8; a.stats.hunted = 0; a.hp = 100; a.carry = []; a.policy = []; a.plan = [{ do: 'hunt', ticks: 1 }]; a.intent = null; a.e = 90; SW.step(w, em); if (c.wounds) kills[j]++; } });
+  [0, 1].forEach(j => { for (let n = 0; n < 250; n++) { const c = { id: w.nextId++, sp: sp, x: 0, y: 0, e: 60, age: 900, size: 1, quick: 1, owner: null }; at(w, a, g); c.x = a.x + 1; c.y = a.y; w.creatures = [c]; at(w, b, j ? g + w.W : g + 40); still(b); a.rel[b.id] = 0.8; a.stats.hunted = 0; a.hp = 100; a.carry = []; a.policy = []; a.plan = [{ do: 'hunt', ticks: 1 }]; a.intent = null; a.e = 90; a.thirst = 0; SW.step(w, em); if (c.wounds) kills[j]++; } });
   ok(kills[0] > 10 && kills[1] > kills[0] * 1.4, 'two together bring down what one cannot: a blow lands ' + kills[0] + ' times of 250 alone, ' + kills[1] + ' with one of your own beside you');
   ok(w.laws.fight.packBonus === 0.8 && /with one of your own beside you a kill is far likelier/.test(M.buildPrompt(st, st.minds[a.id], 'routine')), 'and a being is told so');
 }

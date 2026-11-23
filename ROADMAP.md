@@ -14,7 +14,7 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 19, to be watched and tuned
+## NOW: built in Generations 14 to 20, to be watched and tuned
 
 | Item | State |
 | --- | --- |
@@ -47,19 +47,24 @@ Knowledge is earned slowly, in ages. Later things need earlier ones, need materi
 | **Plans that last until the next thought;** forty thoughts a minute by default | Built in 18. Four at once, easing off when Claude refuses, and a clock that waits for the minds as the population grows, in 19 |
 | **Worlds with names,** kept side by side in the browser; a choice on opening between a saved world and a new one; a new world for a first visit | Built in 19 |
 | **A rim that opens slowly,** and a view that can pass the edge of the map | Built in 19 from the eleventh run |
+| **The world as a globe.** East joins west; the poles end it; from far off it is a ball among stars with the sun by day and the moon by night | Built in 20. New worlds only |
+| **Three climates:** a warm belt with no winter, the ice cold all year, the seasons between | Built in 20 |
+| **Two poles that differ,** with their own animals and plants; what lives in the sea; the rainforest and its life | Built in 20 |
+| **Peoples of the rainforest and of each pole;** the pull of the homeland; animals that keep to their own kind of country | Built in 20 |
+| **The dog,** the sled, the igloo, the canoe and the kayak | Built in 20 |
+| **Whose thoughts the world waits for:** everyone, or those in view | Built in 20 as a choice in Setup |
 
 Answered by the seventh run: people do earn a following (nine pledges), and lessons from the dead do change plans. Still open, for the next run: does need bring storage before the first winter; do fewer starve; does anyone tell a tale, begin a teaching or take one up; does anyone tame an animal; do the peoples meet, trade or cross water.
 
 ## NEXT: once NOW is seen working
 
-**First, from Nova's notes of 22 November, evening: the world as a globe.** A world of a fixed size that can be gone around, so that exploring fills it in until it meets itself and need not be held back. Two ways to build it, to be chosen:
+**From Nova's notes of 22 November, evening, after the globe was built:**
 
-- *A torus:* east joins west and north joins south. Every place is like every other and the corners need no special care (the four corners of the map are one neighbourhood), but a torus cannot be shown as a globe without a lie: on a ball, north and south do not meet.
-- *A world that wraps east to west, with ice at the top and bottom* (proposed). Sailing or walking east brings you round to the west; north and south end in polar ice that cannot be crossed. This is what a globe is, so the view from far off can be a turning ball that becomes the flat map as one comes closer, and there are no corners at all.
-
-Either way: one function through which every coordinate, distance, path and neighbourhood passes; land made so that the seam joins (the noise it is grown from must itself wrap); the veil closing on itself; the view and the small map wrapping; and checks that walk a being round the world across every seam. A world made before this stays flat.
-
-**Second: the big world, rebuilt.** The 66-day world's last save may be lost (see the design log, Generation 19), but its record is whole and its land can be made again from its seed. Rebuilt from the record it would hold its fifteen people with their minds, bonds and knowledge, its culture, its laws and its lands; its buildings would have to be raised again where the record names them (two settlements, ten halls, forty-four roofs) and its plants regrown. It would ship with the page as a world anyone can choose who wants to begin farther along.
+- **Local time** (Nova's second mode: run only what is in view and pause the rest). Not built, and advised against: the world itself costs about 2 ms a moment, so pausing it saves nothing that can be felt; what is scarce is thoughts, and Generation 20 lets the world wait only for those in view while the rest live on and think less often. Pausing people outright would put them out of step with the seasons and with neighbours who walk in and out of view, and would make every run depend on where the watcher looked, so that two runs could no longer be compared. If the lighter choice proves not enough in a real run, this is where to look next.
+- **Rain and flood as weather of the warm belt:** a rainy season with heavy rain that can be seen, rivers that rise, and floods that take what is built too near them.
+- **A day that goes round the world,** so that the sun lights one side of the globe and it is morning in one country while it is evening in another.
+- **The ice and the rainforest as places to live:** more of what Nova named for them as beings reach them (more craft from hide and bone, fishing through ice, tree-dwellings), from what real runs show is missing.
+- **Sea creatures that return** from the open sea when their numbers fall, as land animals do from the rim.
 
 **From Nova's notes of 22 November, afternoon, in the order proposed:**
 
@@ -127,7 +132,8 @@ These run through every stage and are picked up as runs call for them.
 - **Starvation in winter.** Ten of seventeen over 41 days. Generation 15 brought storage, but on the eve of famine; Generation 16 answers with foresight in autumn, a land that no longer runs down, a milder winter and bodies that reach their stores.
 - **Peoples too small and too closely related to grow.** Generation 16 answered with newcomers, twins and longer lives, and the world went from six to twelve; Generation 17 adds women and men, which narrows who can pair, and bands of four to offset it.
 - **A carried-on world cannot grow at its edges.** Only a new world has the veiled rim. Now in NEXT.
-- **The map is finite and its end shows.** Land opened at the last row of the map stops in a straight line. The globe in NEXT is the answer.
+- **Nothing in Generation 20 has been balanced by a run:** new hunters (wolves, bears, snakes, shadowcats, rivermaws), new food, three new peoples.
+- **The climate has no lever for the maker.**
 - **A thought took 10 seconds in the eleventh run,** three times what it took in the tenth. Unexplained; it sets how often a being can think.
 - **Acts that never reached a body.** `claim` and `venture` were unreachable for real minds in Generations 16 and 17 because tests called the body directly. Fixed in 18, with a check that reads the acts out of the prompt.
 - **Minds hunt very little:** 2 plan steps of 1,274 in the tenth run. Generation 18 points the hungry at prey; unknown whether they will go.
@@ -159,3 +165,4 @@ A short index; the detail is in the design log.
 | 17 | The veiled rim and venturing, strangers in new land, women and men, swimming, seasons of plenty, animals and deposits that return, callings and desire |
 | 18 | Acts that reach the body (claiming, venturing, telling), hunting and gathering as skills, two together, grudges and kindness, courting that holds, people added by hand, plans that last |
 | 19 | A rim that opens slowly, a view past the edge, minds that ease off, worlds with names and a choice on opening |
+| 20 | A world that goes round and is seen as a globe; three climates; two different poles; the sea's own creatures; the rainforest; three new peoples and the pull of the homeland; the dog, sled, igloo, canoe and kayak |

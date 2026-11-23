@@ -25,9 +25,15 @@ function rnd(w) {
 }
 function ri(w, n) { return Math.floor(rnd(w) * n); }
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
-function cheb(ax, ay, bx, by) { return Math.max(Math.abs(ax - bx), Math.abs(ay - by)); }
+/* A world made since Generation 20 goes round: its east edge joins its west. WW is the width of the world now being worked on (0 for a world with edges);
+   use(w) sets it, and every step, look and sense begins by calling it. Distances and directions east and west go the short way round. North and south end at the poles. */
+let WW = 0;
+function use(w) { WW = w && w.wrap ? w.W : 0; return w; }
+function wdx(d) { if (WW) { d %= WW; if (d > WW / 2) d -= WW; else if (d < -WW / 2) d += WW; } return d; }
+function wrapX(w, x) { return w.wrap && (x < 0 || x >= w.W) ? ((x % w.W) + w.W) % w.W : x; }
+function cheb(ax, ay, bx, by) { let dx = Math.abs(ax - bx); if (WW !== 0 && dx + dx > WW) { if (dx >= WW) dx %= WW; if (dx + dx > WW) dx = WW - dx; } return Math.max(dx, Math.abs(ay - by)); }
 function sign(v) { return v > 0 ? 1 : v < 0 ? -1 : 0; }
-SW.rnd = rnd; SW.cheb = cheb; SW.clamp = clamp;
+SW.rnd = rnd; SW.cheb = cheb; SW.clamp = clamp; SW.use = use; SW.wdx = wdx; SW.wrapX = wrapX;
 
 /* ---------- the rule registry ---------- */
 SW.defaultLaws = function () {
@@ -53,10 +59,11 @@ SW.defaultLaws = function () {
     water: { swim: 1, swimDrain: 0.15, fishChance: 0.09, fishFood: 14, fishRecover: 300, winterFish: 0.5, riverFert: 0.25, oreSeams: 0.1 },
     disease: { rawChance: 0.05, marshChance: 0.0005, spread: 0.008, drain: 0.045, harm: 0.035, length: 480, immunity: 2400 },
     /* how loudly each inner drive speaks, for every being; 1 is as written, 0 silences it */
-    drives: { hunger: 1, pain: 1, sickness: 1, dread: 1, cold: 1, loneliness: 1, missing: 1, resentment: 1, anger: 1, grief: 1, fear: 1, envy: 1, ambition: 1, belonging: 1, family: 1, temptation: 1, curiosity: 1, restlessness: 1, longing: 1, mortality: 1, purpose: 1, freedom: 1, jealousy: 1, selfdoubt: 1, compassion: 1, guilt: 1, awe: 1, insecurity: 1, pride: 1, gratitude: 1, loyalty: 1, betrayal: 1, devotion: 1, guile: 1, obsession: 1, thirst: 1, deference: 1, discontent: 1, contentment: 1, homeseeking: 1, territory: 1, strangeness: 1, standing: 1, legacy: 1, beyond: 1, calling: 1, desire: 1 },
+    drives: { homeland: 1, hunger: 1, pain: 1, sickness: 1, dread: 1, cold: 1, loneliness: 1, missing: 1, resentment: 1, anger: 1, grief: 1, fear: 1, envy: 1, ambition: 1, belonging: 1, family: 1, temptation: 1, curiosity: 1, restlessness: 1, longing: 1, mortality: 1, purpose: 1, freedom: 1, jealousy: 1, selfdoubt: 1, compassion: 1, guilt: 1, awe: 1, insecurity: 1, pride: 1, gratitude: 1, loyalty: 1, betrayal: 1, devotion: 1, guile: 1, obsession: 1, thirst: 1, deference: 1, discontent: 1, contentment: 1, homeseeking: 1, territory: 1, strangeness: 1, standing: 1, legacy: 1, beyond: 1, calling: 1, desire: 1 },
     /* kinds of building beyond a plain shelter. Each is a roof like any other, plus what it does: effects on one who spends time in it
        (once a day), bonds made between those gathered there, sight from its top, longer-lasting tools made beside it. Recipes may require one. */
     buildings: {
+      igloo: { wood: 0, stone: 0, on: 'snow', effort: 14, fx: [{ on: 'warmth', times: 1.8, for: 480 }, { on: 'fear', by: -0.15 }], hint: 'a house of cut snow, raised on snow with nothing but your hands and some strength: a roof where there is no wood, and far warmer than the open ice' },
       hall: { wood: 6, stone: 2, bond: 0.05, fx: [{ on: 'joy', by: 0.2 }, { on: 'lonely', by: -0.4 }], hint: 'a great roof where a band gathers: those who spend time in it together grow closer' },
       shrine: { wood: 2, stone: 4, fx: [{ on: 'fear', by: -0.4 }, { on: 'grief', by: -0.3 }, { on: 'joy', by: 0.2 }], hint: 'a still place set apart: it eases fear and grief in one who spends time there' },
       workshop: { way: 'tools', wood: 5, stone: 2, craft: 0.6, fx: [{ on: 'learning', times: 1.3, for: 240 }], hint: 'a place for making: tools crafted in or beside it last much longer' },
@@ -136,7 +143,17 @@ SW.defaultLaws = function () {
         look: { anim: 'pulse', shapes: [{ t: 'rect', y: 0.16, w: 0.04, h: 0.16, fill: '#d8cfe8' }, { t: 'ellipse', y: -0.06, w: 0.26, h: 0.18, fill: '#6b4bd8' }, { t: 'ring', n: 4, d: 0.13, y: -0.07, s: 0.035, fill: '#9ff0ff', per: 'food' }] } },
       sapcane: { growth: 0.004, maxFood: 3, regrow: 0.003, nutrition: 3, fx: [{ on: 'thirst', by: -70 }], seedRate: 0.002, seedRadius: 3, lifespan: 5000, root: 'cane', hardy: 1, biomes: ['desert'], soil: { desert: 1, sand: 0.6 }, form: { form: 'stalk', hue: 95 } },
       sunfig: { growth: 0.003, maxFood: 4, regrow: 0.002, nutrition: 20, seedRate: 0.002, seedRadius: 2, lifespan: 8000, root: 'fig', biomes: ['desert'], soil: { grass: 1, sand: 0.3 }, form: { form: 'frond', hue: 30 } },
-      cloudberry: { growth: 0.004, maxFood: 3, regrow: 0.003, nutrition: 12, seedRate: 0.003, seedRadius: 2, lifespan: 4000, root: 'cloud', hardy: 1, biomes: ['tundra'], soil: { snow: 0.8, grass: 0.7 }, form: { form: 'rosette', hue: 40 } },
+      cloudberry: { growth: 0.004, maxFood: 3, regrow: 0.003, nutrition: 12, seedRate: 0.003, seedRadius: 2, lifespan: 4000, root: 'cloud', hardy: 1, biomes: ['tundra', 'arctic'], soil: { snow: 0.8, grass: 0.7 }, form: { form: 'rosette', hue: 40 } },
+      goldfruit: { growth: 0.004, maxFood: 4, regrow: 0.004, nutrition: 18, seedRate: 0.003, seedRadius: 3, lifespan: 8000, root: 'goldfruit', biomes: ['rainforest'], soil: { forest: 1, grass: 0.8 }, form: { form: 'bush', hue: 42 } },
+      canopynut: { growth: 0.002, maxFood: 3, regrow: 0.002, nutrition: 20, seedRate: 0.002, seedRadius: 3, lifespan: 9000, root: 'canopynut', biomes: ['rainforest'], soil: { forest: 1 }, form: { form: 'frond', hue: 24 } },
+      vinebean: { growth: 0.007, maxFood: 3, regrow: 0.005, nutrition: 9, seedRate: 0.005, seedRadius: 3, lifespan: 2400, root: 'vinebean', biomes: ['rainforest'], soil: { forest: 0.8, grass: 0.8, marsh: 0.5 }, form: { form: 'vine', hue: 110 } },
+      feverbark: { growth: 0.004, maxFood: 2, regrow: 0.003, nutrition: 1, heal: 10, fx: [{ on: 'sick', by: -1 }], seedRate: 0.002, seedRadius: 2, lifespan: 5000, root: 'feverbark', biomes: ['rainforest'], soil: { forest: 0.9, marsh: 0.6 }, form: { form: 'rosette', hue: 300 } },
+      firepod: { growth: 0.005, maxFood: 2, regrow: 0.004, nutrition: 4, fx: [{ on: 'warmth', times: 1.4, for: 240 }, { on: 'joy', by: 0.1 }], seedRate: 0.003, seedRadius: 2, lifespan: 2600, root: 'firepod', biomes: ['rainforest'], soil: { grass: 0.8, forest: 0.5 }, form: { form: 'flower', hue: 8 } },
+      snowberry: { growth: 0.004, maxFood: 3, regrow: 0.003, nutrition: 11, seedRate: 0.003, seedRadius: 2, lifespan: 4400, root: 'snowberry', hardy: 1, biomes: ['arctic'], soil: { snow: 0.9, grass: 0.6 }, form: { form: 'bush', hue: 350 } },
+      frostcap: { growth: 0.005, maxFood: 2, regrow: 0.004, nutrition: 9, seedRate: 0.003, seedRadius: 2, lifespan: 2800, root: 'frostcap', hardy: 1, biomes: ['arctic', 'tundra'], soil: { snow: 0.6, rock: 0.2, grass: 0.3 }, form: { form: 'cap', hue: 195 } },
+      icekelp: { growth: 0.005, maxFood: 3, regrow: 0.004, nutrition: 7, fx: [{ on: 'warmth', times: 1.3, for: 240 }], seedRate: 0.003, seedRadius: 2, lifespan: 3000, root: 'kelp', hardy: 1, biomes: ['antarctic'], soil: { sand: 0.8, snow: 0.3 }, form: { form: 'stalk', hue: 150 } },
+      windroot: { growth: 0.004, maxFood: 3, regrow: 0.003, nutrition: 13, seedRate: 0.003, seedRadius: 2, lifespan: 4600, root: 'windroot', hardy: 1, biomes: ['antarctic'], soil: { snow: 0.8, grass: 0.6, sand: 0.3 }, form: { form: 'rosette', hue: 60 } },
+      glowcap: { growth: 0.005, maxFood: 2, regrow: 0.004, nutrition: 8, lore: 0.15, seedRate: 0.003, seedRadius: 2, lifespan: 2800, root: 'glowcap', hardy: 1, biomes: ['antarctic'], soil: { snow: 0.6, rock: 0.2 }, form: { form: 'cap', hue: 170 } },
       hazel: { growth: 0.003, maxFood: 3, regrow: 0.002, nutrition: 16, seedRate: 0.002, seedRadius: 3, lifespan: 8000, root: 'hazel', hardy: 1, biomes: ['woodland'], soil: { forest: 1, grass: 0.4 }, form: { form: 'bush', hue: 28 } },
       reedbulb: { growth: 0.006, maxFood: 3, regrow: 0.004, nutrition: 11, seedRate: 0.004, seedRadius: 2, lifespan: 2600, root: 'reed', hardy: 1, biomes: ['lakeland'], soil: { grass: 0.8, sand: 0.8, marsh: 0.6 }, form: { form: 'reed', hue: 60 } },
       plainsroot: { growth: 0.004, maxFood: 2, regrow: 0.003, nutrition: 13, seedRate: 0.003, seedRadius: 2, lifespan: 4000, root: 'plainsroot', hardy: 1, biomes: ['steppe', 'highland'], soil: { grass: 0.8 }, form: { form: 'rosette', hue: 20 } },
@@ -183,7 +200,35 @@ SW.defaultLaws = function () {
       fenfowl: { predator: 0, drain: 0.045, speed: 0.9, maxEnergy: 30, breedAt: 22, breedCost: 10, breedChance: 0.003, matureAge: 200, lifespan: 1800, meat: 1, meatEnergy: 10, fleeRange: 5, wary: 4, grazeGain: 8, grazeSpare: 1, minPop: 5, migrate: 0.005, room: 26, roams: 0.3, root: 'fowl', home: ['marsh', 'grass', 'sand'], biomes: ['marsh', 'lakeland'], form: { build: 'small', head: 'crest', tail: 'up', hue: 182 } },
       bristleboar: { predator: 0, drain: 0.05, speed: 0.55, maxEnergy: 80, breedAt: 60, breedCost: 30, breedChance: 0.002, matureAge: 500, lifespan: 5000, meat: 4, meatEnergy: 16, fleeRange: 2, wary: 1, grazeGain: 12, grazeSpare: 1, minPop: 3, migrate: 0.004, room: 14, roams: 0.3, root: 'boar', tough: 2, gore: 10, home: ['forest', 'grass'], biomes: ['woodland'], form: { build: 'stocky', head: 'tusks', tail: 'stub', pattern: 'stripes', hue: 14 } },
       frostfang: { predator: 1, drain: 0.05, speed: 0.65, maxEnergy: 80, breedAt: 66, breedCost: 34, breedChance: 0.004, matureAge: 600, lifespan: 5200, meat: 3, meatEnergy: 16, range: 5, killChance: 0.3, gain: 26, agentHunger: 28, minPop: 2, migrate: 0.0015, room: 7, root: 'fang', home: ['snow', 'grass', 'forest'], biomes: ['tundra'], form: { build: 'slim', head: 'fangs', tail: 'bushy', hue: 205 } },
-      dunecat: { predator: 1, drain: 0.045, speed: 0.75, maxEnergy: 100, breedAt: 82, breedCost: 40, breedChance: 0.002, matureAge: 900, lifespan: 7000, meat: 4, meatEnergy: 16, range: 6, killChance: 0.6, gain: 30, agentHunger: 65, bite: 20, minPop: 1, migrate: 0.001, room: 4, root: 'dunecat', tough: 3, home: ['desert', 'sand', 'rock'], biomes: ['desert'], form: { build: 'long', head: 'ears', pattern: 'spots', hue: 36 } }
+      dunecat: { predator: 1, drain: 0.045, speed: 0.75, maxEnergy: 100, breedAt: 82, breedCost: 40, breedChance: 0.002, matureAge: 900, lifespan: 7000, meat: 4, meatEnergy: 16, range: 6, killChance: 0.6, gain: 30, agentHunger: 65, bite: 20, minPop: 1, migrate: 0.001, room: 4, root: 'dunecat', tough: 3, home: ['desert', 'sand', 'rock'], biomes: ['desert'], form: { build: 'long', head: 'ears', pattern: 'spots', hue: 36 } },
+      /* the dog: found in most country, wary but easily won with food; one that is yours stands with you in the hunt and against beasts, and can draw a sled over snow */
+      dog: { predator: 0, drain: 0.04, speed: 0.8, maxEnergy: 60, breedAt: 46, breedCost: 22, breedChance: 0.0015, matureAge: 400, lifespan: 4200, meat: 2, meatEnergy: 12, fleeRange: 4, wary: 2, grazeGain: 10, grazeSpare: 1, minPop: 4, migrate: 0.004, room: 14, roams: 0.3, root: 'dog', pack: 1, sled: 1, tame: 2, home: ['grass', 'forest', 'snow', 'sand', 'marsh'], form: { build: 'slim', head: 'ears', tail: 'up', hue: 32 } },
+      /* the rainforest */
+      treeape: { predator: 0, drain: 0.04, speed: 0.9, maxEnergy: 50, breedAt: 38, breedCost: 18, breedChance: 0.003, matureAge: 350, lifespan: 4200, meat: 2, meatEnergy: 12, fleeRange: 5, wary: 3, grazeGain: 10, grazeSpare: 1, spreads: 0.3, minPop: 5, migrate: 0.005, room: 26, roams: 0.2, root: 'ape', home: ['forest', 'grass'], biomes: ['rainforest'], form: { build: 'small', head: 'ears', tail: 'up', pattern: 'belly', hue: 22 } },
+      mudsnout: { predator: 0, drain: 0.05, speed: 0.5, maxEnergy: 110, breedAt: 84, breedCost: 40, breedChance: 0.0016, matureAge: 700, lifespan: 6500, meat: 6, meatEnergy: 16, fleeRange: 3, wary: 2, grazeGain: 14, grazeSpare: 1, minPop: 3, migrate: 0.003, room: 12, roams: 0.3, root: 'snout', tough: 2, gore: 6, home: ['forest', 'marsh', 'grass'], biomes: ['rainforest'], form: { build: 'stocky', head: 'none', tail: 'stub', pattern: 'saddle', hue: 200 } },
+      skybird: { predator: 0, drain: 0.04, speed: 1, maxEnergy: 26, breedAt: 20, breedCost: 9, breedChance: 0.0035, matureAge: 200, lifespan: 2200, meat: 1, meatEnergy: 10, fleeRange: 6, wary: 4, grazeGain: 8, grazeSpare: 1, spreads: 0.5, minPop: 5, migrate: 0.005, room: 30, roams: 0.3, root: 'bird', home: ['forest', 'grass', 'marsh'], biomes: ['rainforest'], form: { build: 'small', head: 'crest', tail: 'up', pattern: 'belly', hue: 345 } },
+      shadowcat: { predator: 1, drain: 0.045, speed: 0.8, maxEnergy: 100, breedAt: 82, breedCost: 40, breedChance: 0.002, matureAge: 900, lifespan: 7000, meat: 4, meatEnergy: 16, range: 6, killChance: 0.55, gain: 30, agentHunger: 60, bite: 20, minPop: 1, migrate: 0.001, room: 4, root: 'shadowcat', tough: 3, home: ['forest', 'grass'], biomes: ['rainforest'], form: { build: 'long', head: 'ears', tail: 'line', pattern: 'spots', hue: 40 } },
+      coilsnake: { predator: 1, drain: 0.03, speed: 0.35, maxEnergy: 60, breedAt: 48, breedCost: 24, breedChance: 0.002, matureAge: 500, lifespan: 6000, meat: 2, meatEnergy: 12, range: 3, killChance: 0.5, gain: 26, agentHunger: 16, bite: 10, minPop: 1, migrate: 0.001, room: 5, root: 'snake', home: ['forest', 'marsh', 'grass'], biomes: ['rainforest'],
+        look: { anim: 'sway', shapes: [{ t: 'ellipse', x: -0.16, y: 0.1, w: 0.2, h: 0.07, fill: '#3f7a3a' }, { t: 'ellipse', x: 0.04, y: 0.04, w: 0.2, h: 0.07, rot: -20, fill: '#4c8c44' }, { t: 'ellipse', x: 0.22, y: -0.06, w: 0.16, h: 0.06, rot: -35, fill: '#3f7a3a' }, { t: 'circle', x: 0.34, y: -0.15, s: 0.06, fill: '#58a04e' }, { t: 'circle', x: 0.36, y: -0.17, s: 0.016, fill: '#ffd23f' }, { t: 'line', x: 0.39, y: -0.14, x2: 0.46, y2: -0.12, lw: 0.012, stroke: '#d6362e' }] } },
+      rivermaw: { predator: 1, sea: 1, seaGain: 0.03, drain: 0.035, speed: 0.4, maxEnergy: 110, breedAt: 90, breedCost: 44, breedChance: 0.0014, matureAge: 900, lifespan: 9000, meat: 5, meatEnergy: 16, range: 4, killChance: 0.5, gain: 30, agentHunger: 40, bite: 16, minPop: 1, migrate: 0, room: 4, root: 'maw', tough: 3, home: ['shallows', 'water'], biomes: ['rainforest'],
+        look: { anim: 'sway', shapes: [{ t: 'ellipse', w: 0.52, h: 0.12, fill: '#4b5a3a' }, { t: 'ellipse', x: 0.36, y: -0.01, w: 0.24, h: 0.07, fill: '#566744' }, { t: 'tri', x: -0.36, y: 0, s: 0.12, rot: 270, fill: '#414f33' }, { t: 'circle', x: 0.28, y: -0.07, s: 0.025, fill: '#ffd23f' }, { t: 'ring', n: 5, d: 0.16, x: -0.04, y: -0.06, s: 0.025, fill: '#3a472d' }] } },
+      /* the lands of ice */
+      caribou: { predator: 0, drain: 0.045, speed: 0.6, maxEnergy: 100, breedAt: 76, breedCost: 36, breedChance: 0.002, matureAge: 600, lifespan: 6000, meat: 5, meatEnergy: 16, fleeRange: 4, wary: 2, grazeGain: 12, grazeSpare: 1, minPop: 4, migrate: 0.004, room: 20, roams: 0.7, root: 'caribou', tough: 2, gore: 6, milk: 1, sled: 1, home: ['snow', 'grass'], biomes: ['arctic', 'tundra'], form: { build: 'tall', head: 'antlers', tail: 'stub', pattern: 'belly', hue: 28 } },
+      mammoth: { predator: 0, drain: 0.05, speed: 0.28, maxEnergy: 200, breedAt: 150, breedCost: 70, breedChance: 0.0008, matureAge: 1200, lifespan: 11000, meat: 12, meatEnergy: 16, fleeRange: 2, wary: 1, grazeGain: 18, grazeSpare: 1, minPop: 2, migrate: 0.002, room: 8, roams: 0.4, root: 'mammoth', tough: 6, gore: 22, wool: 1, home: ['snow', 'grass'], biomes: ['arctic', 'tundra'], form: { build: 'stocky', head: 'tusks', pattern: 'hump', hue: 16 } },
+      penguin: { predator: 0, drain: 0.035, speed: 0.5, maxEnergy: 40, breedAt: 30, breedCost: 14, breedChance: 0.003, matureAge: 300, lifespan: 3600, meat: 2, meatEnergy: 12, fleeRange: 3, wary: 1, grazeGain: 6, grazeSpare: 1, fishes: 0.5, minPop: 5, migrate: 0.004, room: 30, roams: 0.2, root: 'penguin', home: ['snow', 'sand', 'rock'], biomes: ['antarctic'],
+        look: { anim: 'sway', shapes: [{ t: 'ellipse', w: 0.2, h: 0.34, fill: '#1c222b' }, { t: 'ellipse', x: 0.03, y: 0.04, w: 0.12, h: 0.24, fill: '#f3f5f7' }, { t: 'circle', x: 0.02, y: -0.3, s: 0.1, fill: '#1c222b' }, { t: 'tri', x: 0.13, y: -0.29, s: 0.06, rot: 90, fill: '#f2a03a' }, { t: 'circle', x: 0.05, y: -0.32, s: 0.02, fill: '#ffffff' }, { t: 'rect', x: -0.02, y: 0.36, w: 0.14, h: 0.03, fill: '#f2a03a' }] } },
+      wolf: { predator: 1, drain: 0.05, speed: 0.7, maxEnergy: 85, breedAt: 70, breedCost: 36, breedChance: 0.003, matureAge: 600, lifespan: 5600, meat: 3, meatEnergy: 16, range: 6, killChance: 0.35, gain: 26, agentHunger: 30, minPop: 2, migrate: 0.0012, room: 8, root: 'wolf', tough: 2, home: ['snow', 'grass', 'forest', 'rock'], biomes: ['arctic', 'tundra'], form: { build: 'slim', head: 'fangs', tail: 'bushy', hue: 215 } },
+      icebear: { predator: 1, drain: 0.045, speed: 0.6, maxEnergy: 130, breedAt: 104, breedCost: 50, breedChance: 0.0014, matureAge: 1000, lifespan: 8000, meat: 8, meatEnergy: 16, range: 6, killChance: 0.6, gain: 34, agentHunger: 70, bite: 24, minPop: 1, migrate: 0.0008, room: 4, root: 'bear', tough: 4, home: ['snow', 'rock', 'sand'], biomes: ['arctic'],
+        look: { anim: 'sway', shapes: [{ t: 'ellipse', w: 0.5, h: 0.3, fill: '#eef1f2' }, { t: 'ellipse', x: 0.36, y: -0.08, w: 0.2, h: 0.17, fill: '#f6f8f8' }, { t: 'circle', x: 0.3, y: -0.2, s: 0.045, fill: '#dfe4e6' }, { t: 'circle', x: 0.47, y: -0.06, s: 0.03, fill: '#1a1a1a' }, { t: 'circle', x: 0.4, y: -0.11, s: 0.022, fill: '#1a1a1a' }, { t: 'rect', x: -0.22, y: 0.28, w: 0.08, h: 0.1, fill: '#d9dee0' }, { t: 'rect', x: 0.18, y: 0.28, w: 0.08, h: 0.1, fill: '#d9dee0' }] } },
+      /* the southern ice has no hunter on the land; its beasts are of the shore */
+      floeseal: { predator: 0, drain: 0.04, speed: 0.35, maxEnergy: 120, breedAt: 92, breedCost: 44, breedChance: 0.0018, matureAge: 700, lifespan: 7000, meat: 7, meatEnergy: 18, fleeRange: 2, wary: 1, grazeGain: 4, grazeSpare: 1, fishes: 0.6, minPop: 3, migrate: 0.003, room: 14, roams: 0.1, root: 'seal', tough: 2, gore: 5, home: ['sand', 'snow', 'rock'], biomes: ['antarctic'],
+        look: { anim: 'sway', shapes: [{ t: 'ellipse', w: 0.5, h: 0.2, fill: '#7c8792' }, { t: 'ellipse', x: 0.06, y: 0.07, w: 0.34, h: 0.08, fill: '#b9c2c9' }, { t: 'circle', x: 0.36, y: -0.08, s: 0.1, fill: '#87929c' }, { t: 'circle', x: 0.41, y: -0.1, s: 0.022, fill: '#0e1114' }, { t: 'tri', x: -0.36, y: 0.02, s: 0.1, rot: 270, fill: '#6b7680' }, { t: 'ellipse', x: 0.12, y: 0.19, w: 0.1, h: 0.03, fill: '#6b7680' }] } },
+      stormbird: { predator: 0, drain: 0.04, speed: 1, maxEnergy: 30, breedAt: 22, breedCost: 10, breedChance: 0.003, matureAge: 220, lifespan: 2400, meat: 1, meatEnergy: 10, fleeRange: 6, wary: 4, grazeGain: 6, grazeSpare: 1, fishes: 0.4, minPop: 4, migrate: 0.005, room: 28, roams: 0.4, root: 'stormbird', home: ['snow', 'sand', 'rock', 'grass'], biomes: ['antarctic'], form: { build: 'small', head: 'crest', tail: 'up', pattern: 'belly', hue: 210 } },
+      /* the sea: these live in the water and cannot leave it. They feed on what the sea holds, and only one who goes on the water can hunt them */
+      whale: { predator: 0, sea: 1, seaGain: 0.09, drain: 0.04, speed: 0.4, maxEnergy: 220, breedAt: 170, breedCost: 80, breedChance: 0.0012, matureAge: 1200, lifespan: 12000, meat: 16, meatEnergy: 16, fleeRange: 3, wary: 0, grazeGain: 0, grazeSpare: 1, minPop: 2, migrate: 0, room: 6, root: 'whale', tough: 4, gore: 14, home: ['water'],
+        look: { anim: 'sway', shapes: [{ t: 'ellipse', w: 0.62, h: 0.26, fill: '#3d4f63' }, { t: 'ellipse', x: 0.06, y: 0.07, w: 0.44, h: 0.1, fill: '#8fa3b5' }, { t: 'tri', x: -0.38, y: -0.02, s: 0.16, rot: 270, fill: '#33435a' }, { t: 'circle', x: 0.36, y: -0.03, s: 0.025, fill: '#0c1016' }, { t: 'line', x: 0.2, y: -0.14, x2: 0.24, y2: -0.32, lw: 0.03, stroke: '#cfe6f5' }] } },
+      orca: { predator: 1, sea: 1, seaGain: 0.02, drain: 0.045, speed: 0.75, maxEnergy: 120, breedAt: 96, breedCost: 46, breedChance: 0.0016, matureAge: 900, lifespan: 9000, meat: 8, meatEnergy: 16, range: 7, killChance: 0.5, gain: 30, agentHunger: 0, minPop: 1, migrate: 0, room: 4, root: 'orca', tough: 4, bite: 18, home: ['water'],
+        look: { anim: 'sway', shapes: [{ t: 'ellipse', w: 0.5, h: 0.2, fill: '#12161c' }, { t: 'ellipse', x: 0.08, y: 0.06, w: 0.3, h: 0.08, fill: '#f4f6f8' }, { t: 'ellipse', x: 0.3, y: -0.05, w: 0.08, h: 0.04, fill: '#f4f6f8' }, { t: 'tri', x: -0.02, y: -0.2, s: 0.12, fill: '#12161c' }, { t: 'tri', x: -0.3, y: 0, s: 0.12, rot: 270, fill: '#12161c' }] } }
     },
     /* Paths of knowledge. Each is a capability the world allows; what a being makes of it (its name, idea and look) is its own. */
 /* things that can be made or done, each opened by a way. Beings discover that they exist by coming to the way. */
@@ -200,6 +245,9 @@ SW.defaultLaws = function () {
       basket: { way: 'weaving', needs: { wood: 2 }, gives: { thing: 'basket' }, hint: 'A woven basket: while you hold one you carry 2 more.' },
       cart: { way: 'wheel', needs: { wood: 6 }, gives: { thing: 'cart' }, hint: 'A cart on wheels: while you have one you carry 6 more.' },
       raft: { way: 'rafts', needs: { wood: 6 }, gives: { thing: 'raft' }, hint: 'Logs lashed into a raft: with one you can cross deep water, slowly.' },
+      canoe: { way: 'rafts', needs: { wood: 4, tool: 'build' }, gives: { thing: 'canoe' }, hint: 'A log hollowed with a tool into a canoe: light, for one, and much quicker over deep water than a raft.' },
+      kayak: { way: 'rafts', needs: { wood: 2, food: 'meat', foodN: 2 }, gives: { thing: 'kayak' }, hint: 'The hides of two kills stretched over a light frame: a kayak, for one, the quickest small craft on any water, and the way to hunt what lives in the sea.' },
+      sled: { way: 'herding', needs: { wood: 4 }, gives: { thing: 'sled' }, hint: 'A sled of wood: over snow, a dog or a caribou of yours can draw you on it (plan step ride, standing beside the animal), faster than walking and carrying more.' },
       boat: { way: 'boats', needs: { wood: 10, tool: 'build' }, gives: { thing: 'boat' }, hint: 'A hollowed, rowed boat: deep water at a walking pace, and 3 more carried while afloat.' },
       sail: { way: 'weaving', needs: { thing: 'wool', thingN: 3 }, gives: { thing: 'sail' }, hint: 'Cloth to catch the wind.' },
       ship: { way: 'sailing', needs: { wood: 24, thing: 'sail', at: 'dock' }, gives: { thing: 'ship' }, hint: 'A sailed ship, built at a dock: fast on the water, 10 more carried while afloat.' },
@@ -236,6 +284,9 @@ SW.defaultLaws = function () {
       musket: { fight: 2.2, hint: 'fire and iron in the hand' },
       cannon: { land: 1, raze: 8, fight: 1.6, hint: 'a great gun' },
       raft: { float: 2.6, hint: 'logs lashed together: slow, but it crosses deep water' },
+      canoe: { float: 1.5, hint: 'a hollowed log for one: quicker than a raft' },
+      kayak: { float: 1.1, hint: 'hide over a frame, for one: quick on any water' },
+      sled: { hint: 'drawn over snow by a dog or a caribou that is yours' },
       boat: { float: 1, carry: 3, hint: 'a rowed boat: deep water at a walking pace, and room for cargo' },
       ship: { float: 0.5, carry: 10, hint: 'a sailed ship: fast on the water, with a hold' },
       warship: { float: 0.6, carry: 4, fight: 1.5, hint: 'a ship built to fight from' },
@@ -340,8 +391,8 @@ SW.WEATHERS = ['clear', 'rain', 'storm', 'drought', 'fog', 'snow'];
 SW.sight = function (w) { return w.weather && w.weather.kind === 'fog' ? Math.min(w.laws.body.sight, w.laws.weather.fogSight) : w.laws.body.sight; };
 
 /* ---------- geometry ---------- */
-function idx(w, x, y) { return y * w.W + x; }
-function inb(w, x, y) { return x >= 0 && y >= 0 && x < w.W && y < w.H; }
+function idx(w, x, y) { if (x < 0 || x >= w.W) { if (w.wrap) x = ((x % w.W) + w.W) % w.W; } return y * w.W + x; }
+function inb(w, x, y) { return y >= 0 && y < w.H && (w.wrap ? true : x >= 0 && x < w.W); }
 function rootOf(w, a) {
   let cur = a;
   for (let k = 0; k < 6 && cur && cur.leader != null; k++) {
@@ -372,6 +423,7 @@ function passable(w, x, y, e) {
   const i = idx(w, x, y);
   const t = w.terrain[i];
   if (t === T.VOID) return false;
+  if (e && e.sea) return t === T.WATER || t === T.SHALLOWS; /* what lives in the sea keeps to it */
   if (t === T.WATER) return (w.roads && w.roads[i] === 2) || !!(e && e.policy && e.things && floatOf(w, e) > 0) || !!(e && e.policy && w.narrow && w.narrow[i] && w.laws.water.swim && e.e > 20 && e.stage !== 'child'); /* a grown being can swim water that is narrow: a river, not a lake or the sea */
   if (t === T.SHALLOWS && w.roads && w.roads[i] === 2) return true;
   if (t === T.SHALLOWS && !(e && e.policy)) return !!(w.river && w.river[i]); /* beings can wade anywhere; animals ford rivers only */
@@ -381,17 +433,17 @@ function passable(w, x, y, e) {
 }
 SW.idx = idx; SW.passable = passable;
 /* deep water within two steps of ground is narrow enough to swim: channels up to four wide can be crossed, open water cannot */
-function narrowWater(w) { const N = {}; for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) { const i = y * w.W + x; if (w.terrain[i] !== T.WATER) continue; let ok = false; for (let dy = -2; dy <= 2 && !ok; dy++) for (let dx = -2; dx <= 2 && !ok; dx++) { const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= w.W || Y >= w.H) continue; const t = w.terrain[Y * w.W + X]; if (t !== T.WATER && t !== T.VOID) ok = true; } if (ok) N[i] = 1; } w.narrow = N; }
+function narrowWater(w) { const N = {}; for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) { const i = y * w.W + x; if (w.terrain[i] !== T.WATER) continue; let ok = false; for (let dy = -2; dy <= 2 && !ok; dy++) for (let dx = -2; dx <= 2 && !ok; dx++) { const X = x + dx, Y = y + dy; if (!inb(w, X, Y)) continue; const t = w.terrain[idx(w, X, Y)]; if (t !== T.WATER && t !== T.VOID) ok = true; } if (ok) N[i] = 1; } w.narrow = N; }
 SW.narrowWater = narrowWater;
 /* the nearest tile of the unknown within sight of a being, or null */
-SW.edgeNear = function (w, a) { const V = w.veil; if (!V) return null; const R = SW.sight(w); let best = null, bd = 99; for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) { const x = a.x + dx, y = a.y + dy; if (x < 0 || y < 0 || x >= w.W || y >= w.H) continue; if (V.t[y * w.W + x] != null) { const d = Math.max(Math.abs(dx), Math.abs(dy)); if (d < bd) { bd = d; best = { x: x, y: y, d: d }; } } } return best; };
+SW.edgeNear = function (w, a) { const V = w.veil; if (!V) return null; use(w); const R = SW.sight(w); let best = null, bd = 99; for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) { const x = wrapX(w, a.x + dx), y = a.y + dy; if (!inb(w, x, y)) continue; if (V.t[y * w.W + x] != null) { const d = Math.max(Math.abs(dx), Math.abs(dy)); if (d < bd) { bd = d; best = { x: x, y: y, d: d }; } } } return best; };
 /* a place at the rim of the known world, where animals and newcomers come in */
 function edgeSpot(w) { for (let t = 0; t < 30; t++) { const side = ri(w, 4); let x = ri(w, w.W), y = ri(w, w.H), dx = 0, dy = 0; if (side === 0) { y = 0; dy = 1; } else if (side === 1) { y = w.H - 1; dy = -1; } else if (side === 2) { x = 0; dx = 1; } else { x = w.W - 1; dx = -1; } for (let k = 0; k < Math.max(w.W, w.H); k++) { if (!inb(w, x, y)) break; if (w.terrain[idx(w, x, y)] !== T.VOID) return { x: x, y: y }; x += dx; y += dy; } } return { x: w.W >> 1, y: w.H >> 1 }; }
 
 const HEAD = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
 SW.COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 function tryMove(w, e, dx, dy) {
-  const nx = e.x + dx, ny = e.y + dy;
+  const nx = wrapX(w, e.x + dx), ny = e.y + dy;
   if (!(dx || dy) || !passable(w, nx, ny, e)) return false;
   if (!e.rush) {
     if (e.calm > 0) return false;
@@ -410,20 +462,20 @@ function stepDir(w, e, dx, dy) {
   else { const s = rnd(w) < 0.5 ? 1 : -1; if (tryMove(w, e, s, dy) || tryMove(w, e, -s, dy) || tryMove(w, e, s, 0)) return true; }
   return false;
 }
-function stepToward(w, e, tx, ty) { return stepDir(w, e, sign(tx - e.x), sign(ty - e.y)); }
+function stepToward(w, e, tx, ty) { return stepDir(w, e, sign(wdx(tx - e.x)), sign(ty - e.y)); }
 /* Flee to whichever neighbouring tile puts the most ground between you and the threat, without doubling back. Cornered, hold still. */
 function stepAway(w, e, tx, ty) {
-  const cur = (e.x - tx) * (e.x - tx) + (e.y - ty) * (e.y - ty);
+  const cur = wdx(e.x - tx) * wdx(e.x - tx) + (e.y - ty) * (e.y - ty);
   let best = -1, bs = cur + 0.5;
   for (let k = 0; k < 8; k++) {
     const nx = e.x + HEAD[k][0], ny = e.y + HEAD[k][1];
     if (!passable(w, nx, ny, e)) continue;
-    let sc = (nx - tx) * (nx - tx) + (ny - ty) * (ny - ty) + rnd(w) * 0.4;
-    if (nx === e.qx && ny === e.qy) sc -= 3;
+    let sc = wdx(nx - tx) * wdx(nx - tx) + (ny - ty) * (ny - ty) + rnd(w) * 0.4;
+    if (wrapX(w, nx) === e.qx && ny === e.qy) sc -= 3;
     if (sc > bs) { bs = sc; best = k; }
   }
   if (best < 0) return false;
-  e.x += HEAD[best][0]; e.y += HEAD[best][1]; if (HEAD[best][0]) e.f = HEAD[best][0];
+  e.x = wrapX(w, e.x + HEAD[best][0]); e.y += HEAD[best][1]; if (HEAD[best][0]) e.f = HEAD[best][0];
   return true;
 }
 /* Breadth-first search over walkable tiles within R of the mover.
@@ -589,6 +641,9 @@ SW.PEOPLE_KINDS = {
   steppe: { noun: 'Plains-folk', genes: { vigor: 1.3, appetite: 1.08 }, way: 'herding', custom: 'A herd is its keeper\'s, and the pasture is everyone\'s.', form: { build: 0, head: 'round', gear: 'braid', tail: 1, skinHue: 16, skinS: 0.5, skinL: 0.55, tall: 1.04 } },
   desert: { noun: 'Sand-folk', genes: { thirst: 0.6, appetite: 0.88, warmth: 0.8 }, way: 'signs', custom: 'Water is never denied to one who asks.', form: { build: 0, head: 'long', gear: 'crest', bare: 1, skinHue: 30, skinS: 0.5, skinL: 0.44, tall: 1.1 } },
   marsh: { noun: 'Fen-folk', genes: { learning: 1.2, appetite: 0.94 }, way: 'farming', custom: 'The sick are fed first.', form: { build: 2, head: 'round', gear: 'ears', skinHue: 70, skinS: 0.3, skinL: 0.56, tall: 0.96 } },
+  arctic: { noun: 'Ice-folk', genes: { warmth: 1.8, strength: 1.05, appetite: 1.12 }, way: 'herding', custom: 'A kill is shared out before the one who made it eats.', form: { build: 1, head: 'round', gear: 'fur', skinHue: 24, skinS: 0.25, skinL: 0.74, tall: 0.94 } },
+  antarctic: { noun: 'Floe-folk', genes: { warmth: 1.7, luck: 1.2, thirst: 0.8 }, way: 'fishing', custom: 'The sea is thanked aloud for whatever it gives.', form: { build: 2, head: 'long', gear: 'hood', skinHue: 200, skinS: 0.2, skinL: 0.66, tall: 1.02 } },
+  rainforest: { noun: 'Canopy-folk', genes: { luck: 1.2, learning: 1.12, strength: 0.9, appetite: 0.9 }, way: 'medicine', custom: 'Nothing is taken from the forest that the forest cannot grow again.', form: { build: 0, head: 'round', gear: 'feathers', bare: 1, skinHue: 26, skinS: 0.5, skinL: 0.36, tall: 0.84 } },
   tundra: { noun: 'Snow-folk', genes: { warmth: 1.6, strength: 1.1, appetite: 1.1 }, way: 'fire', custom: 'No one sleeps alone in the cold.', form: { build: 1, head: 'wide', gear: 'fur', skinHue: 20, skinS: 0.2, skinL: 0.82, tall: 0.98 } }
 };
 SW.TONGUES = [
@@ -693,7 +748,10 @@ SW.refreshLooks = function (w) {
   });
   w.lookV = 5; return true;
 };
-const BASE_KINDS = { berry: 1, grain: 1, redcap: 1, thornpear: 1, mudroot: 1, frostmoss: 1, ironnut: 1, sunleaf: 1, dreamcap: 1, emberroot: 1, hopper: 1, stalker: 1, skit: 1, hornback: 1, ridgecat: 1 };
+const BASE_KINDS = { berry: 1, grain: 1, redcap: 1, thornpear: 1, mudroot: 1, frostmoss: 1, ironnut: 1, sunleaf: 1, dreamcap: 1, emberroot: 1, hopper: 1, stalker: 1, skit: 1, hornback: 1, ridgecat: 1,
+  /* the life of the ice, of the sea and of the rainforest, and the dog: these are never struck from the world's book, since their country may lie where no one has yet been */
+  dog: 1, caribou: 1, mammoth: 1, penguin: 1, wolf: 1, icebear: 1, floeseal: 1, stormbird: 1, whale: 1, orca: 1, snowberry: 1, frostcap: 1, icekelp: 1, windroot: 1, glowcap: 1, cloudberry: 1,
+  treeape: 1, mudsnout: 1, skybird: 1, shadowcat: 1, coilsnake: 1, rivermaw: 1, goldfruit: 1, canopynut: 1, vinebean: 1, feverbark: 1, firepod: 1 };
 function kindName(w, table, root) {
   for (let k = 0; k < 40; k++) { const n = SYL_A[ri(w, SYL_A.length)].toLowerCase() + root; if (!table[n]) return n; }
   return root + w.nextId++;
@@ -760,8 +818,14 @@ SW.pruneKinds = function (w) {
 };
 
 /* ---------- world generation ---------- */
-function noiseGrid(w, cw, ch) { const g = []; for (let i = 0; i < cw * ch; i++) g.push(rnd(w)); return { g: g, cw: cw, ch: ch }; }
+function noiseGrid(w, cw, ch) { const g = []; for (let i = 0; i < cw * ch; i++) g.push(rnd(w)); return { g: g, cw: cw, ch: ch, round: w.wrap ? 1 : 0 }; }
 function sampleNoise(n, u, v) {
+  if (n.round) { /* u runs once round the world: the last column of the grid is followed by the first, so the land joins itself */
+    const X = u * n.cw, Y = v * (n.ch - 1), xf = Math.floor(X), xa = ((xf % n.cw) + n.cw) % n.cw, xb = (xa + 1) % n.cw, ya = Math.floor(Y), yb = Math.min(ya + 1, n.ch - 1);
+    let gx = X - xf, gy = Y - ya; gx = gx * gx * (3 - 2 * gx); gy = gy * gy * (3 - 2 * gy);
+    const A = n.g[ya * n.cw + xa], Bq = n.g[ya * n.cw + xb], C = n.g[yb * n.cw + xa], D = n.g[yb * n.cw + xb];
+    return (A + (Bq - A) * gx) * (1 - gy) + (C + (D - C) * gx) * gy;
+  }
   const x = u * (n.cw - 1), y = v * (n.ch - 1);
   const x0 = Math.floor(x), y0 = Math.floor(y), x1 = Math.min(x0 + 1, n.cw - 1), y1 = Math.min(y0 + 1, n.ch - 1);
   let fx = x - x0, fy = y - y0; fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
@@ -777,21 +841,33 @@ SW.BIOMES = {
   marsh: { dh: -0.045, noun: 'Fens', minerals: ['peat'], say: 'wet fenland; roots, clay and healing plants, and sickness in the night air' },
   steppe: { dh: 0.02, noun: 'Plains', minerals: ['flint', 'coal'], say: 'open grassland; herds, grain and far sight, few trees and little stone' },
   tundra: { dh: 0.03, noun: 'Snows', minerals: ['iron', 'salt'], say: 'snow and cold; hardy moss and great beasts, and a winter that never quite leaves' },
+  rainforest: { dh: -0.015, noun: 'Rainforest', minerals: ['amber', 'gems', 'gold'], say: 'the warm belt of the world: forest so thick the sky is hidden, rain most days, fruit the year round, bright birds and things that hunt from the branches and the rivers' },
+  arctic: { dh: 0, noun: 'Ice', minerals: ['salt', 'amber', 'iron'], say: 'the northern end of the world: snow, ice and a frozen sea under a low sun; herds, great tusked beasts, wolves and white bears, and nothing beyond' },
+  antarctic: { dh: 0, noun: 'Ice', minerals: ['salt', 'coal', 'gems'], say: 'the southern end of the world: ice shores crowded with birds that swim, great seals, and a sea full of whales; no beast of the land hunts there, and nothing lies beyond' },
   mixed: { dh: 0, noun: 'Land', minerals: ['flint'], say: 'a mixed country' }
 };
 const BIOME_ROWS = [['tundra', 'highland', 'woodland'], ['lakeland', 'steppe', 'marsh'], ['desert', 'woodland', 'highland']];
+const BIOME_ROWS_ROUND = [['tundra', 'highland', 'woodland'], ['lakeland', 'steppe', 'marsh'], ['rainforest', 'desert', 'highland'], ['tundra', 'woodland', 'steppe']]; /* a globe: cold at both ends, and a warm belt of rainforest and desert between */
 const REG_A = ['Va', 'Ko', 'Um', 'Ess', 'Tor', 'Il', 'Ash', 'Mer', 'Dun', 'Ael', 'Oro', 'Sil', 'Bra', 'Yen', 'Hal', 'Ix'], REG_B = ['ra', 'th', 'en', 'mar', 'oss', 'ia', 'ul', 'dan', 'eth', 'or', 'im', 'ka'];
 function genRegions(w) {
   const cols = Math.max(1, Math.round(w.W / 48)), rows = Math.max(1, Math.round(w.H / 32)), regs = [], used = {};
   if (cols * rows < 4) { w.regions = [{ id: 0, name: 'the Land', biome: 'mixed', x: w.W >> 1, y: w.H >> 1 }]; return; }
-  const rowB = BIOME_ROWS.map(function (r) { const a = r.slice(); for (let k = a.length - 1; k > 0; k--) { const j = ri(w, k + 1), t = a[k]; a[k] = a[j]; a[j] = t; } return a; });
+  const rowB = (w.wrap ? BIOME_ROWS_ROUND : BIOME_ROWS).map(function (r) { const a = r.slice(); for (let k = a.length - 1; k > 0; k--) { const j = ri(w, k + 1), t = a[k]; a[k] = a[j]; a[j] = t; } return a; });
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-    const biome = rowB[Math.min(2, Math.floor(r * 3 / rows))][c % 3]; let nm = '';
+    const biome = rowB[w.wrap ? Math.min(3, Math.floor(r * 4 / rows)) : Math.min(2, Math.floor(r * 3 / rows))][c % 3]; let nm = '';
     for (let t = 0; t < 30; t++) { nm = REG_A[ri(w, REG_A.length)] + REG_B[ri(w, REG_B.length)]; if (!used[nm]) break; } used[nm] = 1;
     regs.push({ id: regs.length, name: 'the ' + nm + ' ' + SW.BIOMES[biome].noun, short: nm, biome: biome, x: Math.round((c + 0.25 + 0.5 * rnd(w)) * w.W / cols), y: Math.round((r + 0.25 + 0.5 * rnd(w)) * w.H / rows) });
   }
+  if (w.wrap) { /* a land of ice at each end of the world */
+    w.polar = { rows: 9, n: regs.length, s: regs.length + 1 };
+    regs.push({ id: regs.length, name: 'the North Ice', short: 'North', biome: 'arctic', polar: 1, x: w.W >> 1, y: 4 }); regs.push({ id: regs.length, name: 'the South Ice', short: 'South', biome: 'antarctic', polar: 1, x: w.W >> 1, y: w.H - 5 });
+  }
   w.regions = regs;
 }
+/* The climate of a place: 1 in the warm belt (rainforest and desert: no winter, no snow, no cold season), 2 on the ice (cold all year, a little less in summer), 0 between. */
+const WARM = { rainforest: 1, desert: 1 }, COLD = { arctic: 1, antarctic: 1 };
+function climOf(w, i) { const R = w.regions && w.regions[w.region[i]]; return R ? (WARM[R.biome] ? 1 : COLD[R.biome] ? 2 : 0) : 0; }
+SW.climate = function (w, x, y) { return climOf(w, idx(w, x, y)); };
 SW.regionAt = function (w, x, y) { return w.regions && w.region ? w.regions[w.region[idx(w, x, y)]] || null : null; };
 function genTerrain(w) {
   const sc = Math.max(1, w.W / 44), g = function (a, b) { return noiseGrid(w, Math.round(a * sc) + 1, Math.round(b * sc) + 1); };
@@ -799,20 +875,24 @@ function genTerrain(w) {
   genRegions(w); w.region = [];
   const regs = w.regions, one = regs.length === 1;
   for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
-    const u = x / (w.W - 1), v = y / (w.H - 1);
+    const u = w.wrap ? x / w.W : x / (w.W - 1), v = y / (w.H - 1);
     let h = 0.56 * sampleNoise(e1, u, v) + 0.3 * sampleNoise(e2, u, v) + 0.14 * sampleNoise(e3, u, v);
     const m = 0.65 * sampleNoise(m1, u, v) + 0.35 * sampleNoise(m2, u, v);
     let t, f, B = 'mixed', rid = 0;
     if (!one) {
       /* which land this is: the nearest region heart, with the borders bent so no line is straight */
       const wx = x + (sampleNoise(wa, u, v) - 0.5) * 22, wy = y + (sampleNoise(wb, u, v) - 0.5) * 22; let d1 = 1e9, d2 = 1e9, r1 = 0, r2 = 0;
-      for (let k = 0; k < regs.length; k++) { const d = Math.hypot(wx - regs[k].x, (wy - regs[k].y) * 1.15); if (d < d1) { d2 = d1; r2 = r1; d1 = d; r1 = k; } else if (d < d2) { d2 = d; r2 = k; } }
+      for (let k = 0; k < regs.length; k++) { if (regs[k].polar) continue; const d = Math.hypot(wdx(wx - regs[k].x), (wy - regs[k].y) * 1.15); if (d < d1) { d2 = d1; r2 = r1; d1 = d; r1 = k; } else if (d < d2) { d2 = d; r2 = k; } }
       rid = r1; B = regs[r1].biome; const wgt = 0.5 + 0.5 * clamp((d2 - d1) / 9, 0, 1);
       h += SW.BIOMES[B].dh * wgt + SW.BIOMES[regs[r2].biome].dh * (1 - wgt);
+      /* toward each pole the land turns to ice and snow, whatever country it would have been */
+      if (w.polar) { const lat = Math.min(y, w.H - 1 - y), edge = w.polar.rows + (sampleNoise(wa, u, v) - 0.5) * 5; if (lat < edge) { B = y < w.H / 2 ? 'arctic' : 'antarctic'; rid = y < w.H / 2 ? w.polar.n : w.polar.s; } }
     }
     if (h < 0.33) { t = T.WATER; f = 0; }
     else if (h < 0.368) { t = T.SHALLOWS; f = 0; }
     else if (h < 0.39) { t = T.SAND; f = 0.15; }
+    else if (B === 'arctic' || B === 'antarctic') { if (h > 0.72) { t = T.ROCK; f = 0; } else if (m > 0.76) { t = T.GRASS; f = 0.35; } else { t = T.SNOW; f = 0.16; } }
+    else if (B === 'rainforest') { if (h > 0.8) { t = T.ROCK; f = 0; } else if (m > 0.82 && h < 0.5) { t = T.MARSH; f = 0.8; } else if (m < 0.13) { t = T.GRASS; f = 0.9; } else { t = T.FOREST; f = 0.6; } }
     else if (B === 'woodland') { if (h > 0.74) { t = T.ROCK; f = 0; } else if (m < 0.26) { t = T.GRASS; f = 0.75; } else { t = T.FOREST; f = 0.45; } }
     else if (B === 'desert') { if (h > 0.7) { t = T.ROCK; f = 0; } else if (m > 0.8) { t = T.GRASS; f = 0.5; } else if (m > 0.66) { t = T.SAND; f = 0.15; } else { t = T.DESERT; f = 0.14; } }
     else if (B === 'lakeland') { if (m > 0.72 && h < 0.46) { t = T.MARSH; f = 0.7; } else if (m > 0.58) { t = T.FOREST; f = 0.45; } else { t = T.GRASS; f = 0.85; } }
@@ -979,29 +1059,31 @@ function newCreature(w, sp, x, y, o) {
     id: w.nextId++, sp: sp, x: x, y: y, px: x, py: y,
     e: o.e != null ? o.e : s.maxEnergy * (0.5 + 0.3 * rnd(w)), age: o.age != null ? o.age : ri(w, s.matureAge),
     life: Math.round(s.lifespan * (0.8 + 0.4 * rnd(w))),
-    size: o.size || 0.85 + 0.3 * rnd(w), quick: o.quick || 0.85 + 0.3 * rnd(w)
+    size: o.size || 0.85 + 0.3 * rnd(w), quick: o.quick || 0.85 + 0.3 * rnd(w), sea: s.sea ? 1 : 0
   };
 }
 
 /* The world is made larger than what is known. Its rim is veiled: the true ground is kept, and shown as the unknown until someone ventures in. */
-function veil(w, M) {
-  const V = w.veil = { t: {}, f: {}, lodes: {}, ore: {}, river: {}, caves: [], m: M }; (w.regions || []).forEach(function (R) { R.openLand = 0; });
+function veil(w, M, MY) {
+  if (MY == null) MY = M;
+  const V = w.veil = { t: {}, f: {}, lodes: {}, ore: {}, river: {}, caves: [], m: M, my: MY }; (w.regions || []).forEach(function (R) { R.openLand = 0; });
   for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) { const i = y * w.W + x;
-    if (x >= M && y >= M && x < w.W - M && y < w.H - M) { const tt = w.terrain[i], R = w.regions && w.regions[w.region[i]]; if (R && (tt === T.GRASS || tt === T.FOREST || tt === T.SAND || tt === T.MARSH)) R.openLand++; continue; }
+    if (x >= M && y >= MY && x < w.W - M && y < w.H - MY) { const tt = w.terrain[i], R = w.regions && w.regions[w.region[i]]; if (R && (tt === T.GRASS || tt === T.FOREST || tt === T.SAND || tt === T.MARSH)) R.openLand++; continue; }
     V.t[i] = w.terrain[i]; V.f[i] = w.fert[i]; w.terrain[i] = T.VOID; w.fert[i] = 0;
     if (w.lodes[i]) { V.lodes[i] = w.lodes[i]; delete w.lodes[i]; } if (w.ore && w.ore[i]) { V.ore[i] = w.ore[i]; delete w.ore[i]; } if (w.river && w.river[i]) { V.river[i] = w.river[i]; delete w.river[i]; }
     if (w.shelters[i] === -1) { V.caves.push(i); w.shelters[i] = 0; if (w.bkind) delete w.bkind[i]; } }
   w.sites = (w.sites || []).filter(function (q) { return w.terrain[q.y * w.W + q.x] !== T.VOID; });
-  w.openTiles = (w.W - 2 * M) * (w.H - 2 * M);
+  w.openTiles = (w.W - 2 * M) * (w.H - 2 * MY);
 }
 /* someone has pushed into the unknown: a wide strip of it becomes land, with what was always there and a little more */
 SW.openStrip = function (w, x, y, emit) {
-  emit = emit || noop; const V = w.veil; if (!V) return null; const E = w.laws.explore || {}, D = E.depth || 10, Lh = Math.round((E.length || 40) / 2);
-  let dir = null, bd = 9; [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) { for (let k = 1; k <= 3; k++) { const X = x + d[0] * k, Y = y + d[1] * k; if (!inb(w, X, Y)) break; if (V.t[Y * w.W + X] != null) { if (k < bd) { bd = k; dir = d; } break; } } });
+  emit = emit || noop; const V = w.veil; if (!V) return null; use(w); const E = w.laws.explore || {}, D = E.depth || 10, Lh = Math.round((E.length || 40) / 2);
+  let dir = null, bd = 9; [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) { for (let k = 1; k <= 3; k++) { const X = x + d[0] * k, Y = y + d[1] * k; if (!inb(w, X, Y)) break; if (V.t[idx(w, X, Y)] != null) { if (k < bd) { bd = k; dir = d; } break; } } });
   if (!dir) return null;
-  const x0 = Math.max(0, dir[0] ? (dir[0] > 0 ? x + 1 : x - D - 2) : x - Lh), x1 = Math.min(w.W - 1, dir[0] ? (dir[0] > 0 ? x + D + 2 : x - 1) : x + Lh), y0 = Math.max(0, dir[1] ? (dir[1] > 0 ? y + 1 : y - D - 2) : y - Lh), y1 = Math.min(w.H - 1, dir[1] ? (dir[1] > 0 ? y + D + 2 : y - 1) : y + Lh);
+  const lo = w.wrap ? -1e9 : 0, hi = w.wrap ? 1e9 : w.W - 1; /* in a world that goes round, a strip may cross the line where east meets west */
+  const x0 = Math.max(lo, dir[0] ? (dir[0] > 0 ? x + 1 : x - D - 2) : x - Lh), x1 = Math.min(hi, dir[0] ? (dir[0] > 0 ? x + D + 2 : x - 1) : x + Lh), y0 = Math.max(0, dir[1] ? (dir[1] > 0 ? y + 1 : y - D - 2) : y - Lh), y1 = Math.min(w.H - 1, dir[1] ? (dir[1] > 0 ? y + D + 2 : y - 1) : y + Lh);
   let n = 0; const land = [], found = {};
-  for (let Y = y0; Y <= y1; Y++) for (let X = x0; X <= x1; X++) { const i = Y * w.W + X; if (V.t[i] == null) continue; w.terrain[i] = V.t[i]; w.fert[i] = V.f[i]; delete V.t[i]; delete V.f[i]; n++;
+  for (let Y = y0; Y <= y1; Y++) for (let X = x0; X <= x1; X++) { const i = idx(w, X, Y); if (V.t[i] == null) continue; w.terrain[i] = V.t[i]; w.fert[i] = V.f[i]; delete V.t[i]; delete V.f[i]; n++;
     if (V.lodes[i]) { w.lodes[i] = V.lodes[i]; found[w.lodes[i].k] = 1; delete V.lodes[i]; } if (V.ore[i]) { w.ore[i] = V.ore[i]; delete V.ore[i]; } if (V.river && V.river[i]) { w.river[i] = V.river[i]; delete V.river[i]; }
     const tt = w.terrain[i]; if (tt !== T.WATER && tt !== T.SHALLOWS) { land.push(i); if (w.fert[i] > 0.1 && rnd(w) < 0.16 + w.fert[i] * 0.3) { const k = kindFor(w, i); if (k) w.plants[i] = newPlant(w, k, 1, i); } } }
   if (!n) return null;
@@ -1010,35 +1092,37 @@ SW.openStrip = function (w, x, y, emit) {
   const rich = Object.keys(w.laws.minerals).filter(function (k) { return !w.laws.minerals[k].deep; });
   for (let q = 0; q < (E.finds || 3) && land.length && rich.length; q++) { const i = land[ri(w, land.length)]; if (w.lodes[i] || w.plants[i] || w.shelters[i]) continue; const k = rich[ri(w, rich.length)]; w.lodes[i] = { k: k, n: 150, m: 150 }; found[k] = 1; }
   const gz = Object.keys(w.laws.creatures).filter(function (k) { return !w.laws.creatures[k].predator && !w.laws.creatures[k].retired; }); let herd = 0, hk = null;
-  for (let t = 0; t < 60 && herd < 6 && land.length; t++) { const i = land[ri(w, land.length)], X = i % w.W, Y = Math.floor(i / w.W); if (!hk) { const c = gz.filter(function (k) { return fitsLand(w, w.laws.creatures[k], X, Y); }); if (!c.length) continue; hk = c[ri(w, c.length)]; } if (fitsLand(w, w.laws.creatures[hk], X, Y)) { w.creatures.push(newCreature(w, hk, X, Y, { age: w.laws.creatures[hk].matureAge })); herd++; } }
+  let hcap = 6; for (let t = 0; t < 60 && herd < hcap && land.length; t++) { const i = land[ri(w, land.length)], X = i % w.W, Y = Math.floor(i / w.W); if (!hk) { let c = gz.filter(function (k) { return !w.laws.creatures[k].sea && fitsLand(w, w.laws.creatures[k], X, Y); }); if (!c.length) continue; const bio = (w.regions[w.region[i]] || {}).biome, own = c.filter(function (k) { return (w.laws.creatures[k].biomes || []).indexOf(bio) >= 0; }); if (own.length) c = own; hk = c[ri(w, c.length)]; if ((w.laws.creatures[hk].tough || 1) >= 5) hcap = 3; /* great beasts come few at a time */ } if (fitsLand(w, w.laws.creatures[hk], X, Y)) { w.creatures.push(newCreature(w, hk, X, Y, { age: w.laws.creatures[hk].matureAge })); herd++; } }
+  let seaLife = null; { const deep = []; for (let Y = y0; Y <= y1; Y++) for (let X = x0; X <= x1; X++) { const i = idx(w, X, Y); if (w.terrain[i] === T.WATER) deep.push(i); } /* open water in new country may hold what swims */
+    if (deep.length >= 20 && w.laws.creatures.whale && !w.laws.creatures.whale.retired && rnd(w) < 0.35) { const nW = 2 + ri(w, 2); for (let q = 0; q < nW; q++) { const i = deep[ri(w, deep.length)]; w.creatures.push(newCreature(w, 'whale', i % w.W, Math.floor(i / w.W), { age: w.laws.creatures.whale.matureAge })); } seaLife = 'whales'; if (w.laws.creatures.orca && !w.laws.creatures.orca.retired && rnd(w) < 0.5) { const i = deep[ri(w, deep.length)]; w.creatures.push(newCreature(w, 'orca', i % w.W, Math.floor(i / w.W), { age: w.laws.creatures.orca.matureAge })); } } }
   let beasts = 0; if (rnd(w) < (E.beasts == null ? 0.5 : E.beasts)) { const pk = Object.keys(w.laws.creatures).filter(function (k) { return w.laws.creatures[k].predator && !w.laws.creatures[k].retired; }); for (let t = 0; t < 30 && beasts < 2 && pk.length && land.length; t++) { const i = land[ri(w, land.length)], X = i % w.W, Y = Math.floor(i / w.W), k = pk[ri(w, pk.length)]; if (fitsLand(w, w.laws.creatures[k], X, Y)) { w.creatures.push(newCreature(w, k, X, Y, { age: w.laws.creatures[k].matureAge })); beasts++; } } } /* unknown land is wilder */
   w.opened = (w.opened || 0) + 1; const R = w.regions && w.regions[w.region[Math.min(w.H - 1, Math.max(0, (y0 + y1) >> 1)) * w.W + ((x0 + x1) >> 1)]];
   /* now and then the new land is not empty: a band of another people lives there, with its own tongue, ways and customs */
   let strangers = null; if (R && land.length > 60 && w.peoples.length < 8 && w.agents.length < w.laws.mate.maxPopulation - 4 && rnd(w) < (E.strangers == null ? 0.2 : E.strangers)) { const kinds = Object.keys(SW.PEOPLE_KINDS), P = newPeople(w, SW.PEOPLE_KINDS[R.biome] ? R.biome : kinds[ri(w, kinds.length)], R.id), made = SW.arrive(w, 4, P), era = SW.eraOf(w), ways = Object.keys(w.laws.tree).filter(function (k) { return (w.laws.tree[k].era || 1) <= era + 1 && !(w.laws.tree[k].needs || []).length; }), b = land[ri(w, land.length)];
     made.forEach(function (o, k) { for (let t = 0; t < 30; t++) { const X = (b % w.W) + ri(w, 7) - 3, Y = Math.floor(b / w.W) + ri(w, 7) - 3; if (passable(w, X, Y, o)) { o.x = X; o.y = Y; o.px = X; o.py = Y; break; } } for (let q = 0; q < 2 && ways.length; q++) { const k2 = ways[ri(w, ways.length)]; if (!o.knows[k2]) o.knows[k2] = { name: k2, idea: '', look: null, tick: w.tick, by: null, byName: null }; } });
     if (made.length) strangers = P.name; }
-  const ev = { type: 'opened', x0: x0, y0: y0, x1: x1, y1: y1, tiles: n, found: Object.keys(found), herd: herd ? hk : null, n: herd, beasts: beasts, strangers: strangers, land: R ? R.name : '' };
+  const ev = { type: 'opened', x0: x0, y0: y0, x1: x1, y1: y1, tiles: n, found: Object.keys(found), sea: seaLife, herd: herd ? hk : null, n: herd, beasts: beasts, strangers: strangers, land: R ? R.name : '' };
   emit(ev); return ev;
 };
 SW.createWorld = function (seed, opts) {
   opts = opts || {};
   const w = {
-    v: 2, seed: seed, rng: (seed * 2654435761) | 0, tick: 0, W: (opts.W || 144) + 2 * (opts.margin != null ? opts.margin : 20), H: (opts.H || 96) + 2 * (opts.margin != null ? opts.margin : 20),
+    v: 2, seed: seed, rng: (seed * 2654435761) | 0, tick: 0, W: (opts.W || 144) + 2 * (opts.margin != null ? opts.margin : 36), H: (opts.H || 96) + 2 * (opts.margin != null ? opts.margin : 14), wrap: (opts.wrap != null ? opts.wrap : opts.margin == null) ? 1 : 0, /* a globe: 216 round, 124 from pole to pole, of which the middle 144 by 96 is known at first */
     terrain: [], fert: [], plants: [], shelters: [], walls: [], fires: [], stores: [], sturdy: {},
     relics: [], faiths: {}, culture: { seq: 1, items: {}, log: [], days: [], rites: {} },
     creatures: [], agents: [], graves: [], marks: [], places: [], inventions: [], edicts: [], devices: {}, settlements: [], looks: {}, wars: [], fished: {}, river: {}, ore: {}, sites: [], fields: [], regions: [], region: [], lodes: {}, bkind: {}, roads: {}, works: {}, peoples: [], tally: { made: {}, eaten: {}, built: {} }, weather: { kind: 'clear', until: 160 }, names: {},
     laws: SW.defaultLaws(), nextId: 1
   };
-  genTerrain(w);
-  { const Mg = opts.margin != null ? opts.margin : 20; if (Mg > 0) veil(w, Mg); narrowWater(w); w.tally.lived = 0; }
+  use(w); genTerrain(w);
+  { const Mg = opts.margin != null ? opts.margin : 36, My = opts.margin != null ? opts.margin : 14; if (Mg > 0) veil(w, Mg, My); narrowWater(w); w.tally.lived = 0; }
   for (let i = 0; i < w.W * w.H; i++) {
     if (w.fert[i] > 0.1 && rnd(w) < 0.1 + w.fert[i] * 0.2) { const k = kindFor(w, i); if (k) w.plants[i] = newPlant(w, k, rnd(w) < 0.75 ? 1 : 0.4, i); }
   }
-  const area = (w.openTiles || w.W * w.H) / 1320, stock = { hopper: 7, skit: 4, hornback: 2, stalker: 1.2, ridgecat: 0.5, plainsox: 1.6, tusker: 0.9, sandstrider: 1.1, fenfowl: 2, bristleboar: 1.3, frostfang: 0.45, dunecat: 0.4 };
+  const area = (w.openTiles || w.W * w.H) / 1320, stock = { dog: 1, caribou: 0.7, mammoth: 0.25, treeape: 1.6, mudsnout: 0.8, skybird: 1.4, shadowcat: 0.14, coilsnake: 0.12, rivermaw: 0.15, hopper: 7, skit: 4, hornback: 2, stalker: 1.2, ridgecat: 0.5, plainsox: 1.6, tusker: 0.9, sandstrider: 1.1, fenfowl: 2, bristleboar: 1.3, frostfang: 0.45, dunecat: 0.4 };
   for (const sp in stock) {
     const cs = w.laws.creatures[sp]; if (!cs) continue; if (cs.biomes && w.regions.length < 2) continue;
     const n = Math.max(1, Math.round(stock[sp] * area * 0.8));
-    for (let k = 0; k < n; k++) { const p = landFor(w, cs); if (p) w.creatures.push(newCreature(w, sp, p.x, p.y)); }
+    for (let k = 0; k < n; k++) { let p = null; if (cs.sea) { for (let t = 0; t < 400 && !p; t++) { const x = ri(w, w.W), y = ri(w, w.H); if (fitsLand(w, cs, x, y)) p = { x: x, y: y }; } } else p = landFor(w, cs); if (p && (!cs.sea || fitsLand(w, cs, p.x, p.y))) w.creatures.push(newCreature(w, sp, p.x, p.y)); }
   }
   for (const ck in w.laws.creatures) { const cs = w.laws.creatures[ck]; if (!cs.look) cs.look = SW.genBeast(ck, !!cs.predator, cs.form); }
   for (const pk in w.laws.plants) { const ps = w.laws.plants[pk]; if (!ps.look) ps.look = SW.genPlant(pk, ps.form); }
@@ -1051,8 +1135,8 @@ SW.createWorld = function (seed, opts) {
       let best = null, bs = -1e9;
       w.regions.forEach(function (R) {
         if (!SW.PEOPLE_KINDS[R.biome] || chosen.indexOf(R) >= 0 || (R.openLand != null && R.openLand < 120)) return;
-        let sc = rnd(w) * 20 + (R.biome === 'tundra' || R.biome === 'desert' ? -12 : 0), near = 999;
-        chosen.forEach(function (C) { near = Math.min(near, Math.hypot(C.x - R.x, C.y - R.y)); if (C.biome === R.biome) sc -= 60; });
+        let sc = rnd(w) * 20 + (R.biome === 'tundra' || R.biome === 'desert' ? (w.wrap ? -28 : -12) : 0), near = 999; /* a globe has cold country at both ends: peoples seldom begin in it */
+        chosen.forEach(function (C) { near = Math.min(near, Math.hypot(wdx(C.x - R.x), C.y - R.y)); if (C.biome === R.biome) sc -= 60; });
         if (near < 999) sc += near;
         if (w.sea && chosen.length) { const side = function (Q) { return (w.sea.vertical ? Q.x : Q.y) > w.sea.at; }; if (chosen.every(function (C) { return side(C) !== side(R); })) sc += 45; }
         if (sc > bs) { bs = sc; best = R; }
@@ -1199,27 +1283,30 @@ function stepPlants(w) {
   const L = w.laws, season = SW.season(w);
   const sky = w.weather.kind;
   const bty = (L.ecology.bounty == null ? 1 : L.ecology.bounty), sm = bty > 0 ? Math.max(1, (L.ecology.seeding || 1) / bty) : 1; /* bounty is how fast food comes back on a plant; how readily plants seed is its own law */
-  const gm = bty * (season === 3 ? L.time.winterGrowth : season === 0 ? (L.time.springGrowth || 1) : season === 1 ? 1.15 : (L.time.harvestGrowth || 1)) * (sky === 'rain' ? L.weather.rainGrowth : sky === 'storm' ? 1.2 : sky === 'drought' ? L.weather.droughtGrowth : sky === 'snow' ? 0.6 : 1);
+  const gm0 = bty * (season === 3 ? L.time.winterGrowth : season === 0 ? (L.time.springGrowth || 1) : season === 1 ? 1.15 : (L.time.harvestGrowth || 1)) * (sky === 'rain' ? L.weather.rainGrowth : sky === 'storm' ? 1.2 : sky === 'drought' ? L.weather.droughtGrowth : sky === 'snow' ? 0.6 : 1);
+  /* in the warm belt there is no winter, and in the rainforest it rains most days; on the ice the growing season is short and never generous */
+  const wth = gm0 / (bty * (season === 3 ? L.time.winterGrowth : season === 0 ? (L.time.springGrowth || 1) : season === 1 ? 1.15 : (L.time.harvestGrowth || 1)) || 1), gmWarm = bty * 1.15 * wth, gmRain = bty * 1.15 * Math.max(wth, sky === 'drought' ? wth : L.weather.rainGrowth || 1.3), gmIce = bty * (season === 1 ? 0.8 : season === 3 ? L.time.winterGrowth * 0.8 : 0.5) * wth, regs = w.regions || [];
   /* The soil keeps dormant seed, so a stripped land is slow to return but never dead for good. */
-  if (rnd(w) < L.ecology.dormantSeeds * gm * sm) {
+  if (rnd(w) < L.ecology.dormantSeeds * gm0 * sm) {
     const j = ri(w, w.plants.length);
     if (!w.plants[j] && !w.shelters[j] && !w.walls[j] && w.fert[j] > 0.1) { const kd = kindFor(w, j); if (kd) w.plants[j] = newPlant(w, kd, 0.02, j); }
   }
-  for (let i = 0; i < w.plants.length; i++) {
+  for (let i = w.tick & 1, nP = w.plants.length; i < nP; i += 2) { /* each plant is tended every other moment, for two moments' worth: half the work and the same growth */
     const p = w.plants[i]; if (!p) continue;
     const sp = L.plants[p.sp];
-    p.age++;
+    p.age += 2;
     if (!sp || p.age > p.life) { w.plants[i] = null; continue; }
     const lf = w.fields.length ? fieldFactor(w, 'growth', i % w.W, Math.floor(i / w.W)) : 1;
+    const Rg = regs[w.region[i]], bio = Rg ? Rg.biome : '', warm = WARM[bio] === 1, gm = warm ? (bio === 'rainforest' ? gmRain : gmWarm) : COLD[bio] === 1 ? gmIce : gm0;
     if (p.g < 1) {
-      p.g += sp.growth * (0.4 + w.fert[i]) * (sp.hardy ? Math.max(gm, 0.3) : gm) * lf * (p.s || 1) * (p.t ? L.craft.farmGrowth : 1);
+      p.g += 2 * sp.growth * (0.4 + w.fert[i]) * (sp.hardy ? Math.max(gm, 0.3) : gm) * lf * (p.s || 1) * (p.t ? L.craft.farmGrowth : 1);
       if (p.g >= 1) { p.g = 1; p.food = Math.max(p.food, 1); }
     } else {
-      if (season === 3 && !sp.hardy && !p.t) p.food = Math.max(0, p.food - (L.time.winterWither || 0));
-      else if (sky === 'drought') p.food = Math.max(0.2, p.food - 0.0008);
-      else if (lf < 1 && sky !== 'drought' && p.food > 0.2 && lf < 0.6) p.food = Math.max(0.2, p.food - 0.0006 / lf);
-      else if (p.food < sp.maxFood) p.food = Math.min(sp.maxFood, p.food + sp.regrow * (sp.hardy ? Math.max(gm, 0.3) : gm) * lf * (p.t ? L.craft.farmGrowth : 1));
-      if (rnd(w) < sp.seedRate * gm * sm) trySeed(w, i, p.sp, sp);
+      if (season === 3 && !warm && !sp.hardy && !p.t) p.food = Math.max(0, p.food - 2 * (L.time.winterWither || 0));
+      else if (sky === 'drought') p.food = Math.max(0.2, p.food - 0.0016);
+      else if (lf < 1 && sky !== 'drought' && p.food > 0.2 && lf < 0.6) p.food = Math.max(0.2, p.food - 0.0012 / lf);
+      else if (p.food < sp.maxFood) p.food = Math.min(sp.maxFood, p.food + 2 * sp.regrow * (sp.hardy ? Math.max(gm, 0.3) : gm) * lf * (p.t ? L.craft.farmGrowth : 1));
+      if (rnd(w) < 2 * sp.seedRate * gm * sm) trySeed(w, i, p.sp, sp);
     }
   }
 }
@@ -1319,6 +1406,7 @@ function wanderHome(w, c, s) {
     if (!stepDir(w, c, ri(w, 3) - 1, SW.season(w) >= 2 ? 1 : -1)) return false;
   } else if (!roamStep(w, c)) return false;
   if (s.home && s.home.indexOf(SW.TERRAIN[w.terrain[idx(w, c.x, c.y)]]) < 0 && rnd(w) < 0.85) { c.x = ox; c.y = oy; return false; }
+  if (s.biomes && c.owner == null && w.regions.length > 1) { const R = w.regions[w.region[idx(w, c.x, c.y)]], R0 = w.regions[w.region[idx(w, ox, oy)]]; if (R && R0 && s.biomes.indexOf(R.biome) < 0 && s.biomes.indexOf(R0.biome) >= 0 && rnd(w) < 0.8) { c.x = ox; c.y = oy; return false; } } /* and to its own kind of country */
   return true;
 }
 function stepCreatures(w, emit) {
@@ -1328,7 +1416,7 @@ function stepCreatures(w, emit) {
   const list = w.creatures, born = [], predL = [], grazL = [];
   const ssn = SW.season(w), sprB = ssn === 0 ? (L.ecology.springBreeding || 1) : ssn === 3 ? 0.6 : 1, gTarget = (L.ecology.grazerTarget || 90) * AS, grF = clamp(gTarget / Math.max(20, cls[0]), 0.7, 1.8), prF = clamp(cls[0] / Math.max(1, cls[1]) / 8, 0.4, 1.6); /* few grazers breed faster; hunters breed by how much prey there is for each */
   for (let k = 0; k < list.length; k++) { const c0 = list[k], cs0 = L.creatures[c0.sp]; if (cs0 && !c0.dead) (cs0.predator ? predL : grazL).push(c0); }
-  const nearIn = function (arr, x, y, range, maxTough) { let best = null, bd = range + 1; for (let q = 0; q < arr.length; q++) { const o = arr[q]; if (o.dead) continue; const d = cheb(x, y, o.x, o.y); if (d >= bd) continue; if (maxTough && ((L.creatures[o.sp] || {}).tough || 1) > maxTough) continue; bd = d; best = o; } return best; };
+  const nearIn = function (arr, x, y, range, maxTough) { let best = null, bd = range + 1; for (let q = 0; q < arr.length; q++) { const o = arr[q]; if (o.dead) continue; const dy0 = o.y - y; if (dy0 >= bd || -dy0 >= bd) continue; const d = cheb(x, y, o.x, o.y); if (d >= bd) continue; if (maxTough && ((L.creatures[o.sp] || {}).tough || 1) > maxTough) continue; bd = d; best = o; } return best; };
   for (let k = 0; k < list.length; k++) {
     const c = list[k]; if (c.dead) continue;
     const s = L.creatures[c.sp]; if (!s) { c.dead = true; continue; }
@@ -1336,6 +1424,8 @@ function stepCreatures(w, emit) {
     c.e -= s.drain * c.size * (0.6 + 0.4 * c.quick);
     if (c.e <= 0 || c.age > c.life) { c.dead = true; continue; }
     const moves = rnd(w) < s.speed * c.quick;
+    if (s.sea) c.e = Math.min(s.maxEnergy, c.e + (s.seaGain || 0)); /* the sea feeds its own */
+    if (s.fishes && c.e < s.maxEnergy && w.tick % 4 === 0) { let wet = false; for (let d = 0; d < 8 && !wet; d++) { const X = c.x + HEAD[d][0], Y = c.y + HEAD[d][1]; if (inb(w, X, Y)) { const tt = w.terrain[idx(w, X, Y)]; wet = tt === T.WATER || tt === T.SHALLOWS; } } if (wet) c.e = Math.min(s.maxEnergy, c.e + s.fishes * 4); } /* a fisher at the water's edge */
     if (!s.predator) {
       const threat = nearIn(predL, c.x, c.y, s.fleeRange) || nearestAgentTo(w, c.x, c.y, s.wary);
       if (threat) { c.rush = 1; if (moves) stepAway(w, c, threat.x, threat.y); }
@@ -1350,8 +1440,10 @@ function stepCreatures(w, emit) {
         else if (moves) { const g = nearestGraze(w, c, s, 5); if (!g || !stepToward(w, c, g.x, g.y)) wanderHome(w, c, s); }
       } else if (moves && rnd(w) < 0.12) wanderHome(w, c, s);
     } else {
-      const prey = nearIn(grazL, c.x, c.y, s.range, s.tough || 1);
-      const lone = SW.isNight(w) && c.e < s.maxEnergy * 0.75 ? exposedAgent(w, c.x, c.y, s.range) : null;
+      let prey = nearIn(grazL, c.x, c.y, s.range, s.tough || 1);
+      if (prey && s.sea && !prey.sea && !(L.creatures[prey.sp] || {}).fishes) prey = null; /* a hunter of the sea takes what swims, and what fishes at the shore */
+      if (prey && !s.sea && prey.sea) prey = null;
+      const lone = !s.sea && SW.isNight(w) && c.e < s.maxEnergy * 0.75 ? exposedAgent(w, c.x, c.y, s.range) : null;
       if (lone) {
         c.rush = 1; const dd = cheb(c.x, c.y, lone.x, lone.y);
         if (dd <= 1 || (dd === 2 && rnd(w) < 0.4)) { c.e += 10; feel(lone, 'fear', 0.6); emit({ type: 'bitten', a: lone.id, by: c.sp, stalked: true }); hurtAgent(w, lone, s.bite || L.fight.predatorBite, 'killed by a ' + c.sp, emit); }
@@ -1415,8 +1507,8 @@ function senses(w, a) {
   const L = w.laws, R = SW.sight(w), near = {}, vars = {};
   let fd = 99, td = 99, sd = 99, fired = 99, stod = 99, wd = 99, rud = 99;
   for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
-    const x = a.x + dx, y = a.y + dy; if (!inb(w, x, y)) continue;
-    const i = idx(w, x, y), d = Math.max(Math.abs(dx), Math.abs(dy));
+    let x = a.x + dx; const y = a.y + dy; if (y < 0 || y >= w.H) continue; if (x < 0 || x >= w.W) { if (!w.wrap) continue; x = wrapX(w, x); }
+    const i = y * w.W + x, d = Math.max(Math.abs(dx), Math.abs(dy));
     const p = w.plants[i];
     if (p && d < fd && bitesFor(a, p) > 0) { fd = d; near.food = { x: x, y: y, d: d }; }
     if (d < td && w.terrain[i] === T.FOREST && w.trees[i] > 0) { td = d; near.tree = { x: x, y: y, d: d }; }
@@ -1431,7 +1523,7 @@ function senses(w, a) {
     const c = w.creatures[k]; if (c.dead) continue;
     const d = cheb(a.x, a.y, c.x, c.y); if (d > R) continue;
     if (L.creatures[c.sp].predator) { if (d < qd) { qd = d; near.predator = c; } }
-    else if (d < pd) { pd = d; near.prey = c; }
+    else if (d < pd && !(c.sea && d > 1 && !floatOf(w, a))) { pd = d; near.prey = c; } /* what swims far out is prey only to one who can go on the water */
   }
   let ad = 99, frd = 99, fod = 99, crowd = 0, ld = 99, fol = 0, ed = 99, ald = 99, bandNear = 0;
   for (let k = 0; k < w.agents.length; k++) if (!w.agents[k].dead && w.agents[k].leader === a.id) fol++;
@@ -1527,7 +1619,7 @@ function mark(w, holder, other, k, why) { const M2 = holder.marks = holder.marks
 function gifted(w, a, t, emit) { const m = t.marks && t.marks[a.id]; if (m && m.k === 'grudge') { m.n = (m.n || 0) + 1; if (m.n >= ((w.laws.culture || {}).mendGifts || 3)) { delete t.marks[a.id]; t.rel[a.id] = Math.max(t.rel[a.id] || 0, 0); emit({ type: 'mended', a: t.id, b: a.id }); } } else if (t.e < 40) mark(w, t, a, 'kindness', 'gave to you when you were in need'); }
 SW.mark = mark;
 /* how many of one's own stand close enough to help: band, kin, or those one is warm toward */
-function packOf(w, a, x, y) { let n = 0; for (let k = 0; k < w.agents.length; k++) { const o = w.agents[k]; if (o === a || o.dead || cheb(o.x, o.y, x, y) > 2) continue; if (rootOf(w, o) === rootOf(w, a) || (a.rel[o.id] || 0) > 0.3 || (a.parents || []).indexOf(o.id) >= 0 || (o.parents || []).indexOf(a.id) >= 0) n++; } return Math.min(3, n); }
+function packOf(w, a, x, y) { let n = 0; for (let k = 0; k < w.agents.length; k++) { const o = w.agents[k]; if (o === a || o.dead || cheb(o.x, o.y, x, y) > 2) continue; if (rootOf(w, o) === rootOf(w, a) || (a.rel[o.id] || 0) > 0.3 || (a.parents || []).indexOf(o.id) >= 0 || (o.parents || []).indexOf(a.id) >= 0) n++; } if (n < 3) for (let k = 0; k < w.creatures.length && n < 3; k++) { const c = w.creatures[k]; if (c.keeper === a.id && !c.dead && cheb(c.x, c.y, x, y) <= 2 && (w.laws.creatures[c.sp] || {}).pack) n++; } /* and a dog that is yours */ return Math.min(3, n); }
 SW.packOf = packOf;
 function strike(w, a, o, emit) {
   const L = w.laws, dmg = Math.round(L.fight.agentDamage * (0.6 + 0.8 * rnd(w)) * (1 + L.fight.angerBonus * a.mood.anger) * (w.fields.length ? fieldFactor(w, 'harm', o.x, o.y) : 1) * useTool(w, a, 'fight', emit) / useTool(w, o, 'guard', emit) / boon(o, 'toughness') * strengthOf(w, a) * (1 + Math.min(0.2, (a.stats.blows || 0) * 0.01)) * boon(a, 'strength') / boon(o, 'toughness')); a.stats.blows = (a.stats.blows || 0) + 1; /* each fight hardens the arm a little */
@@ -1625,6 +1717,7 @@ SW.siteQuality = function (w, x, y) {
 };
 /* a world saved by an older version gains what newer versions expect */
 SW.upgrade = function (w) {
+  use(w);
   if (!w.regions || !w.regions.length) { w.regions = [{ id: 0, name: 'the Land', biome: 'mixed', x: w.W >> 1, y: w.H >> 1 }]; w.region = []; for (let i = 0; i < w.W * w.H; i++) w.region.push(0); }
   ['lodes', 'bkind', 'roads', 'works'].forEach(function (k) { if (!w[k]) w[k] = {}; });
   if (!w.peoples) w.peoples = []; if (!w.tally) w.tally = { made: {}, eaten: {}, built: {} }; ['made', 'eaten', 'built'].forEach(function (k) { if (!w.tally[k]) w.tally[k] = {}; });
@@ -1633,7 +1726,13 @@ SW.upgrade = function (w) {
   w.agents.forEach(function (a) { if (!a.things) a.things = {}; if (!a.tongues) a.tongues = {}; if (a.tall == null) a.tall = 1; if (!a.press) a.press = {}; });
   w.agents.forEach(function (a, k) { if (!a.sex) a.sex = sexFor(w, a.people); if (!a.calling) a.calling = SW.CALLINGS[(a.id + k) % SW.CALLINGS.length]; }); if (!w.narrow) narrowWater(w);
   if ((w.tuned2 || 0) < 18) { w.tuned2 = 18; const A2 = w.laws.arrivals; if (A2) { if (A2.floor === 10) A2.floor = 14; if (A2.size === 3) A2.size = 4; } if (w.laws.ecology && w.laws.ecology.grazerTarget === 90) w.laws.ecology.grazerTarget = 120; }
+  if ((w.tuned2 || 0) < 20) { /* a world made before Generation 20 learns of the dog and of the life of far countries; what it had lost stays lost */
+    const D2 = SW.defaultLaws(); ['dog', 'caribou', 'mammoth', 'penguin', 'wolf', 'icebear', 'floeseal', 'stormbird', 'whale', 'orca', 'treeape', 'mudsnout', 'skybird', 'shadowcat', 'coilsnake', 'rivermaw'].forEach(function (k) { if (!w.laws.creatures[k] && D2.creatures[k]) { const cs = w.laws.creatures[k] = D2.creatures[k]; if (!cs.look) cs.look = SW.genBeast(k, !!cs.predator, cs.form); } });
+    ['snowberry', 'frostcap', 'icekelp', 'windroot', 'glowcap', 'goldfruit', 'canopynut', 'vinebean', 'feverbark', 'firepod'].forEach(function (k) { if (!w.laws.plants[k] && D2.plants[k]) { const ps = w.laws.plants[k] = D2.plants[k]; if (!ps.look) ps.look = SW.genPlant(k, ps.form); } });
+    if (w.laws.plants.cloudberry && (w.laws.plants.cloudberry.biomes || []).indexOf('arctic') < 0) w.laws.plants.cloudberry.biomes = (w.laws.plants.cloudberry.biomes || []).concat(['arctic']);
+    if (!w.laws.fight.packBonus) w.laws.fight.packBonus = 0.8; }
   if ((w.tuned2 || 0) < 19) { w.tuned2 = 19; const E2 = w.laws.explore; if (E2) { if (E2.chance === 0.5) E2.chance = 0.35; if (E2.restDays === 5) E2.restDays = 8; if (E2.depth === 10) E2.depth = 6; if (E2.gapDays == null) E2.gapDays = 1; } }
+  w.tuned2 = Math.max(w.tuned2 || 0, 20);
   /* laws that were re-tuned after a world was made: a world still at the old value takes the new one; a value its maker changed is left alone */
   if ((w.tuned || 0) < 16) { w.tuned = 16; const L = w.laws;
     [['time', 'winterGrowth', 0.1, 0.2], ['time', 'winterWither', 0.005, 0.0025], ['time', 'winterWither', 0.004, 0.0025], ['mate', 'cooldown', 1500, 900], ['mate', 'minAgeFraction', 0.2, 0.14], ['mate', 'maxPopulation', 40, 60], ['age', 'childUntil', 0.14, 0.1], ['age', 'elderFrom', 0.78, 0.8]].forEach(function (q) { if (L[q[0]] && L[q[0]][q[1]] === q[2]) L[q[0]][q[1]] = q[3]; });
@@ -1864,22 +1963,23 @@ function act(w, a, r, S, emit) {
     }
     case 'tame': {
       let c = null, bd = 3, far = null, fd = 9;
-      for (let k = 0; k < w.creatures.length; k++) { const o = w.creatures[k], so = L.creatures[o.sp]; if (!o.dead && so && !so.predator && o.owner == null) { const d = cheb(o.x, o.y, a.x, a.y); if (d >= 3 && d < fd) { fd = d; far = o; } } }
-      for (let k = 0; k < w.creatures.length; k++) { const o = w.creatures[k], so = L.creatures[o.sp]; if (!o.dead && so && !so.predator && o.owner == null) { const d = cheb(o.x, o.y, a.x, a.y); if (d < bd) { bd = d; c = o; } } }
+      for (let k = 0; k < w.creatures.length; k++) { const o = w.creatures[k], so = L.creatures[o.sp]; if (!o.dead && so && !so.predator && !so.sea && o.owner == null) { const d = cheb(o.x, o.y, a.x, a.y); if (d >= 3 && d < fd) { fd = d; far = o; } } }
+      for (let k = 0; k < w.creatures.length; k++) { const o = w.creatures[k], so = L.creatures[o.sp]; if (!o.dead && so && !so.predator && !so.sea && o.owner == null) { const d = cheb(o.x, o.y, a.x, a.y); if (d < bd) { bd = d; c = o; } } }
       const fi = a.carry.findIndex(function (q) { return L.plants[q.k] && L.plants[q.k].nutrition > 0; });
       if (!c && far && fi >= 0) { far.calm = 3; if (!move(w, a, stepToward(w, a, far.x, far.y))) return false; a.doing = 'walking slowly toward a ' + far.sp + ' with food held out'; return true; }
       if (!c || fi < 0) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: !c ? 'You tried to tame an animal, but no wild grazing animal is within eight steps.' : 'You tried to tame an animal, but you carry no plant food to offer it.' }); return false; }
       a.carry.splice(fi, 1); a.fin = 1; a.doing = 'offering food to a ' + c.sp; c.fedBy = c.fedBy || {}; c.fedBy[a.id] = (c.fedBy[a.id] || 0) + 1; c.calm = 30; /* each offering is remembered: an animal fed again and again by the same hand comes to trust it */
-      if (rnd(w) < (L.ecology.tameChance || 0.3) * (1 + ((L.culture || {}).tameTrust || 0) * (c.fedBy[a.id] - 1)) / ((L.creatures[c.sp].tough || 1) > 2 ? 2 : 1)) { c.owner = rootOf(w, a).id; c.keeper = a.id; a.stats.tamed = (a.stats.tamed || 0) + 1; emit({ type: 'tamed', a: a.id, kind: c.sp, n: w.creatures.filter(function (o) { return o.keeper === a.id; }).length }); }
+      if (rnd(w) < (L.ecology.tameChance || 0.3) * (1 + ((L.culture || {}).tameTrust || 0) * (c.fedBy[a.id] - 1)) * (L.creatures[c.sp].tame || 1) / ((L.creatures[c.sp].tough || 1) > 2 ? 2 : 1)) { c.owner = rootOf(w, a).id; c.keeper = a.id; a.stats.tamed = (a.stats.tamed || 0) + 1; emit({ type: 'tamed', a: a.id, kind: c.sp, n: w.creatures.filter(function (o) { return o.keeper === a.id; }).length }); }
       else emit({ type: 'fail', a: a.id, text: 'The ' + c.sp + ' took the food from your hand and drew back a little. It is not yours yet, but it knows your hand now (' + c.fedBy[a.id] + ' offering' + (c.fedBy[a.id] > 1 ? 's' : '') + '); each offering makes it likelier to stay.' });
       return true;
     }
     case 'milk': case 'shear': case 'ride': {
       const want = r.do === 'milk' ? 'milk' : r.do === 'shear' ? 'wool' : 'ride';
-      if (want === 'ride' ? !a.knows.riding : !a.knows.herding) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: want === 'ride' ? 'You do not yet know how to stay on an animal\'s back. That is the way of riding, which comes to those who have kept and tamed animals a long while.' : 'You do not yet know how to ' + r.do + ' an animal. That is the way of herding, which comes to those who have tamed animals.' }); return false; }
+      const sledOk = want === 'ride' && a.things && a.things.sled > 0 && a.knows.herding && w.terrain[here] === T.SNOW; /* with a sled, on snow, herding is knowledge enough */
+      if (want === 'ride' ? !(a.knows.riding || sledOk) : !a.knows.herding) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: want === 'ride' ? 'You do not yet know how to stay on an animal\'s back. That is the way of riding, which comes to those who have kept and tamed animals a long while.' : 'You do not yet know how to ' + r.do + ' an animal. That is the way of herding, which comes to those who have tamed animals.' }); return false; }
       if (r.do === 'ride' && a.mount) { a.mount = null; a.fin = 1; a.doing = 'getting down'; emit({ type: 'rode', a: a.id, off: true }); return true; }
       let c = null;
-      for (let k = 0; k < w.creatures.length && !c; k++) { const o = w.creatures[k], so = L.creatures[o.sp]; if (!o.dead && so && so[want] && o.owner != null && (o.keeper === a.id || o.owner === rootOf(w, a).id) && cheb(o.x, o.y, a.x, a.y) <= 1 && o.age > so.matureAge && (want === 'ride' || (o[want + 'At'] || -1e9) + L.time.dayLength * (want === 'wool' ? 2 : 0.5) < w.tick)) c = o; }
+      for (let k = 0; k < w.creatures.length && !c; k++) { const o = w.creatures[k], so = L.creatures[o.sp]; if (!o.dead && so && (so[want] || (sledOk && so.sled)) && o.owner != null && (o.keeper === a.id || o.owner === rootOf(w, a).id) && cheb(o.x, o.y, a.x, a.y) <= (want === 'ride' ? 2 : 1) && o.age > so.matureAge && (want === 'ride' || (o[want + 'At'] || -1e9) + L.time.dayLength * (want === 'wool' ? 2 : 0.5) < w.tick)) c = o; }
       if (!c) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: want === 'ride' ? 'You tried to mount, but no grown animal of yours that can bear a rider is beside you.' : 'You tried to ' + r.do + ', but no grown animal of yours that gives ' + want + ' is beside you and ready. (Not every kind gives it, and each must be left a while between.)' }); return false; }
       a.fin = 1;
       if (want === 'milk') { if (a.carry.length >= cap(w, a)) return false; c.milkAt = w.tick; c.e -= 4; a.carry.push({ k: 'milk', n: L.ecology.milkEnergy }); a.doing = 'milking a ' + c.sp; }
@@ -2000,9 +2100,11 @@ function act(w, a, r, S, emit) {
           } else emit({ type: 'laboured', a: a.id, kind: r.what, x: a.x, y: a.y, gave: gw + gs, left: (bw - W0.wood) + ' wood and ' + (bs - W0.stone) + ' stone' });
           return true;
         }
+        if (B.on && SW.TERRAIN[w.terrain[here]] !== B.on) return say('You tried to raise a ' + r.what + ', but it can only be raised on ' + B.on + ', and you stand on ' + SW.TERRAIN[w.terrain[here]] + '.');
+        if (B.effort && a.e < B.effort + 20) return say('You tried to raise a ' + r.what + ', but it takes strength you do not have now. Eat first.');
         if (a.wood < bw || a.stone < bs) return say('You tried to raise a ' + r.what + ', but it takes ' + bw + ' wood and ' + bs + ' stone, and you have ' + a.wood + ' wood and ' + a.stone + ' stone.');
         if (taken) return say('You tried to raise a ' + r.what + ', but this ground is taken. It needs bare ground.');
-        a.wood -= bw; a.stone -= bs; a.stats.built++; a.fin = 1; w.shelters[here] = a.id; if (!w.bkind) w.bkind = {}; w.bkind[here] = r.what; delete w.looks[here]; w.tally.built[r.what] = (w.tally.built[r.what] || 0) + 1;
+        a.wood -= bw; a.stone -= bs; if (B.effort) a.e -= B.effort; a.stats.built++; a.fin = 1; w.shelters[here] = a.id; if (!w.bkind) w.bkind = {}; w.bkind[here] = r.what; delete w.looks[here]; w.tally.built[r.what] = (w.tally.built[r.what] || 0) + 1;
         emit({ type: 'built', a: a.id, x: a.x, y: a.y, what: r.what, building: true }); a.doing = 'raising a ' + r.what; return true;
       }
       if (what === 'store' && !a.knows.storage) { emit({ type: 'fail', a: a.id, text: 'You tried to build a store, but you do not know how: that is the way of storage, which you have not yet come to. A roof (build with what: shelter) you can raise without it.' }); return false; }
@@ -2372,7 +2474,7 @@ function stepAgents(w, emit) {
     if (a.e < 18 && (a.carry.some(function (q) { return a.habits.avoid.indexOf(q.k) < 0; }) || S.vars.plant_here >= 1)) { done = act(w, a, { do: 'eat' }, S, emit); if (done) a.doing += ' (starving: the body ate by itself)'; }
     if (!done && a.e < 22 && !a.carry.length && S.near.store) { const sj = idx(w, S.near.store.x, S.near.store.y), so = w.stores[sj]; if (so && so.items && so.items.length && (!so.by || allied(w, a, so.by) || !isAlive(w, so.by))) { if (S.near.store.d === 0) { done = act(w, a, { do: 'take' }, S, emit); if (done) a.doing = 'taking from the store, starving'; } else if (move(w, a, pathToward(w, a, S.near.store.x, S.near.store.y, 0))) { done = true; a.doing = 'making for the store, starving'; } } }
     if (!done && a.e < 20 && !a.carry.length && !S.near.food && !(S.near.predator && cheb(a.x, a.y, S.near.predator.x, S.near.predator.y) <= 2) && (w.tick + a.id) % 2 === 0) { /* nothing to eat in sight: a starving body follows its nose to the nearest food, far off */
-      if (!a.nose || w.tick - a.nose.t > 40) { let bj = -1, bd = 31; for (let dy = -30; dy <= 30; dy += 1) for (let dx = -30; dx <= 30; dx += 1) { const x = a.x + dx, y = a.y + dy; if (!inb(w, x, y)) continue; const j = idx(w, x, y), q = w.plants[j]; if (!q || q.food < 1 || !(L.plants[q.sp].nutrition > 0) || a.habits.avoid.indexOf(q.sp) >= 0) continue; const dd = Math.max(Math.abs(dx), Math.abs(dy)); if (dd < bd) { bd = dd; bj = j; } } a.nose = { t: w.tick, j: bj }; }
+      if (!a.nose || w.tick - a.nose.t > 40) { let bj = -1, bd = 31; for (let dy = -30; dy <= 30; dy += 1) for (let dx = -30; dx <= 30; dx += 1) { const x = wrapX(w, a.x + dx), y = a.y + dy; if (!inb(w, x, y)) continue; const j = idx(w, x, y), q = w.plants[j]; if (!q || q.food < 1 || !(L.plants[q.sp].nutrition > 0) || a.habits.avoid.indexOf(q.sp) >= 0) continue; const dd = Math.max(Math.abs(dx), Math.abs(dy)); if (dd < bd) { bd = dd; bj = j; } } a.nose = { t: w.tick, j: bj }; }
       if (a.nose.j >= 0 && move(w, a, pathToward(w, a, a.nose.j % w.W, Math.floor(a.nose.j / w.W), 0))) { done = true; a.doing = 'following the smell of food, starving'; } }
     if (!done && a.e < 22 && !a.carry.length && !S.near.food && S.near.prey && cheb(a.x, a.y, S.near.prey.x, S.near.prey.y) <= 6 && !(S.near.predator && cheb(a.x, a.y, S.near.predator.x, S.near.predator.y) <= 2)) { done = act(w, a, { do: 'hunt' }, S, emit); if (done) a.doing = 'hunting, starving'; }
     if (!done && a.e < 22 && S.near.food && !(S.near.predator && cheb(a.x, a.y, S.near.predator.x, S.near.predator.y) <= 2)) { done = act(w, a, { do: 'seek', target: 'food' }, S, emit); if (done) a.doing = 'making for food, starving'; } /* a starving body goes to food it can see, whatever the plan, unless teeth are upon it */
@@ -2404,8 +2506,10 @@ function stepAgents(w, emit) {
     if (a.lore > a.loreSeen) { a.lore = Math.round((a.loreSeen + (a.lore - a.loreSeen) / (1 + a.loreSeen / 2.5)) * 100) / 100; const why = a.loreWhy || (a.intent && a.intent.do) || 'other'; if (!w.loreBy) w.loreBy = {}; w.loreBy[why] = Math.round(((w.loreBy[why] || 0) + a.lore - a.loreSeen) * 100) / 100; } a.loreWhy = null; /* each step of understanding is harder than the last */
     a.loreSeen = a.lore;
     let drain = L.body.baseDrain * (stg === 'child' ? AG.childDrain : 1) * boon(a, 'appetite'), cold = 0;
-    if (night) cold += L.body.nightCold;
-    if (winter) cold += L.time.winterCold;
+    const clim = climOf(w, a.y * w.W + a.x), ssn = SW.season(w);
+    if (night) cold += L.body.nightCold * (clim === 1 ? 0.4 : clim === 2 ? 1.3 : 1);
+    if (clim === 2) cold += L.time.winterCold * (ssn === 1 ? 0.6 : ssn === 3 ? 1.5 : 1); /* on the ice it is winter all year, eased a little in summer */
+    else if (winter && clim !== 1) cold += L.time.winterCold; /* in the warm belt there is no cold season */
     cold *= 1 / boon(a, 'warmth');
     const sky = w.weather.kind;
     if (sky === 'rain') cold += L.weather.rainCold; else if (sky === 'storm') cold += L.weather.stormCold; else if (sky === 'snow') cold += L.weather.snowCold; else if (sky === 'gale') cold += 0.035;
@@ -2419,7 +2523,7 @@ function stepAgents(w, emit) {
     if (ground === T.WATER && !(w.roads && w.roads[idx(w, a.x, a.y)]) && !floatOf(w, a)) { drain += L.water.swimDrain || 0; a.stats.swum = (a.stats.swum || 0) + 1; SW.press(w, a, 'water', 0.02); } /* and one who swims thinks about better ways over water */ /* swimming is hard work */
     if (w.fields.length) { cold *= fieldFactor(w, 'cold', a.x, a.y); drain *= fieldFactor(w, 'drain', a.x, a.y); }
     drain += cold;
-    if (SW.season(w) === 2) SW.press(w, a, 'turning', 0.004); /* autumn: the days shorten, and everyone feels what is coming */
+    if (SW.season(w) === 2 && climOf(w, a.y * w.W + a.x) !== 1) SW.press(w, a, 'turning', 0.004); /* autumn: the days shorten, and everyone feels what is coming */
     if (cold > 0.09) SW.press(w, a, 'cold', 0.004); if ((sky === 'storm' || sky === 'gale' || (w.blizzard || 0) > w.tick) && !a.sheltered) SW.press(w, a, 'storms', 0.003); if ((a.thirst || 0) > 80) SW.press(w, a, 'thirst', 0.01);
     if (sky === 'drought') drain += L.weather.droughtThirst;
     a.mood.lonely = clamp(a.mood.lonely + (S.near.agent ? -0.006 : 0.002), 0, 1);
@@ -2459,7 +2563,7 @@ function stepAgents(w, emit) {
     { /* time spent in a building of some kind does what that kind does, once a day */
       const bi = idx(w, a.x, a.y), bk = buildingAt(w, bi);
       if (bk) { const B = L.buildings[bk], used = a.used = a.used || {}; if ((used[bi] || -1e9) + L.time.dayLength < w.tick) { used[bi] = w.tick; if (B.fx) applyFx(w, a, B.fx, emit, 'the ' + bk); const wth = []; if (B.bond) for (let j = 0; j < w.agents.length; j++) { const o = w.agents[j]; if (o !== a && !o.dead && cheb(a.x, a.y, o.x, o.y) <= 2) { a.rel[o.id] = clamp((a.rel[o.id] || 0) + B.bond, -1, 1); o.rel[a.id] = clamp((o.rel[a.id] || 0) + B.bond, -1, 1); wth.push(o.id); } } emit({ type: 'used', a: a.id, kind: bk, with: wth, x: a.x, y: a.y }); } }
-      if (a.mount) { let mc = null; for (let j = 0; j < w.creatures.length; j++) if (w.creatures[j].id === a.mount) mc = w.creatures[j]; if (!mc || mc.dead || mc.keeper !== a.id) a.mount = null; else if (mc.x !== a.x || mc.y !== a.y) { mc.px = mc.x; mc.py = mc.y; mc.x = a.x; mc.y = a.y; } }
+      if (a.mount) { let mc = null; for (let j = 0; j < w.creatures.length; j++) if (w.creatures[j].id === a.mount) mc = w.creatures[j]; if (!mc || mc.dead || mc.keeper !== a.id) a.mount = null; else if (!(L.creatures[mc.sp] || {}).ride && w.terrain[idx(w, a.x, a.y)] !== T.SNOW) { a.mount = null; emit({ type: 'rode', a: a.id, off: true, why: 'the snow has ended, and a sled goes no farther' }); } else if (mc.x !== a.x || mc.y !== a.y) { mc.px = mc.x; mc.py = mc.y; mc.x = a.x; mc.y = a.y; } }
     }
     if (a.e > L.body.healAbove && a.hp < 100 && !(a.sick > 0)) a.hp = Math.min(100, a.hp + L.body.healRate * (1 + 0.3 * (a.happy || 0)) * (a.knows.medicine ? 2 : 1) * (S.vars.in_home ? L.home.heal : 1));
     if (S.vars.in_home) a.mood.fear *= 0.99;
@@ -2496,6 +2600,7 @@ function stepAgents(w, emit) {
 
 /* ---------- the tick ---------- */
 SW.step = function (w, emit) {
+  use(w);
   emit = emit || noop;
   w.tick++;
   w.fresh = [];
@@ -3010,17 +3115,19 @@ SW.forecast = function (w, agentId, policy, ticks) {
 
 /* ---------- what a being perceives, for its mind ---------- */
 SW.compass = function (dx, dy) {
+  dx = wdx(dx);
   if (!dx && !dy) return 'here';
   const ax = Math.abs(dx), ay = Math.abs(dy);
   const ns = dy < 0 ? 'N' : 'S', ew = dx > 0 ? 'E' : 'W';
   if (ay > 2 * ax) return ns; if (ax > 2 * ay) return ew; return ns + ew;
 };
 SW.look = function (w, a) {
+  use(w);
   const R = SW.sight(w) + (function () { const k = buildingAt(w, idx(w, a.x, a.y)); return k ? w.laws.buildings[k].sight || 0 : 0; })(), plants = [], shelters = [], creatures = [], agents = [], walls = {}, fires = [], stores = [], halls = [], lodes = [];
   let water = null, seam = null;
   for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
-    const x = a.x + dx, y = a.y + dy; if (!inb(w, x, y)) continue;
-    const i = idx(w, x, y), d = Math.max(Math.abs(dx), Math.abs(dy));
+    let x = a.x + dx; const y = a.y + dy; if (y < 0 || y >= w.H) continue; if (x < 0 || x >= w.W) { if (!w.wrap) continue; x = wrapX(w, x); }
+    const i = y * w.W + x, d = Math.max(Math.abs(dx), Math.abs(dy));
     const p = w.plants[i];
     if (p) plants.push({ sp: p.sp, x: x, y: y, d: d, dir: SW.compass(dx, dy), food: p.g >= 1 ? Math.floor(p.food + 1e-9) : 0, young: p.g < 1 });
     if (w.shelters[i]) shelters.push({ x: x, y: y, d: d, dir: SW.compass(dx, dy), owner: w.shelters[i], kind: w.bkind && w.bkind[i] ? w.bkind[i] : null });

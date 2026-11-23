@@ -24,6 +24,7 @@ function ask(st, cfg, prompt) {
 
 /* ---------- the numbers ---------- */
 K.stats = function (st) {
+  SW.use(st.world);
   const w = st.world, ags = w.agents, T = st.story.tally, rels = [], bands = {}, ways = {}, kinds = {};
   ags.forEach(function (a) { for (const id in a.rel) rels.push(a.rel[id]); const r = SW.rootOf(w, a); if (r !== a || ags.some(function (o) { return o.leader === a.id; })) bands[r.id] = (bands[r.id] || 0) + 1; for (const k in a.knows) ways[k] = (ways[k] || 0) + 1; });
   w.creatures.forEach(function (c) { kinds[c.sp] = (kinds[c.sp] || 0) + 1; });
@@ -284,7 +285,9 @@ K.SEED = [
   '[NOW] bridges; weapons for one hand and for a siege (bow, shield, armour, ram, catapult, guns); defence',
   '[NOW] the old workings of the world weakening as the ages of knowledge advance',
   '[NOW] the known world ends in mist and can be pushed back: one who stands at the edge can venture in, and a wide strip of new land may open, continuing the rivers, shores and kinds of ground it joins, with rich deposits and a herd; a band has three tries and then must wait, and once any strip has opened the mist parts for no one for a day, so that the known world grows slowly (laws explore.*, among them gapDays)',
-  '[NEXT] the world as a whole that can be gone around: the unknown filled in until it meets itself, east joined to west, and seen from far off as a globe',
+  '[NOW] the world is a globe: east joins west, and it ends at two poles of ice that are different countries (white bears, wolves, caribou and mammoths in the north; penguins, seals and stormbirds in the south; whales and orcas in both seas). Between them lie three climates: the ice, cold all year; the lands with seasons; and a warm belt of rainforest and desert with no winter. Each kind of country has its own plants, animals and people, and both people and animals are drawn back to their own (law drives.homeland)',
+  '[NOW] the dog, easily won with food, which stands with its keeper in the hunt and draws a sled over snow; the igloo, raised on snow from nothing; the canoe and the kayak',
+  '[NEXT] rain and flood as the weather of the warm belt; a day that goes round the world',
   '[NOW] women and men: a child comes of one of each; twins are a girl and a boy; children come sooner when both parents are well fed and well (mate.plentyCooldown); a grown body can swim narrow water; plants grow faster in spring, rain and at harvest; animals breed by season and by their numbers, and herds return from the rim when few (ecology.grazerTarget, ecology.herdReturn); deposits refill slowly (ecology.lodeRegrow)',
   '[NOW] peoples that last: newcomers who come into the land when the living are few (law arrivals.*, event newcomers), twins (mate.twinChance), longer lives, a milder lean season; what the dead built stands empty and can be claimed by anyone, to begin a home or add to a band\'s; elders moved to hand on what only they know',
   '[NOW] necessity as the mother of invention: what beings suffer (hunger, the lean season, cold, thirst, sickness, beasts, deaths, water they cannot cross, strife, storm, strange speech) sharpens them toward the ways that answer it; knowing neighbouring ways helps; you can set which hardships spur which way (op spur) and how strongly need counts (laws discovery.*)',

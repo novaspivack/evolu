@@ -5,7 +5,9 @@ const fresh = seed => { const w = SW.createWorld(seed), st = M.createState(w); K
   const { w, st } = fresh(7); for (let i = 0; i < 300; i++) { SW.step(w, st.emit); M.tick(st); }
   const a = w.agents[0], b = w.agents[1], c = w.agents[2], m = st.minds[a.id];
   a.leader = b.id; a.temperament.bold = 0.8; a.rel[b.id] = 0.9; b.x = a.x + 1; b.y = a.y; c.x = b.x; c.y = b.y + 1; b.rel[c.id] = 0.9; b.rel[a.id] = 0.3; a.stats.stolen = 3; a.temperament.honest = 0.9; m.dull = 4; a.e = 90; a.hp = 100;
-  let d = M.drives(st, m, a, SW.look(w, a)).map(q => q.k);
+  w.creatures = w.creatures.filter(q => !w.laws.creatures[q.sp].predator); /* no beast near: purpose speaks only to the safe */
+  const keep = Object.assign({}, w.laws.drives); Object.assign(w.laws.drives, { ambition: 0, calling: 0, desire: 0, beyond: 0, homeland: 0 }); /* only six drives are spoken at once: quiet the ones later generations added, with the maker's own levers */
+  let d = M.drives(st, m, a, SW.look(w, a)).map(q => q.k); w.laws.drives = keep;
   ok(d.includes('purpose') && d.includes('jealousy'), 'new drives speak: ' + d.join(', '));
   w.laws.drives.jealousy = 0; ok(!M.drives(st, m, a, SW.look(w, a)).some(q => q.k === 'jealousy'), 'the drives law silences a drive');
   ok(K.applyOp(w, { op: 'law', group: 'drives', key: 'purpose', value: 1.8 }).ok, 'the maker can tune a drive');

@@ -42,6 +42,12 @@ The page writes each run to the artifact's store as it goes. With the artifact d
 - A world may be carried on across generations (same run id). `SW.upgrade` moves a law to its re-tuned value only where the world still holds the old default; add to that table when you re-tune a law.
 - Measure balance changes on at least ten seeds before believing them: three seeds swing by several deaths either way. Survival on instinct alone cannot show what minds do with stores, fire and shelter.
 - Watch speed: a world moment costs about 2.8 ms since the world grew a veiled rim (Generation 17); do not let it rise further. Compare generations on the same machine in the same sitting (`/tmp`-style script over twelve seeds): the cost rises with the number alive.
+- **A world made since Generation 20 goes round** (`w.wrap`): x wraps, y does not. Always go through `idx(w, x, y)`, `inb`, `cheb`, `wdx` (shortest signed east-west difference), `wrapX` and `SW.compass`; never compute `y * w.W + x` from an x that may be off the map, never take `a.x - b.x` as a distance or a direction, and never clamp x to `0..W-1` for a wrapped world. `cheb` and `wdx` read the width of the world in use, which `use(w)` sets: `SW.step`, `SW.look`, `M.onEvent`, `M.apply`, `M.tick` and `K.stats` call it; a new entry point that measures distances must too. A world made before stays flat (`w.wrap` unset) and both must keep working: `tests/14` covers each.
+- Kinds of plant and animal whose country may not have been seen yet are listed in `BASE_KINDS`, or `pruneKinds` strikes them from the world within three days. Add every new native kind there.
+- Climate comes from the biome of the region (`SW.climate`: 1 warm belt, 2 ice, 0 between) and acts in `stepPlants`, in the cold on a body, and in the snow and leaf veils the page paints.
+- Plants are stepped every other moment at double rates. A new per-moment rate in `stepPlants` must be doubled.
+- On the page, `sx()` wraps and `toWorld()` returns a wrapped x; whole-map images are laid with `lay()`. The globe (`drawSpace`) is used when `isGlobe()`.
+- When a script edits a document, end it by writing the file and check the result: the README said Generation 18 through Generation 19 because an edit was computed and never written.
 - Terrain 9 is the unknown (`T.VOID`): impassable, nothing lives there, and the true ground is kept in `w.veil`. Anything that picks a tile by position and not by terrain must skip it. Animals and newcomers come in at `edgeSpot(w)`, not at the map's rim.
 - Settings: a bump of `settings.v` must carry the previous version's saved settings across (see `M.restore`), moving a default only where the saved value still equals the old default.
 - When Nova sends more ideas than a generation can hold, build what is cheap and safe, put the rest in `ROADMAP.md` in order, and say plainly which is which.
@@ -61,7 +67,7 @@ tests/run-all.sh                                   # needs only Node
 PLAYWRIGHT=/path/to/node_modules/playwright tests/run-all.sh browser
 ```
 
-All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`14-...js`), with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
+All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`15-...js`), with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
 
 What the tests cannot show is how real minds behave. Say so in every report.
 
