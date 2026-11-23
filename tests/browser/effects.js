@@ -52,6 +52,15 @@ const errs = []; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m)
   ok(eco.now.a === '16' && eco.now.h === '269' && eco.now.s === '22' && eco.now.p === '1855' && /^now, day 5/.test(eco.now.day), 'under the chart the count of each stands in its own colour: ' + JSON.stringify(eco.now));
   ok(eco.then.a === '17' && eco.then.h === '246' && eco.then.p === '1970' && eco.then.day === 'day 2' && /^now/.test(eco.back), 'pointing at the chart reads the counts of that day (' + JSON.stringify(eco.then) + '), and leaving it returns to now');
   await page.screenshot({ path: path.join(SHOTS, 'chart-of-the-living.png') });
+  /* Generation 23: an eased pace is shown for as long as it lasts, and refusals never switch the minds off */
+  const pace = await page.evaluate(async () => { const d = window.SWdebug, st = d.st, was = st.on, wait = () => new Promise(r => setTimeout(r, 700)), meter = () => document.getElementById('meter').textContent;
+    st.on = true; st.rate = 0; st.par = 0; st.narrow = false; await wait(); const plain = meter();
+    for (let k = 0; k < 3; k++) SWM.ease(st, Date.now()); await wait(); const eased = meter(), e1 = SWM.eased(st);
+    for (let k = 0; k < 9; k++) SWM.ease(st, Date.now()); await wait(); const narrow = meter(), on = st.on, notice = document.getElementById('notice').hidden ? '' : document.getElementById('notice').textContent;
+    st.rate = 0; st.par = 0; st.narrow = false; st.hold = 0; st.easeN = 0; st.notice = ''; await wait(); const after = meter(); st.on = was;
+    return { plain: plain, eased: eased, narrow: narrow, after: after, on: on, e1: e1, notice: notice }; });
+  ok(!/pace eased|in view only/.test(pace.plain) && /pace eased/.test(pace.eased) && pace.e1.par === 1 && /minds in view only/.test(pace.narrow) && pace.on === true && !/pace eased|in view only/.test(pace.after), 'the meter says "pace eased" after three refusals and "minds in view only" after twelve, the minds are still on, and it clears when the pace is whole again');
+  ok(/Nothing has been switched off/.test(pace.notice || ''), 'and the notice says that nothing has been switched off');
   /* a notice passes by itself */
   await page.evaluate(() => { window.SWdebug.notice('A notice with nothing to do.'); }); const shown = await page.evaluate(() => !document.getElementById('notice').hidden);
   await page.waitForTimeout(10600); const gone = await page.evaluate(() => document.getElementById('notice').hidden);

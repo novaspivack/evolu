@@ -2393,6 +2393,7 @@ function act(w, a, r, S, emit) {
       else if (th2.obsidian > 0) { th2.obsidian--; edge = 1.5; } else if (th2.flint > 0) { th2.flint--; edge = 1.25; } /* a stone that takes an edge makes a tool that lasts */
       a.wood -= d.wood; a.stone -= d.stone; a.tools.push(metal ? { k: key, wear: Math.round(d.wear * L.craft.metalWear * (grade === 3 ? 2 : grade === 2 ? 1.5 : 1) * (1 + nearB(w, a, 'craft'))), m: grade } : { k: key, wear: Math.round(d.wear * edge * (1 + nearB(w, a, 'craft'))) }); a.fin = 1; a.stats.crafted++;
       a.doing = 'making a ' + key;
+      w.tally.crafted = w.tally.crafted || {}; w.tally.crafted[key] = (w.tally.crafted[key] || 0) + 1;
       emit({ type: 'crafted', a: a.id, kind: key, use: d.use, metal: metal, grade: grade, edge: edge });
       /* anyone watching can copy what they saw made */
       for (let k = 0; k < w.agents.length; k++) { const o = w.agents[k]; if (o !== a && !o.dead && !o.designs[key] && cheb(o.x, o.y, a.x, a.y) <= SW.sight(w)) { o.designs[key] = 1; emit({ type: 'sawmade', a: o.id, b: a.id, kind: key, use: d.use }); } }
@@ -2462,7 +2463,7 @@ function act(w, a, r, S, emit) {
     case 'take': {
       const dvh = w.devices[here], st = w.stores[here] || (dvh ? { by: dvh.by, items: dvh.hold } : null); if (!st || !st.items.length || a.carry.length >= cap(w, a)) return false;
       let n = 0; while (st.items.length && a.carry.length < cap(w, a)) { a.carry.push(st.items.pop()); n++; }
-      if (w.stores[here]) { st.drawn = (st.drawn || 0) + n; w.tally.storeOut = (w.tally.storeOut || 0) + n; if (a.e < 25) w.tally.storeOutHungry = (w.tally.storeOutHungry || 0) + n; }
+      if (w.stores[here]) { st.who = st.who || {}; st.who[a.name] = (st.who[a.name] || 0) + n; st.drawn = (st.drawn || 0) + n; w.tally.storeOut = (w.tally.storeOut || 0) + n; if (a.e < 25) w.tally.storeOutHungry = (w.tally.storeOutHungry || 0) + n; }
       a.fin = 1; a.doing = 'taking from a store';
       const raid = !!st.by && !allied(w, a, st.by), seenBy = [];
       if (!st.by && !st.items.length && w.stores[here]) { w.stores[here] = null; delete w.looks[here]; } /* a dead one's leavings, now gone */

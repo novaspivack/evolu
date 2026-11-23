@@ -83,7 +83,7 @@ M.record = function (st, item) {
 M.digest = function (st) {
   const w = st.world;
   return {
-    run: st.runId, generation: 22, seed: w.seed, culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {} }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
+    run: st.runId, generation: 23, seed: w.seed, culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {} }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
     peoples: (w.peoples || []).map(function (P) { return { name: P.name, noun: P.noun, kind: P.kind, way: P.way, custom: P.custom, land: P.region != null && w.regions[P.region] ? w.regions[P.region].name : '', alive: w.agents.filter(function (a) { return a.people === P.id; }).length }; }), lands: (w.regions || []).map(function (R) { return { name: R.name, biome: R.biome, minerals: R.minerals || [], beings: w.agents.filter(function (a) { return w.region[a.y * w.W + a.x] === R.id; }).length }; }), tally: w.tally || {}, alive: w.agents.length, creatures: w.creatures.length, plants: w.plants.filter(Boolean).length, wars: w.wars, settlements: w.settlements.map(function (q) { return q.name; }), ways: Object.keys(w.laws.tree).filter(function (k) { return w.agents.some(function (a) { return a.knows[k]; }); }), designs: Object.keys(w.laws.tools),
     beings: Object.keys(st.minds).map(function (id) {
       const m = st.minds[id], a = agentById(w, +id);
@@ -810,6 +810,7 @@ M.buildPrompt = function (st, mind, kind, lean) {
   });
   { let rg = null, rd = 15; (w.rich || []).forEach(function (R) { const dd = SW.cheb(a.x, a.y, R.x, R.y); if (dd < rd) { rd = dd; rg = R; } }); /* rich ground can be told from afar by how green it stands and by the herds on it */
     if (rg) see.push('- RICH GROUND: ' + rg.name + (rd <= rg.r ? ', all about you' : ', its middle at (' + rg.x + ',' + rg.y + '), ' + rd + ' steps ' + SW.compass(SW.wdx(rg.x - a.x), rg.y - a.y)) + '. Food plants spread twice as fast there and come back after picking, and herds gather and breed there. Homes, stores and herds do best beside such ground.'); }
+  if (a.press && a.press.water > 1.5 && a.knows.rafts && !SW.floatOf(w, a) && w.laws.recipes.raft) see.push('- Deep water has stopped you more than once, and you know the way of rafts. make {what: raft} (needs ' + M.needsText(w.laws.recipes.raft.needs) + ') and, holding it, you can cross deep water.' + (w.laws.recipes.kayak ? ' A kayak (' + M.needsText(w.laws.recipes.kayak.needs) + ') or a canoe is quicker.' : ''));
   if (notYet.length) see.push('- growing near, but with NOTHING TO EAT on them yet: ' + notYet.join(', ') + '. Walking to these feeds no one.');
   const ct = {};
   v.creatures.forEach(function (c) { (ct[c.sp] = ct[c.sp] || []).push(c); });
@@ -1199,16 +1200,14 @@ M.think = async function (st, mind, kind) {
     const code = (e && e.code) || 'upstream_error';
     if (HIDE[code]) { st.on = false; st.blocked = 'Claude is not available to this page in this view, so the beings run on reflexes alone.'; }
     else if (code === 'rate_limited' && e.reason === 'usage_limit') { st.on = false; st.notice = 'You have reached your Claude usage limit. The minds are asleep; wake them again later.'; }
-    else if (code === 'rate_limited') { /* asked for fewer at once: think fewer at a time, wait a little, and carry on. Only if it keeps happening do the minds sleep */
-      const now = Date.now(); st.easeN = (now - (st.easeT || 0) < 120000 ? (st.easeN || 0) : 0) + 1; st.easeT = now;
-      st.par = Math.max(1, Math.min(st.par || st.settings.parallel, st.settings.parallel) - 1); st.hold = now + 12000 * st.easeN; mind.again = true;
-      if (st.easeN >= 5) { st.on = false; st.notice = 'Claude refused the pace five times in two minutes. The minds are asleep: lower thoughts per minute in Setup, then wake them.'; }
-      else st.notice = 'Claude asked for fewer thoughts at once. The minds carry on, ' + st.par + ' at a time.'; }
+    else if (code === 'rate_limited') { M.ease(st, Date.now()); mind.again = true; }
     else if (code === 'session_expired') { st.on = false; st.notice = 'Your session expired. Sign in again, then wake the minds.'; }
     else if (code === 'tools_unavailable') { st.toolsOK = false; st.notice = 'Foresight (imagined test runs) is not available in this view; deep reflection continues without it.'; }
     else if (code !== 'cancelled') {
-      st.errStreak++;
-      if (st.errStreak >= 3) { st.on = false; st.notice = 'Three thoughts in a row failed (' + code + '). The minds are asleep; wake them to try again.'; }
+      st.errStreak++; mind.again = true;
+      /* a fault upstream is usually passing: pause, longer each time, and try again. Only a long run of them puts the minds to sleep */
+      if (st.errStreak >= 10) { st.on = false; st.notice = 'Ten thoughts in a row failed (' + code + '). The minds are asleep; wake them to try again.'; }
+      else if (st.errStreak >= 2) { st.hold = Date.now() + Math.min(120000, 15000 * st.errStreak); st.notice = 'Thoughts are failing (' + code + '). The minds pause for ' + Math.round(Math.min(120, 15 * st.errStreak)) + ' seconds and try again; nothing has been switched off.'; }
     }
     mind.log.push({ tick: w.tick, day: SW.day(w), kind: kind, failed: true, code: code, thought: code === 'invalid_json' ? 'The thought came out garbled and was lost.' : 'The thought did not arrive (' + code + ').', changes: [], raw: e && e.text ? clip(e.text, 300) : '' });
     M.record(st, { t: 'failed', id: mind.id, name: mind.name, kind: kind, code: code, raw: e && e.text ? String(e.text).slice(0, 1500) : (e && e.message) || '' });
@@ -1330,22 +1329,48 @@ M.kindFor = function (st, mind) {
 M.pace = function (st) {
   if (!st.on || !st.sample || st.blocked || st.settings.wait === false) return 1;
   const w = st.world, G = Math.max(20, st.settings.thinkEvery || 90); let n = 0, late = 0;
-  const near = st.settings.focus === 'view' && typeof st.inView === 'function' ? st.inView : null; /* the watcher may ask the world to wait only for those in view; the rest still live and think, less often */
+  const near = (st.settings.focus === 'view' || st.narrow) && typeof st.inView === 'function' ? st.inView : null; /* the watcher may ask the world to wait only for those in view; the rest still live and think, less often */
   for (let k = 0; k < w.agents.length; k++) { const m = st.minds[w.agents[k].id]; if (!m || m.dead) continue; if (m.lastT == null) m.lastT = w.tick; if (near && !near(w.agents[k])) continue; n++; if (!m.busy && w.tick - m.lastT > G) late++; }
   if (!n) return 1; const f = late / n;
   return f <= 0.1 ? 1 : Math.max(0.1, Math.round((1 - (f - 0.1) * 2.5) * 100) / 100);
 };
+/* WHEN CLAUDE ASKS FOR A SLOWER PACE. Nothing is switched off. Fewer thoughts at a time, fewer a minute, and a pause that grows with each refusal;
+   the clock of the world slows to wait (M.pace), so a large people simply lives more slowly. If even one thought at a time at the slowest pace is refused,
+   only the beings in view go on thinking and the rest live on their reflexes, until the pace has recovered. */
+M.PACE_FLOOR = 6;
+M.ease = function (st, now) {
+  const S = st.settings, cur = Math.min(st.rate || S.perMinute, S.perMinute), par = Math.min(st.par || S.parallel, S.parallel);
+  st.easeN = (now - (st.easeT || 0) < 120000 ? (st.easeN || 0) : 0) + 1; st.easeT = now; st.refused = (st.refused || 0) + 1;
+  const atFloor = par <= 1 && cur <= M.PACE_FLOOR + 0.01;
+  st.par = Math.max(1, par - 1); st.rate = Math.max(M.PACE_FLOOR, Math.round(cur * 0.7 * 10) / 10);
+  st.hold = now + Math.min(120000, 10000 * st.easeN);
+  if (atFloor && !st.narrow && typeof st.inView === 'function' && S.focus !== 'view') st.narrow = true;
+  st.notice = st.narrow ? 'Claude is still asking for a slower pace. Only the beings in view go on thinking; the rest live on their reflexes until the pace recovers. Nothing has been switched off.'
+    : 'Claude asked for a slower pace. The minds carry on, ' + st.par + ' at a time and at most ' + st.rate + ' thoughts a minute, and the clock of the world slows to wait for them. It quickens again by itself.';
+};
+M.recover = function (st, now) { /* two quiet minutes: one more at a time and a quarter faster; once the pace is back to half, everyone thinks again */
+  if (!st.rate && !st.par && !st.narrow) return; const S = st.settings;
+  if (now - Math.max(st.easeT || 0, st.upT || 0) < 120000) return; st.upT = now;
+  if (st.par && st.par < S.parallel) st.par++;
+  if (st.rate && st.rate < S.perMinute) st.rate = Math.min(S.perMinute, Math.round(st.rate * 1.25 * 10) / 10);
+  if (st.narrow && (st.rate || S.perMinute) >= S.perMinute * 0.5) st.narrow = false;
+  if ((!st.rate || st.rate >= S.perMinute) && (!st.par || st.par >= S.parallel) && !st.narrow) { st.rate = 0; st.par = 0; st.easeN = 0; }
+};
+/* how the pace stands, for the page */
+M.eased = function (st) { const S = st.settings; return { rate: st.rate && st.rate < S.perMinute ? st.rate : 0, par: st.par && st.par < S.parallel ? st.par : 0, narrow: !!st.narrow, refused: st.refused || 0, holdFor: Math.max(0, (st.hold || 0) - Date.now()) }; };
 M.pump = function (st) {
   if (!st.on || !st.sample || st.blocked) return;
   if (st.used >= st.settings.budget && !st.settings.endless) { st.on = false; st.notice = 'The minds have had the ' + st.settings.budget + ' thoughts you allowed and are asleep. Wake them for another ' + st.settings.budget + ', or raise the budget in Setup.'; st.budgetHit = true; return; }
-  if (st.inflight >= Math.min(st.settings.parallel, st.par || 99)) return;
+  if (st.inflight >= Math.max(1, Math.min(st.settings.parallel, st.par || 99) - (st.outerBusy ? 1 : 0))) return; /* the maker or the chronicler at work takes one place */
   if (Date.now() < (st.hold || 0)) return;
-  if (st.par && st.par < st.settings.parallel && Date.now() - Math.max(st.easeT || 0, st.upT || 0) > 180000) { st.par++; st.upT = Date.now(); } /* three quiet minutes: try one more at a time again */
-  if (Date.now() - st.lastStart < 60000 / Math.max(1, st.settings.perMinute)) return;
+  M.recover(st, Date.now());
+  if (Date.now() - st.lastStart < 60000 / Math.max(1, Math.min(st.settings.perMinute, st.rate || st.settings.perMinute))) return;
+  const narrow = st.narrow && typeof st.inView === 'function'; /* while the pace is being refused even at its slowest, only those in view think */
   let best = null;
   for (const id in st.minds) {
     const m = st.minds[id];
-    if (m.dead || m.busy || !agentById(st.world, m.id)) continue;
+    const ag = m.dead || m.busy ? null : agentById(st.world, m.id); if (!ag) continue;
+    if (narrow && !st.inView(ag)) continue;
     if (!best || m.urge > best.urge) best = m;
   }
   if (best && best.urge >= 1) M.think(st, best, M.kindFor(st, best));

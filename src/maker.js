@@ -51,9 +51,11 @@ K.stats = function (st) {
     pledgesRefused: (w.tally && w.tally.pledgesRefused) || [], buildingsOfTheDeadClaimed: (w.tally && w.tally.claimed) || 0, emptyBuildingsOfTheDead: (function () { let n = 0; for (let i = 0; i < w.shelters.length; i++) if (w.shelters[i] > 0 && !SW.isAlive(w, w.shelters[i])) n++; return n; })(), newcomersSoFar: ags.filter(function (a) { return a.arrived != null; }).length,
     lessonsLearnedFromOthers: (w.tally && w.tally.lessons) || 0, talesHeld: Object.keys(st.minds).reduce(function (n, id) { return n + ((st.minds[id].tales || []).length); }, 0),
     tellingsByTheFire: ags.reduce(function (n, a) { return n + (a.stats.told || 0); }, 0), huntsMadeTogether: ags.reduce(function (n, a) { return n + (a.stats.huntedWith || 0); }, 0), grudgesHeld: ags.reduce(function (n, a) { return n + Object.keys(a.marks || {}).filter(function (k) { return a.marks[k].k === 'grudge'; }).length; }, 0), kindnessesRemembered: ags.reduce(function (n, a) { return n + Object.keys(a.marks || {}).filter(function (k) { return a.marks[k].k === 'kindness'; }).length; }, 0),
-    whatTheStoresHold: (function () { const out = [], S2 = w.stores || {}; for (const k in S2) { const so = S2[k]; if (!so || !so.items) continue; const i = +k, x = i % w.W, y = Math.floor(i / w.W), ow = so.by != null ? w.agents.filter(function (a) { return a.id === so.by; })[0] : null; out.push({ at: [x, y], keptBy: ow ? ow.name : so.by != null ? 'one now dead' : 'no one', foodNow: so.items.length, putInEver: so.put || 0, drawnEver: so.drawn || 0 }); } return { each: out.slice(0, 24), foodPutIntoStoresEver: (w.tally || {}).storeIn || 0, foodDrawnFromStoresEver: (w.tally || {}).storeOut || 0, ofThatDrawnByTheHungry: (w.tally || {}).storeOutHungry || 0 }; })(),
+    deathsOfLate: (w.graves || []).slice(-10).map(function (g) { const R = SW.regionAt(w, g.x, g.y); return g.name + ', day ' + (1 + Math.floor(g.tick / w.laws.time.dayLength)) + ', ' + g.cause + ', at (' + g.x + ',' + g.y + ')' + (R ? ' in ' + R.name : ''); }),
+    toolsOfTheirOwnDesignMade: (function () { const c = (w.tally || {}).crafted || {}; return Object.keys(c).sort(function (x, y) { return c[y] - c[x]; }).slice(0, 14).map(function (k) { return k + ' ' + c[k]; }).join(', ') || 'none counted yet'; })(),
+    whatTheStoresHold: (function () { const out = [], S2 = w.stores || {}; for (const k in S2) { const so = S2[k]; if (!so || !so.items) continue; const i = +k, x = i % w.W, y = Math.floor(i / w.W), ow = so.by != null ? w.agents.filter(function (a) { return a.id === so.by; })[0] : null; out.push({ at: [x, y], keptBy: ow ? ow.name : so.by ? 'one now dead' : 'no one', foodNow: so.items.length, putInEver: so.put || 0, drawnEver: so.drawn || 0, drawnBy: so.who || {} }); } return { each: out.slice(0, 24), foodPutIntoStoresEver: (w.tally || {}).storeIn || 0, foodDrawnFromStoresEver: (w.tally || {}).storeOut || 0, ofThatDrawnByTheHungry: (w.tally || {}).storeOutHungry || 0 }; })(),
     hungerAndHelp: { collapsedFromHungerNow: w.agents.filter(function (a) { return a.e <= 0; }).length, timesTheStarvingBegged: (w.tally || {}).begged || 0, timesTheStarvingWereFedByAnother: (w.tally || {}).succoured || 0, callsToHuntOrGatherTogether: (w.tally || {}).musters || 0 },
-    richGrounds: (w.rich || []).map(function (R) { let pl = 0, gr = 0, pe = 0; for (let dy = -R.r; dy <= R.r; dy++) for (let dx = -R.r; dx <= R.r; dx++) { if (R.y + dy < 0 || R.y + dy >= w.H) continue; const p = w.plants[SW.idx(w, R.x + dx, R.y + dy)]; if (p && p.food >= 1) pl++; } w.creatures.forEach(function (c) { if (!c.dead && !w.laws.creatures[c.sp].predator && SW.cheb(c.x, c.y, R.x, R.y) <= R.r) gr++; }); w.agents.forEach(function (a) { if (SW.cheb(a.x, a.y, R.x, R.y) <= 12) pe++; }); return R.name + ' (' + R.x + ',' + R.y + '): ' + pl + ' plants bearing, ' + gr + ' grazers, ' + pe + ' people within 12'; }).filter(function (t, i) { return i < 40; }),
+    richGrounds: (w.rich || []).map(function (R) { let pl = 0, al = 0, gr = 0, pe = 0; for (let dy = -R.r; dy <= R.r; dy++) for (let dx = -R.r; dx <= R.r; dx++) { if (R.y + dy < 0 || R.y + dy >= w.H) continue; const p = w.plants[SW.idx(w, R.x + dx, R.y + dy)]; if (p) { al++; if (p.food >= 1) pl++; } } w.creatures.forEach(function (c) { if (!c.dead && !w.laws.creatures[c.sp].predator && SW.cheb(c.x, c.y, R.x, R.y) <= R.r) gr++; }); w.agents.forEach(function (a) { if (SW.cheb(a.x, a.y, R.x, R.y) <= 12) pe++; }); return R.name + ' (' + R.x + ',' + R.y + '): ' + al + ' food plants standing, ' + pl + ' of them bearing now, ' + gr + ' grazers, ' + pe + ' people within 12'; }).filter(function (t, i) { return i < 40; }),
     climate: (function () { if (!w.wrap) return 'this world has edges and no equator: only the warm countries are warm'; let warm = 0, ice = 0; w.agents.forEach(function (a) { const c = SW.climate(w, a.x, a.y); if (c === 1) warm++; else if (c === 2) ice++; }); return { warmBeltHalfWidthAsShareOfHeight: (w.laws.climate || {}).belt, seasonOfRains: (w.laws.climate || {}).rains ? 'on' : 'off', livingInTheWarmBelt: warm, livingOnTheIce: ice, livingBetween: w.agents.length - warm - ice }; })(),
     hardshipsPressing: (function () { const o = {}; (w.peoples || []).forEach(function (p, i) { const t = {}; let n = 0; w.agents.forEach(function (a) { if (a.people !== i) return; n++; for (const k in (a.press || {})) t[k] = (t[k] || 0) + a.press[k]; }); const top = Object.keys(t).sort(function (x, y) { return t[y] - t[x]; }).slice(0, 4).map(function (k) { return (SW.PRESSURES[k] || k) + ' ' + (Math.round(t[k] / Math.max(1, n) * 10) / 10); }); o[p.name] = top.join(', ') || 'none'; }); return o; })(),
     waysWithinReach: (function () { const o = {}; w.agents.forEach(function (a) { const pf = SW.pathsFor(w, a); pf.open.forEach(function (q) { o[q.id] = (o[q.id] || '') + a.name + ' (open' + (q.why ? ', by ' + q.why : '') + ') '; }); pf.near.slice(0, 2).forEach(function (q) { if ((o[q.id] || '').length < 90) o[q.id] = (o[q.id] || '') + a.name + ' (needs ' + q.missing.slice(0, 70) + ') '; }); }); return o; })(),
@@ -87,7 +89,7 @@ function people(st, full) {
 /* ---------- the chronicler ---------- */
 K.tell = async function (st) {
   const w = st.world, S = st.story, d = w.laws.time.dayLength;
-  if (K.busy || !st.sample) return null; K.busy = 'story'; st.used++;
+  if (K.busy || !st.sample) return null; K.busy = 'story'; st.outerBusy = true; st.used++;
   try {
     const since = st.chron.filter(function (c) { return c.tick > S.last && c.kind !== 'story' && c.kind !== 'maker'; }).slice(-140).map(function (c) { return 'day ' + (Math.floor(c.tick / d) + 1) + ' [' + c.kind + '] ' + c.text; });
     const vs = st.voices.filter(function (v) { return v.tick > S.last; }), step = Math.max(1, Math.ceil(vs.length / 28));
@@ -110,8 +112,8 @@ K.tell = async function (st) {
     M.record(st, { t: 'story', n: ch.n, title: ch.title, text: ch.text, threads: S.threads, trends: S.trends, stats: now });
     st.ui({ type: 'story', chapter: ch });
     return ch;
-  } catch (e) { S.lastDay = SW.day(w); K.error = 'The chronicler could not write (' + ((e && e.code) || (e && e.message) || 'failed') + ').'; M.record(st, { t: 'failed', name: 'chronicler', code: (e && e.code) || 'error', raw: e && e.text ? String(e.text).slice(0, 800) : '' }); return null; }
-  finally { K.busy = ''; }
+  } catch (e) { K.error = K.later(st, S, e, 'The chronicler', st.settings.story.every); M.record(st, { t: 'failed', name: 'chronicler', code: (e && e.code) || 'error', raw: e && e.text ? String(e.text).slice(0, 800) : '' }); return null; }
+  finally { K.busy = ''; st.outerBusy = false; }
 };
 
 /* ---------- what the maker may do, each with its bounds ---------- */
@@ -304,6 +306,7 @@ K.SEED = [
   '[NOW] rich ground (event kind rich; laws ecology.richSpread, ecology.richBreed): rounds of land where food plants spread fast and herds breed; one near each people at the founding and one in every land',
   '[NOW] hunger that can be answered: an empty body fails over a day (body.starveHarm) and can be fed back; one with food feeds their own who starve (culture.succour 1, or 2 for anyone); the starving go to stores and to those who carry food; a call to hunt or gather together (muster; culture.musterHold); a herd follows its lead when one of it is tamed (ecology.herdFollow)',
   '[NOW] a body mends at half pace when half fed (body.healLow) and twice as fast in the warm, under a roof or by a fire (body.healWarm)',
+  '[NOW] a refused call never puts the minds to sleep: the pace eases, the clock slows, and at the worst only those in view think; the maker and the chronicler try again within minutes',
   '[NEXT] a pen that holds a herd at a settlement; flood in the season of rains; a day that goes round the world',
   '[NOW] women and men: a child comes of one of each; twins are a girl and a boy; children come sooner when both parents are well fed and well (mate.plentyCooldown); a grown body can swim narrow water; plants grow faster in spring, rain and at harvest; animals breed by season and by their numbers, and herds return from the rim when few (ecology.grazerTarget, ecology.herdReturn); deposits refill slowly (ecology.lodeRegrow)',
   '[NOW] peoples that last: newcomers who come into the land when the living are few (law arrivals.*, event newcomers), twins (mate.twinChance), longer lives, a milder lean season; what the dead built stands empty and can be claimed by anyone, to begin a home or add to a band\'s; elders moved to hand on what only they know',
@@ -362,7 +365,7 @@ K.HERITAGE = {
     { op: 'recipe', name: 'sharing', way: null, needs: { food: 'any', foodN: 2, beings: 1 }, gives: { fxAll: [{ on: 'energy', by: 8 }, { on: 'joy', by: 0.15 }] }, hint: 'Lay out two foods for whoever stands beside you, and all eat together.' },
     { op: 'recipe', name: 'watchfire', way: 'fire', needs: { wood: 2, fire: true, beings: 1 }, gives: { fxAll: [{ on: 'fear', by: -0.3 }, { on: 'warmth', times: 1.3, for: 240 }] }, hint: 'Feed your fire high with two wood while others sit close, and everyone beside it feels warmer and braver against the dark.' },
     { op: 'recipe', name: 'ironward', way: 'smelting', needs: { ore: 1, fire: true }, gives: { thing: 'ironward', n: 1, fx: [{ on: 'toughness', times: 1.3, for: 480 }, { on: 'fear', by: -0.15 }] }, hint: 'Beat smelted metal in a fire into a ward that can be worn or given; its bearer stands harder against teeth and claws.' },
-    { op: 'law', group: 'drives', key: 'belonging', value: 1.5 }, { op: 'law', group: 'drives', key: 'curiosity', value: 1.4 }, { op: 'law', group: 'drives', key: 'compassion', value: 1.4 }, { op: 'law', group: 'drives', key: 'hunger', value: 1.3 }, { op: 'law', group: 'body', key: 'sight', value: 11 }, { op: 'law', group: 'mate', key: 'minEnergy', value: 68 },
+    { op: 'law', group: 'drives', key: 'belonging', value: 1.5 }, { op: 'law', group: 'drives', key: 'curiosity', value: 1.4 }, { op: 'law', group: 'drives', key: 'compassion', value: 1.4 }, { op: 'law', group: 'drives', key: 'hunger', value: 1.3 }, { op: 'law', group: 'body', key: 'sight', value: 11 }, { op: 'law', group: 'mate', key: 'minEnergy', value: 64 },
     { op: 'recipe', name: 'amberknot', way: null, needs: { thing: 'amber', thingN: 1, beings: 1 }, gives: { thing: 'amberknot', n: 1, fxAll: [{ on: 'joy', by: 0.15 }, { on: 'lonely', by: -0.15 }] }, hint: 'Bind a piece of amber on a cord while another stands beside you; it is a small bright thing to keep, or to give.' },
     { op: 'site', name: 'Reedmother', kind: 'grove', on: 'marsh', r: 3, cool: 960, fx: [{ on: 'lore', by: 0.4 }, { on: 'joy', by: 0.2 }, { on: 'fear', by: -0.1 }] },
     { op: 'creature', name: 'nibbet', base: 'hopper', set: { breedChance: 0.004, speed: 0.75, meat: 2 }, form: { build: 'small', head: 'longears', tail: 'stub', pattern: 'belly', hue: 32 }, n: 14 },
@@ -443,7 +446,11 @@ K.HERITAGE = {
     'A spur shortens the road but does not walk it. The fire spur closed the Kragrek\'s lore gap within four days, but what still stands between them and fire is the act of gathering wood and stone, which only their own aims can supply.',
     'Closeness saves lives in hunger but kills in contagion. Each carer who stayed beside the sick caught the raw-meat fever, and the sickness drain, storm cold and winter scarcity together starved four in one day. Before a lean season, sickness and cold must be judged together with food, not food alone.',
     'A sowing made in a season of plenty is a cheap insurance. Kelbulb and thornpear sown before need peaked were eaten steadily, so food placed ahead of the lean season reaches people because they are already foraging, not starving.',
-    'Those who starve now are not the poor but the newly arrived: Sitha was a newcomer dependent on another\'s table, and Zihua, the weakest Meki, is one too. A custom or a store at the hall does not feed someone who cannot reach the hall, so help for newcomers must be placed where they stand.'],
+    'Those who starve now are not the poor but the newly arrived: Sitha was a newcomer dependent on another\'s table, and Zihua, the weakest Meki, is one too. A custom or a store at the hall does not feed someone who cannot reach the hall, so help for newcomers must be placed where they stand.',
+    'A hardy food sown on the ground where people already forage, ahead of the lean season, carried the north through winter (rimewort eaten 44 times). A healing spring placed a few steps outside their paths was found by no one. In this world, help must stand where people already walk.',
+    'Three sowings of familiar foods made in a season of plenty were all eaten past their targets, so the food supply in this world is now sound. What still kills is reach, and what still stalls is not food but births: the population can be well fed and still not grow.',
+    'A looser mating law once again brought a birth to the pair already furthest along (Vorok and Eiuine), not to the pair I named. And the north\'s danger has changed shape: the weak there now die to predators rather than to hunger outright, so in the north I must judge low energy as a risk of being killed, not only of starving.',
+    'A store does not only feed the hungry: once food sits in one place, it draws thieves as well. The count \'drawn by the hungry\' must be read alongside the theft events before I judge whether a store saved anyone.'],
   ideas: ['Places of power as anchors that people compete over and settle around; a contested place between two camps could create contact that scarcity alone never did.',
     'Death should leave a trace: the place where someone fell could become a site that touches visitors with grief or lore, a seed for ancestor belief.',
     'Leaders without followers are a lasting tension. Give them acts that cost something and visibly benefit others, rather than handing out followers.',
@@ -470,7 +477,14 @@ K.HERITAGE = {
     'Rafts are known by six and water is the heaviest hardship for four peoples, yet no raft, canoe or kayak has ever been made. Watch whether anyone gathers six wood toward one, or whether the vessel recipes are too costly next to gathering food.',
     'A hardy winter food on the snow (rimewort) is a test of idea 65: watch whether the northern folk return to where it grows when the cold comes.',
     'Hoka\'s custom that no one hold more than four shares while another starves is the first law of the world, yet Sitha starved anyway. Watch whether the custom is ever invoked to make someone give, and whether it spreads to another band. A law that cannot reach the hungry is only words.',
-    'Newcomers starve first: they arrive with little standing, few bonds and no knowledge of where food grows. Watch whether the hosts who take them in (Nande with the Meki, Hoka with the Pesi) feed them through their first winter.']
+    'Newcomers starve first: they arrive with little standing, few bonds and no knowledge of where food grows. Watch whether the hosts who take them in (Nande with the Meki, Hoka with the Pesi) feed them through their first winter.',
+    'Hoka\'s Rest stands beside four fresh graves. Watch whether Hoka or Hanna raise a cairn, tell of the dead, or leave the place, and whether the site becomes the first ancestor ground.',
+    'Hoka\'s custom that no one hold more than four shares while another starves is the first law of the world, yet Sitha starved anyway. Watch whether the custom is ever invoked to make someone give, and whether it spreads to another band. A law that cannot reach the hungry is only words.',
+    'Help that travels: trailcake and saltmeat exist and 89 salt is held, yet neither has ever been made. Every hunger death has been someone far from a fire. Watch whether anyone ever carries prepared food to kin elsewhere. If no one does, a carried-food gift to the hungry may be the missing act.',
+    'Bands without words: Huahua pledged to Zichi while the Tlame understand 0% of other tongues. Watch whether following comes before speech elsewhere too, and whether the Tlame learn Meki first through the band rather than through trade.',
+    'Hanna starves near Hoka, who keeps offering his store and fire, while robbing of that store is recorded but no draw is. Watch whether an offered store ever becomes a drawn store for a bonded friend: the first shared granary would be the first food that reaches someone who cannot reach a hall.',
+    'Births have paused while courtings climb (46 to 52). Watch whether the looser energy threshold brings births to roofed pairs before winter, and whether a winter-born child survives. If newborns die in the cold, timing births toward spring may need its own law.',
+    'Predators take the weak: Hanna sat at energy 0 for days and then fell to a stalker. Hunger now kills indirectly, by leaving people too weak to flee. Watch whether the starving die to beasts more than to hunger itself, and whether a watchfire or company ever shields them.']
 };
 K.legacy = function (st) {
   const Mk = st.maker, H = Mk.heritage || { ops: [], lessons: [], ideas: [] }, ops = H.ops.slice(), lessons = H.lessons.slice(), ideas = H.ideas.slice();
@@ -497,7 +511,7 @@ K.inherit = function (st, legacy) {
 function ensure(st) { const Mk = st.maker; if (!Mk.ideas.length) K.SEED.forEach(function (t) { Mk.ideas.push({ text: t, by: 'owner', status: 'open' }); }); return Mk; }
 K.make = async function (st) {
   const w = st.world, L = w.laws, Mk = ensure(st), S = st.story;
-  if (K.busy || !st.sample) return null; K.busy = 'maker'; st.used++;
+  if (K.busy || !st.sample) return null; K.busy = 'maker'; st.outerBusy = true; st.used++;
   try {
     const now = K.stats(st), pend = Mk.log.filter(function (e) { return e.verdict === 'pending'; });
     const laws = LAW_GROUPS.map(function (g) { return g + ': ' + Object.keys(L[g] || {}).filter(function (k) { return typeof L[g][k] === 'number'; }).map(function (k) { return k + '=' + L[g][k]; }).join(', '); }).join('\n');
@@ -513,7 +527,7 @@ K.make = async function (st) {
       '\n\nTHE WORLD\'S PARTS\nLaws (group: key=value):\n' + laws + '\nPlants: ' + plants + '\nAnimals: ' + beasts + '\nWays of knowledge: ' + Object.keys(L.tree).map(function (k) { const d = L.tree[k]; return k + ' [' + d.tree + '; after ' + (d.needs.join(',') || '-') + '; lore ' + d.lore + '; ' + d.stat + ' x' + d.n + '; known by ' + (now.waysKnown[k] || 0) + ']'; }).join('; ') +
       '\nGraves (where the dead fell): ' + (w.graves.slice(-8).map(function (g) { return g.name + ' at (' + g.x + ',' + g.y + '), ' + g.cause; }).join('; ') || 'none') +
       '\nMixes: ' + ((L.mixes || []).map(function (m) { return '"' + m.name + '" ' + m.of.join('+') + ' → ' + fxT(m.fx); }).join('; ') || 'none') + '\nPlaces of power: ' + ((w.sites || []).map(function (q) { return q.kind + ' "' + q.name + '" (' + fxT(q.fx) + '; found by ' + w.agents.filter(function (a) { return a.met && a.met[q.id] != null; }).length + '; nearest being ' + Math.min.apply(null, w.agents.map(function (a) { return SW.cheb(a.x, a.y, q.x, q.y); }).concat([999])) + ' steps away)'; }).join('; ') || 'none') +
-      '\nThings that can be made or done: ' + (Object.keys(L.recipes || {}).map(function (k) { const r = L.recipes[k]; return '"' + k + '" (way ' + (r.way || 'none') + '; needs ' + M.needsText(r.needs) + '; done ' + w.agents.reduce(function (s, a) { return s + ((a.things && a.things[r.gives.thing]) || 0); }, 0) + ' held)'; }).join('; ') || 'none') +
+      '\nThings that can be made or done: ' + (Object.keys(L.recipes || {}).map(function (k) { const r = L.recipes[k]; return '"' + k + '" (way ' + (r.way || 'none') + '; needs ' + M.needsText(r.needs) + '; made ' + (((w.tally || {}).made || {})[k] || 0) + ' times ever; ' + w.agents.reduce(function (s, a) { return s + ((a.things && a.things[r.gives.thing]) || 0); }, 0) + ' held now; a tool of a being\'s own design, such as a bow it invented, is not one of these and is counted under toolsOfTheirOwnDesignMade)'; }).join('; ') || 'none') +
       '\n\nYOUR NOTEBOOK\nIdeas (the owner\'s roadmap first, in the order the owner wants it: work with what is marked NOW, prepare what is marked NEXT, and let LATER, FAR and LAST wait until the peoples reach those ages. For those, say in a request what you would need; do not force them early. Then your own):\n' + Mk.ideas.map(function (q, i) { return (i + 1) + '. [' + q.status + (q.by === 'maker' ? ', yours' : '') + '] ' + q.text; }).join('\n') +
       '\nYour changes so far:\n' + (Mk.log.slice(-10).map(function (e) { return '#' + e.id + ' day ' + e.day + ' [' + e.verdict + '] ' + (e.ops.join('; ') || 'no change') + (e.refused.length ? ' (refused: ' + e.refused.join('; ') + ')' : '') + '. You predicted: ' + e.predict + (e.why ? ' On review you wrote: ' + e.why : ''); }).join('\n') || 'none yet') + (pend.length ? '\nThose marked pending must be reviewed now: keep or undo each.' : '') +
       '\nLessons you wrote down: ' + (Mk.lessons.slice(-10).join(' | ') || 'none yet') +
@@ -528,7 +542,7 @@ K.make = async function (st) {
     if (ops.length) {
       const t = K.trial(w, ops);
       if (!t.ok) out.refused.push('all changes refused: ' + t.why);
-      else ops.forEach(function (op) { const a = K.applyOp(w, op); if (a.ok) { out.ops.push(a.text); out.undo.push(a.undo); out.raw.push(op); } else out.refused.push(a.why); });
+      else ops.forEach(function (op, oi) { const a = K.applyOp(w, op); if (a.ok) { out.ops.push(a.text); out.undo.push(a.undo); out.raw.push(op); } else out.refused.push('your change ' + (oi + 1) + ' (' + [op.op, op.kind, op.name || op.plant || op.key].filter(Boolean).join(' ') + '): ' + a.why); }); /* a refusal names the change it refuses: one of two rich grounds was refused and the maker took it for the other */
     }
     if (!out.ops.length) out.verdict = 'nothing';
     Mk.log.push(out); if (Mk.log.length > 60) Mk.log.shift();
@@ -537,20 +551,27 @@ K.make = async function (st) {
     (Array.isArray(I.add) ? I.add : []).slice(0, 4).forEach(function (t) { if (t && Mk.ideas.length < 80) Mk.ideas.push({ text: clip(t, 500), by: 'maker', status: 'open', day: now.day }); });
     if (r.lesson) { Mk.lessons.push('day ' + now.day + ': ' + clip(r.lesson, 700)); if (Mk.lessons.length > 30) Mk.lessons.shift(); }
     (Array.isArray(r.requests) ? r.requests : []).slice(0, 2).forEach(function (t) { if (t) { Mk.requests.push({ day: now.day, text: clip(t, 1800) }); M.record(st, { t: 'request', text: clip(t, 1800) }); } });
-    Mk.stats = JSON.parse(JSON.stringify(now)); /* a copy: the tallies inside are live objects, and a kept reference made every count look frozen between visits */ Mk.lastDay = now.day; Mk.seen = out.seen; Mk.rev = (Mk.rev || 0) + 1;
+    Mk.stats = JSON.parse(JSON.stringify(now)); /* a copy: the tallies inside are live objects, and a kept reference made every count look frozen between visits */ Mk.lastDay = now.day; Mk.fails = 0; Mk.retryAt = 0; K.error = ''; Mk.seen = out.seen; Mk.rev = (Mk.rev || 0) + 1;
     M.record(st, { t: 'maker', id: out.id, seen: out.seen, changes: out.ops, refused: out.refused, predict: out.predict, reviewed: Mk.log.filter(function (e) { return e.why; }).slice(-3).map(function (e) { return '#' + e.id + ' ' + e.verdict + ': ' + e.why; }), lesson: r.lesson || '', ideasAdded: (I.add || []).slice(0, 4), raw: ops });
     if (out.ops.length) M.chron(st, 'maker', 'The world changed: ' + out.ops.join('; ') + '.', []);
     st.ui({ type: 'maker', entry: out });
     return out;
-  } catch (e) { Mk.lastDay = SW.day(w); K.error = 'The maker could not finish its visit (' + ((e && e.code) || (e && e.message) || 'failed') + ').'; M.record(st, { t: 'failed', name: 'maker', code: (e && e.code) || 'error', raw: e && e.text ? String(e.text).slice(0, 800) : String((e && e.message) || '') }); return null; }
-  finally { K.busy = ''; }
+  } catch (e) { K.error = K.later(st, Mk, e, 'The maker', st.settings.maker.every); M.record(st, { t: 'failed', name: 'maker', code: (e && e.code) || 'error', raw: e && e.text ? String(e.text).slice(0, 800) : String((e && e.message) || '') }); return null; }
+  finally { K.busy = ''; st.outerBusy = false; }
 };
 /* when each of them is due */
+/* a visit that Claude refused or that failed is tried again soon, not put off until the next visit is due: first after a minute, then two, up to ten.
+   After five refusals in a row it waits a day. A refusal also eases the pace of the minds, so that the next try has room. */
+K.later = function (st, rec, e, who, every) {
+  const code = (e && e.code) || (e && e.message) || 'failed', now = Date.now(); rec.fails = (rec.fails || 0) + 1;
+  if (rec.fails <= 5) { rec.retryAt = now + Math.min(600000, 60000 * rec.fails); if (code === 'rate_limited' && !(e && e.reason === 'usage_limit')) M.ease(st, now); return who + ' was refused (' + code + ') and will try again in ' + Math.round((rec.retryAt - now) / 60000) + ' min.'; }
+  rec.fails = 0; rec.retryAt = 0; rec.lastDay = SW.day(st.world) - every + 1; return who + ' could not get through after five tries (' + code + ') and will try again tomorrow.';
+};
 K.tick = function (st) {
   if (!st.on || !st.sample || st.blocked || K.busy || st.used >= st.settings.budget) return;
-  const day = SW.day(st.world), S = st.settings;
-  if (day - st.story.lastDay >= S.story.every) K.tell(st);
-  else if (S.maker.on && st.story.chapters.length && day - st.maker.lastDay >= S.maker.every) K.make(st);
+  const day = SW.day(st.world), S = st.settings, now = Date.now(); if (now < (st.hold || 0)) return;
+  if (day - st.story.lastDay >= S.story.every && now >= (st.story.retryAt || 0)) K.tell(st);
+  else if (S.maker.on && st.story.chapters.length && day - st.maker.lastDay >= S.maker.every && now >= (st.maker.retryAt || 0)) K.make(st);
 };
 K.ensure = ensure;
 if (typeof module !== 'undefined' && module.exports) module.exports = K; else root.SWK = K;

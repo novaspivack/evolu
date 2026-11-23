@@ -32,11 +32,11 @@ const at = (w, o, i) => { o.x = i % w.W; o.y = Math.floor(i / w.W); o.px = o.x; 
   const { w, st } = fresh(7); let calls = 0, refuse = 2; st.settings.perMinute = 6000; st.on = true;
   st.sample = async function () { calls++; if (refuse > 0) { refuse--; const e = new Error('too many sample calls at once from this page'); e.code = 'rate_limited'; throw e; } return { text: JSON.stringify({ thought: 'I am here.', plan: [{ do: 'rest', ticks: 20 }] }) }; };
   const m = st.minds[w.agents[0].id]; await M.think(st, m, 'routine');
-  ok(st.on === true && st.par === 3 && st.hold > Date.now() && /fewer thoughts at once\. The minds carry on, 3 at a time/.test(st.notice) && m.urge === 2 && st.inflight === 0, 'when Claude asks for fewer calls at once the minds stay awake, think three at a time, wait a little, and the one refused will ask again');
+  ok(st.on === true && st.par === 3 && st.hold > Date.now() && /slower pace\. The minds carry on, 3 at a time/.test(st.notice) && m.urge === 2 && st.inflight === 0, 'when Claude asks for fewer calls at once the minds stay awake, think three at a time, wait a little, and the one refused will ask again');
   const before = calls; M.pump(st); ok(calls === before, 'while waiting, no new thought is begun');
   st.hold = 0; await M.think(st, m, 'routine'); ok(st.par === 2 && st.on, 'a second refusal eases off again');
   st.hold = 0; await M.think(st, m, 'routine'); ok(m.thoughts >= 1 && st.on && m.urge === 0, 'and then thinking carries on');
-  refuse = 9; for (let k = 0; k < 3; k++) { st.hold = 0; await M.think(st, m, 'routine'); } ok(st.on === false && /five times in two minutes/.test(st.notice), 'only if it is refused five times in two minutes do the minds sleep');
+  refuse = 9; for (let k = 0; k < 3; k++) { st.hold = 0; await M.think(st, m, 'routine'); } ok(st.on === true && st.par === 1 && st.rate < st.settings.perMinute, 'refused five times in two minutes, the minds no longer sleep (they did until Generation 23): they think one at a time, at an eased pace');
   { /* the world waits for its minds */
     const q = fresh(11), w2 = q.w, s2 = q.st; s2.on = true; s2.sample = async function () { return { text: '{}' }; }; const ms = w2.agents.map(o => s2.minds[o.id]);
     ok(M.pace(s2) === 1 && ms.every(m => m.lastT === w2.tick), 'at the start no one is overdue and the clock runs free');

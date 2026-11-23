@@ -6,7 +6,7 @@ Evolu is an experimental world game that runs as a single page inside Claude. A 
 
 Nothing in Evolu is hard-coded to happen. Things are made possible, and the beings find them or do not.
 
-Created by **Nova Spivack**, built with Claude. Generation 22, November 2026.
+Created by **Nova Spivack**, built with Claude. Generation 23, November 2026.
 Source: <https://github.com/novaspivack/evolu>
 
 > Evolu was called Seedworld until Generation 14.
@@ -264,12 +264,12 @@ tests/run-all.sh            engine, minds and maker (about three minutes, needs 
 tests/run-all.sh browser    the same, then the page in headless Chrome (needs Playwright and Chrome)
 ```
 
-There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore, culture and necessity, peoples that last, a world with edges, what a mind is offered, a rim that opens slowly, a world that goes round, the warm belt with food in sight and trade, and hunger answered with rich ground and the muster. Together they are a regression suite of 532 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds.
+There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore, culture and necessity, peoples that last, a world with edges, what a mind is offered, a rim that opens slowly, a world that goes round, the warm belt with food in sight and trade, hunger answered with rich ground and the muster, and a world that slows and does not sleep. Together they are a regression suite of 564 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds.
 
 ## What is and is not verified
 
 - The tests show that the mechanics work and that the page runs without errors. They cannot show how real minds behave: those calls only happen when the page runs inside Claude.
-- What real minds did is known from thirteen recorded runs, described in the design log. The globe has been run for twenty-five days, the last thirteen under Generation 21; Generation 22 (a slow collapse from hunger, feeding one's own, rich ground, the muster, herds that follow) was in its first run with real minds when this was written: the pictures above are from it, and its record has not yet been analysed.
+- What real minds did is known from fourteen recorded runs, described in the design log. One world on the globe has been run for sixty days, the last thirty-five under Generation 22 (the pictures above are from it). Generation 23 (a pace that eases when Claude asks, a clock that slows, minds that narrow to those in view and are never all switched off) had not yet been run with real minds when this was written, and the real service cannot be made to refuse in a test.
 - Saved worlds live in the browser (IndexedDB, with one older slot as a fallback). They do not travel between browsers or devices; the run log does.
 - Only a world begun under Generation 20 or later is a globe. Older worlds keep their edges.
 - An act can pass every check on the body and still never be reachable by a mind: claiming and venturing were in that state for two generations. The last suite now drives each act through the mind's own path, and reads the list of acts out of the prompt to check the body accepts every one.

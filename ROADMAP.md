@@ -14,10 +14,11 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 22, to be watched and tuned
+## NOW: built in Generations 14 to 23, to be watched and tuned
 
 | Item | State |
 | --- | --- |
+| **A world that slows and does not sleep:** a refused call eases the pace and slows the clock; at the worst only the beings in view think; the maker and chronicler try again within minutes | Built in 23, after the minds slept eighteen days in the fourteenth run. Watch: how many refusals at each pace; is six a minute low enough; does the maker get through |
 | **Hunger that can be answered:** an empty body fails over a day and can be fed back; those with food feed their own; the starving go to stores and to those who carry food and beg | Built in 22 (laws `body.starveHarm`, `culture.succour`). Watch: who still starves, and whether anyone was near with food |
 | **Mending when half fed, and faster in the warm** | Built in 22 (laws `body.healLow`, `body.healWarm`). Watch: do the hurt on the ice now mend by a fire |
 | **Rich ground:** rounds where food plants spread fast and herds breed; one near each people and in every land | Built in 22 (laws `ecology.richSpread`, `ecology.richBreed`; maker event `rich`). Watch: does anyone settle by it; is there game near homes |
@@ -144,7 +145,8 @@ These run through every stage and are picked up as runs call for them.
 - **Peoples too small and too closely related to grow.** Generation 16 answered with newcomers, twins and longer lives, and the world went from six to twelve; Generation 17 adds women and men, which narrows who can pair, and bands of four to offset it.
 - **A carried-on world cannot grow at its edges.** Only a new world has the veiled rim. Now in NEXT.
 - **Nothing in Generation 20 has been balanced by a run:** new hunters (wolves, bears, snakes, shadowcats, rivermaws), new food, three new peoples.
-- **Prompts have grown again:** median 29,000 characters and longest 38,000 in the twelfth run (24,000 and 36,800 in the eighth). No call failed and a thought took 7 seconds, so nothing was cut in Generation 21 beyond the list of plants; if thoughts slow or fail, this is the first place to look.
+- **Prompts are now the first thing to cut:** middle 30,700 characters and longest 45,600 in the fourteenth run, with forty-three alive. Refusals began at this size. Generation 23 changed the pace only, so that the next run shows what the pace alone does; cut the prompt next.
+- **Prompts grew through Generation 21 too:** median 29,000 characters and longest 38,000 in the twelfth run (24,000 and 36,800 in the eighth). No call failed and a thought took 7 seconds, so nothing was cut in Generation 21 beyond the list of plants; if thoughts slow or fail, this is the first place to look.
 - **Not yet used by real minds in twelve days on the globe:** fishing, the canoe, kayak, sled and igloo; one animal tamed. Too soon to call a fault.
 - **A band of one people that settles in another's climate** (Wood-folk on the ice) pays for it heavily in winter. The pull of the homeland did not bring them back. Watch before changing anything.
 - **A thought took 10 seconds in the eleventh run,** three times what it took in the tenth. Unexplained; it sets how often a being can think.
@@ -181,3 +183,4 @@ A short index; the detail is in the design log.
 | 20 | A world that goes round and is seen as a globe; three climates; two different poles; the sea's own creatures; the rainforest; three new peoples and the pull of the homeland; the dog, sled, igloo, canoe and kayak |
 | 21 | A warm belt about the equator and a season of rains; a sky that belongs to a place; food shown by what bears, and eat and harvest that walk to it; trade of anything held; signs and sounds for 29 kinds of event; a wind that does not pulse; hardships in words and sowings that say why they failed, for the maker |
 | 22 | Hunger that can be answered (a slow collapse, feeding one's own, begging, any store at the edge of death); mending in the warm; rich ground; more game; a call to hunt or gather together; a herd that follows its lead; a gift that answers an offer; a chart that can be read, notices that pass, verse that is verse; stores, sowings and hunger made visible to the maker |
+| 23 | A world that slows and does not sleep: an eased pace, a slower clock, minds in view only at the worst, all recovering by themselves; the maker and chronicler try again within minutes; who draws from each store, deaths with place and cause, recipes made ever, tools of their own design, refusals that name the change, for the maker; a reminder of rafts to one stopped by water |

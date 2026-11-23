@@ -65,7 +65,10 @@ The page writes each run to the artifact's store as it goes. With the artifact d
 - When a script replaces a line it found by a loose match, print the line and check it is the kind of thing meant before writing: looking for the heritage's fire spur by `way: 'fire'` found the roast recipe and replaced it (Generation 21; caught by diffing the heritage against the previous one, which is worth doing every time).
 - A patch of open grass of a given length may not exist: test helpers that look for one return undefined, and every position after that is NaN. Ask for eight tiles or fewer.
 - The browser checks set `window.EVOLU_SEED = 7` before the page loads, because a first visit now begins a world from a chance seed.
-- Claude allows a page only so many calls at once (six was refused in the eleventh run; four ran 478 thoughts without a refusal). The chronicler, the maker and foresight add to the count.
+- Claude allows a page only so many calls at once (six was refused in the eleventh run; four ran 478 thoughts without a refusal), and refuses more often as the people and the prompts grow (forty-three alive and 30,000 characters in the fourteenth). The chronicler, the maker and foresight add to the count.
+- **Never switch every mind off for something that may pass.** A refusal eases the pace (`M.ease`), the clock slows (`M.pace`), at the worst only those in view think (`st.narrow`), and it all recovers by itself (`M.recover`). Only a limit on the account, an expired session or ten faults in a row stop the minds. Anything that calls Claude from the page must try again by itself (`K.later`): in the fourteenth run the minds slept eighteen days of the world before anyone saw.
+- `M.ease` and `M.recover` take the time as an argument so that checks need not wait; keep new timing code that way.
+- In `K.stats` the world is `w` and its laws `w.laws`; there is no `L` there (a figure that used it broke every visit of the maker until a check called `K.stats`).
 - Beasts wander in from the edge of the map over time. A check that runs for hundreds of moments must keep clearing `w.creatures` if it needs beings to stay put. Calamities move people too: set `w.laws.weather.disaster = 0` (and `herd`, `pack`) in a check that needs them still.
 - A check that rests on chance (how many of forty animals stray) is measured against a control in the same check, not against a fixed number: the stream of chance shifts whenever anything in the world step changes.
 - A mind sees farther than it seems (11 steps in open country): a check that lays out plants must clear 16 steps around.
@@ -77,7 +80,7 @@ tests/run-all.sh                                   # needs only Node
 PLAYWRIGHT=/path/to/node_modules/playwright tests/run-all.sh browser
 ```
 
-All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`17-...js`); do not pin the generation number or the size of the heritage with `===` in it, or the next generation breaks it, with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
+All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`18-...js`); do not pin the generation number or the size of the heritage with `===` in it, or the next generation breaks it, with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
 
 What the tests cannot show is how real minds behave. Say so in every report.
 

@@ -12,6 +12,52 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## Generation 23 (built, not yet run with real minds): a world that slows and does not sleep
+
+Built from the fourteenth run and from what Nova said after it: "I did encounter rate limits and it turned off minds and I had to turn them back on ... the problem is the large population. What we should do is keep minds on in the visible area and turn them off in other areas rather than turn off all minds, ideally. And when rate limited perhaps slow time down so there are fewer global requests?" Both are built, in the other order: time slows first, and the minds narrow to those in view only if slowing is not enough.
+
+**What was wrong.** When Claude refused a thought ("sampling too often, try again later") the page thought one fewer at a time and paused. That was right. But five refusals inside two minutes switched **every** mind off and waited for a person to switch them on. On day 39 that happened, and the world ran on reflexes until day 57. The same rule existed for any three failures in a row. And when the maker or the chronicler was refused, it did not try again until its next visit was due, four days on.
+
+**What happens now when Claude asks for a slower pace.** Nothing is switched off.
+
+1. **Fewer, and slower.** Each refusal takes one from the number of thoughts at once (down to one) and three tenths from the thoughts allowed a minute (40, 28, 19.6, 13.7 ... down to a floor of 6), and the minds pause: ten seconds, then twenty, up to two minutes. The being whose thought was refused is first in line again.
+2. **Time slows.** The clock of the world already waits for minds that are overdue (Generation 19). With fewer thoughts a minute, more beings fall overdue and the clock slows further, so a large people simply lives more slowly, and no one is skipped. The settings Nova chose are not changed; this is a pace beneath them.
+3. **Only at the worst, only those in view.** If one thought at a time at six a minute is still refused, the beings in view go on thinking and the rest live on their reflexes. The clock then waits only for those in view.
+4. **It comes back by itself.** After two quiet minutes: one more at a time and a quarter faster, and so on. Once the pace is back to half of what Nova set, everyone thinks again. From the very bottom it is whole again in about twenty minutes.
+
+The meter by the thought count says "pace eased" or "minds in view only" for as long as it lasts (the notice itself now passes after ten seconds). A true limit on the account (`usage_limit`) still stops the minds and says so: no pace can answer that. A passing fault upstream now pauses and tries again; only ten in a row puts the minds to sleep.
+
+**The maker and the chronicler try again within minutes** (one, two, three ... up to ten) and after five refusals in a row leave it until tomorrow, not until the next visit is due. A refusal of either also eases the pace of the minds, and while either is at work the minds leave one place free.
+
+**The maker's five requests of this run.**
+
+- *"Vessels are never made."* True: 14 knew rafts and no raft, canoe, kayak or boat was ever made, in 258 planned makings. The recipes were offered and a held vessel does let a being cross; no one chose them. A being who has been stopped by deep water more than once, knows rafts and holds no vessel is now told what a raft needs and what it does. That is a reminder of what it knows, at the moment it matters; whether it then builds one is its own affair.
+- *"The story says Hoka's store was robbed twice on day 23, but the store shows drawn 0."* The counts began with Generation 22, on day 26. Raids are counted as draws since then. No fault, but the maker could not know that; each store now also shows **who** drew from it and how much.
+- *"Record who draws from each store, and each death with its place and cause."* Both are now among the maker's figures directly, where they cannot be lost in the telling: `drawnBy` on every store, and the last ten deaths with day, cause, place and land.
+- *"Bow, shield, raft and boat show done 0, yet the chapters say they were made."* The bows and shields in the story are tools of the beings' own design ("canopy bow"), which are not the recipes of the same name. The list now says how many times each recipe was ever made as well as how many are held, says in words that tools of a being's own design are counted elsewhere, and that count (`toolsOfTheirOwnDesignMade`) is new.
+- *"My rich ground was reported refused, yet it appears."* It asked for two rich grounds in one visit; the first was made and the second refused for lying within ten steps of the first, and the refusal did not say which. A refusal now names the change it refuses. Rich ground is also read by what stands on it as well as what bears, so ground picked bare by a crowded camp is not taken for ground never made.
+
+**Heritage folded in:** the maker lowered the energy needed to mate from 68 to 64 and kept it; four lessons and seven ideas.
+
+**Not built.** The prompts have grown again (middle 30,700 characters, longest 45,600). This is now the most likely cause of the refusals as the people grows, more than the number of calls, and it is first on the list for next time; I did not cut it in the same change as the pace, so that the next run shows what the pace alone does. A pen for a herd, a settlement that feeds itself, flood, and a day that goes round the world stand as they did.
+
+**Tested.** 564 checks in seventeen numbered files (32 new, in `tests/17-a-world-that-slows-and-does-not-sleep.js`), the two mind pipelines, the ecology run, and nine browser checks, one of which now reads the meter and the notice after three and after twelve refusals. The engine is unchanged in what it does (two new tallies): on three seeds, after 1,500 moments, every being's place, energy and health and the counts of animals and plants are identical to Generation 22's, so balance and speed are as measured there.
+
+**What the tests cannot show.** I can make a stand-in for Claude refuse a thought, and every rule above is checked that way. I cannot make the real service refuse, so I do not know how many refusals a people of forty-three will meet at each pace, nor whether the floor of six a minute is low enough. The run will show it: the record keeps every refusal, and the meter will say when the pace is eased.
+
+## What the fourteenth run showed (the same world carried on under Generation 22, days 26 to 60, run `r5614-mwsokxmr`, 1,369 more thoughts)
+
+- **The minds slept for eighteen days and nobody was told in a way that could not be missed.** 74 to 98 thoughts a day from day 26 to day 38; five refusals on day 39; **none at all from day 40 to day 57**; 80 to 88 a day again from day 58, when Nova woke them, and four more refusals that day (two thoughts, the chronicler and the maker). The chronicle has 52 to 115 entries a day while the minds are awake and 2 to 14 while they sleep.
+- **Awake, the answers to hunger worked.** In thirty-five days the starving begged 19 times and were fed by another 23 times; 150 portions went into stores and 113 came out, 69 of them drawn by the hungry. **Both deaths by hunger (day 47 and day 57) fell while the minds were asleep.** Awake, in seventeen days, no one starved.
+- **The other deaths:** one killed by a stalker (day 31), one gored by a mammoth (day 60), and **the first two deaths of old age** (days 58 and 59), which the people marked: "Elyys, I am sorry for Elyis. I would sit with you in the hall tonight."
+- **Forty-three alive**, nine births. None of the births fell in the sleeping days either.
+- **A call to hunt was used at once:** 18 musters. 333 kills by the living, 41 made with others (13 of 95 before).
+- **The first trade** was done. 16 trade steps, 356 gifts.
+- **Fishing took hold** (69 fish, from 19), 6 animals tamed, 6 longhalls, 17 stores.
+- **No vessel was ever made**, though water is the heaviest hardship of all six peoples (above).
+- **The maker** made three visits (days 29, 33, 37) and then none: asleep with the minds, then refused once on day 58, as the chronicler was, with no second try.
+- **Prompts:** middle 30,700 characters, longest 45,600 (26,900 and 40,600 in the run before). A thought still took 7.2 seconds.
+
 ## Generation 22 (built, not yet run with real minds): hunger that can be answered, rich ground, and a call to hunt together
 
 Built from the thirteenth run and from Nova's notes of the morning of 23 November. He asked for a great deal in one message. What is cheap and safe is built; the rest is in the roadmap in order, and each is named below.
