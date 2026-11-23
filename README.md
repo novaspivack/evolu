@@ -67,7 +67,17 @@ These were taken by Nova from one world, Wenenvale, on days 36 to 38 of its life
 </tr>
 </table>
 
-The panel beside the map has a tab for each way of reading the world. Click any of these for the full picture.
+Click any being and the panel shows it from the inside. This is Ilyae of the Phizhi, a founder, on day 38: "I have never hunted, and a penguin walks three steps south; meat for the store would be a first, and it would make my table heavier than Vorok's."
+
+<table>
+<tr>
+<td align="center" valign="top" width="33%"><a href="docs/images/inspect-being.png"><img src="docs/images/inspect-being.png" alt="The Inspect tab: its body, its nature, its standing, what presses on it, and the forces under its thoughts" width="260"></a><br><b>A being</b><br><sub>Its body, its nature, its standing, what presses on it, and the forces under its thoughts</sub></td>
+<td align="center" valign="top" width="33%"><a href="docs/images/inspect-mind-stream.png"><img src="docs/images/inspect-mind-stream.png" alt="The Inspect tab: every thought it has had, what it felt, and the plan it made" width="260"></a><br><b>Its mind stream</b><br><sub>Every thought it has had, what it felt, and the plan it made</sub></td>
+<td align="center" valign="top" width="33%"><a href="docs/images/inspect-reflexes.png"><img src="docs/images/inspect-reflexes.png" alt="The Inspect tab: what has happened to it, how it has taught itself to think, and the reflexes it has rewritten for its own body" width="260"></a><br><b>Its life, creed and reflexes</b><br><sub>What has happened to it, how it has taught itself to think, and the reflexes it has rewritten for its own body</sub></td>
+</tr>
+</table>
+
+The other tabs are each a way of reading the whole world. Click any of these for the full picture.
 
 <table>
 <tr>
