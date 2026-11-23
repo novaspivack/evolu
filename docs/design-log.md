@@ -12,6 +12,43 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## Generation 26 (built, not yet run with real minds): a community raises better buildings; the audit of the trees
+
+Nova, 23 November, after Generation 25: communities should come to better buildings by the tree, when at least two members hold the new knowledge, and the whole community should have it once the building stands. Then a round on the trees themselves, and farther out the sim in groups, peoples and planets. He asked for a plan and for it to be carried out; the plan is in `ROADMAP.md`, and this generation is its first step: his rule for buildings, and the audit that the round on the trees begins with (`docs/tree-audit.md`).
+
+### What the audit found (in full in `docs/tree-audit.md`)
+
+- **Progress so far:** 68 ways in four trees over six ages. After sixty days 28 were held by someone: all 17 of the first age, 9 of 16 of the second, 2 of 11 of the third. One being held 18 ways; the middle being 7.
+- **Six kinds of building could never be raised:** forge, mill, well, standing stone, infirmary and barracks ask for eight wood or stone at once where hands hold six, and only a building of more than fourteen in all was a work brought to in loads. **Eight things could never be made:** the boat, every ship, the airship, the ram, the catapult, the cannon. With the lists hidden until Generation 25, no run could have gone past the second age in craft.
+- **The line of building is the blockage:** masonry asks for eight things built and one being of 43 had built that many; wheel, monuments and roads ask for 12 and 14.
+- **Fifteen ways have nothing behind them,** nearly all from the fourth age on.
+
+### Built
+
+- **A way is a band's when two of its members hold it** (`culture.commonAt`, `SW.heldInCommon`, `SW.commonWays`). Then any member may raise that way's buildings, whether or not it holds the way itself.
+- **When the building stands, every member of the band learns the way** (`raised`). A building raised by the only one who knows its way teaches no one: it takes two.
+- **Lines of descent between kinds of building** (`from`): shelter to hall to longhall; workshop to forge to factory; tower to observatory; shrine to temple; school to university; infirmary to hospital; mill to windmill. A better building may be raised **in place of** the one it grows out of, by its holder or one of the holder's band: half of what the old one took is used again (`build.reuse`), the old building stands and serves until the new one is finished, and whoever held the old holds the new. A building **serves wherever the kind it grew out of is asked for** (what must be made at a forge can be made at a factory). The forge and the factory now give all a workshop gives and more; before, a forge lost the workshop's help to learning.
+- **Whatever takes more than two hands hold is a work brought to in loads:** any building that asks for more than six wood or six stone, and any making (`w.makings`: a boat of ten wood, a ship of twenty-four), by one or by many.
+- **A settlement has an age,** the latest age among the ways of its buildings. It is shown beside the settlement's name.
+- **Buildings show their age:** a stone footing from the second age, a pennant from the third, a chimney from the fourth, lit windows from the fifth. The pen, the weir and the field have looks of their own.
+- **For the maker:** the law `culture.commonAt`, `build.reuse`, `from` on a building it adds, and numbers for settlements by age, what each band holds in common and by one alone, ways learned when a building was raised, buildings raised in place, things made over time.
+- **For a mind:** the ways its band holds in common and which of them it does not yet know; that a building it stands in can become a better one, and what that takes; that a thing too big for the hands is made by loads.
+
+### Measured
+
+- **What each better building gives against the one it grows out of** (from the registry): hall over a plain roof, a bond between those gathered and joy; forge over workshop, tools that last longer (craft 1 against 0.6) and the same help to learning; factory over forge, craft 2 and more help to learning. The windmill, the observatory, the temple, the university and the hospital are each richer than what they grow out of. The mill itself still does nothing but serve the making of bread.
+- **On instinct, twelve seeds, forty days, against Generation 25:** the same in every figure (alive 15.1, deaths 0.3, starved 0.3, grazers 279, hunters 25.4), since bodies on instinct raise nothing of this. 2.23 ms a moment against 2.18.
+
+### Tested
+
+`tests/22-a-community-raises-better-buildings.js`, 29 checks, each through a plan given to a mind: the six kinds that could not be raised; a forge begun and finished in two loads; a boat made by two; a band in which none, one and then two hold masonry; the third raising the tower and learning the way; one outside the band learning nothing; a lone knower teaching no one; the lines of descent and what each gives; a workshop becoming a forge over two loads while it still stands; a hall in place of a plain roof by one of the band and not by a stranger; a recipe served by the newer kind; the age of a settlement; the maker's numbers and its `from`; a world saved by Generation 25 carried on.
+
+### Not built, and not known
+
+- **The rest of the round on the trees** (practice counted for the band, the empty ways, more structures, the maker composing structures from blocks, libraries by age, roads and transport) waits for Nova's word on the audit's five proposals.
+- **Knowledge is the band's, not the settlement's.** Nova said "community"; a band is who lives and builds together, and a settlement is where. If he means everyone who lives in a place whatever their band, that is a small change.
+- Whether minds raise forges and wells now that they can, whether bands come to hold ways in common, and whether settlements climb the ages: this needs a run.
+
 ## Generation 25 (built, not yet run with real minds): what can be made, pens, weirs and fields, thought by plan
 
 Built on 23 November from the list Nova approved (fewer thoughts; a pen and driven herds; a settlement that feeds itself; why no one crosses water; sea creatures that return), without the flood, which he left out. There was no new run file: the findings below come from the thirteenth and fourteenth runs, read again with these questions.

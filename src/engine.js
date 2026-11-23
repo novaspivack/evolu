@@ -56,7 +56,7 @@ SW.defaultLaws = function () {
     discovery: { needBoost: 0.6, kinBoost: 0.04, floor: 0.35, pressFade: 0.85, pressMax: 3 },
     trade: { window: 240 }, /* how long an offer stands, in moments */
     climate: { belt: 0.11, rains: 1 }, /* the warm belt: half its width as a share of the height of a round world; whether the cold season there is a season of rain */
-    culture: { succour: 1, musterHold: 120, faithComfort: 0.004, faithStanding: 0.2, tameTrust: 0.6, grudgeDays: 40, kindDays: 60, mendGifts: 3 },
+    culture: { commonAt: 2, succour: 1, musterHold: 120, faithComfort: 0.004, faithStanding: 0.2, tameTrust: 0.6, grudgeDays: 40, kindDays: 60, mendGifts: 3 },
     age: { childUntil: 0.1, elderFrom: 0.8, childStrength: 0.45, elderStrength: 0.7, childDrain: 0.75, elderMove: 1.5, elderTeach: 1.5, childLearn: 1.5 },
     water: { swim: 1, swimDrain: 0.15, fishChance: 0.09, fishFood: 14, fishRecover: 300, winterFish: 0.5, riverFert: 0.25, oreSeams: 0.1 },
     disease: { rawChance: 0.02, marshChance: 0.0005, spread: 0.008, drain: 0.045, harm: 0.035, length: 480, immunity: 2400 },
@@ -72,38 +72,38 @@ SW.defaultLaws = function () {
       pen: { way: 'herding', wood: 5, stone: 0, hint: 'a fenced ground for kept animals. With them beside it, plan step pen, and they stay and breed there while you go where you will; whoever holds the pen keeps the herd. They must find grazing within its reach or they break out' },
       weir: { way: 'fishing', wood: 4, stone: 0, beside: 'water', yields: { food: 'fish', every: 60, tend: 480, holds: 6 }, hint: 'stakes set at the edge of the water that gather fish by themselves. Tend it (plan step tend) every day or two and its catch goes into the nearest store of yours or of your band, for all who live there' },
       field: { way: 'farming', wood: 2, stone: 0, yields: { food: 'grain', every: 80, tend: 480, holds: 6, seasons: [1, 2] }, hint: 'ground broken and sown beside a home. Tend it (plan step tend) every day or two, and through summer and autumn its grain goes into the nearest store of yours or of your band' },
-      hall: { wood: 6, stone: 2, bond: 0.05, fx: [{ on: 'joy', by: 0.2 }, { on: 'lonely', by: -0.4 }], hint: 'a great roof where a band gathers: those who spend time in it together grow closer' },
+      hall: { from: 'shelter', wood: 6, stone: 2, bond: 0.05, fx: [{ on: 'joy', by: 0.2 }, { on: 'lonely', by: -0.4 }], hint: 'a great roof where a band gathers: those who spend time in it together grow closer' },
       shrine: { wood: 2, stone: 4, fx: [{ on: 'fear', by: -0.4 }, { on: 'grief', by: -0.3 }, { on: 'joy', by: 0.2 }], hint: 'a still place set apart: it eases fear and grief in one who spends time there' },
       workshop: { way: 'tools', wood: 5, stone: 2, craft: 0.6, fx: [{ on: 'learning', times: 1.3, for: 240 }], hint: 'a place for making: tools crafted in or beside it last much longer' },
       tower: { way: 'masonry', wood: 4, stone: 4, sight: 5, fx: [{ on: 'fear', by: -0.2 }], hint: 'a height to watch from: one who stands in it sees much farther' },
       kiln: { way: 'pottery', wood: 2, stone: 6, craft: 0.3, hint: 'a fire-house for baking clay hard' },
       school: { way: 'schooling', wood: 6, stone: 4, bond: 0.03, fx: [{ on: 'learning', times: 1.6, for: 480 }], hint: 'a place of teaching: one who spends time there learns far more from a teacher' },
-      forge: { way: 'smelting', wood: 4, stone: 8, craft: 1, hint: 'a great fire for metal: tools made in or beside it last twice as long' },
+      forge: { from: 'workshop', way: 'smelting', wood: 4, stone: 8, craft: 1, fx: [{ on: 'learning', times: 1.3, for: 240 }], hint: 'a great fire for metal: tools made in or beside it last twice as long. It does all a workshop does' },
       mill: { way: 'milling', wood: 8, stone: 6, hint: 'grinding-stones under a roof: grain becomes bread here' },
       well: { way: 'wells', wood: 2, stone: 8, water: 1, hint: 'a shaft down to water: one beside it never thirsts' },
       stone: { way: 'monuments', wood: 0, stone: 8, fx: [{ on: 'joy', by: 0.15 }, { on: 'fear', by: -0.2 }], hint: 'a standing stone, raised to mark that a people was here' },
       statue: { way: 'monuments', wood: 2, stone: 18, bond: 0.04, fx: [{ on: 'joy', by: 0.3 }, { on: 'grief', by: -0.2 }], hint: 'a great figure in stone. A great work: many hands, many days' },
       moot: { way: 'law', wood: 10, stone: 6, bond: 0.06, fx: [{ on: 'anger', by: -0.5 }], hint: 'a house where quarrels are settled: anger cools in it and those who meet there grow closer' },
       dock: { way: 'sailing', wood: 12, stone: 4, hint: 'a landing for boats' },
-      observatory: { way: 'mathematics', wood: 6, stone: 14, sight: 8, fx: [{ on: 'learning', times: 1.5, for: 480 }], hint: 'a place to watch the sky and reckon' },
-      temple: { way: 'architecture', wood: 10, stone: 30, bond: 0.08, fx: [{ on: 'fear', by: -0.6 }, { on: 'grief', by: -0.5 }, { on: 'joy', by: 0.4 }], hint: 'a great house for what a people holds sacred. A great work' },
+      observatory: { from: 'tower', way: 'mathematics', wood: 6, stone: 14, sight: 8, fx: [{ on: 'learning', times: 1.5, for: 480 }], hint: 'a place to watch the sky and reckon' },
+      temple: { from: 'shrine', way: 'architecture', wood: 10, stone: 30, bond: 0.08, fx: [{ on: 'fear', by: -0.6 }, { on: 'grief', by: -0.5 }, { on: 'joy', by: 0.4 }], hint: 'a great house for what a people holds sacred. A great work' },
       pyramid: { way: 'architecture', wood: 0, stone: 60, bond: 0.06, fx: [{ on: 'joy', by: 0.5 }, { on: 'fear', by: -0.4 }], hint: 'a mountain raised by hands. The greatest of works: a whole people, a whole season' },
       market: { way: 'cities', wood: 10, stone: 8, bond: 0.05, fx: [{ on: 'joy', by: 0.2 }], hint: 'a place where peoples meet to trade: those who meet there grow closer' },
       infirmary: { way: 'surgery', wood: 8, stone: 6, fx: [{ on: 'health', by: 25 }, { on: 'sick', by: -1 }], hint: 'a house of healing: the hurt and the sick mend there' },
-      windmill: { way: 'mechanics', wood: 14, stone: 8, craft: 0.5, hint: 'sails that turn stones: it does the work of many hands' },
+      windmill: { from: 'mill', way: 'mechanics', wood: 14, stone: 8, craft: 0.5, hint: 'sails that turn stones: it does the work of many hands' },
       press: { way: 'printing', wood: 12, stone: 6, fx: [{ on: 'lore', by: 0.2 }, { on: 'learning', times: 1.8, for: 720 }], hint: 'a printing-house: what is known is set down in many copies' },
       enginehouse: { way: 'steam', wood: 10, stone: 20, craft: 1.5, hint: 'fire made to work' },
       library: { way: 'scholarship', wood: 10, stone: 10, fx: [{ on: 'learning', times: 1.8, for: 720 }], bond: 0.03, hint: 'a house of what is known. A great work' },
       barracks: { way: 'armour', wood: 8, stone: 4, fx: [{ on: 'strength', times: 1.3, for: 480 }, { on: 'fear', by: -0.3 }], hint: 'a house for those who fight: one who spends time there strikes harder' },
-      university: { way: 'science', wood: 12, stone: 24, fx: [{ on: 'learning', times: 2.2, for: 720 }, { on: 'lore', by: 0.2 }], bond: 0.04, hint: 'a great house of learning. A great work' },
-      factory: { way: 'steam', wood: 10, stone: 16, craft: 2, hint: 'many hands and one engine: what is made here lasts three times as long. A great work' },
-      hospital: { way: 'genetics', wood: 10, stone: 20, fx: [{ on: 'health', by: 40 }, { on: 'sick', by: -1 }], hint: 'a great house of healing. A great work' },
+      university: { from: 'school', way: 'science', wood: 12, stone: 24, fx: [{ on: 'learning', times: 2.2, for: 720 }, { on: 'lore', by: 0.2 }], bond: 0.04, hint: 'a great house of learning. A great work' },
+      factory: { from: 'forge', way: 'steam', wood: 10, stone: 16, craft: 2, fx: [{ on: 'learning', times: 1.5, for: 240 }], hint: 'many hands and one engine: what is made here lasts three times as long. It does all a forge does. A great work' },
+      hospital: { from: 'infirmary', way: 'genetics', wood: 10, stone: 20, fx: [{ on: 'health', by: 40 }, { on: 'sick', by: -1 }], hint: 'a great house of healing. A great work' },
       airport: { way: 'flight', wood: 6, stone: 30, sight: 6, hint: 'a ground for machines that fly. A great work' },
       spaceport: { way: 'spaceflight', wood: 10, stone: 70, sight: 10, fx: [{ on: 'joy', by: 0.5 }, { on: 'lore', by: 0.3 }], hint: 'a ground for ships that leave the world. The greatest of works' },
       powerhouse: { way: 'electricity', wood: 10, stone: 30, sight: 4, fx: [{ on: 'joy', by: 0.3 }], hint: 'light without flame'  }
     },
     land: { rockMove: 1.8, marshMove: 1.6, snowMove: 1.6, shallowsMove: 3, forestMove: 1.1, desertThirst: 0.03, snowCold: 0.05 },
-    build: { shelterWood: 3, wallWood: 2, razeChance: 0.25, woodChance: 0.5, woodMax: 6, fellChance: 0.25, treeRegrow: 0.5 },
+    build: { reuse: 0.5, shelterWood: 3, wallWood: 2, razeChance: 0.25, woodChance: 0.5, woodMax: 6, fellChance: 0.25, treeRegrow: 0.5 },
     weather: { meanDuration: 200, rainGrowth: 1.6, droughtGrowth: 0.35, rainCold: 0.015, stormCold: 0.08, snowCold: 0.03, droughtThirst: 0.02, strikeChance: 0.006, strikeDamage: 24, fogSight: 4, bloom: 0.08, blight: 0.05, herd: 0.05, pack: 0.03, disaster: 0.04 },
     mood: { decay: 0.996 },
     device: { life: 3600, wood: 2, stone: 1, strike: 9, holdMax: 6 },
@@ -1818,6 +1818,7 @@ SW.upgrade = function (w) {
   if (!w.regions || !w.regions.length) { w.regions = [{ id: 0, name: 'the Land', biome: 'mixed', x: w.W >> 1, y: w.H >> 1 }]; w.region = []; for (let i = 0; i < w.W * w.H; i++) w.region.push(0); }
   ['lodes', 'bkind', 'roads', 'works'].forEach(function (k) { if (!w[k]) w[k] = {}; });
   if (!w.peoples) w.peoples = []; if (!w.tally) w.tally = { made: {}, eaten: {}, built: {} }; ['made', 'eaten', 'built'].forEach(function (k) { if (!w.tally[k]) w.tally[k] = {}; });
+  { const D0 = SW.defaultLaws().buildings, B0 = w.laws.buildings || {}; for (const k in D0) if (D0[k].from && B0[k] && B0[k].from == null) B0[k].from = D0[k].from; if (B0.longhall && B0.longhall.from == null && B0.hall) B0.longhall.from = 'hall'; } /* lines of descent between kinds of building (Generation 26) */
   const D = SW.defaultLaws(); ['minerals', 'goods', 'recipes', 'buildings', 'drives', 'status', 'discovery', 'culture', 'arrivals', 'explore', 'trade', 'climate', 'body', 'ecology', 'disease'].forEach(function (g) { if (!w.laws[g]) w.laws[g] = D[g]; else for (const k in D[g]) if (w.laws[g][k] == null && g !== 'recipes') w.laws[g][k] = D[g][k]; });
   for (const g in D) if (D[g] && typeof D[g] === 'object' && !Array.isArray(D[g]) && w.laws[g] && ['plants', 'creatures', 'tools', 'tree', 'recipes', 'buildings', 'minerals', 'goods'].indexOf(g) < 0) for (const k in D[g]) if (w.laws[g][k] == null) w.laws[g][k] = D[g][k];
   w.agents.forEach(function (a) { if (!a.things) a.things = {}; if (!a.tongues) a.tongues = {}; if (a.tall == null) a.tall = 1; if (!a.press) a.press = {}; });
@@ -1845,10 +1846,27 @@ SW.upgrade = function (w) {
   return w;
 };
 /* the best vessel a being holds: the cost of a step on deep water with it, or 0 if it has none */
+/* KNOWLEDGE HELD IN COMMON. A way is a band's when enough of its living members hold it (culture.commonAt, two). Then any of them may raise that
+   way's buildings, and when one stands every member of the band learns the way: a people advances as a community, not one being at a time. */
+function bandMembers(w, a) { const r = rootOf(w, a).id, out = []; for (let k = 0; k < w.agents.length; k++) { const o = w.agents[k]; if (!o.dead && rootOf(w, o).id === r) out.push(o); } return out; }
+function heldInCommon(w, a, way) { const need = (w.laws.culture || {}).commonAt || 2; let n = 0; const B = bandMembers(w, a); for (let k = 0; k < B.length; k++) if (B[k].knows[way]) n++; return n >= need && B.length >= need; }
+SW.bandMembers = bandMembers; SW.heldInCommon = heldInCommon;
+SW.commonWays = function (w, a) { use(w); const need = (w.laws.culture || {}).commonAt || 2, B = bandMembers(w, a), c = {}, out = []; if (B.length < need) return out; B.forEach(function (o) { for (const k in o.knows) c[k] = (c[k] || 0) + 1; }); for (const k in c) if (c[k] >= need) out.push(k); return out; };
+function raised(w, a, kind, i, emit) {
+  const B = w.laws.buildings[kind], way = B && B.way; if (!way || !w.laws.tree[way] || !heldInCommon(w, a, way)) return;
+  const band = bandMembers(w, a), from = band.filter(function (o) { return o.knows[way]; })[0], got = [];
+  band.forEach(function (o) { if (o.knows[way]) return; const src = from.knows[way]; o.knows[way] = { name: src.name, idea: src.idea, look: src.look || null, tick: w.tick, by: src.by, byName: src.byName, from: kind }; o.lore = Math.round((o.lore + 0.15) * 100) / 100; o.loreWhy = 'a way learned from what the band built'; got.push(o.id); });
+  if (got.length) { w.tally.commonLearned = (w.tally.commonLearned || 0) + got.length; emit({ type: 'commonway', a: a.id, ids: got, way: way, kind: kind, x: i % w.W, y: Math.floor(i / w.W) }); }
+}
+/* A making that takes more than two hands hold (a boat of ten wood, a ship of twenty-four) is done over time: the first step lays it down where the
+   maker stands, and each later step by anyone adds what they carry, until all is there. Before, such things could never be made. */
+function tooBig(w, rc) { const N = (rc && rc.needs) || {}, L = w.laws; return (N.wood || 0) > L.build.woodMax || (N.stone || 0) > L.craft.stoneMax || (N.ore || 0) > (L.craft.oreMax || 99); }
+SW.tooBig = function (w, key) { const rc = (w.laws.recipes || {})[key]; return !!(rc && tooBig(w, rc)); };
 /* What a being lacks, this moment, of what a thing or a deed needs: the words it is told when it tries, and what its mind is shown beforehand. */
-function lacks(w, a, rc) {
-  const L = w.laws, N = (rc && rc.needs) || {}, lack = [], th = a.things || {}, here = idx(w, a.x, a.y);
-  ['wood', 'stone', 'ore', 'clay'].forEach(function (k) { if (N[k] && (a[k] || 0) < N[k]) lack.push(N[k] + ' ' + k + ' (you have ' + (a[k] || 0) + ')'); });
+function lacks(w, a, rc, key) {
+  const L = w.laws, N = (rc && rc.needs) || {}, lack = [], th = a.things || {}, here = idx(w, a.x, a.y), big = tooBig(w, rc), laid = big && key && w.makings && w.makings[here] && w.makings[here].kind === key ? w.makings[here] : null;
+  if (big) { if (!['wood', 'stone', 'ore'].some(function (k) { return N[k] && (a[k] || 0) > 0 && (!laid || (laid[k] || 0) < N[k]); })) lack.push('some of its ' + ['wood', 'stone', 'ore'].filter(function (k) { return N[k]; }).join(' or ') + ' in hand to bring to it'); if (N.clay && (a.clay || 0) < N.clay) lack.push(N.clay + ' clay (you have ' + (a.clay || 0) + ')'); }
+  else ['wood', 'stone', 'ore', 'clay'].forEach(function (k) { if (N[k] && (a[k] || 0) < N[k]) lack.push(N[k] + ' ' + k + ' (you have ' + (a[k] || 0) + ')'); });
   if (N.food) { const have = a.carry.filter(function (c) { return N.food === 'any' || c.k === N.food; }).length; if (have < (N.foodN || 1)) lack.push((N.foodN || 1) + ' ' + (N.food === 'any' ? 'food of any kind' : N.food) + ' carried'); }
   if (N.thing && (th[N.thing] || 0) < (N.thingN || 1)) lack.push((N.thingN || 1) + ' ' + N.thing);
   if (N.tool && !a.tools.some(function (q) { return L.tools[q.k] && L.tools[q.k].use === N.tool; })) lack.push('a tool for ' + N.tool + ' in your hands');
@@ -1860,7 +1878,7 @@ function lacks(w, a, rc) {
   if (N.beings) { let near = 0; for (let k = 0; k < w.agents.length; k++) { const o = w.agents[k]; if (o !== a && !o.dead && cheb(o.x, o.y, a.x, a.y) <= 2) near++; } if (near < N.beings) lack.push(N.beings + ' others within two steps (' + near + ' are)'); }
   return lack;
 }
-SW.lacks = function (w, a, key) { use(w); const rc = (w.laws.recipes || {})[key]; return rc ? lacks(w, a, rc) : null; };
+SW.lacks = function (w, a, key) { use(w); const rc = (w.laws.recipes || {})[key]; return rc ? lacks(w, a, rc, key) : null; };
 function floatOf(w, a) { let f = 0; const G = w.laws.goods; if (a.things && G) for (const k in G) if (G[k].float && a.things[k] > 0 && (!f || G[k].float < f)) f = G[k].float; return f; }
 SW.floatOf = floatOf;
 /* standing: how others weigh a being. Earned by what one holds, has done, knows, has built, by children, followers, giving and renown; lost through shame. */
@@ -1891,7 +1909,10 @@ SW.magicFactor = function (w) { return clamp(1 - (w.laws.magic.wane || 0) * Math
 function buildingAt(w, i) { const k = w.bkind && w.shelters[i] ? w.bkind[i] : null; return k && w.laws.buildings && w.laws.buildings[k] ? k : null; }
 SW.buildingAt = buildingAt; SW.newCreature = newCreature;
 /* the strongest of some property among the special buildings within a step (or the kind, if asked by name) */
-function nearB(w, a, prop, kind) { let v = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const x = a.x + dx, y = a.y + dy; if (!inb(w, x, y)) continue; const k = buildingAt(w, idx(w, x, y)); if (!k) continue; if (kind) { if (k === kind) v = 1; } else v = Math.max(v, w.laws.buildings[k][prop] || 0); } return v; }
+function nearB(w, a, prop, kind) { let v = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const x = a.x + dx, y = a.y + dy; if (!inb(w, x, y)) continue; const k = buildingAt(w, idx(w, x, y)); if (!k) continue; if (kind) { if (isOfLine(w, k, kind)) v = 1; } else v = Math.max(v, w.laws.buildings[k][prop] || 0); } return v; }
+/* a kind of building, or one that grew out of it: what needs a forge is served by a factory */
+function isOfLine(w, k, kind) { const B = w.laws.buildings; for (let n = 0; k && n < 8; n++) { if (k === kind) return true; k = B[k] && B[k].from; } return false; }
+SW.isOfLine = isOfLine;
 SW.wellbeing = function (a) { return { suffering: a.suffer || 0, happiness: a.happy == null ? 0.4 : a.happy, satisfaction: a.sat == null ? 0.5 : a.sat }; };
 function waterBeside(w, a) {
   if (w.terrain[idx(w, a.x, a.y)] === T.SHALLOWS) return true;
@@ -2078,10 +2099,19 @@ function act(w, a, r, S, emit) {
     case 'make': {
       const key = String(r.what || '').toLowerCase().trim(), rc = (L.recipes || {})[key];
       if (!rc || (rc.way && !a.knows[rc.way])) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You do not know how to make or do "' + key + '".' }); return false; }
-      const N = rc.needs || {}, th = a.things = a.things || {}, lack = lacks(w, a, rc);
+      const N = rc.needs || {}, th = a.things = a.things || {}, lack = lacks(w, a, rc, key);
       const near = w.agents.filter(function (o) { return o !== a && !o.dead && cheb(o.x, o.y, a.x, a.y) <= 2; });
       if (lack.length) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You tried "' + key + '", but it needs ' + lack.join(', ') + '.' }); return false; }
-      ['wood', 'stone', 'ore', 'clay'].forEach(function (k) { if (N[k]) a[k] -= N[k]; });
+      if (tooBig(w, rc)) { /* brought in loads to one spot */
+        w.makings = w.makings || {}; let M0 = w.makings[here]; if (M0 && M0.kind !== key) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'A ' + M0.kind + ' is already being made on this spot. Make the ' + key + ' a step away.' }); return false; }
+        if (!M0) M0 = w.makings[here] = { kind: key, by: a.id, wood: 0, stone: 0, ore: 0, hands: {} };
+        let gave = 0; ['wood', 'stone', 'ore'].forEach(function (k) { const g = Math.min(a[k] || 0, (N[k] || 0) - (M0[k] || 0)); if (g > 0) { a[k] -= g; M0[k] = (M0[k] || 0) + g; gave += g; } });
+        M0.hands[a.id] = (M0.hands[a.id] || 0) + gave; a.stats.raised = (a.stats.raised || 0) + gave;
+        const left = ['wood', 'stone', 'ore'].filter(function (k) { return (N[k] || 0) > (M0[k] || 0); }).map(function (k) { return ((N[k] || 0) - (M0[k] || 0)) + ' ' + k; });
+        if (left.length) { a.fin = 1; a.doing = 'working on a ' + key; emit({ type: 'laboured', a: a.id, kind: key, x: a.x, y: a.y, gave: gave, left: left.join(' and '), making: true }); return true; }
+        delete w.makings[here]; w.tally.madeOverTime = (w.tally.madeOverTime || 0) + 1;
+      } else ['wood', 'stone', 'ore'].forEach(function (k) { if (N[k]) a[k] -= N[k]; });
+      if (N.clay) a.clay -= N.clay;
       if (N.food) { let n = N.foodN || 1; for (let q = a.carry.length - 1; q >= 0 && n > 0; q--) if (N.food === 'any' || a.carry[q].k === N.food) { a.carry.splice(q, 1); n--; } }
       if (N.thing) th[N.thing] -= N.thingN || 1;
       if (N.tool) useTool(w, a, N.tool, emit);
@@ -2298,10 +2328,33 @@ function act(w, a, r, S, emit) {
       }
       if (L.buildings && L.buildings[r.what]) {
         const B = L.buildings[r.what], bw = B.wood || 0, bs = B.stone || 0, say = function (t) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: t }); return false; };
-        if (B.way && !a.knows[B.way] && !(w.works[here] && w.works[here].kind === r.what)) return say('You tried to raise a ' + r.what + ', but you do not know how. It belongs to the way of ' + B.way + '.');
+        if (B.way && !a.knows[B.way] && !(w.works[here] && w.works[here].kind === r.what) && !heldInCommon(w, a, B.way)) return say('You tried to raise a ' + r.what + ', but you do not know how. It belongs to the way of ' + B.way + ', and fewer than ' + ((L.culture || {}).commonAt || 2) + ' of your band hold it.');
         if (B.beside === 'water' && !waterBeside(w, a)) return say('A ' + r.what + ' must stand at the edge of water. There is none beside you here.'); /* anyone may carry to a work that one who knows has begun */
         const taken = w.shelters[here] || w.walls[here] || w.stores[here] || w.plants[here] || w.fires[here] > w.tick;
-        if (bw + bs > 14) { /* a great work: begun by one, finished by whoever brings wood and stone to it */
+        /* A better building may be raised in place of the one it grows out of (B.from): the old one's holder or one of the holder's band stands
+           in it and builds; half of what the old one took is used again (build.reuse); whoever held the old one holds the new. */
+        const oldK = w.shelters[here] > 0 ? ((w.bkind && w.bkind[here]) || 'shelter') : null;
+        if (B.from && oldK === B.from) {
+          if (!(w.shelters[here] === a.id || allied(w, a, w.shelters[here]))) return say('You tried to raise a ' + r.what + ' in place of this ' + oldK + ', but it is not yours or your band\'s.');
+          const O = oldK === 'shelter' ? { wood: L.build.shelterWood, stone: 0 } : (L.buildings[oldK] || {}), ru = L.build.reuse == null ? 0.5 : L.build.reuse;
+          const nw = Math.max(0, bw - Math.floor(ru * (O.wood || 0))), ns = Math.max(0, bs - Math.floor(ru * (O.stone || 0)));
+          let W1 = w.works[here]; if (W1 && W1.kind !== r.what) return say('A ' + W1.kind + ' is already being raised here.');
+          const done = function () {
+            delete w.works[here]; a.stats.built++; a.fin = 1; w.bkind = w.bkind || {}; w.bkind[here] = r.what; delete w.looks[here];
+            w.tally.built[r.what] = (w.tally.built[r.what] || 0) + 1; w.tally.raisedInPlace = (w.tally.raisedInPlace || 0) + 1;
+            emit({ type: 'built', a: a.id, x: a.x, y: a.y, what: r.what, building: true, replaced: oldK }); a.doing = 'raising a ' + r.what + ' in place of a ' + oldK;
+            raised(w, a, r.what, here, emit); return true;
+          };
+          if (!W1 && nw <= L.build.woodMax && ns <= L.craft.stoneMax && a.wood >= nw && a.stone >= ns) { a.wood -= nw; a.stone -= ns; return done(); }
+          /* more than is in hand: it is brought in loads, and the old building stands and serves until the new one is finished */
+          if (!W1) { if (a.wood + a.stone < 1) return say('You tried to raise a ' + r.what + ' in place of this ' + oldK + '. Half of the old one is used again, so it takes ' + nw + ' wood and ' + ns + ' stone, brought in as many loads as it needs, and you carry neither.'); W1 = w.works[here] = { kind: r.what, by: a.id, wood: 0, stone: 0, hands: {}, tick: w.tick, inPlace: oldK }; }
+          const gw = Math.min(a.wood, nw - W1.wood), gs = Math.min(a.stone, ns - W1.stone);
+          if (gw + gs <= 0) return say('The ' + r.what + ' being raised here in place of the ' + oldK + ' still needs ' + (nw - W1.wood) + ' wood and ' + (ns - W1.stone) + ' stone, and you carry none of what it lacks.');
+          a.wood -= gw; a.stone -= gs; W1.wood += gw; W1.stone += gs; W1.hands[a.id] = (W1.hands[a.id] || 0) + gw + gs; a.stats.raised = (a.stats.raised || 0) + gw + gs; a.fin = 1; a.doing = 'labouring on a ' + r.what;
+          if (W1.wood >= nw && W1.stone >= ns) return done();
+          emit({ type: 'laboured', a: a.id, kind: r.what, x: a.x, y: a.y, gave: gw + gs, left: (nw - W1.wood) + ' wood and ' + (ns - W1.stone) + ' stone' }); return true;
+        }
+        if (bw + bs > 14 || bw > L.build.woodMax || bs > L.craft.stoneMax) { /* a great work: begun by one, finished by whoever brings wood and stone to it. Anything that takes more than two hands hold is one (before, a forge, a well, a mill, an infirmary and a barracks could never be raised: each asked for eight of something where hands hold six) */
           let W0 = w.works[here];
           if (!W0) { if (taken) return say('You tried to begin a ' + r.what + ', but this ground is taken. It needs bare ground.'); if (a.wood + a.stone < 1) return say('A ' + r.what + ' is a great work: ' + bw + ' wood and ' + bs + ' stone in all, brought over many days by as many hands as will help. Bring wood or stone to begin it.'); W0 = w.works[here] = { kind: r.what, by: a.id, wood: 0, stone: 0, hands: {}, tick: w.tick }; emit({ type: 'begun', a: a.id, kind: r.what, x: a.x, y: a.y, wood: bw, stone: bs }); }
           else if (W0.kind !== r.what) return say('A ' + W0.kind + ' is already being raised on this ground.');
@@ -2311,7 +2364,7 @@ function act(w, a, r, S, emit) {
           if (W0.wood >= bw && W0.stone >= bs) {
             delete w.works[here]; w.shelters[here] = W0.by; w.bkind[here] = r.what; delete w.looks[here]; a.stats.built++; w.tally.built[r.what] = (w.tally.built[r.what] || 0) + 1;
             const hands = Object.keys(W0.hands).map(Number); hands.forEach(function (p1) { hands.forEach(function (p2) { if (p1 === p2) return; const o = agentById(w, p1); if (o) o.rel[p2] = clamp((o.rel[p2] || 0) + 0.1, -1, 1); }); });
-            emit({ type: 'built', a: a.id, x: a.x, y: a.y, what: r.what, building: true, great: true, hands: hands, began: W0.by });
+            emit({ type: 'built', a: a.id, x: a.x, y: a.y, what: r.what, building: true, great: true, hands: hands, began: W0.by }); raised(w, a, r.what, here, emit);
           } else emit({ type: 'laboured', a: a.id, kind: r.what, x: a.x, y: a.y, gave: gw + gs, left: (bw - W0.wood) + ' wood and ' + (bs - W0.stone) + ' stone' });
           return true;
         }
@@ -2320,7 +2373,7 @@ function act(w, a, r, S, emit) {
         if (a.wood < bw || a.stone < bs) return say('You tried to raise a ' + r.what + ', but it takes ' + bw + ' wood and ' + bs + ' stone, and you have ' + a.wood + ' wood and ' + a.stone + ' stone.');
         if (taken) return say('You tried to raise a ' + r.what + ', but this ground is taken. It needs bare ground.');
         a.wood -= bw; a.stone -= bs; if (B.effort) a.e -= B.effort; a.stats.built++; a.fin = 1; w.shelters[here] = a.id; if (!w.bkind) w.bkind = {}; w.bkind[here] = r.what; delete w.looks[here]; w.tally.built[r.what] = (w.tally.built[r.what] || 0) + 1;
-        emit({ type: 'built', a: a.id, x: a.x, y: a.y, what: r.what, building: true }); a.doing = 'raising a ' + r.what; return true;
+        emit({ type: 'built', a: a.id, x: a.x, y: a.y, what: r.what, building: true }); a.doing = 'raising a ' + r.what; raised(w, a, r.what, here, emit); return true;
       }
       if (what === 'store' && !a.knows.storage) { emit({ type: 'fail', a: a.id, text: 'You tried to build a store, but you do not know how: that is the way of storage, which you have not yet come to. A roof (build with what: shelter) you can raise without it.' }); return false; }
       const wall = what === 'wall', hasB = a.tools.some(function (q) { return L.tools[q.k] && L.tools[q.k].use === 'build'; });
@@ -3135,7 +3188,9 @@ SW.findSettlements = function (w, emit) {
       let sx = 0, sy = 0; q.forEach(function (k) { sx += pts[k].x; sy += pts[k].y; });
       const cx = Math.round(sx / q.length), cy = Math.round(sy / q.length); let r = 0;
       q.forEach(function (k) { r = Math.max(r, cheb(pts[k].x, pts[k].y, cx, cy)); });
-      out.push({ x: cx, y: cy, r: r + H.margin, root: pts[i].root, n: q.length });
+      /* the age of a settlement is the latest age among the ways its buildings belong to: it shows how far a community has come */
+      let age = 1; q.forEach(function (k) { const K0 = buildingAt(w, pts[k].y * w.W + pts[k].x), wy = K0 && w.laws.buildings[K0].way, e = wy && w.laws.tree[wy] ? w.laws.tree[wy].era || 1 : 1; if (e > age) age = e; });
+      out.push({ x: cx, y: cy, r: r + H.margin, root: pts[i].root, n: q.length, age: age });
     }
     nc++;
   }

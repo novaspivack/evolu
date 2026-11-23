@@ -28,9 +28,21 @@ const DEFAULT_STORE = { anim: 'none', shapes: [{ t: 'line', x: -0.24, y: 0.4, x2
 const STRUCT_CACHE = {};
 const KIND_CACHE = {};
 function kindLook(name, owner) {
-  const tone = (owner || 0) % 7, key = name + tone; if (KIND_CACHE[key]) return KIND_CACHE[key];
+  /* a building shows the age of the way it belongs to: a stone footing from the second age, a pennant from the third, a chimney from the fourth, lit windows from the fifth */
+  const Bk = typeof w !== 'undefined' && w && w.laws && w.laws.buildings ? w.laws.buildings[name] : null, era = Bk && Bk.way && w.laws.tree[Bk.way] ? w.laws.tree[Bk.way].era || 1 : 1;
+  const tone = (owner || 0) % 7, key = name + tone + ':' + era; if (KIND_CACHE[key]) return KIND_CACHE[key];
+  const aged = function (shapes) {
+    if (era >= 2) shapes.push({ t: 'rect', y: 0.36, w: 0.62, h: 0.05, fill: 'hsl(210,8%,48%)' });
+    if (era >= 3) shapes.push({ t: 'line', x: 0.34, y: -0.14, x2: 0.34, y2: -0.5, lw: 0.025, stroke: '#2a2f38' }, { t: 'tri', x: 0.41, y: -0.44, s: 0.13, rot: 1.57, fill: ['#d9534f', '#e0b23c', '#4f8fd9', '#6fbf73', '#b06fd9', '#e08a3c', '#d94f9c'][tone] });
+    if (era >= 4) shapes.push({ t: 'rect', x: -0.3, y: -0.12, w: 0.08, h: 0.3, fill: 'hsl(12,30%,36%)' }, { t: 'ellipse', x: -0.27, y: -0.36, w: 0.07, h: 0.05, fill: 'rgba(210,210,215,0.55)' }, { t: 'ellipse', x: -0.22, y: -0.46, w: 0.09, h: 0.06, fill: 'rgba(210,210,215,0.35)' });
+    if (era >= 5) shapes.push({ t: 'rect', x: -0.1, y: 0.16, w: 0.06, h: 0.07, fill: '#ffd97a' }, { t: 'rect', x: 0.1, y: 0.16, w: 0.06, h: 0.07, fill: '#ffd97a' });
+    return shapes;
+  };
   const hue = [28, 38, 20, 46, 14, 58, 32][tone], wood = 'hsl(' + hue + ',34%,29%)', thatch = 'hsl(' + (hue + 12) + ',44%,46%)', dark = 'hsl(' + hue + ',30%,13%)', line = 'hsl(' + hue + ',36%,24%)', stone = 'hsl(' + (205 + tone * 5) + ',7%,56%)', stone2 = 'hsl(' + (205 + tone * 5) + ',7%,42%)', sh = [{ t: 'ellipse', x: 0.05, y: 0.36, w: 0.46, h: 0.08, fill: '#141a14' }];
   let h = 0; for (let k = 0; k < name.length; k++) h = (h * 31 + name.charCodeAt(k)) % 997;
+  if (name === 'pen') { sh.length = 0; sh.push({ t: 'ellipse', y: 0.14, w: 0.42, h: 0.26, fill: 'rgba(120,96,60,0.35)' }, { t: 'ring', n: 11, d: 0.86, y: 0.14, s: 0.05, fill: wood }, { t: 'line', x: -0.4, y: 0.06, x2: 0.4, y2: 0.06, lw: 0.02, stroke: line }, { t: 'line', x: -0.34, y: 0.3, x2: 0.34, y2: 0.3, lw: 0.02, stroke: line }); return (KIND_CACHE[key] = { anim: 'none', shapes: sh }); }
+  if (name === 'weir') { sh.length = 0; sh.push({ t: 'ellipse', y: 0.2, w: 0.46, h: 0.16, fill: 'rgba(60,120,160,0.55)' }); for (let q = 0; q < 6; q++) sh.push({ t: 'line', x: -0.36 + q * 0.145, y: 0.34 - (q % 2) * 0.05, x2: -0.36 + q * 0.145, y2: -0.04 - (q % 2) * 0.05, lw: 0.035, stroke: line }); sh.push({ t: 'line', x: -0.38, y: 0.08, x2: 0.38, y2: 0.02, lw: 0.02, stroke: wood }); return (KIND_CACHE[key] = { anim: 'none', shapes: sh }); }
+  if (name === 'field') { sh.length = 0; sh.push({ t: 'rect', y: 0.14, w: 0.8, h: 0.5, fill: 'hsl(34,36%,24%)' }); for (let q = 0; q < 4; q++) sh.push({ t: 'line', x: -0.36, y: -0.04 + q * 0.12, x2: 0.36, y2: -0.04 + q * 0.12, lw: 0.035, stroke: 'hsl(48,62%,52%)' }); return (KIND_CACHE[key] = { anim: 'none', shapes: sh }); }
   const special = { cave: 10, stone: 11, statue: 12, pyramid: 13, well: 14, mill: 15, windmill: 15, temple: 16, market: 17, dock: 18 }[name];
   if (special) {
     const sand = '#c9b27a', pale = 'hsl(' + (205 + tone * 5) + ',8%,70%)';
@@ -43,14 +55,14 @@ function kindLook(name, owner) {
     else if (special === 16) sh.push({ t: 'rect', y: 0.34, w: 0.6, h: 0.06, fill: stone2 }, { t: 'line', x: -0.21, y: 0.3, x2: -0.21, y2: -0.1, lw: 0.07, stroke: pale }, { t: 'line', x: -0.07, y: 0.3, x2: -0.07, y2: -0.1, lw: 0.07, stroke: pale }, { t: 'line', x: 0.07, y: 0.3, x2: 0.07, y2: -0.1, lw: 0.07, stroke: pale }, { t: 'line', x: 0.21, y: 0.3, x2: 0.21, y2: -0.1, lw: 0.07, stroke: pale }, { t: 'tri', y: -0.24, s: 0.52, fill: stone }, { t: 'star', y: -0.24, s: 0.07, n: 6, fill: '#f2d28a' });
     else if (special === 17) sh.push({ t: 'line', x: -0.34, y: 0.34, x2: -0.34, y2: -0.02, lw: 0.03, stroke: line }, { t: 'line', x: -0.06, y: 0.34, x2: -0.06, y2: -0.02, lw: 0.03, stroke: line }, { t: 'line', x: 0.08, y: 0.34, x2: 0.08, y2: -0.1, lw: 0.03, stroke: line }, { t: 'line', x: 0.36, y: 0.34, x2: 0.36, y2: -0.1, lw: 0.03, stroke: line }, { t: 'rect', x: -0.2, y: -0.04, w: 0.17, h: 0.05, fill: '#b5532a' }, { t: 'rect', x: 0.22, y: -0.12, w: 0.17, h: 0.05, fill: '#e8dcc0' }, { t: 'ring', n: 4, d: 0.2, x: -0.2, y: 0.24, s: 0.05, fill: '#d8a13a' }, { t: 'ring', n: 3, d: 0.18, x: 0.22, y: 0.22, s: 0.05, fill: '#7fb7b0' });
     else sh.push({ t: 'rect', y: 0.16, w: 0.56, h: 0.07, fill: wood }, { t: 'line', x: -0.4, y: 0.4, x2: -0.4, y2: 0.06, lw: 0.05, stroke: line }, { t: 'line', x: 0, y: 0.4, x2: 0, y2: 0.06, lw: 0.05, stroke: line }, { t: 'line', x: 0.4, y: 0.4, x2: 0.4, y2: 0.06, lw: 0.05, stroke: line }, { t: 'ellipse', x: 0.1, y: -0.08, w: 0.26, h: 0.07, fill: '#7a5a3a' }, { t: 'line', x: 0.1, y: -0.12, x2: 0.1, y2: -0.44, lw: 0.02, stroke: line }, { t: 'tri', x: 0.2, y: -0.3, s: 0.16, rot: 90, fill: '#e8dcc0' });
-    return (KIND_CACHE[key] = { anim: 'none', shapes: sh });
+    return (KIND_CACHE[key] = { anim: 'none', shapes: aged(sh) });
   }
   const form = name === 'hall' || name === 'longhall' || name === 'school' || name === 'moot' ? 0 : name === 'shrine' ? 1 : name === 'workshop' || name === 'kiln' || name === 'forge' || name === 'enginehouse' ? 2 : name === 'tower' || name === 'observatory' ? 3 : h % 4;
   if (form === 0) sh.push({ t: 'rect', y: 0.18, w: 0.5, h: 0.16, fill: wood }, { t: 'tri', y: -0.14, s: 0.54, fill: thatch }, { t: 'line', x: -0.5, y: 0.03, x2: 0.5, y2: 0.03, lw: 0.03, stroke: line }, { t: 'rect', y: 0.22, w: 0.09, h: 0.12, fill: dark }, { t: 'line', x: -0.3, y: 0.06, x2: -0.3, y2: 0.34, lw: 0.03, stroke: line }, { t: 'line', x: 0.3, y: 0.06, x2: 0.3, y2: 0.34, lw: 0.03, stroke: line }, { t: 'line', x: 0, y: -0.5, x2: 0, y2: -0.66, lw: 0.025, stroke: line }, { t: 'tri', x: 0.07, y: -0.6, s: 0.07, rot: 90, fill: '#b5532a' });
   else if (form === 1) sh.push({ t: 'ring', n: 7, d: 0.72, y: 0.18, s: 0.07, fill: stone2 }, { t: 'rect', y: 0.1, w: 0.1, h: 0.26, fill: stone }, { t: 'rect', y: -0.18, w: 0.2, h: 0.05, fill: stone }, { t: 'star', y: -0.36, s: 0.1, n: 6, fill: '#f2d28a' }, { t: 'ring', n: 3, d: 0.24, y: 0.3, s: 0.035, fill: '#e8a04a' });
   else if (form === 2) sh.push({ t: 'rect', x: -0.08, y: 0.16, w: 0.36, h: 0.18, fill: wood }, { t: 'tri', x: -0.08, y: -0.06, s: 0.4, rot: 0, fill: thatch }, { t: 'rect', x: 0.36, y: 0.02, w: 0.07, h: 0.34, fill: stone2 }, { t: 'circle', x: 0.36, y: -0.38, s: 0.07, fill: 'rgba(200,200,200,0.5)' }, { t: 'circle', x: 0.42, y: -0.52, s: 0.05, fill: 'rgba(200,200,200,0.35)' }, { t: 'rect', x: -0.08, y: 0.24, w: 0.14, h: 0.1, fill: dark }, { t: 'circle', x: -0.08, y: 0.26, s: 0.035, fill: '#f08a3c' }, { t: 'line', x: -0.42, y: 0.34, x2: -0.3, y2: 0.2, lw: 0.03, stroke: stone });
   else sh.push({ t: 'rect', y: 0.1, w: 0.2, h: 0.5, fill: stone2 }, { t: 'rect', y: -0.44, w: 0.3, h: 0.07, fill: stone }, { t: 'rect', x: -0.2, y: -0.56, w: 0.07, h: 0.08, fill: stone }, { t: 'rect', x: 0, y: -0.56, w: 0.07, h: 0.08, fill: stone }, { t: 'rect', x: 0.2, y: -0.56, w: 0.07, h: 0.08, fill: stone }, { t: 'rect', y: -0.12, w: 0.06, h: 0.1, fill: dark }, { t: 'rect', y: 0.28, w: 0.09, h: 0.14, fill: dark }, { t: 'line', x: -0.2, y: 0.1, x2: 0.2, y2: 0.1, lw: 0.015, stroke: dark });
-  return (KIND_CACHE[key] = { anim: 'none', shapes: sh });
+  return (KIND_CACHE[key] = { anim: 'none', shapes: aged(sh) });
 }
 function structLook(kind, owner, i) {
   if (kind === 'shelter' && w.bkind && w.bkind[i] && ((w.laws.buildings && w.laws.buildings[w.bkind[i]]) || w.bkind[i] === 'cave')) return kindLook(w.bkind[i], owner > 0 ? owner : 0);
@@ -736,7 +748,7 @@ function drawLabels(c) {
   for (let k = 0; k < w.settlements.length; k++) {
     const stl = w.settlements[k], root = agentOf(stl.root), px = sx(stl.x), py = sy(stl.y) - (stl.r + 0.9) * z; if (px < -120 || py < -30 || px > W + 120 || py > H + 30) continue;
     c.font = '800 ' + Math.round(clamp(z * 0.62, 12, 22)) + 'px "Bricolage Grotesque", sans-serif';
-    c.lineWidth = 4; c.strokeStyle = 'rgba(5,8,11,0.8)'; c.strokeText(stl.name, px, py); c.fillStyle = SW.hslToHex(root ? root.hue : 40, 0.85, 0.72); c.fillText(stl.name, px, py);
+    c.lineWidth = 4; c.strokeStyle = 'rgba(5,8,11,0.8)'; const nm = stl.name + (stl.age > 1 ? ' \u00b7 ' + ['', 'I', 'II', 'III', 'IV', 'V', 'VI'][stl.age] : ''); /* the age its buildings have reached */ c.strokeText(nm, px, py); c.fillStyle = SW.hslToHex(root ? root.hue : 40, 0.85, 0.72); c.fillText(nm, px, py);
   }
   /* the names beings have given to places */
   for (let k = 0; k < w.places.length; k++) {
@@ -953,6 +965,7 @@ function onWorldEvent(ev) {
     case 'dismantled': burst(ev.x, ev.y, '#b98a55', 8); soundAt('wood', ev.x, ev.y); break;
     case 'stashed': burst(ev.x, ev.y, '#d9c08a', 4); soundAt('stashed', ev.x, ev.y); break;
     case 'tamed': if (a) { glyph(a.x, a.y, '\u2665 ' + ev.kind, '#ffb3c7', 2.6); motes(a.x, a.y, '#ffb3c7', 6); soundAt('tamed', a.x, a.y, voice); } break;
+    case 'commonway': addFx({ type: 'ring', x: ev.x, y: ev.y, r: 5, life: 3.5, color: 'rgba(157,180,255,0.85)' }); glyph(ev.x, ev.y, 'all now know ' + ev.way, '#b9c8ff', 3.4); motes(ev.x, ev.y, '#b9c8ff', 10); soundAt('telling', ev.x, ev.y); break;
     case 'penned': if (a) { glyph(a.x, a.y, (ev.out ? 'out of the pen: ' : 'penned: ') + ev.n + ' ' + ev.kind, '#cdbb96', 2.8); motes(a.x, a.y, '#cdbb96', 6); soundAt('herd', a.x, a.y); } break;
     case 'drove': addFx({ type: 'ring', x: ev.x, y: ev.y, r: 4, life: 3, color: 'rgba(205,187,150,0.8)' }); glyph(ev.x, ev.y, ev.n + ' ' + ev.kind + ' driven in', '#cdbb96', 3); soundAt('herd', ev.x, ev.y); break;
     case 'strayed': glyph(ev.x, ev.y, 'a ' + ev.kind + ' breaks out', '#e0a070', 2.6); break;
@@ -1757,7 +1770,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 25, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 26, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1823,7 +1836,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 25, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 26, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }

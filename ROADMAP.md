@@ -14,10 +14,12 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 25, to be watched and tuned
+## NOW: built in Generations 14 to 26, to be watched and tuned
 
 | Item | State |
 | --- | --- |
+| **A community raises better buildings:** a way is a band's when two members hold it; any member may then raise its buildings; when one stands the whole band learns the way; a better building is raised in place of the one it grows out of and serves in its stead; settlements and buildings show their age | Built in 26, by Nova's rule. Watch: whether bands come to hold ways in common, whether anything is raised in place, whether settlements pass the first age |
+| **Whatever takes more than hands hold is a work brought to in loads** | Built in 26. A forge, a well, a mill, an infirmary, a barracks, a boat and every ship could never be made before. Watch: whether they are now |
 | **Everything a being knows how to make is before it,** with what it lacks for each; "build raft" makes a raft; every kind of building shown in turn | Built in 25. In fourteen runs no vessel, cloak or basket was made, because the prompt showed only the last six recipes added to the world. Watch: whether rafts and the older recipes are made now; whether a vessel is worth making where most water can be swum |
 | **A pen for a herd, and herds that are driven;** whoever holds the pen keeps the herd | Built in 25. Watch: whether anyone builds a pen, pens or drives; whether penned animals starve their ground and break out |
 | **Works that yield: a weir and a field,** tended, lay food in their holder's store; one's own store is a larder | Built in 25. Watch: whether they are built and tended; whether a settlement with them starves less; whether the yields are too rich or too poor |
@@ -76,17 +78,11 @@ Answered by the seventh run: people do earn a following (nine pledges), and less
 
 **Next in order (Nova, 23 November, after Generation 25):**
 
-1. **A community raises better buildings** (near term; below).
-2. **The big round: the trees, and what is built from them** (its own section, after this one).
+1. **A community raises better buildings:** built in Generation 26.
+2. **The big round: the trees, and what is built from them** (its own section, after this one). The audit is done (`docs/tree-audit.md`); its five proposals wait for Nova's word.
 3. Then, as agreed earlier the same day: a day that goes round the world; hatred that lasts, peacemakers, rivalry for mates, heroes and duels.
 
 Left out by Nova's choice: flood in the season of rains. Farther out: the sim in groups, peoples, planets (the section SCALE, below).
-
-**A community raises better buildings (Nova, 23 November; near term).** Nova's rule: it follows the tree; it takes at least two members of the community who hold the new knowledge; and when the new building stands, the whole community has that knowledge.
-
-- *What exists today.* Knowledge belongs to one being and passes by teaching, one to one. A building of a later age can be raised by anyone who knows its way, on bare ground; nothing is ever raised in place of an older building, and nothing a settlement builds changes what its other members know. Of 36 kinds of building all but three do something (a bond, an effect on those inside, longer-lasting tools, sight, water, a yield) or are needed for a recipe. In the fourteenth run, sixty days and forty-three alive, the people held ways of the second and third ages (smelting 3, boats 9, wells 1, sailing 1, alchemy 1) and built only shelters (32), stores (16), halls (14), workshops (8), igloos (6), longhalls (5) and one wall: no forge, well, school or dock. Until Generation 25 a being who knew many ways was shown only the last nine kinds of building.
-- *To build.* A settlement as the holder of knowledge: a way counts as the settlement's when two who live there hold it. Then any member may raise that way's buildings, and may raise one in place of an older building of the line it improves (a line of descent between kinds: shelter, hall, longhall; workshop, forge, factory; store, granary), keeping what the old one held. When it stands, every member of the settlement learns the way. The better building must be worth it: measure what each kind gives before and after.
-- *To be seen.* The building looks different on the map when it is raised, and the settlement's age shows.
 
 **From Nova's notes of 22 November, evening, after the globe was built:**
 
@@ -120,7 +116,7 @@ Left out by Nova's choice: flood in the season of rains. Farther out: the sim in
 
 The purpose: that progress along the trees really happens, that the trees work together, and that it can be seen. The sim should be able to go all the way to advanced societies.
 
-**First an audit, with numbers from the runs, before anything is changed.**
+**First an audit, with numbers from the runs, before anything is changed.** Done on 23 November: `docs/tree-audit.md`.
 
 - *What there is.* 68 ways in four trees (craft 31, mind 18, society 9, life 10) over six ages. A way comes within reach by practice (a count of something done) and by the ways it needs, and opens at a deep reflection; hardship brings some nearer. It then passes by teaching and by being watched.
 - *What to find out.* How far each run got and how fast; which ways were never reached and why (the practice never done, a needed way missing, never offered); whether a band advances together or one being runs ahead; whether a way once found changes what its holder does; which ways have nothing behind them (from about the fourth age the ways, minerals and buildings have names and looks and little that they do); how the four trees lean on one another, and where they do not but should.
@@ -238,3 +234,4 @@ A short index; the detail is in the design log.
 | 23 | A world that slows and does not sleep: an eased pace, a slower clock, minds in view only at the worst, all recovering by themselves; the maker and chronicler try again within minutes; who draws from each store, deaths with place and cause, recipes made ever, tools of their own design, refusals that name the change, for the maker; a reminder of rafts to one stopped by water |
 | 24 | Memory in a window, history in files: a journal of the year in hand, a markdown file for each year with an index of whom it speaks of, recall by asking and by sight, the foods and people before a being now shown in full and the rest counted; the maker's last four visits in full and recall of older ones; all of it inside the saved world |
 | 25 | Everything one knows how to make shown; pens and driven herds; weirs, fields and the larder; thought by plan; the sea gives back |
+| 26 | A community advances together: ways held in common, learned by all when a building stands; better buildings raised in place of older; works too big for the hands brought in loads; the age of a settlement shown |

@@ -62,6 +62,9 @@ The page writes each run to the artifact's store as it goes. With the artifact d
 - Most water inside the known land can be swum (`w.narrow`: within two steps of a shore or of shallows). Only the heart of a lake and the sea need a vessel; a check of crossing must use open water.
 - A being in the middle of a plan waits for it (`settings.planWait`, `M.ready`, `M.WEIGHTY`). An event that should break into a plan must be told with an urge of 3 or more; one of less only brings the next thought nearer.
 - A building with `yields` is a work that gives food while tended (`stepYields`, `w.tended`); a pen holds kept animals (`c.pen`, `keepPenned`). Both are data in `L.buildings`.
+- **Nothing may ask for more at once than hands hold** (`build.woodMax` and `craft.stoneMax`, six each): a forge of eight stone could never be raised and a boat of ten wood never made, for fourteen runs. Anything larger is a work brought to in loads (`w.works` for a building, `w.makings` for a thing). When adding a building or a recipe, check its cost against the hands; `tests/22` lists what would be impossible.
+- A way is a band's when two members hold it (`culture.commonAt`, `SW.heldInCommon`); a building of that way teaches the whole band when it stands (`raised`). Kinds of building have lines of descent (`from`): the newer may be raised in place of the older and serves wherever the older is asked for (`isOfLine`), so it must give all the older gave. `SW.bandOf` is an older function with another meaning; the members of a band are `SW.bandMembers`.
+- The audit of the trees is `docs/tree-audit.md`, made by `tests/tools/tree-audit.js` from the run files. Run it again after each full run.
 - When a script edits a document, end it by writing the file and check the result: the README said Generation 18 through Generation 19 because an edit was computed and never written.
 - Terrain 9 is the unknown (`T.VOID`): impassable, nothing lives there, and the true ground is kept in `w.veil`. Anything that picks a tile by position and not by terrain must skip it. Animals and newcomers come in at `edgeSpot(w)`, not at the map's rim.
 - Settings: a bump of `settings.v` must carry the previous version's saved settings across (see `M.restore`), moving a default only where the saved value still equals the old default.
@@ -88,7 +91,7 @@ tests/run-all.sh                                   # needs only Node
 PLAYWRIGHT=/path/to/node_modules/playwright tests/run-all.sh browser
 ```
 
-All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`22-...js`); do not pin the generation number or the size of the heritage with `===` in it, or the next generation breaks it, with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
+All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`23-...js`); do not pin the generation number or the size of the heritage with `===` in it, or the next generation breaks it, with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
 
 What the tests cannot show is how real minds behave. Say so in every report.
 
