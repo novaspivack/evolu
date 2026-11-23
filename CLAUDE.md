@@ -56,6 +56,7 @@ The page writes each run to the artifact's store as it goes. With the artifact d
 - Plants are stepped every other moment at double rates. A new per-moment rate in `stepPlants` must be doubled.
 - On the page, `sx()` wraps and `toWorld()` returns a wrapped x; whole-map images are laid with `lay()`. The globe (`drawSpace`) is used when `isGlobe()`.
 - Boxes of speech and thought are all placed (`placeBubbles`, with the panels from `hudRects`) before any is drawn, and `U.laid` holds where they went. Never place a box by itself with a fixed offset: that is how speech came to be drawn over thought. Anything new shown as a box over the map goes through the same placing; a new panel over the map is added to `hudRects`. `tests/19-boxes-of-speech-and-thought.js` (by chance scenes, in Node) and `tests/browser/bubbles.js` (on the page) check it.
+- The chronicler writes from everything recorded since the last chapter (`K.span`): memory and the save keep that much (`M.kept`, `M.CHRON`). Never cut what something writes from by a fixed tail (`slice(-140)` made a chapter of the last day and a half and called the rest thin); thin it by weight and by day, and say how much was left out. A chapter written from too little can be replaced from outside through the store (`K.amend`, `runs/<run id>/state/amend`, a higher `rev` each time).
 - When a script edits a document, end it by writing the file and check the result: the README said Generation 18 through Generation 19 because an edit was computed and never written.
 - Terrain 9 is the unknown (`T.VOID`): impassable, nothing lives there, and the true ground is kept in `w.veil`. Anything that picks a tile by position and not by terrain must skip it. Animals and newcomers come in at `edgeSpot(w)`, not at the map's rim.
 - Settings: a bump of `settings.v` must carry the previous version's saved settings across (see `M.restore`), moving a default only where the saved value still equals the old default.
@@ -82,7 +83,7 @@ tests/run-all.sh                                   # needs only Node
 PLAYWRIGHT=/path/to/node_modules/playwright tests/run-all.sh browser
 ```
 
-All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`20-...js`); do not pin the generation number or the size of the heritage with `===` in it, or the next generation breaks it, with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
+All suites must pass before publishing. Every check runs against the one current engine; the numbered files are grouped by subject. Each generation adds a numbered file for what it added (`21-...js`); do not pin the generation number or the size of the heritage with `===` in it, or the next generation breaks it, with checks that place beings and clear predators so they do not depend on chance. Regenerate `tests/fixtures/save-generation-<N>.json.gz` from the generation being replaced, so the save-compatibility check always covers the previous generation.
 
 What the tests cannot show is how real minds behave. Say so in every report.
 

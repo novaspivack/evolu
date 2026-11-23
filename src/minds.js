@@ -372,9 +372,28 @@ function chron(st, kind, text, ids, at) {
   if (st.story) st.story.tally[kind] = (st.story.tally[kind] || 0) + 1;
   M.record(st, { t: 'chron', kind: kind, text: text });
   st.chron.push({ tick: st.world.tick, kind: kind, text: text, ids: ids || [], x: at ? at.x : null, y: at ? at.y : null });
-  if (st.chron.length > 300) st.chron.shift();
+  if (st.chron.length > M.CHRON.hold) { const cut = st.chron.length - M.kept(st, st.chron, M.CHRON.hold, M.CHRON.most).length; if (cut > 0) st.chron.splice(0, cut); }
 }
 M.chron = chron;
+/* The chronicle in hand. The chronicler writes each chapter from everything recorded since the chapter before, so nothing recorded since then is let
+   go until that chapter is written: not from memory, and not from a saved world. (Before, memory held the last 300 entries and a save the last 120,
+   while forty-five beings record about 95 a day and a chapter covers three days or, when the chronicler cannot get through, many more.) There is a
+   limit, for a world whose chronicler never gets through. What is said aloud is kept the same way. */
+M.CHRON = { hold: 300, most: 1200, save: 120, voices: 600 };
+/* What beings thought when they looked back on their lives, since the last chapter: the chronicler quotes from these. The record of the run is not
+   brought back when a world is reloaded, so the last few are carried in the save. */
+M.deep = function (st) {
+  const last = st.story ? st.story.last || 0 : 0, seen = {}, out = [];
+  (st.deepKept || []).concat(st.rec ? st.rec.all.filter(function (r) { return r.t === 'thought' && r.kind === 'deep'; }) : []).forEach(function (r) {
+    const k = r.name + ':' + r.tick; if (!(r.tick > last) || seen[k]) return; seen[k] = 1; out.push({ tick: r.tick, day: r.day, name: r.name, thought: String(r.thought || '').slice(0, 400) });
+  });
+  return out.slice(-12);
+};
+M.kept = function (st, list, least, most) {
+  const last = st.story ? st.story.last || 0 : Infinity, floor = Math.max(0, list.length - least); let i = Math.max(0, list.length - most);
+  while (i < floor && !(list[i].tick > last)) i++;
+  return i ? list.slice(i) : list;
+};
 function witnesses(st, x, y, except) {
   const w = st.world, out = [];
   for (let k = 0; k < w.agents.length; k++) {
@@ -1464,7 +1483,7 @@ M.snapshot = function (st) {
     c.busy = false; c.stream = ''; c.log = m.log.slice(-30); delete c.tests;
     minds[id] = c;
   }
-  return { v: 4, world: st.world, minds: minds, names: st.names, chron: st.chron.slice(-120), voices: st.voices.slice(-120), settings: st.settings, used: st.used, total: st.total || st.used || 0, runId: st.runId, recChunk: st.rec ? st.rec.chunk : 0, story: st.story, maker: st.maker };
+  return { v: 4, world: st.world, minds: minds, names: st.names, chron: M.kept(st, st.chron, M.CHRON.save, M.CHRON.most).slice(), voices: M.kept(st, st.voices, M.CHRON.save, M.CHRON.voices).slice(), deep: M.deep(st), settings: st.settings, used: st.used, total: st.total || st.used || 0, runId: st.runId, recChunk: st.rec ? st.rec.chunk : 0, story: st.story, maker: st.maker };
 };
 M.restore = function (snap) {
   if (!snap || snap.v !== 4 || !snap.world || !snap.world.laws || snap.world.v !== 2) return null;
@@ -1472,7 +1491,7 @@ M.restore = function (snap) {
   if (got.v === base.v || got.v === 10 || got.v === 11) { for (const k in got) if (k in base) base[k] = got[k]; if (got.v === 10 && got.perMinute === 24) base.perMinute = 40; if (got.v === 11 && got.parallel === 6) base.parallel = 4; /* six at once was more than Claude allows a page */ base.v = 12; } /* settings from the generation before are kept, and its pace moves to the new one where it was never changed; older settings give way to the defaults */
   SW.upgrade(snap.world);
   const st = M.createState(snap.world, base);
-  st.minds = snap.minds || {}; st.names = snap.names || {}; st.chron = snap.chron || []; st.voices = snap.voices || [];
+  st.minds = snap.minds || {}; st.names = snap.names || {}; st.chron = snap.chron || []; st.voices = snap.voices || []; st.deepKept = Array.isArray(snap.deep) ? snap.deep : [];
   st.used = 0; st.total = snap.total || snap.used || 0;
   if (snap.runId) { st.runId = snap.runId; st.rec.chunk = snap.recChunk || 0; }
   if (snap.story && snap.story.chapters) st.story = snap.story; if (snap.maker && snap.maker.log) st.maker = snap.maker;

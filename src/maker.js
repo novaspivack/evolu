@@ -87,19 +87,77 @@ function people(st, full) {
 }
 
 /* ---------- the chronicler ---------- */
+/* What the chronicler is handed of the span it is to write. Where the span holds no more than the page can carry, all of it. Where it holds more
+   (forty-five beings record about 95 things a day), not simply the last of it, which made a chapter of the final day or two and called the rest
+   thin: every death, birth, discovery, trade, theft and war; of the rest a share from every day, in proportion to what the day held and never fewer
+   than three (fewer only where the days are very many), the weightier kinds first and no one kind crowding out the others; and a count of what each day held, so that a quiet day can be told
+   from a day of which little is shown. */
+K.STORY = { show: 240, full: 600 };
+const WEIGHT = { death: 9, birth: 9, war: 9, discovery: 9, trade: 8, extinct: 8, theft: 7, sky: 6, invention: 5, court: 5, build: 5, age: 5, sick: 5, mark: 5, variety: 5, lore: 4, magic: 4, hunt: 3, power: 3, craft: 2, gift: 2, culture: 2, self: 1 };
+K.span = function (st, from, show) {
+  const d = st.world.laws.time.dayLength, cap = show || K.STORY.show, wt = function (k) { return WEIGHT[k] || 5; };
+  const all = st.chron.filter(function (c) { return c.tick > from && c.kind !== 'story' && c.kind !== 'maker'; });
+  const dayOf = function (c) { return Math.floor(c.tick / d) + 1; }, line = function (c) { return 'day ' + dayOf(c) + ' [' + c.kind + '] ' + c.text; };
+  if (all.length <= cap) return { n: all.length, shown: all.length, lines: all.map(line), table: [], days: 0 };
+  const keep = []; let left = cap;
+  const heavy = []; all.forEach(function (c, i) { keep.push(false); if (wt(c.kind) >= 7) heavy.push(i); });
+  const hn = Math.min(heavy.length, Math.round(cap * 0.6));
+  for (let j = 0; j < hn; j++) { keep[heavy[Math.floor(j * heavy.length / hn)]] = true; left--; }
+  const days = {}, order = [];
+  all.forEach(function (c, i) {
+    const k = dayOf(c); if (!days[k]) { days[k] = { day: k, n: 0, kinds: {}, free: {}, freeN: 0 }; order.push(days[k]); }
+    const D = days[k]; D.n++; D.kinds[c.kind] = (D.kinds[c.kind] || 0) + 1; if (!keep[i]) { (D.free[c.kind] = D.free[c.kind] || []).push(i); D.freeN++; }
+  });
+  const least = Math.max(1, Math.min(3, Math.floor(left / order.length))); /* three of each day, or fewer where the days are very many */
+  order.forEach(function (D) {
+    let share = Math.min(D.freeN, Math.max(least, Math.round(left * D.n / all.length))); const got = {};
+    while (share-- > 0) {
+      let best = null, bs = -1;
+      for (const k in D.free) { const g = got[k] || 0; if (g >= D.free[k].length) continue; const sc = wt(k) / (1 + g); if (sc > bs) { bs = sc; best = k; } }
+      if (!best) break; got[best] = (got[best] || 0) + 1;
+    }
+    for (const k in got) { const list = D.free[k], n = got[k]; for (let j = 0; j < n; j++) keep[list[Math.floor((j + 0.5) * list.length / n)]] = true; }
+  });
+  const table = order.map(function (D) {
+    const ks = Object.keys(D.kinds).sort(function (a, b) { return D.kinds[b] - D.kinds[a]; });
+    return 'day ' + D.day + ': ' + D.n + ' (' + ks.slice(0, 6).map(function (k) { return k + ' ' + D.kinds[k]; }).join(', ') + (ks.length > 6 ? ', and other things' : '') + ')';
+  });
+  const lines = all.filter(function (c, i) { return keep[i]; }).map(line);
+  return { n: all.length, shown: lines.length, lines: lines, table: table, days: order.length };
+};
+/* A chapter rewritten from outside the world. Where the chronicler was shown too little of a span (as for days 37 to 61 of Nova's world), the chapter
+   can be written again from the full record of the run and laid in the store beside the run (runs/<run id>/state/amend: { rev, chapters: [{ n, title,
+   text, why }] }); the page takes it up once when the world is opened. Only the title and the text of a chapter that exists are changed, the first
+   writing is kept beside it, and a correction is taken up once (by its rev). What it holds is text from outside and is treated as text. */
+K.amend = function (st, doc) {
+  const S = st.story, rev = doc ? +doc.rev || 0 : 0; if (!(rev > (S.amended || 0)) || !Array.isArray(doc.chapters)) return 0;
+  const done = [];
+  doc.chapters.slice(0, 8).forEach(function (c) {
+    const ch = c && S.chapters.find(function (q) { return q.n === +c.n; }), text = c && typeof c.text === 'string' ? c.text.trim().slice(0, 6000) : '';
+    if (!ch || text.length < 40) return;
+    if (!ch.was) ch.was = { title: ch.title, text: ch.text };
+    ch.title = clip(c.title || ch.title, 80); ch.text = text; ch.amended = clip(c.why || 'Rewritten from the full record of the run.', 300); done.push(ch.n);
+  });
+  S.amended = rev;
+  if (done.length) { S.rev = (S.rev || 0) + 1; M.record(st, { t: 'amended', chapters: done, rev: rev }); }
+  return done.length;
+};
+/* how much has been recorded since the last chapter */
+K.pending = function (st) { let n = 0; for (let i = st.chron.length - 1; i >= 0 && st.chron[i].tick > st.story.last; i--) n++; return n; };
 K.tell = async function (st) {
   const w = st.world, S = st.story, d = w.laws.time.dayLength;
   if (K.busy || !st.sample) return null; K.busy = 'story'; st.outerBusy = true; st.used++;
   try {
-    const since = st.chron.filter(function (c) { return c.tick > S.last && c.kind !== 'story' && c.kind !== 'maker'; }).slice(-140).map(function (c) { return 'day ' + (Math.floor(c.tick / d) + 1) + ' [' + c.kind + '] ' + c.text; });
+    const span = K.span(st, S.last), since = span.lines;
     const vs = st.voices.filter(function (v) { return v.tick > S.last; }), step = Math.max(1, Math.ceil(vs.length / 28));
     const said = vs.filter(function (v, i) { return i % step === 0; }).map(function (v) { return 'day ' + (Math.floor(v.tick / d) + 1) + ' ' + v.name + ' to ' + v.to + ': "' + clip(v.text, 150) + '"'; });
-    const th = st.rec ? st.rec.all.filter(function (r) { return r.t === 'thought' && r.tick > S.last && r.kind === 'deep'; }).slice(-12).map(function (r) { return 'day ' + r.day + ' ' + r.name + ' reflected: ' + clip(r.thought, 260); }) : [];
+    const th = M.deep(st).map(function (r) { return 'day ' + r.day + ' ' + r.name + ' reflected: ' + clip(r.thought, 260); });
     const now = K.stats(st), last = S.chapters[S.chapters.length - 1];
     const prompt = 'You are the chronicler of a small simulated world called Evolu. Beings live there, each with a mind of its own. You stand outside it. From the record below, write the next chapter of its history, for a reader who wants to understand what is really going on: who these people are to one another, what they are making, what is changing, what is coming.\n' +
       'Rules: use only what the record shows; never invent an event, a motive or a quotation. Name people. Prefer what was done over what was said. Say plainly when nothing much happened. Plain prose, past tense, no headings inside the chapter, no flourish.\n\n' +
       (S.chapters.length ? 'CHAPTERS SO FAR: ' + S.chapters.map(function (c) { return c.n + '. "' + c.title + '" (days ' + c.day0 + '-' + c.day1 + ')'; }).join('; ') + '\nTHE LAST CHAPTER, for continuity:\n' + last.text + '\n\nTHREADS YOU WERE FOLLOWING:\n' + S.threads.map(function (t) { return '- ' + t.name + ' [' + t.kind + ']: ' + t.text; }).join('\n') + '\n\n' : 'This is the first chapter.\n\n') +
-      'THIS CHAPTER COVERS day ' + (Math.floor(S.last / d) + 1) + ' to day ' + now.day + ' (' + now.season + ').\n\nWHAT HAPPENED (the world\'s own record):\n' + (since.join('\n') || '- nothing was recorded') +
+      'THIS CHAPTER COVERS day ' + (Math.floor(S.last / d) + 1) + ' to day ' + now.day + ' (' + now.season + ').\n\nWHAT HAPPENED (the world\'s own record)' + (span.shown < span.n ? '. ' + span.n + ' things were recorded in this span, more than can be set before you, so here are ' + span.shown + ' of them: every death, birth, discovery, trade, theft and war, and of the rest a share from every day, the weightier first. After them is a count of what each day held. Judge which days were busy and which were quiet from that count, never from how many lines of a day you are shown, and give the early days of the span their due' : '') + ':\n' + (since.join('\n') || '- nothing was recorded') +
+      (span.table.length ? '\n\nHOW MUCH WAS RECORDED EACH DAY (all of it, with the most common kinds):\n' + span.table.join('\n') : '') +
       '\n\nSOME OF WHAT WAS SAID ALOUD:\n' + (said.join('\n') || '- nothing') + '\n\nSOME OF WHAT THEY THOUGHT WHEN THEY LOOKED BACK ON THEIR LIVES:\n' + (th.join('\n') || '- nothing') +
       '\n\nTHE PEOPLE NOW:\n' + people(st, true) + '\n\nTHE NUMBERS NOW: ' + JSON.stringify(now) + (S.stats ? '\nTHE NUMBERS AT THE LAST CHAPTER: ' + JSON.stringify(S.stats) : '') +
       '\n\nReply with ONLY one JSON object: {"title": "a short title for this chapter", "text": "the chapter, 180 to 320 words", "threads": [up to 8 running threads, each {"name": "short name", "kind": "family" or "band" or "rivalry" or "person" or "craft" or "belief" or "land", "text": "where this thread stands now, one or two sentences"}], "trends": [up to 6 short lines, each one thing that is rising, falling or missing, with a number where the numbers give one]}';
@@ -109,7 +167,7 @@ K.tell = async function (st) {
     S.threads = (Array.isArray(r.threads) ? r.threads : []).slice(0, 8).map(function (t) { return { name: clip(t && t.name, 40), kind: word(t && t.kind, 10) || 'thread', text: clip(t && t.text, 600) }; }).filter(function (t) { return t.name && t.text; });
     S.trends = (Array.isArray(r.trends) ? r.trends : []).slice(0, 6).map(function (t) { return clip(t, 320); }).filter(Boolean);
     S.stats = JSON.parse(JSON.stringify(now)); S.last = w.tick; S.lastDay = now.day; S.rev = (S.rev || 0) + 1;
-    M.record(st, { t: 'story', n: ch.n, title: ch.title, text: ch.text, threads: S.threads, trends: S.trends, stats: now });
+    M.record(st, { t: 'story', n: ch.n, title: ch.title, text: ch.text, threads: S.threads, trends: S.trends, stats: now, recorded: span.n, shown: span.shown, promptSize: prompt.length });
     st.ui({ type: 'story', chapter: ch });
     return ch;
   } catch (e) { K.error = K.later(st, S, e, 'The chronicler', st.settings.story.every); M.record(st, { t: 'failed', name: 'chronicler', code: (e && e.code) || 'error', raw: e && e.text ? String(e.text).slice(0, 800) : '' }); return null; }
@@ -575,7 +633,8 @@ K.later = function (st, rec, e, who, every) {
 K.tick = function (st) {
   if (!st.on || !st.sample || st.blocked || K.busy || st.used >= st.settings.budget) return;
   const day = SW.day(st.world), S = st.settings, now = Date.now(); if (now < (st.hold || 0)) return;
-  if (day - st.story.lastDay >= S.story.every && now >= (st.story.retryAt || 0)) K.tell(st);
+  /* a chapter every few days, or sooner (never twice in a day) when so much has been recorded that waiting would mean showing the chronicler too little of it */
+  if ((day - st.story.lastDay >= S.story.every || (day > st.story.lastDay && K.pending(st) >= K.STORY.full)) && now >= (st.story.retryAt || 0)) K.tell(st);
   else if (S.maker.on && st.story.chapters.length && day - st.maker.lastDay >= S.maker.every && now >= (st.maker.retryAt || 0)) K.make(st);
 };
 K.ensure = ensure;

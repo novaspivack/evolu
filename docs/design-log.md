@@ -12,6 +12,30 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## After Generation 24: the chronicler is handed the whole span
+
+Nova, with his world at day 63, asked why chapter 13 (days 37 to 61) said "the record for days 37 to 61 is thin until days 59 and 60, when almost everything it holds took place", and whether the memory files of Generation 24 had caused it. They had not; the chronicler's code was as it had been since Generation 20.
+
+**What the record shows.** Half of the sentence is true. From day 40 to day 57 the minds were asleep after the refusals of the fourteenth run, and the world's chronicle holds 2 to 14 entries a day there (103 in eighteen days) against 55 to 68 a day before and 84 to 115 after. The other half is a fault. No chapter was written between day 37 and day 61 (the minds slept, and the one attempt on day 58 was refused and never tried again in Generation 22), so chapter 13 had 569 entries to cover. The chronicler was handed the last 140 of them, and all 140 fall on days 59 and 60. Days 37 to 39 (181 entries: a band of the Papa arriving, two births, new land found twice, farming, rafts, boats, wells, smelting and sailing discovered) and day 58 (115 entries) were never before it. Two more limits stood behind the first: memory held the last 300 entries and a saved world the last 120, so each reload dropped what was older.
+
+**It is not only a fault of long gaps.** Forty-five beings record about 95 entries a day and a chapter covers three days: about 285 entries against 140. In ordinary running the chronicler was seeing the second half of every span. The limit was set when the world was a third of this size.
+
+**Built.**
+
+- *Nothing since the last chapter is let go before that chapter is written* (`M.kept`, `M.CHRON`): memory keeps everything recorded since the chapter before, to 1,200 entries; a saved world keeps the same, and what was said aloud, and the last twelve reflections (the record of a run does not come back with a reloaded world). Once the chapter is written, memory goes back to 300 and a save to 120, as before.
+- *The chronicler is handed the whole span* (`K.span`). Up to 240 entries, all of them. Beyond that: every death, birth, discovery, trade, theft, war and dying-out; of the rest a share from every day in proportion to what the day held and never fewer than three; within a day the weightier kinds first, each further line of a kind counting for less, so that a being rewriting its own thinking (a quarter of all entries) does not crowd out the rest; and a count of everything each day held, with the instruction to judge busy and quiet days from the counts.
+- *A chapter comes early* when 600 entries are waiting, never twice in a day (`K.pending`). At today's size that does not happen; it is a guard for a larger world.
+- *A chapter can be written again from outside* (`K.amend`, `amendCheck` on the page): a correction laid in the store at `runs/<run id>/state/amend` is taken up once when the world is opened. Only the title and text of a chapter that exists change; the first writing is kept beside it; the Story marks the chapter as rewritten; what comes from the store is shown as text.
+- The record of a run now says of each chapter how much was recorded, how much was shown, and how long the prompt was.
+
+**Chapter 13 written again.** I ran the 569 entries of the run file through the new `K.span` (255 lines, every one of the 24 days present) and wrote the chapter from that and from what the first writing says of days 59 to 61, under the chronicler's own rules. It is in the store for Nova's world and replaces the first writing when the world is next opened. It was written by me, not by the page's chronicler.
+
+**Measured.** On the real record of days 37 to 60: before, 140 lines (8,850 characters) from two days; after, 255 lines and 24 count lines (18,964 characters) from all 24 days. The chronicler's prompt grows by about 10,000 characters where a span is long and by about 7,000 in ordinary running, one call every three days. Its whole prompt is dominated by the numbers of the world, sent twice at about 24,000 characters each; that is the place to cut if it must be cut.
+
+**Tested.** `tests/20-the-chronicler-sees-the-whole-span.js`, 27 checks: the fault itself, the share of every day, the weighty in full, no kind crowding, the counts, the chapter and its record, memory and save before and after a chapter, reflections across a reload, the early chapter, the rewriting of a chapter and its refusal of a correction that is malformed, repeated or for a chapter that does not exist, and a save of the generation before. `tests/browser/amend.js`, 6 checks with a stand-in store: a store that does not answer, then one that does; read from beside the run and nowhere else; text from the store never becomes markup.
+
+**Not shown by this:** whether the chronicler, handed a digest and a count, writes a better chapter. That needs a real chapter from a real run.
+
 ## After Generation 24: the boxes of speech and thought no longer cover one another
 
 Nova, watching a world on day 61, sent four pictures: the white box of what a being says lay over the blue box of what it thinks, sometimes, and sometimes not.

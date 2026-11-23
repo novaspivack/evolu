@@ -1394,7 +1394,7 @@ function renderStory() {
   if (SWK.error) h += '<p class="note">' + esc(SWK.error) + '</p>';
   if (S.trends.length) h += '<h3>Trends</h3><ul class="events">' + S.trends.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
   if (S.threads.length) h += '<h3>Threads</h3>' + S.threads.map(function (t) { return '<div class="mk"><b>' + esc(t.name) + '</b> <span class="v">' + esc(t.kind) + '</span><div class="q">' + esc(t.text) + '</div></div>'; }).join('');
-  h += S.chapters.length ? S.chapters.slice().reverse().map(function (c) { return '<h3>' + c.n + '. ' + esc(c.title) + ' <small>days ' + c.day0 + ' to ' + c.day1 + '</small></h3><p class="chapter">' + esc(c.text) + '</p>'; }).join('') : '<p class="muted">No chapter yet. The first is written on day ' + (1 + st.settings.story.every) + ' while the minds are awake, or press the button.</p>';
+  h += S.chapters.length ? S.chapters.slice().reverse().map(function (c) { return '<h3>' + c.n + '. ' + esc(c.title) + ' <small>days ' + c.day0 + ' to ' + c.day1 + '</small></h3>' + (c.amended ? '<p class="note">' + esc(c.amended) + '</p>' : '') + '<p class="chapter">' + esc(c.text) + '</p>'; }).join('') : '<p class="muted">No chapter yet. The first is written on day ' + (1 + st.settings.story.every) + ' while the minds are awake, or press the button.</p>';
   const n = SWK.stats(st), kv = function (o) { return Object.keys(o).filter(function (k) { return o[k]; }).map(function (k) { return k + ' <b>' + o[k] + '</b>'; }).join(' · ') || 'none'; };
   h += '<h3>The numbers <small>day ' + n.day + ', ' + n.season + '</small></h3><div class="nums">alive <b>' + n.alive + '</b> (children <b>' + n.children + '</b>, elders <b>' + n.elders + '</b>) · ever lived <b>' + n.everBorn + '</b> · died <b>' + n.deaths + '</b>' + (n.deaths ? ' (' + kv(n.deathCauses) + ')' : '') +
     '<br>energy, middle being <b>' + n.energyMedian + '</b> · lowest health <b>' + n.healthLowest + '</b> · sick <b>' + n.sick + '</b><br>bonds <b>' + n.bonds + '</b>: warm <b>' + n.bondsWarm + '</b>, hostile <b>' + n.bondsHostile + '</b> · following a leader <b>' + n.following + '</b> · bands ' + (n.bands.length ? '<b>' + esc(n.bands.join(', ')) + '</b>' : '<b>none</b>') +
@@ -1756,6 +1756,20 @@ function recFlush(force) {
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
+/* A chapter the chronicler wrote from too little can be written again from the full record and laid in the store beside the run; it is looked for
+   once when a world is opened (SWK.amend says what is taken from it). If the store does not answer, it is tried again a minute later. */
+function amendCheck() {
+  if (!dbNS || !st || U.choosing || U.amendFor === st.runId || Date.now() < (U.amendAt || 0)) return;
+  const run = st.runId, world = st; U.amendFor = run;
+  const again = function () { if (U.amendFor === run) U.amendFor = null; U.amendAt = Date.now() + 60000; };
+  try {
+    dbNS.doc('runs/' + run + '/state/amend').get().then(function (snap) {
+      if (world !== st || !snap || !snap.exists) return;
+      const n = SWK.amend(st, snap.data());
+      if (n) { U.keys.story = ''; save(); showNotice(n === 1 ? 'A chapter of the story has been written again from the full record. It is marked in the Story.' : n + ' chapters of the story have been written again from the full record. They are marked in the Story.'); }
+    }, again);
+  } catch (e) { again(); }
+}
 /* the state of every being, as one document that is overwritten */
 function recState1() {
   if (!dbNS || recBusy) return; recBusy = true;
@@ -1890,7 +1904,7 @@ function frame(ts) {
   draw();
   if (ts - U.lastPanel > 260) { U.lastPanel = ts; updatePanels(); }
   if (ts - U.lastMini > 400) { U.lastMini = ts; drawMini(); }
-  if (ts - (U.lastRec || 0) > 5000) { U.lastRec = ts; recFlush(false); SWK.tick(st); }
+  if (ts - (U.lastRec || 0) > 5000) { U.lastRec = ts; recFlush(false); amendCheck(); SWK.tick(st); }
   if (ts - U.lastScene > 500) { U.lastScene = ts; if (!U.eraT || ts - U.eraT > 6000) { U.eraT = ts; let er = 1; w.agents.forEach(function (a) { for (const k in a.knows) er = Math.max(er, (w.laws.tree[k] || {}).era || 1); }); U.era = er; } const R0 = SW.regionAt(w, clamp(Math.round(cam.x), 0, w.W - 1), clamp(Math.round(cam.y), 0, w.H - 1)); SWA.scene(nightLevel(), SW.season(w), skyHere(), { warm: SW.climate(w, ((Math.round(cam.x) % w.W) + w.W) % w.W, clamp(Math.round(cam.y), 0, w.H - 1)) === 1, biome: R0 ? R0.biome : 'mixed', mood: w.musicMood || 'calm', era: U.era || 1, crowd: w.settlements.length }); }
   if (ts - U.lastSave > 30000 && !U.choosing) { U.lastSave = ts; save(); }
   requestAnimationFrame(frame);

@@ -27,3 +27,9 @@ The analysis of each is in [`docs/design-log.md`](../docs/design-log.md). Earlie
 - `chronicle`, `voices`: the last entries of the world's chronicle and of what was said.
 
 To add a run: download it from the page, name it `generation-<N>-run-<run id>-day<D>.json`, add a line to the table.
+
+## Corrections laid in the store
+
+| File | For | What |
+| --- | --- | --- |
+| `amend-r5614-mwsokxmr-chapter-13.json` | Wenenvale (run `r5614-mwsokxmr`), chapter 13, days 37 to 61 | The chapter written again from the full record of days 37 to 60 after the chronicler had been shown only the last 140 of 569 entries. Stored at `runs/r5614-mwsokxmr/state/amend`; the page takes it up when the world is opened (`K.amend`). Written by Claude under the chronicler's rules, not by the page's chronicler. |
