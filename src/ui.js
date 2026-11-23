@@ -768,35 +768,110 @@ function drawLabels(c) {
       }
     }
   }
-  /* speech and thought */
-  const keep = [];
+  /* speech and thought: every box is given its place before any is drawn, so that none lies over another (placeBubbles) */
+  const keep = [], groups = [], byId = {};
   for (let k = 0; k < U.bubbles.length; k++) {
     const b = U.bubbles[k], age = U.time - b.t0; if (age > b.life) continue; keep.push(b);
     const a = agentOf(b.id); if (!a) continue;
-    const px = sx(ex(a)), py = sy(ey(a)) - z * 0.95 - (b.kind === 'think' && keep.some(function (o) { return o.id === b.id && o.kind === 'say'; }) ? 70 : 0);
-    if (px < 0 || py < 0 || px > W || py > H + 60) continue;
-    const alpha = Math.min(1, age / 0.2, (b.life - age) / 0.6);
-    c.globalAlpha = clamp(alpha, 0, 1);
-    if (z < 9) { c.fillStyle = b.kind === 'say' ? '#f4f6f0' : '#9db4ff'; c.beginPath(); c.arc(px, py, 4, 0, 6.2832); c.fill(); continue; }
-    c.font = (b.kind === 'think' ? 'italic 400 ' : '500 ') + '12.5px "Instrument Sans", sans-serif';
-    const lines = wrap(c, b.text, 210), tw = Math.max.apply(null, lines.map(function (l) { return c.measureText(l).width; })), bw = tw + 18, bh = lines.length * 16 + 10;
-    const bx = clamp(px - bw / 2, 6, W - bw - 6), by = Math.max(6, py - bh - 8);
-    c.beginPath();
-    if (c.roundRect) c.roundRect(bx, by, bw, bh, 9); else c.rect(bx, by, bw, bh);
-    if (b.kind === 'say') {
-      c.fillStyle = 'rgba(244,246,240,0.96)'; c.fill();
-      c.beginPath(); c.moveTo(px - 5, by + bh - 1); c.lineTo(px, by + bh + 7); c.lineTo(px + 5, by + bh - 1); c.fill();
-      c.fillStyle = '#131a1f';
-    } else {
-      c.fillStyle = 'rgba(22,30,58,0.9)'; c.fill(); c.strokeStyle = 'rgba(157,180,255,0.7)'; c.setLineDash([3, 3]); c.lineWidth = 1; c.stroke(); c.setLineDash([]);
-      c.fillStyle = 'rgba(157,180,255,0.8)'; c.beginPath(); c.arc(px - 2, by + bh + 5, 2.6, 0, 6.2832); c.arc(px + 2, by + bh + 11, 1.6, 0, 6.2832); c.fill();
-      c.fillStyle = '#cfd9ff';
-    }
-    c.textAlign = 'left';
-    for (let i = 0; i < lines.length; i++) c.fillText(lines[i], bx + 9, by + 17 + i * 16);
-    c.textAlign = 'center';
+    const px = sx(ex(a)), py = sy(ey(a)), top = py - z * 0.95;
+    if (px < 0 || top < 0 || px > W || top > H + 60) continue;
+    b.al = clamp(Math.min(1, age / 0.2, (b.life - age) / 0.6), 0, 1);
+    let g = byId[b.id]; if (!g) { g = byId[b.id] = { id: b.id, ax: px, top: top, bot: py + z * 0.85, t0: b.t0, list: [], boxes: [] }; groups.push(g); }
+    g.t0 = Math.min(g.t0, b.t0); g.list.push(b);
   }
-  c.globalAlpha = 1; U.bubbles = keep;
+  U.bubbles = keep; U.laid = [];
+  const dot = function (g, b, n) { c.globalAlpha = b.al; c.fillStyle = b.kind === 'say' ? '#f4f6f0' : '#9db4ff'; c.beginPath(); c.arc(g.ax + n * 9, g.top, 4, 0, 6.2832); c.fill(); };
+  if (z < 9) { groups.forEach(function (g) { g.list.forEach(function (b, n) { dot(g, b, n); }); }); c.globalAlpha = 1; return; }
+  groups.forEach(function (g) {
+    g.list.sort(function (p, q) { return (p.kind === 'say' ? 0 : 1) - (q.kind === 'say' ? 0 : 1); }); /* what is said stands nearest the one who says it */
+    g.list.forEach(function (b) {
+      c.font = (b.kind === 'think' ? 'italic 400 ' : '500 ') + '12.5px "Instrument Sans", sans-serif';
+      b.lines = wrap(c, b.text, 210); const tw = Math.max.apply(null, b.lines.map(function (l) { return c.measureText(l).width; }));
+      g.boxes.push({ w: tw + 18, h: b.lines.length * 16 + 10 });
+    });
+  });
+  /* the one being looked at first, then whoever has been speaking longest: a box already up does not jump for a newer one */
+  groups.sort(function (p, q) { const sp = U.sel && U.sel.t === 'agent' && U.sel.id === p.id ? 0 : 1, sq = U.sel && U.sel.t === 'agent' && U.sel.id === q.id ? 0 : 1; return sp - sq || p.t0 - q.t0 || p.id - q.id; });
+  const at = placeBubbles(groups, W, H, hudRects());
+  /* a box lifted away from its being is tied to it by a thread, drawn under every box */
+  groups.forEach(function (g, gi) {
+    const P = at[gi], n = P ? P.rects.length : 0;
+    for (let i = n; i < g.list.length; i++) dot(g, g.list[i], i - n); /* no room for it: a dot, under the boxes, not a box over another */
+    if (!P || P.shift < 14) return; const b = g.list[0], r = P.rects[0], tx = clamp(g.ax, r.x + 12, r.x + r.w - 12);
+    c.globalAlpha = b.al * 0.8; c.lineWidth = 1.4; c.strokeStyle = b.kind === 'say' ? 'rgba(244,246,240,0.8)' : 'rgba(157,180,255,0.75)'; if (b.kind === 'think') c.setLineDash([2, 4]);
+    c.beginPath(); c.moveTo(tx, P.below ? r.y - 6 : r.y + r.h + 6); c.lineTo(g.ax, P.below ? g.bot + 2 : g.top - 2); c.stroke(); c.setLineDash([]);
+  });
+  groups.forEach(function (g, gi) {
+    const P = at[gi], n = P ? P.rects.length : 0;
+    for (let i = 0; i < n; i++) {
+      const b = g.list[i], r = P.rects[i], bx = r.x, by = r.y, bw = r.w, bh = r.h, tx = clamp(g.ax, bx + 12, bx + bw - 12), dn = P.below ? -1 : 1, edge = P.below ? by : by + bh;
+      U.laid.push({ id: g.id, kind: b.kind, x: bx, y: by, w: bw, h: bh, below: P.below, shift: P.shift });
+      c.globalAlpha = b.al; c.font = (b.kind === 'think' ? 'italic 400 ' : '500 ') + '12.5px "Instrument Sans", sans-serif';
+      c.beginPath();
+      if (c.roundRect) c.roundRect(bx, by, bw, bh, 9); else c.rect(bx, by, bw, bh);
+      if (b.kind === 'say') {
+        c.fillStyle = 'rgba(244,246,240,0.96)'; c.fill();
+        if (i === 0) { c.beginPath(); c.moveTo(tx - 5, edge - dn); c.lineTo(tx, edge + 7 * dn); c.lineTo(tx + 5, edge - dn); c.fill(); }
+        c.fillStyle = '#131a1f';
+      } else {
+        c.fillStyle = 'rgba(22,30,58,0.9)'; c.fill(); c.strokeStyle = 'rgba(157,180,255,0.7)'; c.setLineDash([3, 3]); c.lineWidth = 1; c.stroke(); c.setLineDash([]);
+        if (i === 0) { c.fillStyle = 'rgba(157,180,255,0.8)'; c.beginPath(); c.arc(tx - 2, edge + 4 * dn, 2.4, 0, 6.2832); c.arc(tx + 2, edge + 8.5 * dn, 1.5, 0, 6.2832); c.fill(); }
+        c.fillStyle = '#cfd9ff';
+      }
+      c.textAlign = 'left';
+      for (let k = 0; k < b.lines.length; k++) c.fillText(b.lines[k], bx + 9, by + 17 + k * 16);
+      c.textAlign = 'center';
+    }
+  });
+  c.globalAlpha = 1;
+}
+/* Where the boxes of speech and thought go. The boxes of one being are a stack: what it says nearest to it, what it thinks beyond that. A stack
+   stands over its being. Where another stack or a panel of the page is in the way it is lifted clear of it, and where there is no room above
+   it hangs below. If the whole stack fits neither way the last box is dropped and the rest tried again; a box with no place at all is not
+   drawn (the page shows a dot for it). Groups are placed in the order given and those placed first keep their place.
+   groups: [{ ax, top, bot, boxes: [{ w, h }] }], nearest box first. fixed: [{ x, y, w, h }] that nothing may cover.
+   Returns, for each group, null or { rects: [{ x, y, w, h }], below, shift }. */
+function placeBubbles(groups, W, H, fixed) {
+  const PAD = 4, M = 6, GAP = 10, BETWEEN = 6, FAR = 240, placed = (fixed || []).slice();
+  const hits = function (r, P) { return r.x < P.x + P.w + PAD && r.x + r.w + PAD > P.x && r.y < P.y + P.h + PAD && r.y + r.h + PAD > P.y; };
+  const stack = function (g, n, dir) {
+    const rs = []; let y = dir < 0 ? g.top - GAP : g.bot + GAP;
+    for (let i = 0; i < n; i++) {
+      const b = g.boxes[i], x = clamp(g.ax - b.w / 2, M, Math.max(M, W - b.w - M));
+      if (dir < 0) { y -= b.h; rs.push({ x: x, y: y, w: b.w, h: b.h }); y -= BETWEEN; } else { rs.push({ x: x, y: y, w: b.w, h: b.h }); y += b.h + BETWEEN; }
+    }
+    /* what each box holds: itself, and for the nearest one the ground between it and its being, where its tail is drawn */
+    const held = function (s) { return rs.map(function (r, i) { const t = i === 0 ? GAP : 0; return { x: r.x, y: r.y + dir * s - (dir > 0 ? t : 0), w: r.w, h: r.h + t }; }); };
+    /* a being at the very foot of the view (or, hung below, at its head): begin far enough in that the nearest box is whole within the view */
+    let s = n ? Math.max(0, dir < 0 ? rs[0].y + rs[0].h - (H - M) : M - rs[0].y) : 0; if (s > FAR) return null;
+    for (let turn = 0; turn < 80; turn++) {
+      const q = held(s); let move = 0;
+      for (let i = 0; i < n; i++) for (let k = 0; k < placed.length; k++) if (hits(q[i], placed[k])) move = Math.max(move, dir < 0 ? q[i].y + q[i].h + PAD - placed[k].y : placed[k].y + placed[k].h + PAD - q[i].y);
+      if (!move) {
+        const last = rs[n - 1]; if (dir < 0 ? last.y - s < M : last.y + last.h + s > H - M) return null;
+        return { rects: rs.map(function (r) { return { x: r.x, y: r.y + dir * s, w: r.w, h: r.h }; }), held: q, below: dir > 0, shift: s };
+      }
+      s += move + 0.01; if (s > FAR) return null;
+    }
+    return null;
+  };
+  return groups.map(function (g) {
+    for (let n = g.boxes.length; n > 0; n--) {
+      const P = stack(g, n, -1) || stack(g, n, 1);
+      if (P) { P.held.forEach(function (r) { placed.push(r); }); delete P.held; return P; }
+    }
+    return null;
+  });
+}
+/* The panels that lie over the map, in the map's own measure, looked up twice a second: no speech is put under them. */
+function hudRects() {
+  if (U.hudR && U.time >= U.hudAt && U.time - U.hudAt < 0.5) return U.hudR;
+  const s = $('stage').getBoundingClientRect(), out = [];
+  ['brand', 'census', 'controls', 'miniWrap', 'hint', 'notice', 'chooser'].forEach(function (id) {
+    const e = $(id); if (!e || e.hidden) return; const r = e.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0) out.push({ x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height });
+  });
+  U.hudAt = U.time; U.hudR = out; return out;
 }
 function bubble(id, kind, text) {
   U.bubbles = U.bubbles.filter(function (b) { return b.id !== id || b.kind !== kind; });
@@ -1777,7 +1852,7 @@ function attach(state) {
   if (w.agents.length) { cam.x = w.agents.reduce(function (s, a) { return s + a.x; }, 0) / w.agents.length + 0.5; cam.y = w.agents.reduce(function (s, a) { return s + a.y; }, 0) / w.agents.length + 0.5; }
   else { cam.x = w.W / 2; cam.y = w.H / 2; }
   clampCam(); syncButtons();
-  window.SWdebug = { st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco };
+  window.SWdebug = { st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco, bubble: bubble, placeBubbles: placeBubbles, hudRects: hudRects };
 }
 function newWorld(seed) {
   const keep = st ? st.settings : null;
