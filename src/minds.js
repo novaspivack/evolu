@@ -83,11 +83,11 @@ M.record = function (st, item) {
 M.digest = function (st) {
   const w = st.world;
   return {
-    run: st.runId, generation: 23, seed: w.seed, culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {} }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
+    run: st.runId, generation: 24, seed: w.seed, culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {} }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
     peoples: (w.peoples || []).map(function (P) { return { name: P.name, noun: P.noun, kind: P.kind, way: P.way, custom: P.custom, land: P.region != null && w.regions[P.region] ? w.regions[P.region].name : '', alive: w.agents.filter(function (a) { return a.people === P.id; }).length }; }), lands: (w.regions || []).map(function (R) { return { name: R.name, biome: R.biome, minerals: R.minerals || [], beings: w.agents.filter(function (a) { return w.region[a.y * w.W + a.x] === R.id; }).length }; }), tally: w.tally || {}, alive: w.agents.length, creatures: w.creatures.length, plants: w.plants.filter(Boolean).length, wars: w.wars, settlements: w.settlements.map(function (q) { return q.name; }), ways: Object.keys(w.laws.tree).filter(function (k) { return w.agents.some(function (a) { return a.knows[k]; }); }), designs: Object.keys(w.laws.tools),
     beings: Object.keys(st.minds).map(function (id) {
       const m = st.minds[id], a = agentById(w, +id);
-      return { id: +id, name: m.name, dead: !!m.dead, cause: m.cause || '', gen: m.gen, thoughts: m.thoughts, creed: m.creed, aim: m.aim, method: m.method, feeling: m.feeling || '', wonder: m.wonder || '', rut: m.rut || 0, notes: m.notes, life: m.life.map(function (e) { return e.text; }), foods: Object.keys(m.foods), ties: m.ties || {},
+      return { memory: { index: m.fidx || {}, files: m.files || {}, yearInHand: M.journalFile(st, m) }, id: +id, name: m.name, dead: !!m.dead, cause: m.cause || '', gen: m.gen, thoughts: m.thoughts, creed: m.creed, aim: m.aim, method: m.method, feeling: m.feeling || '', wonder: m.wonder || '', rut: m.rut || 0, notes: m.notes, life: m.life.map(function (e) { return e.text; }), foods: Object.keys(m.foods), ties: m.ties || {},
         body: a ? { e: Math.round(a.e), hp: Math.round(a.hp), age: Math.round(100 * a.age / a.life), x: a.x, y: a.y, stage: SW.stage(w, a), sick: a.sick > 0, temperament: a.temperament, mood: a.mood, rel: a.rel, stats: a.stats, knows: Object.keys(a.knows), designs: Object.keys(a.designs), tools: a.tools.map(function (q) { return q.k; }), carry: a.carry.map(function (q) { return q.k; }), wood: a.wood, stone: a.stone, lore: a.lore, arts: a.arts, leader: a.leader, band: a.bandName, habits: a.habits, policy: a.policy, plan: a.plan, doing: a.doing } : null };
     })
   };
@@ -278,10 +278,74 @@ function addNote(mind, text, cap) {
   mind.notes.push(text); if (mind.notes.length > 16) mind.notes.shift();
   return true;
 }
+/* LONGER MEMORY. What is going on now is held in the prompt at full grain. What is older is kept in the being, not in the prompt:
+   a journal of the year in hand (mind.jr), and one markdown file for each year gone by (mind.files), each with a line in an index (mind.fidx) that says
+   whom it speaks of and what stands out in it. A being calls a year, a name or a thing back by asking in its reply ("recall"), and it is before it at its
+   next thought; what its memory holds of those it is looking at comes back by itself. All of it lives in the mind, and so in the saved world and nowhere else. */
+const MEM = { yearCap: 1400, liveCap: 60, files: 10, recall: 1500, sight: 480 };
+M.yearOf = function (w) { return Math.floor((SW.day(w) - 1) / (4 * w.laws.time.seasonDays)) + 1; };
+function memOf(m) { if (!m.files) m.files = {}; if (!m.fidx) m.fidx = {}; if (!m.jr) m.jr = { y: 0, lines: [] }; return m; }
+function fileName(y) { return 'year-' + (y < 10 ? '0' : '') + y + '.md'; }
+/* write a line in the journal: d the day, t the text, w how much it matters (2 a passing thought ... 9 a thing never forgotten) */
+function roll(st, m) { memOf(m); if (m.jr.y && m.jr.y !== M.yearOf(st.world)) M.closeYear(st, m); } /* a year that has ended is filed the next time memory is touched */
+function journal(st, m, text, weight, sameYear) {
+  if (!m || m.dead || !text) return; memOf(m); const w = st.world, y = M.yearOf(w), d = SW.day(w);
+  if (m.jr.y && m.jr.y !== y && !sameYear) M.closeYear(st, m);
+  if (!m.jr.y) m.jr = { y: y, lines: [] };
+  const t = clip(String(text).replace(/\s+/g, ' '), 170), L = m.jr.lines, last = L[L.length - 1];
+  if (last && last.t === t) { last.w = Math.max(last.w, weight || 3); return; }
+  L.push({ d: d, t: t, w: weight || 3 });
+  if (L.length > MEM.liveCap) { let k = 0; for (let i = 1; i < L.length - 10; i++) if (L[i].w < L[k].w) k = i; L.splice(k, 1); } /* a full journal lets go of what mattered least, never of the last ten lines */
+}
+function namesIn(st, text, skipId) { const out = []; for (const id in st.names) { if (+id === skipId) continue; const n = st.names[id]; if (n && text.indexOf(n) >= 0 && out.indexOf(n) < 0) out.push(n); } return out; }
+/* the year in hand is over: what mattered most of it becomes a file, and the file gets its line in the index */
+M.closeYear = function (st, m) {
+  memOf(m); const J = m.jr; if (!J.y || !J.lines.length) { m.jr = { y: 0, lines: [] }; return null; }
+  const keep = J.lines.map(function (q, i) { return { q: q, i: i }; }).sort(function (a, b) { return b.q.w - a.q.w || a.i - b.i; }); let n = 0, size = 0;
+  while (n < keep.length && size + keep[n].q.t.length + 12 <= MEM.yearCap) { size += keep[n].q.t.length + 12; n++; }
+  const lines = keep.slice(0, Math.max(1, n)).sort(function (a, b) { return a.i - b.i; }).map(function (k) { return k.q; }), sd = st.world.laws.time.seasonDays * 4, d0 = (J.y - 1) * sd + 1, name = fileName(J.y);
+  m.files[name] = '# Year ' + J.y + ', days ' + d0 + ' to ' + (d0 + sd - 1) + '\n' + lines.map(function (q) { return '- day ' + q.d + ': ' + q.t; }).join('\n') + '\n';
+  const body = lines.map(function (q) { return q.t; }).join(' '), who = namesIn(st, body, m.id).map(function (nm) { return { nm: nm, c: body.split(nm).length - 1 }; }).sort(function (a, b) { return b.c - a.c; }).slice(0, 6).map(function (o) { return o.nm; });
+  const top = lines.slice().sort(function (a, b) { return b.w - a.w; }).slice(0, 2).map(function (q) { return clip(q.t, 70); });
+  m.fidx[name] = { y: J.y, d0: d0, d1: d0 + sd - 1, n: lines.length, who: who, gist: top };
+  const names = Object.keys(m.files).filter(function (k) { return /^year-/.test(k); }).sort();
+  if (names.length > MEM.files) { const old = names[0]; m.files['long-ago.md'] = clip((m.files['long-ago.md'] || '# Long ago\n') + m.files[old].split('\n').slice(1, 5).join('\n') + '\n', 1800); const fo = m.fidx[old] || {}, la = m.fidx['long-ago.md'] || { y: 0, n: 0, who: [], gist: ['the earliest years'] }; la.n += 4; (fo.who || []).forEach(function (x) { if (la.who.indexOf(x) < 0 && la.who.length < 8) la.who.push(x); }); m.fidx['long-ago.md'] = la; delete m.files[old]; delete m.fidx[old]; }
+  m.jr = { y: 0, lines: [] }; return name;
+};
+/* the journal of the year in hand, as the same kind of file */
+M.journalFile = function (st, m) { memOf(m); return m.jr.y ? '# Year ' + m.jr.y + ' (the year in hand)\n' + m.jr.lines.map(function (q) { return '- day ' + q.d + ': ' + q.t; }).join('\n') + '\n' : ''; };
+/* call something back: a year by its number, or every line that speaks of a name or a thing */
+M.recall = function (st, m, ask) {
+  memOf(m); const q = String(ask || '').trim(); if (!q) return null;
+  const ym = /year\s*(\d+)/i.exec(q), all = Object.keys(m.files).sort();
+  if (ym) { const f = fileName(+ym[1]); if (m.files[f]) return { what: 'year ' + (+ym[1]), text: clip(m.files[f], MEM.recall) }; if (m.jr.y === +ym[1]) return { what: 'year ' + (+ym[1]), text: clip(M.journalFile(st, m), MEM.recall) }; return { what: q, text: '' }; }
+  if (/long ago|earliest/i.test(q) && m.files['long-ago.md']) return { what: 'long ago', text: clip(m.files['long-ago.md'], MEM.recall) };
+  const words = q.toLowerCase().split(/[^a-z0-9'-]+/).filter(function (x) { return x.length >= 3 && ['the', 'and', 'what', 'who', 'when', 'where', 'about', 'did', 'was', 'year'].indexOf(x) < 0; }); if (!words.length) return { what: q, text: '' };
+  const hits = []; all.concat(['']).forEach(function (f) { const md = f ? m.files[f] : M.journalFile(st, m), tag = f ? (f === 'long-ago.md' ? 'long ago' : 'year ' + (m.fidx[f] ? m.fidx[f].y : '?')) : 'this year'; md.split('\n').forEach(function (ln) { if (ln.charAt(0) !== '-') return; const low = ln.toLowerCase(); let sc = 0; words.forEach(function (x) { if (low.indexOf(x) >= 0) sc++; }); if (sc) hits.push({ sc: sc, t: '(' + tag + ') ' + ln.slice(2) }); }); });
+  hits.sort(function (a, b) { return b.sc - a.sc; }); let out = '', n = 0; for (let i = 0; i < hits.length && n < 12; i++) { if (out.length + hits[i].t.length > MEM.recall) break; out += '- ' + hits[i].t + '\n'; n++; }
+  return { what: q, text: out };
+};
+/* what older memory holds of those in sight: one line each, the weightiest that names them; it comes back by itself */
+M.remind = function (st, m, names) {
+  memOf(m); const out = []; let size = 0;
+  (names || []).slice(0, 4).forEach(function (nm) { let best = null; Object.keys(m.files).sort().forEach(function (f) { if (best) return; const ix = m.fidx[f]; if (ix && ix.who && ix.who.indexOf(nm) < 0 && m.files[f].indexOf(nm) < 0) return; m.files[f].split('\n').forEach(function (ln) { if (!best && ln.charAt(0) === '-' && ln.indexOf(nm) >= 0) best = '(' + (f === 'long-ago.md' ? 'long ago' : 'year ' + (ix ? ix.y : '?')) + ') ' + ln.slice(2); }); });
+    if (best && size + best.length <= MEM.sight) { out.push('- ' + best); size += best.length; } });
+  return out;
+};
+/* the index a being carries of its own longer memory */
+M.memoryIndex = function (st, m) {
+  memOf(m); const fs = Object.keys(m.fidx).sort(); if (!fs.length) return '';
+  /* and the other way about: for each one it remembers, which years to look in */
+  const by = {}, order = []; fs.forEach(function (f) { const ix = m.fidx[f], tag = f === 'long-ago.md' ? 'long ago' : String(ix.y); (ix.who || []).forEach(function (nm) { if (!by[nm]) { by[nm] = []; order.push(nm); } by[nm].push(tag); }); });
+  return fs.map(function (f) { const ix = m.fidx[f]; return '- ' + (f === 'long-ago.md' ? 'long ago' : 'year ' + ix.y + ' (days ' + ix.d0 + ' to ' + ix.d1 + ')') + ': ' + ix.n + ' things kept' + (ix.who && ix.who.length ? '; of ' + ix.who.join(', ') : '') + (ix.gist && ix.gist.length ? '; ' + ix.gist.join(' / ') : ''); }).join('\n') +
+    (order.length ? '\n- whom you remember, and the years to look in: ' + order.slice(0, 14).map(function (nm) { return nm + ' (' + by[nm].join(', ') + ')'; }).join('; ') : '');
+};
+M.MEM = MEM; M.journal = journal; M.roll = roll;
 /* the few things a being will remember all its life */
 function story(st, id, text) {
   const m = st.minds[id]; if (!m || m.dead) return;
   m.life.push({ tick: st.world.tick, text: text }); if (m.life.length > 16) m.life.splice(1, 1); /* keep the first: its birth or waking */
+  journal(st, m, text, 9);
 }
 M.story = story;
 /* tell everyone in sight of a deed, once per watcher, doer and kind of deed */
@@ -298,6 +362,7 @@ function dayStamp(w) { return 'day ' + SW.day(w); }
 /* ---------- what happens to a being becomes what it remembers ---------- */
 function tell(st, id, text, urge, deep) {
   const m = st.minds[id]; if (!m || m.dead) return;
+  if ((urge || 0) >= 4) journal(st, m, text, /^YOU(R)? [A-Z]{2,}/.test(text) ? 3 : Math.min(8, urge)); /* what was worth waking for is worth keeping; a cry of the body (YOU ARE PARCHED) is of the moment and is kept lightly */
   const last = m.events[m.events.length - 1];
   if (last && last.text === text) last.n++;
   else { st.seq = (st.seq || 0) + 1; m.events.push({ tick: st.world.tick, text: text, n: 1, seq: st.seq }); if (m.events.length > 16) m.events.shift(); }
@@ -839,11 +904,13 @@ M.buildPrompt = function (st, mind, kind, lean) {
   }).filter(Boolean);
   if (led.length) out.push('WHAT HAS PASSED BETWEEN YOU AND THOSE HERE (your own account; judge them by what they did, not only by what they said):\n' + led.join('\n'));
   const inSight = {}; v.agents.forEach(function (o) { inSight[o.id] = 1; });
-  const knownP = Object.keys(a.rel).concat(Object.keys(a.seenAt).filter(function (id) { return !(id in a.rel); })).slice(0, 14).map(function (id) {
+  const allP = Object.keys(a.rel).concat(Object.keys(a.seenAt).filter(function (id) { return !(id in a.rel); }));
+  /* those here, those most strongly felt about and those seen most lately come first; the rest are in longer memory */
+  const knownP = allP.map(function (id) { const m0 = a.seenAt[id]; return { id: id, k: (inSight[id] ? 100 : 0) + Math.abs(a.rel[id] || 0) * 10 + (m0 ? Math.max(0, 5 - (w.tick - m0[2]) / 480) : 0) }; }).sort(function (x, y) { return y.k - x.k; }).slice(0, 10).map(function (o) { return o.id; }).map(function (id) {
     const dead = st.minds[id] && st.minds[id].dead, m = a.seenAt[id], rv = a.rel[id] || 0;
     return nameOf(st, id) + ' ' + (rv >= 0 ? '+' : '') + rv.toFixed(1) + (dead ? ' (dead)' : inSight[id] ? ' (here now)' : m ? ' (last seen at (' + m[0] + ',' + m[1] + '), ' + (w.tick - m[2]) + ' moments ago)' : '');
   });
-  if (knownP.length) out.push('THOSE YOU KNOW (how you feel, -1 enemy to +1 trust; where you last saw them): ' + knownP.join('; ') + '.');
+  if (knownP.length) out.push('THOSE YOU KNOW (how you feel, -1 enemy to +1 trust; where you last saw them): ' + knownP.join('; ') + (allP.length > knownP.length ? '; and ' + (allP.length - knownP.length) + ' others you have met, kept in your longer memory' : '') + '.');
   out.push('WHAT HAPPENED SINCE YOUR LAST THOUGHT (oldest first):\n' + (mind.events.length ? mind.events.map(function (e) { return '- ' + e.text + (e.n > 1 ? ' (x' + e.n + ')' : ''); }).join('\n') : '- nothing of note'));
   const prev = mind.log.filter(function (e) { return !e.failed; }).slice(-2);
   if (prev.length) out.push('YOUR LAST THOUGHTS (oldest first; think onward from these, do not repeat them):\n' + prev.map(function (e) { return '- (day ' + e.day + ') ' + clip(e.thought, 320); }).join('\n'));
@@ -851,8 +918,16 @@ M.buildPrompt = function (st, mind, kind, lean) {
   if (mind.said.length) out.push('WHAT YOU HAVE ALREADY SAID ALOUD (do not say the same thing again to the same listener):\n' + mind.said.slice(-2).map(function (q) { return '- to ' + q.to + ': "' + q.text + '"'; }).join('\n'));
   if (mind.heard.length) out.push('WHAT OTHERS HAVE TOLD YOU (their word, not your experience; it may be true, mistaken or a lie):\n' + mind.heard.slice(-2).map(function (q) { return '- ' + q.from + ' (day ' + (Math.floor(q.tick / L.time.dayLength) + 1) + '): "' + q.text + '"'; }).join('\n'));
   const foods = Object.keys(mind.foods);
+  /* of the foods it knows, a being is shown in full those before it now (in sight, in its hands), every one that hurts or does something to it, and the six it has eaten most; the rest it knows by name as safe */
+  const hereF = {}; v.plants.forEach(function (q) { hereF[q.sp] = 1; }); a.carry.forEach(function (q) { hereF[q.k] = 1; });
+  const byN = foods.slice().sort(function (x, y) { return (mind.foods[y].n || 0) - (mind.foods[x].n || 0); }).slice(0, 6);
+  const foodsNow = kind === 'deep' ? foods : foods.filter(function (k) { const f = mind.foods[k]; return hereF[k] || f.gain < 0 || f.fx || f.told || f.seen || byN.indexOf(k) >= 0; });
+  { roll(st, mind); const names = v.agents.map(function (o) { return o.name; });
+    if (mind.recallAsk) { const r = M.recall(st, mind, mind.recallAsk); out.push('WHAT YOU CALLED BACK FROM MEMORY ("' + mind.recallAsk + '"):\n' + (r && r.text ? r.text.trim() : 'Nothing in your longer memory answers to that.')); }
+    const rem = M.remind(st, mind, names); if (rem.length) out.push('FROM LONGER AGO, OF THOSE YOU SEE (your own memory; it came back at the sight of them):\n' + rem.join('\n'));
+    const ix = M.memoryIndex(st, mind); if (ix) out.push('YOUR LONGER MEMORY (kept in you, year by year. Only the year in hand is before you; older years are not shown unless you call them. To call one back, add to your reply "recall": "year 2", or a name or a thing, as in "recall": "Hanna"; it will be before you at your next thought, which then comes at once):\n' + ix); }
   out.push('WHAT YOU KNOW (this is settled knowledge; act on it, do not rediscover or restate it):\n' +
-    (foods.length ? 'Foods: ' + foods.map(function (k) { return M.foodLine(k, mind.foods[k]); }).join(' | ') + '\n' : '') +
+    (foods.length ? 'Foods: ' + foodsNow.map(function (k) { return M.foodLine(k, mind.foods[k]); }).join(' | ') + (foods.length > foodsNow.length ? ' | and ' + (foods.length - foodsNow.length) + ' more foods you have eaten and know to be safe (each is shown in full again whenever it is before you)' : '') + '\n' : '') +
     (mind.notes.length ? (kind === 'deep' ? mind.notes : mind.notes.slice(-8)).map(function (n, i) { return (i + 1) + '. ' + (kind === 'deep' ? n : clip(n, 150)); }).join('\n') + (kind !== 'deep' && mind.notes.length > 8 ? '\n(and ' + (mind.notes.length - 8) + ' older notes you will see when you reflect)' : '') : '(no notes yet)') +
     (mind.felt && Object.keys(mind.felt).length ? '\nWhat things have done to your body and mind: ' + Object.keys(mind.felt).map(function (k) { return k + ': ' + clip(mind.felt[k], 110); }).join(' | ') : ''));
   {
@@ -884,7 +959,7 @@ M.buildPrompt = function (st, mind, kind, lean) {
       if (mineF) out.push('THE TEACHING YOU HOLD: "' + mineF.title + '"' + (mineF.byId === a.id ? ' (you began it)' : mineF.by ? ' (begun by ' + mineF.by + ')' : '') + ', held by ' + M.cultLive(st, mineF).n + ' of the living: ' + mineF.text);
       if (hd.length) out.push('TEACHINGS YOU HAVE HEARD (you may take one up with "adopt", begin your own with "belief", or hold to none):\n' + hd.map(function (id) { const it = C.items[id]; return '- "' + it.title + '"' + (it.by ? ' of ' + it.by : '') + ', held by ' + M.cultLive(st, it).n + ': ' + it.text; }).join('\n')); }
     if (mind.lessons && mind.lessons.length) out.push('WHAT HAS BEFALLEN OTHERS (things your people saw happen or were told of; they are true, and the same will happen to you in the same case):\n' + mind.lessons.slice(-6).map(function (q) { return '- day ' + q.day + ': ' + q.text + (q.from ? ' (told to you by ' + q.from + ')' : ''); }).join('\n'));
-    if (mind.seasons && mind.seasons.length) out.push('THE SEASONS YOU HAVE LIVED (plainly what you saw, in order. If something comes round again, that is yours to notice, to prepare for, to tell as a tale or to cut in a sign):\n' + mind.seasons.slice(-8).join('\n'));
+    if (mind.seasons && mind.seasons.length) out.push('THE SEASONS YOU HAVE LIVED (plainly what you saw, in order. If something comes round again, that is yours to notice, to prepare for, to tell as a tale or to cut in a sign):\n' + mind.seasons.slice(-4).join('\n'));
     if (L.buildings && Object.keys(L.buildings).length && (kind === 'deep' || mind.thoughts % 3 === 0)) out.push('KINDS OF BUILDING you know how to raise (each is also a roof; build {what: its name} on bare ground; a great work is begun by one and finished by whoever carries wood and stone to it):\n' + Object.keys(L.buildings).filter(function (k) { return !L.buildings[k].way || a.knows[L.buildings[k].way]; }).slice(-9).map(function (k) { const B = L.buildings[k]; return '- ' + k + ' (' + (B.wood || 0) + ' wood, ' + (B.stone || 0) + ' stone): ' + (B.hint || ''); }).join('\n'));
     if (tl.length) out.push('TALES YOU CARRY (yours, and those told to you; a tale is how the absent and the dead are remembered, and it can be told on by teaching):\n' + tl.slice(-4).map(function (q) { return '- ' + (q.kind && q.kind !== 'tale' ? q.kind + ' ' : '') + '"' + q.title + '"' + (q.about ? ', about ' + q.about : '') + (q.from ? ' (told to you by ' + q.from + ', first told by ' + q.by + (q.gen > 1 ? ', through ' + q.gen + ' mouths' : '') + ')' : ' (your own)') + ': ' + clip(q.text, 170); }).join('\n'));
   }
@@ -958,6 +1033,9 @@ M.apply = function (st, mind, kind, d, meta) {
   const w = st.world, a = agentById(w, mind.id), L = w.laws;
   const entry = { tick: w.tick, day: SW.day(w), kind: kind, thought: clip(d.thought, kind === 'deep' ? 3000 : 1500), changes: [], model: meta.model, ms: meta.ms, tests: meta.tests || [] };
   if (!a) { entry.changes.push('died before the thought finished'); mind.log.push(entry); mind.rev++; return entry; }
+  journal(st, mind, 'You thought: ' + clip(d.thought, 150), kind === 'deep' ? 4 : 2);
+  { const ask = typeof d.recall === 'string' && d.recall.trim() ? clip(d.recall.trim(), 60) : null, hit = ask ? M.recall(st, mind, ask) : null;
+    mind.recallAsk = ask; if (ask) { entry.changes.push('called back from memory: ' + ask + (hit && hit.text ? '' : ' (nothing answered)')); if (hit && hit.text && !mind.recalledLast) mind.again = true; /* what was called for comes at once, but never twice running */ } mind.recalledLast = !!ask; }
   if (mind.lastT != null && w.tick > mind.lastT) { const g = w.tick - mind.lastT; mind.gap = Math.round(mind.gap ? mind.gap * 0.5 + g * 0.5 : g); } mind.lastT = w.tick; /* how often this mind is given a thought, in moments of the world */
   /* what it had seen when it began this thought is now behind it; what arrives from here on is new */
   mind.events = mind.events.filter(function (e) { return e.seq > (mind.seenSeq || 0); });
@@ -1223,7 +1301,7 @@ M.think = async function (st, mind, kind) {
    Those who saw it or belong with the one it happened to carry it at once; from them it passes, mouth to mouth, to anyone who understands their speech. */
 function community(st, a, reach) { const w = st.world, out = []; if (!a) return out; w.agents.forEach(function (o) { if (o === a || o.dead) return; const d = SW.cheb(o.x, o.y, a.x, a.y); if (SW.rootOf(w, o) === SW.rootOf(w, a) || (a.parents || []).indexOf(o.id) >= 0 || (o.parents || []).indexOf(a.id) >= 0 || (o.people === a.people && d <= (reach || 30)) || d <= w.laws.body.sight) out.push(o.id); }); return out; }
 function lesson(st, ids, text) { const w0 = st.world, first = (ids || []).map(function (id) { return w0.agents.filter(function (o) { return o.id === id; })[0]; }).filter(Boolean), ci = first.length ? cultNew(st, 'lesson', text, text, first[0], null, false) : null; if (ci) first.forEach(function (o) { cultHold(st, ci.id, o, null, false, 0, true); });
-  (ids || []).forEach(function (id) { const m = st.minds[id]; if (!m || m.dead) return; m.lessons = m.lessons || []; if (m.lessons.some(function (q) { return q.text === text; })) return; m.lessons.push({ day: SW.day(st.world), text: text, cid: ci ? ci.id : null }); if (m.lessons.length > 10) m.lessons.shift(); m.rev++; }); if (ids && ids.length) { st.world.tally.lessons = (st.world.tally.lessons || 0) + 1; M.record(st, { t: 'lesson', text: text, to: ids.length }); } }
+  (ids || []).forEach(function (id) { const m = st.minds[id]; if (!m || m.dead) return; m.lessons = m.lessons || []; if (!m.lessons.some(function (q) { return q.text === text; })) journal(st, m, text, 6); if (m.lessons.some(function (q) { return q.text === text; })) return; m.lessons.push({ day: SW.day(st.world), text: text, cid: ci ? ci.id : null }); if (m.lessons.length > 10) m.lessons.shift(); m.rev++; }); if (ids && ids.length) { st.world.tally.lessons = (st.world.tally.lessons || 0) + 1; M.record(st, { t: 'lesson', text: text, to: ids.length }); } }
 M.lesson = lesson;
 /* ---------- culture: what is made, held and handed on. Every idea has an origin, holders, and a path by which it spread. ---------- */
 function cult(st) { const w = st.world; return w.culture || (w.culture = { seq: 1, items: {}, log: [], days: [], rites: {} }); }
@@ -1299,7 +1377,7 @@ function seasonKeep(st) {
     if (f(q.hurt)) bits.push('hurt ' + f(q.hurt)); if (f(q.sick)) bits.push('sick ' + f(q.sick));
     bits.push(sky.length ? 'skies of ' + sky.join(' and ') : 'clear skies'); bits.push('food plants in the land at its end: ' + (food > 600 ? 'plentiful' : food > 300 ? 'fair' : food > 120 ? 'thin' : 'scarce'));
     if (q.saw.length) bits.push(q.saw.join('; '));
-    if (!m.seasons) m.seasons = []; m.seasons.push('Year ' + year + ', ' + SW.SEASONS[ended] + ': ' + bits.join('; ') + '.'); if (m.seasons.length > 10) m.seasons.shift();
+    if (!m.seasons) m.seasons = []; m.seasons.push('Year ' + year + ', ' + SW.SEASONS[ended] + ': ' + bits.join('; ') + '.'); journal(st, m, 'The ' + SW.SEASONS[ended] + ' of year ' + year + ': ' + bits.join('; ') + '.', 7, true); /* the season just ended belongs to its own year */ if (m.seasons.length > 10) m.seasons.shift();
     m.sea = null; m.rev++;
   });
 }

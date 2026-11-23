@@ -1111,6 +1111,7 @@ function renderAgent(pane, id) {
   { const th = a.things ? Object.keys(a.things).filter(function (k) { return a.things[k] > 0; }) : [];
     if (th.length) b += '<div class="kv" style="font-size:13px"><span class="muted">holds</span> ' + th.map(function (k) { return esc(k) + ' ×' + a.things[k]; }).join(', ') + '</div>';
     if (a.boons && a.boons.length) b += '<div class="kv" style="font-size:13px"><span class="muted">at work in its body</span> ' + a.boons.map(function (q) { return esc(q.k) + ' ×' + q.v + ' <span class="muted">(' + esc(q.src) + ')</span>'; }).join(', ') + '</div>';
+    { const ix = SWM.memoryIndex(st, m), jn = m.jr && m.jr.lines ? m.jr.lines.length : 0; if (ix || jn) b += '<h3>Longer memory</h3><div class="m">Kept in this being and saved with this world. ' + jn + ' lines in the journal of the year in hand' + (ix ? '; years gone by:' : '.') + '</div>' + (ix ? '<div class="m" style="white-space:pre-line">' + esc(ix) + '</div>' : ''); }
     if (m.tales && m.tales.length) b += '<h3>Tales it carries</h3>' + m.tales.map(function (q) { return '<div class="mk"><b>' + esc(q.title) + '</b> <span class="v">' + (q.from ? 'told by ' + esc(q.from) + ', first by ' + esc(q.by) : 'its own') + (q.retold ? ' · retold' : '') + '</span><div class="q">' + verse(q.text) + '</div></div>'; }).join(''); }
   if (m.aim) b += '<h3>Aim</h3><div class="kv" style="font-size:13.5px;color:var(--text)">' + esc(m.aim) + '</div>';
   if (m.life && m.life.length) b += '<h3>Its life so far</h3><ul class="events">' + m.life.map(function (e) { return '<li><span class="muted">' + esc(when(e.tick).split(',')[0]) + '</span> ' + esc(e.text) + '</li>'; }).join('') + '</ul>';
@@ -1676,7 +1677,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 23, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 24, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1728,7 +1729,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 23, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 24, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }
