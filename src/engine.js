@@ -54,6 +54,8 @@ SW.defaultLaws = function () {
     status: { wealth: 1, deeds: 1, knowledge: 1, children: 1, works: 1, followers: 1, giving: 1, renown: 1, shame: 1, leadNeeds: 1.2, shameFade: 0.9 },
     /* how ways are come to: what a being has suffered sharpens it toward the ways that would answer it; what it already knows in a line helps with the next */
     discovery: { needBoost: 0.6, kinBoost: 0.04, floor: 0.35, pressFade: 0.85, pressMax: 3 },
+    trade: { window: 240 }, /* how long an offer stands, in moments */
+    climate: { belt: 0.11, rains: 1 }, /* the warm belt: half its width as a share of the height of a round world; whether the cold season there is a season of rain */
     culture: { faithComfort: 0.004, faithStanding: 0.2, tameTrust: 0.6, grudgeDays: 40, kindDays: 60, mendGifts: 3 },
     age: { childUntil: 0.1, elderFrom: 0.8, childStrength: 0.45, elderStrength: 0.7, childDrain: 0.75, elderMove: 1.5, elderTeach: 1.5, childLearn: 1.5 },
     water: { swim: 1, swimDrain: 0.15, fishChance: 0.09, fishFood: 14, fishRecover: 300, winterFish: 0.5, riverFert: 0.25, oreSeams: 0.1 },
@@ -866,8 +868,29 @@ function genRegions(w) {
 }
 /* The climate of a place: 1 in the warm belt (rainforest and desert: no winter, no snow, no cold season), 2 on the ice (cold all year, a little less in summer), 0 between. */
 const WARM = { rainforest: 1, desert: 1 }, COLD = { arctic: 1, antarctic: 1 };
-function climOf(w, i) { const R = w.regions && w.regions[w.region[i]]; return R ? (WARM[R.biome] ? 1 : COLD[R.biome] ? 2 : 0) : 0; }
+/* the climate of every tile: the warm lands and the ice by their country, and on a round world a warm belt about the equator whatever the country.
+   Kept beside the world, not in it (it is made again when a world is loaded, or when the maker moves the belt). */
+const CLIM = new WeakMap();
+function climArr(w) {
+  const belt = w.wrap ? ((w.laws.climate || {}).belt == null ? 0.11 : +w.laws.climate.belt || 0) : 0, nR = w.regions ? w.regions.length : 0;
+  const c = CLIM.get(w); if (c && c.belt === belt && c.W === w.W && c.H === w.H && c.nR === nR) return c.a;
+  const a = new Uint8Array(w.W * w.H), mid = (w.H - 1) / 2, half = belt * w.H, k1 = 6.2832 * 3 / w.W, k2 = 6.2832 * 7 / w.W;
+  for (let x = 0; x < w.W; x++) {
+    const edge = half > 0 ? half + 2.5 * Math.sin(x * k1) + 1.5 * Math.sin(x * k2 + 1.7) : -1; /* the edge of the belt wanders a little, and meets itself where the world comes round */
+    for (let y = 0; y < w.H; y++) { const i = y * w.W + x, R = nR ? w.regions[w.region[i]] : null, bio = R ? R.biome : ''; a[i] = WARM[bio] ? 1 : COLD[bio] ? 2 : Math.abs(y - mid) <= edge ? 1 : 0; }
+  }
+  CLIM.set(w, { belt: belt, W: w.W, H: w.H, nR: nR, a: a }); return a;
+}
+function climOf(w, i) { return climArr(w)[i] || 0; }
 SW.climate = function (w, x, y) { return climOf(w, idx(w, x, y)); };
+/* the sky over one place: snow does not fall in the warm belt (it rains), the cold season there is a season of rain, and on the ice rain falls as snow */
+function skyAt(w, i) {
+  const k = w.weather.kind, c = climOf(w, i);
+  if (c === 1) { if (k === 'snow') return 'rain'; if ((k === 'clear' || k === 'fog') && SW.season(w) === 3 && (w.laws.climate || {}).rains) return 'rain'; return k; }
+  if (c === 2 && k === 'rain') return 'snow';
+  return k;
+}
+SW.skyAt = function (w, x, y) { return skyAt(w, idx(w, x, y)); };
 SW.regionAt = function (w, x, y) { return w.regions && w.region ? w.regions[w.region[idx(w, x, y)]] || null : null; };
 function genTerrain(w) {
   const sc = Math.max(1, w.W / 44), g = function (a, b) { return noiseGrid(w, Math.round(a * sc) + 1, Math.round(b * sc) + 1); };
@@ -1280,7 +1303,7 @@ function trySeed(w, i, spName, sp) {
   }
 }
 function stepPlants(w) {
-  const L = w.laws, season = SW.season(w);
+  const L = w.laws, season = SW.season(w), CL = climArr(w), rains = season === 3 && !!(L.climate || {}).rains;
   const sky = w.weather.kind;
   const bty = (L.ecology.bounty == null ? 1 : L.ecology.bounty), sm = bty > 0 ? Math.max(1, (L.ecology.seeding || 1) / bty) : 1; /* bounty is how fast food comes back on a plant; how readily plants seed is its own law */
   const gm0 = bty * (season === 3 ? L.time.winterGrowth : season === 0 ? (L.time.springGrowth || 1) : season === 1 ? 1.15 : (L.time.harvestGrowth || 1)) * (sky === 'rain' ? L.weather.rainGrowth : sky === 'storm' ? 1.2 : sky === 'drought' ? L.weather.droughtGrowth : sky === 'snow' ? 0.6 : 1);
@@ -1297,7 +1320,7 @@ function stepPlants(w) {
     p.age += 2;
     if (!sp || p.age > p.life) { w.plants[i] = null; continue; }
     const lf = w.fields.length ? fieldFactor(w, 'growth', i % w.W, Math.floor(i / w.W)) : 1;
-    const Rg = regs[w.region[i]], bio = Rg ? Rg.biome : '', warm = WARM[bio] === 1, gm = warm ? (bio === 'rainforest' ? gmRain : gmWarm) : COLD[bio] === 1 ? gmIce : gm0;
+    const Rg = regs[w.region[i]], bio = Rg ? Rg.biome : '', cl = CL[i], warm = cl === 1, gm = warm ? (bio === 'rainforest' || rains ? gmRain : gmWarm) : cl === 2 ? gmIce : gm0;
     if (p.g < 1) {
       p.g += 2 * sp.growth * (0.4 + w.fert[i]) * (sp.hardy ? Math.max(gm, 0.3) : gm) * lf * (p.s || 1) * (p.t ? L.craft.farmGrowth : 1);
       if (p.g >= 1) { p.g = 1; p.food = Math.max(p.food, 1); }
@@ -1559,7 +1582,7 @@ function senses(w, a) {
   let inField = 0; for (let k = 0; k < w.fields.length; k++) if (cheb(a.x, a.y, w.fields[k].x, w.fields[k].y) <= w.fields[k].r) inField = 1;
   vars.in_working = inField;
   vars.anger = a.mood.anger; vars.fear = a.mood.fear; vars.grief = a.mood.grief; vars.joy = a.mood.joy; vars.lonely = a.mood.lonely;
-  const sky = w.weather.kind;
+  const sky = skyAt(w, a.y * w.W + a.x);
   vars.wet = sky === 'rain' || sky === 'storm' ? 1 : 0; vars.storm = sky === 'storm' ? 1 : 0; vars.fog = sky === 'fog' ? 1 : 0; vars.drought = sky === 'drought' ? 1 : 0;
   return { vars: vars, near: near };
 }
@@ -1721,7 +1744,7 @@ SW.upgrade = function (w) {
   if (!w.regions || !w.regions.length) { w.regions = [{ id: 0, name: 'the Land', biome: 'mixed', x: w.W >> 1, y: w.H >> 1 }]; w.region = []; for (let i = 0; i < w.W * w.H; i++) w.region.push(0); }
   ['lodes', 'bkind', 'roads', 'works'].forEach(function (k) { if (!w[k]) w[k] = {}; });
   if (!w.peoples) w.peoples = []; if (!w.tally) w.tally = { made: {}, eaten: {}, built: {} }; ['made', 'eaten', 'built'].forEach(function (k) { if (!w.tally[k]) w.tally[k] = {}; });
-  const D = SW.defaultLaws(); ['minerals', 'goods', 'recipes', 'buildings', 'drives', 'status', 'discovery', 'culture', 'arrivals', 'explore'].forEach(function (g) { if (!w.laws[g]) w.laws[g] = D[g]; else for (const k in D[g]) if (w.laws[g][k] == null && g !== 'recipes') w.laws[g][k] = D[g][k]; });
+  const D = SW.defaultLaws(); ['minerals', 'goods', 'recipes', 'buildings', 'drives', 'status', 'discovery', 'culture', 'arrivals', 'explore', 'trade', 'climate'].forEach(function (g) { if (!w.laws[g]) w.laws[g] = D[g]; else for (const k in D[g]) if (w.laws[g][k] == null && g !== 'recipes') w.laws[g][k] = D[g][k]; });
   for (const g in D) if (D[g] && typeof D[g] === 'object' && !Array.isArray(D[g]) && w.laws[g] && ['plants', 'creatures', 'tools', 'tree', 'recipes', 'buildings', 'minerals', 'goods'].indexOf(g) < 0) for (const k in D[g]) if (w.laws[g][k] == null) w.laws[g][k] = D[g][k];
   w.agents.forEach(function (a) { if (!a.things) a.things = {}; if (!a.tongues) a.tongues = {}; if (a.tall == null) a.tall = 1; if (!a.press) a.press = {}; });
   w.agents.forEach(function (a, k) { if (!a.sex) a.sex = sexFor(w, a.people); if (!a.calling) a.calling = SW.CALLINGS[(a.id + k) % SW.CALLINGS.length]; }); if (!w.narrow) narrowWater(w);
@@ -1907,6 +1930,12 @@ function act(w, a, r, S, emit) {
         if (fleshy && !cooked && rnd(w) < L.disease.rawChance) sicken(w, a, 'eating raw ' + it.k, emit);
         a.doing = 'eating carried ' + it.k; return true;
       }
+      if (r === a.intent) { /* nothing in the hands and nothing underfoot: the body walks to the nearest plant in sight that bears, until it is full */
+        if (a.e >= 92) return false;
+        const s = bfsStep(w, a, function (x, y) { return bitesFor(a, w.plants[idx(w, x, y)]) > 0; }, L.body.sight);
+        if (s && tryMove(w, a, s[0], s[1])) { move(w, a, true); a.doing = 'going to food to eat'; return true; }
+        emit({ type: 'fail', a: a.id, text: 'You meant to eat, but you carry nothing you will eat, ' + (p ? 'the ' + p.sp + ' where you stand bears nothing yet' : 'no plant grows where you stand') + ', and nothing within your sight bears food. Go where food is: hunt, fish, a store, or one who carries food.' });
+      }
       return false;
     }
     case 'make': {
@@ -2008,10 +2037,15 @@ function act(w, a, r, S, emit) {
     }
     case 'harvest': {
       const p = w.plants[here];
-      if (r === a.intent && a.carry.length >= cap(w, a)) { emit({ type: 'fail', a: a.id, text: 'You tried to harvest, but YOUR HANDS ARE FULL (' + a.carry.length + ' of ' + cap(w, a) + '). Nothing more can be picked until you eat, give, stash or drop something.' }); return false; }
-      if (r === a.intent && !p) { emit({ type: 'fail', a: a.id, text: 'You tried to harvest, but no plant grows where you stand, at (' + a.x + ',' + a.y + '). Walk onto the plant first.' }); return false; }
+      if (r === a.intent && a.carry.length >= cap(w, a)) { if (r.got) return false; /* the hands were filled by this very step: that is the step done, not a failure */ emit({ type: 'fail', a: a.id, text: 'You tried to harvest, but YOUR HANDS ARE FULL (' + a.carry.length + ' of ' + cap(w, a) + '). Nothing more can be picked until you eat, give, stash or drop something.' }); return false; }
+      if (r === a.intent && !(bitesFor(a, p) > 0)) { /* nothing to pick underfoot: the body walks to the nearest plant in sight that bears, of the kind asked for if one was named */
+        const want = r.what && L.plants[r.what] ? r.what : null;
+        const s = bfsStep(w, a, function (x, y) { const q = w.plants[idx(w, x, y)]; return bitesFor(a, q) > 0 && (!want || q.sp === want); }, L.body.sight);
+        if (s && tryMove(w, a, s[0], s[1])) { move(w, a, true); a.doing = 'going to pick ' + (want || 'food'); return true; }
+        if (!r.got) emit({ type: 'fail', a: a.id, text: 'You tried to harvest, but ' + (p ? 'the ' + p.sp + ' where you stand bears nothing yet' : 'no plant grows where you stand, at (' + a.x + ',' + a.y + ')') + ', and no ' + (want || 'plant') + ' within your sight bears food you will eat. A young plant feeds no one: look for one listed with food, or go where food is.' }); return false;
+      }
       if (bitesFor(a, p) > 0 && a.carry.length < cap(w, a)) {
-        p.food -= 1; a.carry.push({ k: p.sp, n: L.plants[p.sp].nutrition });
+        p.food -= 1; a.carry.push({ k: p.sp, n: L.plants[p.sp].nutrition }); r.got = 1;
         a.stats.picked = (a.stats.picked || 0) + 1; /* a practised hand picks more at a time */
         if (a.carry.length < cap(w, a) && rnd(w) < useTool(w, a, 'harvest', emit) - 1 + Math.min(0.5, a.stats.picked * 0.01)) a.carry.push({ k: p.sp, n: L.plants[p.sp].nutrition });
         if (p.food < 1) { if (p.t) p.food = 0.2; else { w.plants[here] = null; emit({ type: 'stripped', a: a.id, kind: p.sp }); } }
@@ -2064,7 +2098,7 @@ function act(w, a, r, S, emit) {
       for (let d = 0; d < 8 && !water; d++) { const x = a.x + HEAD[d][0], y = a.y + HEAD[d][1]; if (inb(w, x, y)) { const t = w.terrain[idx(w, x, y)]; water = t === T.WATER || t === T.SHALLOWS; } }
       if (!water && w.terrain[here] !== T.SHALLOWS) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You tried to fish, but there is no water beside you.' }); return false; }
       if (a.carry.length >= cap(w, a)) return false;
-      const W2 = L.water, key = (a.x >> 3) + ',' + (a.y >> 3), taken = w.fished[key] || 0, sky = w.weather.kind;
+      const W2 = L.water, key = (a.x >> 3) + ',' + (a.y >> 3), taken = w.fished[key] || 0, sky = skyAt(w, here);
       a.doing = 'fishing';
       const chance = W2.fishChance * boon(a, 'luck') * (a.knows.fishing ? 2 : 1) * useTool(w, a, 'fish', emit) / (1 + 0.5 * taken) * (SW.season(w) === 3 ? W2.winterFish : 1) * (sky === 'storm' ? 0.5 : sky === 'rain' ? 1.3 : 1);
       if (rnd(w) < chance) {
@@ -2386,16 +2420,17 @@ function act(w, a, r, S, emit) {
     case 'trade': {
       const t = targetOf(w, a, S, 'agent', r.name); if (!t) return false;
       const give = r.what || 'food', want = r.want || 'food';
-      const has = function (q, k) { return k === 'food' ? q.carry.length : k === 'seed' ? q.seeds.length : q.wood; };
-      if (!has(a, give)) return false;
+      const plain = { wood: 1, stone: 1, ore: 1, clay: 1 }, win = (L.trade || {}).window || 240;
+      const has = function (q, k) { return k === 'food' ? q.carry.length : k === 'seed' ? q.seeds.length : plain[k] ? q[k] || 0 : (q.things && q.things[k]) || 0; };
+      if (!has(a, give)) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You meant to offer ' + give + ' to ' + t.name + ', but you hold none.' }); return false; }
       if (cheb(a.x, a.y, t.x, t.y) > 1) { if (!move(w, a, pathToward(w, a, t.x, t.y, 1))) return false; a.doing = 'going to trade with ' + t.name; return true; }
-      if (!a.offer || a.offer.id !== t.id || a.offer.give !== give || a.offer.want !== want || w.tick - a.offer.t > 80) emit({ type: 'offer', a: a.id, b: t.id, give: give, want: want });
+      const o = t.offer, meets = !!(o && o.id === a.id && o.give === want && o.want === give && w.tick - o.t <= win && has(t, want)); /* an answer to an offer that stands is not a new offer */
+      if (!meets && (!a.offer || a.offer.id !== t.id || a.offer.give !== give || a.offer.want !== want || w.tick - a.offer.t > win)) { w.tally.offers = (w.tally.offers || 0) + 1; emit({ type: 'offer', a: a.id, b: t.id, give: give, want: want, x: a.x, y: a.y }); }
       a.offer = { id: t.id, give: give, want: want, t: w.tick }; a.doing = 'offering ' + give + ' for ' + want + ' to ' + t.name;
-      const o = t.offer;
-      if (o && o.id === a.id && o.give === want && o.want === give && w.tick - o.t <= 80 && has(t, want)) {
-        const pass = function (from, to, k) { if (k === 'food') { const it = from.carry.pop(); to.carry.push(it); return it.k; } if (k === 'seed') { const sd = from.seeds.pop(); to.seeds.push(sd); return sd + ' seed'; } from.wood--; to.wood++; return 'wood'; };
+      if (meets) {
+        const pass = function (from, to, k) { if (k === 'food') { const it = from.carry.pop(); to.carry.push(it); return it.k; } if (k === 'seed') { const sd = from.seeds.pop(); to.seeds.push(sd); return sd + ' seed'; } if (plain[k]) { from[k]--; to[k] = (to[k] || 0) + 1; return k; } from.things[k]--; to.things = to.things || {}; to.things[k] = (to.things[k] || 0) + 1; return k; };
         const gave = pass(a, t, give), got = pass(t, a, want);
-        a.offer = t.offer = null; a.fin = 1; a.stats.trades++; t.stats.trades++;
+        a.offer = t.offer = null; a.fin = 1; a.stats.trades++; t.stats.trades++; w.tally.trades = (w.tally.trades || 0) + 1;
         a.rel[t.id] = clamp((a.rel[t.id] || 0) + 0.15, -1, 1); t.rel[a.id] = clamp((t.rel[a.id] || 0) + 0.15, -1, 1);
         feel(a, 'joy', 0.15); feel(t, 'joy', 0.15);
         emit({ type: 'traded', a: a.id, b: t.id, gave: gave, got: got });
@@ -2511,7 +2546,7 @@ function stepAgents(w, emit) {
     if (clim === 2) cold += L.time.winterCold * (ssn === 1 ? 0.6 : ssn === 3 ? 1.5 : 1); /* on the ice it is winter all year, eased a little in summer */
     else if (winter && clim !== 1) cold += L.time.winterCold; /* in the warm belt there is no cold season */
     cold *= 1 / boon(a, 'warmth');
-    const sky = w.weather.kind;
+    const sky = skyAt(w, a.y * w.W + a.x);
     if (sky === 'rain') cold += L.weather.rainCold; else if (sky === 'storm') cold += L.weather.stormCold; else if (sky === 'snow') cold += L.weather.snowCold; else if (sky === 'gale') cold += 0.035;
     const ground = w.terrain[idx(w, a.x, a.y)];
     if (ground === T.SNOW) cold += L.land.snowCold;

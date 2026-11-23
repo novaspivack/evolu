@@ -26,10 +26,12 @@ function impulse(ctx, secs) {
   return buf;
 }
 function noiseBuffer(ctx) {
-  /* thirteen seconds, so the ear cannot hear it come round; faded at both ends so the join is silent */
-  const n = Math.floor(ctx.sampleRate * 13), buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0), edge = Math.floor(ctx.sampleRate * 0.4);
+  /* thirteen seconds, so the ear cannot hear it come round. The noise runs on a little past the end, and that tail is
+     folded into the beginning, so the join carries straight on and never dips: a dip at each turn was heard as a breath that came again and again */
+  const n = Math.floor(ctx.sampleRate * 13), buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0), edge = Math.floor(ctx.sampleRate * 0.6);
   let last = 0;
-  for (let i = 0; i < n; i++) { last = 0.97 * last + 0.03 * (Math.random() * 2 - 1); d[i] = last * 6 * Math.min(1, i / edge, (n - 1 - i) / edge); }
+  for (let i = 0; i < n; i++) { last = 0.97 * last + 0.03 * (Math.random() * 2 - 1); d[i] = last * 6; }
+  for (let i = 0; i < edge; i++) { last = 0.97 * last + 0.03 * (Math.random() * 2 - 1); const q = i / edge; d[i] = d[i] * Math.sqrt(q) + last * 6 * Math.sqrt(1 - q); }
   return buf;
 }
 let noiseBuf = null;
@@ -53,8 +55,9 @@ A.start = function (seed) {
       windFilter = ctx.createBiquadFilter(); windFilter.type = 'lowpass'; windFilter.frequency.value = 320; windFilter.Q.value = 0.3;
       windGain = ctx.createGain(); windGain.gain.value = 0;
       wind.connect(windFilter); windFilter.connect(windGain); windGain.connect(master); wind.start();
+      { const w2 = ctx.createBufferSource(), g2 = ctx.createGain(); w2.buffer = noiseBuf; w2.loop = true; w2.playbackRate.value = 0.73; g2.gain.value = 0.7; w2.connect(g2); g2.connect(windFilter); w2.start(0, 6.1); } /* a second, slower layer: the two never come round together */
       const rain = ctx.createBufferSource(), rf = ctx.createBiquadFilter(), rl = ctx.createBiquadFilter(); rain.buffer = noiseBuf; rain.loop = true; rain.playbackRate.value = 1.31;
-      rf.type = 'highpass'; rf.frequency.value = 2200; rl.type = 'lowpass'; rl.frequency.value = 7000;
+      rf.type = 'highpass'; rf.frequency.value = 1700; rl.type = 'lowpass'; rl.frequency.value = 4800;
       rainGain = ctx.createGain(); rainGain.gain.value = 0; rain.connect(rf); rf.connect(rl); rl.connect(rainGain); rainGain.connect(master); rain.start(0, 3.7);
       nextChord = ctx.currentTime + 1.5; nextNote = ctx.currentTime + 5;
     }
@@ -64,6 +67,7 @@ A.start = function (seed) {
     A.on = true; return true;
   } catch (e) { A.on = false; return false; }
 };
+A.noise = function () { return noiseBuf; }; /* for the checks: the bed of wind and rain */
 A.stop = function () {
   if (A.ctx && master) master.gain.setTargetAtTime(0, A.ctx.currentTime, 0.15);
   A.on = false;
@@ -98,15 +102,16 @@ A.scene = function (night, season, sky, o) {
     }
     nextNote = t + at + (quick ? 2 : 6) + Math.random() * (dark ? 20 : quick ? 5 : 11);
   }
-  windGain.gain.setTargetAtTime(sky === 'gale' ? 0.15 : sky === 'storm' ? 0.11 : sky === 'snow' ? 0.05 : winter || A.land === 'tundra' || A.land === 'highland' ? 0.03 : A.land === 'desert' || A.land === 'steppe' ? 0.018 : 0, t, 3);
-  if (sky === 'gale') windFilter.frequency.setTargetAtTime(520 + 260 * Math.sin(t * 0.4), t, 0.6);
+  /* the wind is steady and low, and it swells and eases slowly on two tides that never fall in step; it never pulses */
+  { const swell = 0.8 + 0.14 * Math.sin(t * 0.13) + 0.08 * Math.sin(t * 0.071 + 1.3), base = sky === 'gale' ? 0.06 : sky === 'storm' ? 0.042 : sky === 'snow' ? 0.03 : (winter && !(o && o.warm)) || A.land === 'tundra' || A.land === 'highland' || A.land === 'arctic' || A.land === 'antarctic' ? 0.022 : A.land === 'desert' || A.land === 'steppe' ? 0.014 : 0;
+    windGain.gain.setTargetAtTime(base * swell, t, 3);
+    windFilter.frequency.setTargetAtTime((sky === 'gale' ? 400 : sky === 'storm' ? 330 : 270) + 70 * Math.sin(t * 0.05) + 40 * Math.sin(t * 0.021 + 2), t, 3); }
   if (sky === 'heat' && Math.random() < 0.25) { const f = 5200 + Math.random() * 900; for (let k = 0; k < 6; k++) tone({ f: f, dur: 0.02, gain: 0.006, pan: Math.random() * 2 - 1, at: k * 0.04, wet: 0.1 }); }
   if (A.land === 'marsh' && night > 0.5 && Math.random() < 0.12) tone({ f: 180 + Math.random() * 60, to: 120, dur: 0.16, gain: 0.02, pan: Math.random() * 2 - 1, wet: 0.3 });
   if (A.land === 'lakeland' && night < 0.4 && Math.random() < 0.06) tone({ f: 900 + Math.random() * 300, to: 700, dur: 0.22, gain: 0.012, pan: Math.random() * 2 - 1, wet: 0.5 });
-  rainGain.gain.setTargetAtTime(sky === 'storm' ? 0.1 : sky === 'rain' ? 0.045 : 0, t, 2.5);
+  rainGain.gain.setTargetAtTime((sky === 'storm' ? 0.05 : sky === 'rain' ? 0.03 : 0) * (0.9 + 0.1 * Math.sin(t * 0.09 + 0.7)), t, 3);
   if (sky === 'rain' || sky === 'storm') { if (Math.random() < 0.5) tone({ f: 1800 + Math.random() * 2600, dur: 0.03, gain: 0.006 + Math.random() * 0.006, pan: Math.random() * 2 - 1, wet: 0.4 }); return; }
   if (sky === 'fog' || sky === 'snow') return;
-  windFilter.frequency.setTargetAtTime(280 + 120 * Math.sin(t * 0.05), t, 2);
   if (night > 0.6 && season !== 3 && Math.random() < 0.3) {
     const f = 4100 + Math.random() * 700, pan = Math.random() * 2 - 1;
     for (let k = 0; k < 3; k++) tone({ f: f, dur: 0.035, gain: 0.012, pan: pan, at: k * 0.07, wet: 0.2 });
@@ -222,6 +227,28 @@ A.event = function (type, o) {
     case 'razed': if (allow()) { burst({ f: 300, type: 'lowpass', dur: 0.6, gain: v(0.5), pan: pan }); burst({ f: 900, dur: 0.25, gain: v(0.2), pan: pan, at: 0.05 }); } break;
     case 'taught': if (allow()) [0, 2, 4].forEach(function (d, k) { tone({ f: hz(step + 5 + d), dur: 0.5, gain: v(0.035), pan: pan, at: k * 0.16, wet: 0.8 }); }); break;
     case 'law': tone({ f: hz(-5), dur: 3.5, gain: 0.14, wet: 1 }); tone({ f: hz(-5) * 2.4, dur: 2.5, gain: 0.04, wet: 1 }); break;
+    /* the small sounds of a day's work and of what passes between people */
+    case 'mined': if (allow(true)) [0, 0.13].forEach(function (at, k) { tone({ f: 1900 - k * 160, to: 1700 - k * 160, type: 'triangle', dur: 0.05, gain: v(0.03), pan: pan, at: at, wet: 0.3 }); burst({ f: 3200, dur: 0.04, gain: v(0.07), pan: pan, at: at, q: 6 }); }); break;
+    case 'wood': if (allow(true)) { burst({ f: 300, dur: 0.09, gain: v(0.16), pan: pan, q: 3 }); tone({ f: 140, to: 90, dur: 0.08, gain: v(0.06), pan: pan }); } break;
+    case 'stashed': if (allow(true)) { tone({ f: 110, to: 70, dur: 0.12, gain: v(0.07), pan: pan }); burst({ f: 420, dur: 0.05, gain: v(0.08), pan: pan, q: 2 }); } break;
+    case 'craft': if (allow()) { [0, 0.1].forEach(function (at) { burst({ f: 900, dur: 0.05, gain: v(0.12), pan: pan, at: at, q: 5 }); }); tone({ f: hz(step + 4), dur: 0.22, gain: v(0.03), pan: pan, at: 0.2, wet: 0.5 }); } break;
+    case 'tamed': if (allow()) { tone({ f: hz(step + 7), to: hz(step + 9), dur: 0.18, gain: v(0.04), pan: pan, wet: 0.5 }); tone({ f: hz(step + 11), dur: 0.28, gain: v(0.035), pan: pan, at: 0.2, wet: 0.6 }); } break;
+    case 'rode': if (allow(true)) [0, 0.12, 0.3, 0.42].forEach(function (at) { burst({ f: 220, dur: 0.05, gain: v(0.14), pan: pan, at: at, q: 2 }); }); break;
+    case 'telling': if (allow()) { tone({ f: hz(step - 7), dur: 1.8, gain: v(0.03), pan: pan, wet: 0.9 }); [0, 2, 0, 4].forEach(function (d, k) { tone({ f: hz(step + d), type: 'triangle', dur: 0.4, gain: v(0.03), pan: pan, at: 0.2 + k * 0.38, lp: 1800, wet: 0.7 }); }); } break;
+    case 'rite': if (allow()) [0, 4, 7, 12].forEach(function (d, k) { tone({ f: hz(step + d), type: 'triangle', dur: 1.0, gain: v(0.035), pan: pan, at: k * 0.2, wet: 1 }); }); break;
+    case 'shared': if (allow()) { tone({ f: hz(step + 2), dur: 0.5, gain: v(0.035), pan: pan, wet: 0.7 }); tone({ f: hz(step + 6), dur: 0.5, gain: v(0.03), pan: pan, at: 0.04, wet: 0.7 }); } break;
+    case 'healed': if (allow()) [7, 9, 12].forEach(function (d, k) { tone({ f: hz(step + d), dur: 0.5, gain: v(0.03), pan: pan, at: k * 0.14, wet: 0.9 }); }); break;
+    case 'sick': if (allow(true)) tone({ f: hz(step - 1), to: hz(step - 3), type: 'triangle', dur: 0.3, gain: v(0.03), pan: pan, lp: 700 }); break;
+    case 'offer': if (allow()) { tone({ f: hz(step + 4), dur: 0.15, gain: v(0.04), pan: pan, wet: 0.4 }); tone({ f: hz(step + 7), dur: 0.25, gain: v(0.04), pan: pan, at: 0.15, wet: 0.4 }); } break;
+    case 'traded': if (allow()) [2, 6, 6, 2].forEach(function (d, k) { tone({ f: hz(step + d), dur: 0.16, gain: v(0.04), pan: pan + (k < 2 ? -0.15 : 0.15), at: k * 0.1 + (k > 1 ? 0.1 : 0), wet: 0.5 }); }); break;
+    case 'claimed': if (allow()) { tone({ f: hz(step - 5), type: 'sawtooth', dur: 0.3, gain: v(0.04), pan: pan, lp: 800, wet: 0.5 }); tone({ f: hz(step + 2), type: 'triangle', dur: 0.6, gain: v(0.04), pan: pan, at: 0.25, wet: 0.7 }); } break;
+    case 'arrived': if (allow()) { tone({ f: hz(-3), type: 'triangle', dur: 1.0, gain: v(0.05), pan: pan, lp: 1200, wet: 0.8 }); tone({ f: hz(4), type: 'triangle', dur: 1.3, gain: v(0.045), pan: pan, at: 0.5, lp: 1200, wet: 0.8 }); } break;
+    case 'aged': if (allow()) { tone({ f: hz(step), dur: 0.6, gain: v(0.035), pan: pan, wet: 0.8 }); tone({ f: hz(step + 7), dur: 0.8, gain: v(0.03), pan: pan, at: 0.25, wet: 0.8 }); } break;
+    case 'rallied': if (allow()) { tone({ f: hz(-5), type: 'sawtooth', dur: 0.7, gain: v(0.05), pan: pan, lp: 700, wet: 0.5 }); tone({ f: hz(2), type: 'sawtooth', dur: 0.9, gain: v(0.05), pan: pan, at: 0.5, lp: 800, wet: 0.5 }); } break;
+    case 'herd': if (allow()) burst({ f: 120, type: 'lowpass', dur: 1.6, gain: v(0.3), pan: pan, q: 0.5 }); break;
+    case 'splash': if (allow(true)) { burst({ f: 1500, dur: 0.18, gain: v(0.09), pan: pan, q: 0.7 }); tone({ f: 600, to: 300, dur: 0.12, gain: v(0.03), pan: pan }); } break;
+    case 'opened': [-5, 2, 7, 11, 14].forEach(function (d, k) { tone({ f: hz(d), dur: 2.4, gain: v(0.035), pan: pan + (k - 2) * 0.12, at: k * 0.14, wet: 1 }); }); break;
+    case 'weather': if (allow(true)) burst({ f: 380, type: 'lowpass', dur: 1.4, gain: 0.05, q: 0.4 }); break;
     case 'wake': [0, 2, 4, 7, 9].forEach(function (d, k) { tone({ f: hz(5 + d), dur: 1.2, gain: 0.04, at: k * 0.12, wet: 0.9 }); }); break;
   }
 };

@@ -14,10 +14,14 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 20, to be watched and tuned
+## NOW: built in Generations 14 to 21, to be watched and tuned
 
 | Item | State |
 | --- | --- |
+| **A warm belt about the equator, and a sky that belongs to a place:** no snow or cold season in the belt whatever the country; its winter is a season of rain; rain falls as snow on the ice | Built in 21 (laws `climate.belt`, `climate.rains`). Watch: do those in the belt live differently; is the belt the right width |
+| **Food that can be found:** a mind is shown the nearest plant that bears; eat and harvest walk to it | Built in 21, after four starved beside food in the twelfth run. Watch: does anyone still starve in sight of food |
+| **Trade of anything held,** on an offer that stands a day | Built in 21 (law `trade.window`). Watch: does a first trade happen, and of what |
+| **Signs and sounds for the small events of a day;** a wind that does not come round as a breath | Built in 21. For Nova's eye and ear |
 | **Standing.** Earned by wealth, deeds, knowledge, children, works, followers, giving and renown; lost through shame; needed before anyone will follow; some things carry it | Built. Unknown whether it produces leaders |
 | **Songs, poems and tales** about people and about how the world came to be; told aloud, changing in each mouth; bards | Built. Mythology of the world's origin is open to the beings, not seeded |
 | **A community learns from what befalls its own:** a death and how it came, a sickness, a thing that worked; spreading by word of mouth | Built |
@@ -61,7 +65,7 @@ Answered by the seventh run: people do earn a following (nine pledges), and less
 **From Nova's notes of 22 November, evening, after the globe was built:**
 
 - **Local time** (Nova's second mode: run only what is in view and pause the rest). Not built, and advised against: the world itself costs about 2 ms a moment, so pausing it saves nothing that can be felt; what is scarce is thoughts, and Generation 20 lets the world wait only for those in view while the rest live on and think less often. Pausing people outright would put them out of step with the seasons and with neighbours who walk in and out of view, and would make every run depend on where the watcher looked, so that two runs could no longer be compared. If the lighter choice proves not enough in a real run, this is where to look next.
-- **Rain and flood as weather of the warm belt:** a rainy season with heavy rain that can be seen, rivers that rise, and floods that take what is built too near them.
+- **Flood in the season of rains:** rivers that rise, and floods that take what is built too near them. (The season of rains itself was built in Generation 21; flood changes the ground under buildings and paths and waits to see the rains run first.)
 - **A day that goes round the world,** so that the sun lights one side of the globe and it is morning in one country while it is evening in another.
 - **The ice and the rainforest as places to live:** more of what Nova named for them as beings reach them (more craft from hide and bone, fishing through ice, tree-dwellings), from what real runs show is missing.
 - **Sea creatures that return** from the open sea when their numbers fall, as land animals do from the rim.
@@ -133,7 +137,9 @@ These run through every stage and are picked up as runs call for them.
 - **Peoples too small and too closely related to grow.** Generation 16 answered with newcomers, twins and longer lives, and the world went from six to twelve; Generation 17 adds women and men, which narrows who can pair, and bands of four to offset it.
 - **A carried-on world cannot grow at its edges.** Only a new world has the veiled rim. Now in NEXT.
 - **Nothing in Generation 20 has been balanced by a run:** new hunters (wolves, bears, snakes, shadowcats, rivermaws), new food, three new peoples.
-- **The climate has no lever for the maker.**
+- **Prompts have grown again:** median 29,000 characters and longest 38,000 in the twelfth run (24,000 and 36,800 in the eighth). No call failed and a thought took 7 seconds, so nothing was cut in Generation 21 beyond the list of plants; if thoughts slow or fail, this is the first place to look.
+- **Not yet used by real minds in twelve days on the globe:** fishing, the canoe, kayak, sled and igloo; one animal tamed. Too soon to call a fault.
+- **A band of one people that settles in another's climate** (Wood-folk on the ice) pays for it heavily in winter. The pull of the homeland did not bring them back. Watch before changing anything.
 - **A thought took 10 seconds in the eleventh run,** three times what it took in the tenth. Unexplained; it sets how often a being can think.
 - **Acts that never reached a body.** `claim` and `venture` were unreachable for real minds in Generations 16 and 17 because tests called the body directly. Fixed in 18, with a check that reads the acts out of the prompt.
 - **Minds hunt very little:** 2 plan steps of 1,274 in the tenth run. Generation 18 points the hungry at prey; unknown whether they will go.
@@ -166,3 +172,4 @@ A short index; the detail is in the design log.
 | 18 | Acts that reach the body (claiming, venturing, telling), hunting and gathering as skills, two together, grudges and kindness, courting that holds, people added by hand, plans that last |
 | 19 | A rim that opens slowly, a view past the edge, minds that ease off, worlds with names and a choice on opening |
 | 20 | A world that goes round and is seen as a globe; three climates; two different poles; the sea's own creatures; the rainforest; three new peoples and the pull of the homeland; the dog, sled, igloo, canoe and kayak |
+| 21 | A warm belt about the equator and a season of rains; a sky that belongs to a place; food shown by what bears, and eat and harvest that walk to it; trade of anything held; signs and sounds for 29 kinds of event; a wind that does not pulse; hardships in words and sowings that say why they failed, for the maker |

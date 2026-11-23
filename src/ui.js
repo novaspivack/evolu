@@ -654,7 +654,7 @@ function drawFlat() {
       c.fillStyle = g; c.fillRect(0, 0, W, H);
     }
   }
-  const sky = w.weather.kind;
+  const sky = skyHere();
   if (sky === 'storm') { c.fillStyle = 'rgba(8,12,28,0.28)'; c.fillRect(0, 0, W, H); }
   else if (sky === 'drought') { c.fillStyle = 'rgba(255,186,70,0.10)'; c.fillRect(0, 0, W, H); }
   else if (sky === 'heat') { c.fillStyle = 'rgba(255,150,60,' + (0.1 + 0.03 * Math.sin(U.time * 1.3)) + ')'; c.fillRect(0, 0, W, H); }
@@ -691,6 +691,10 @@ function drawFlat() {
 
 function addFx(o) { o.t0 = U.time; U.fx.push(o); if (U.fx.length > 140) U.fx.shift(); }
 function burst(x, y, color, n) { for (let k = 0; k < (n || 8); k++) { const a = Math.random() * 6.28, v = 0.6 + Math.random() * 1.2; addFx({ type: 'dot', x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 0.6, life: 0.7 + Math.random() * 0.5, color: color }); } }
+/* small things that rise and fade (a rite, a tale, a healing), that glint (ore, a thing made), and rings on water */
+function motes(x, y, color, n) { for (let k = 0; k < (n || 6); k++) addFx({ type: 'mote', x: x + (Math.random() - 0.5) * 0.8, y: y + (Math.random() - 0.5) * 0.4, vx: (Math.random() - 0.5) * 0.3, vy: 0.5 + Math.random() * 0.7, ph: Math.random() * 6, life: 1.2 + Math.random(), color: color }); }
+function sparks(x, y, color, n) { for (let k = 0; k < (n || 3); k++) addFx({ type: 'spark', x: x, y: y, dx: (Math.random() - 0.5) * 1.1, dy: (Math.random() - 0.5) * 1.1, life: 0.5 + Math.random() * 0.6, color: color }); }
+function glyph(x, y, text, color, life) { addFx({ type: 'float', x: x, y: y, text: text, life: life || 2, color: color }); }
 function drawFx(c) {
   const z = cam.z, keep = [];
   for (let k = 0; k < U.fx.length; k++) {
@@ -706,6 +710,9 @@ function drawFx(c) {
       for (let i = 1; i <= 7; i++) { const q = i / 7; c.lineTo(bx + (tx - bx) * q + (i < 7 ? (hash(i, f.x, f.y) - 0.5) * 46 : 0), by + (ty - by) * q); }
       c.stroke();
     }
+    else if (f.type === 'mote') { c.fillStyle = f.color; c.beginPath(); c.arc(sx(f.x + f.vx * age + 0.12 * Math.sin(age * 4 + f.ph)), sy(f.y - f.vy * age), Math.max(1, z * 0.05) * (1 + 0.5 * Math.sin(age * 9 + f.ph)), 0, 6.2832); c.fill(); }
+    else if (f.type === 'spark') { const X = sx(f.x + f.dx), Y = sy(f.y + f.dy), r = Math.max(3, z * 0.22) * Math.sin(3.1416 * p); c.strokeStyle = f.color; c.lineWidth = 1.4; c.beginPath(); c.moveTo(X - r, Y); c.lineTo(X + r, Y); c.moveTo(X, Y - r); c.lineTo(X, Y + r); c.stroke(); }
+    else if (f.type === 'ripple') { c.strokeStyle = f.color; c.lineWidth = 1.5; for (let q = 0; q < 2; q++) { const pp = p - q * 0.25; if (pp <= 0) continue; c.beginPath(); c.ellipse(sx(f.x), sy(f.y), f.r * z * pp, f.r * z * pp * 0.5, 0, 0, 6.2832); c.stroke(); } }
     else if (f.type === 'float') { c.fillStyle = f.color; c.font = '600 ' + Math.round(clamp(z * 0.5, 11, 22)) + 'px "Instrument Sans", sans-serif'; c.textAlign = 'center'; c.fillText(f.text, sx(f.x), sy(f.y) - z * (0.5 + p * 0.9)); }
   }
   c.globalAlpha = 1; U.fx = keep;
@@ -796,6 +803,8 @@ function bubble(id, kind, text) {
 }
 
 /* ---------- world events become light, motion and sound ---------- */
+/* the sky over the middle of the view: rain where the world is warm, snow on the ice */
+function skyHere() { const w = st.world; return SW.skyAt(w, ((Math.round(cam.x) % w.W) + w.W) % w.W, clamp(Math.round(cam.y), 0, w.H - 1)); }
 function soundAt(type, x, y, extra) {
   if (!SWA.on) return;
   const px = sx(x), py = sy(y), onScreen = px > -40 && py > -40 && px < W + 40 && py < H + 40;
@@ -836,17 +845,17 @@ function onWorldEvent(ev) {
     case 'great': { const e = ev.edict; U.flash = 0.6; burst(e.x, e.y, '#ffffff', 40); addFx({ type: 'ring', x: e.x, y: e.y, r: 14, life: 4, color: 'rgba(255,255,255,0.9)' }); addFx({ type: 'ring', x: e.x, y: e.y, r: 30, life: 6, color: 'rgba(229,155,240,0.8)' }); if (SWA.on) { SWA.event('law', {}); SWA.event('awakened', { near: 1, hue: e.hue }); } break; }
     case 'discovery': if (a) { burst(a.x, a.y, '#ffe9a0', 24); addFx({ type: 'ring', x: a.x, y: a.y, r: 3, life: 2, color: 'rgba(255,233,160,0.9)' }); soundAt('variety', a.x, a.y); } break;
     case 'invented': if (a) { addFx({ type: 'float', x: a.x, y: a.y, text: '✦ ' + ev.kind, life: 3.2, color: '#ffe9a0' }); burst(a.x, a.y, '#ffe9a0', 16); soundAt('variety', a.x, a.y); } break;
-    case 'crafted': if (a) { burst(a.x, a.y, '#d9a066', 8); soundAt('built', a.x, a.y); } break;
-    case 'healed': if (b) { burst(b.x, b.y, '#8fe08a', 12); soundAt('taught', b.x, b.y, voice); } break;
+    case 'crafted': if (a) { burst(a.x, a.y, '#d9a066', 6); sparks(a.x, a.y, '#ffe2b0', 3); soundAt('craft', a.x, a.y, voice); } break;
+    case 'healed': if (b) { motes(b.x, b.y, '#8fe08a', 12); addFx({ type: 'ring', x: b.x, y: b.y, r: 1.4, life: 1.4, color: 'rgba(143,224,138,0.8)' }); soundAt('healed', b.x, b.y, voice); } break;
     case 'took': if (ev.raid) { addFx({ type: 'float', x: ev.x, y: ev.y, text: 'raid!', life: 1.8, color: '#ff8f6b' }); soundAt('stole', ev.x, ev.y); } break;
     case 'story': U.keys.story = ''; break;
     case 'insight': U.keys.inspect = ''; break;
-    case 'opened': buildTerrain(); SPACE.tex = null; U.keys.kinds = ''; addFx({ type: 'ring', x: (ev.x0 + ev.x1) / 2, y: (ev.y0 + ev.y1) / 2, r: 10, life: 4, color: 'rgba(250,236,170,0.9)' }); showNotice('New land has been found beyond the edge of the known world' + (ev.land ? ', in ' + ev.land : '') + '.'); break;
+    case 'opened': buildTerrain(); SPACE.tex = null; U.keys.kinds = ''; addFx({ type: 'ring', x: (ev.x0 + ev.x1) / 2, y: (ev.y0 + ev.y1) / 2, r: 10, life: 4, color: 'rgba(250,236,170,0.9)' }); showNotice('New land has been found beyond the edge of the known world' + (ev.land ? ', in ' + ev.land : '') + '.'); motes((ev.x0 + ev.x1) / 2, (ev.y0 + ev.y1) / 2, '#faecaa', 16); soundAt('opened', (ev.x0 + ev.x1) / 2, (ev.y0 + ev.y1) / 2); break;
     case 'disaster': if (ev.x2 != null) addFx({ type: 'ring', x: ev.x2, y: ev.y2, r: 4, life: 3.5, color: 'rgba(230,230,240,0.9)' }); addFx({ type: 'ring', x: ev.x, y: ev.y, r: Math.max(4, ev.r), life: 3.5, color: ev.kind === 'wildfire' || ev.kind === 'volcano' ? 'rgba(255,120,40,0.95)' : ev.kind === 'locusts' ? 'rgba(190,200,90,0.9)' : 'rgba(230,230,240,0.9)' }); addFx({ type: 'float', x: ev.x, y: ev.y, text: ev.kind === 'quake' ? 'the earth shakes' : ev.kind === 'volcano' ? 'the mountain burns' : ev.kind, life: 4, color: '#ffb070' }); soundAt('lightning', ev.x, ev.y); U.keys.laws = ''; break;
     case 'maker': U.keys.maker = ''; U.keys.laws = ''; U.keys.kinds = ''; U.keys.ways = ''; if (ev.entry.ops.length) showNotice('The maker changed the world: ' + ev.entry.ops.join('; ') + '. See the Maker tab.'); break;
     case 'site': if (ev.first) { addFx({ type: 'ring', x: ev.x, y: ev.y, r: 5, life: 2.5, color: 'rgba(214,196,255,0.9)' }); soundAt('cast', ev.x, ev.y); } break;
-    case 'sick': if (a) addFx({ type: 'float', x: a.x, y: a.y, text: 'sick', life: 2.6, color: '#a6dc5a' }); break;
-    case 'fished': if (a && ev.first) addFx({ type: 'float', x: a.x, y: a.y, text: 'a fish', life: 2.2, color: '#9fd3e6' }); break;
+    case 'sick': if (a) { addFx({ type: 'float', x: a.x, y: a.y, text: 'sick', life: 2.6, color: '#a6dc5a' }); soundAt('sick', a.x, a.y, voice); } break;
+    case 'fished': if (a) { addFx({ type: 'ripple', x: a.x, y: a.y, r: 1.1, life: 1.3, color: 'rgba(159,211,230,0.9)' }); soundAt('splash', a.x, a.y); if (ev.first) addFx({ type: 'float', x: a.x, y: a.y, text: 'a fish', life: 2.2, color: '#9fd3e6' }); } break;
     case 'war': { const q = agentOf(ev.war.a); if (q) { addFx({ type: 'ring', x: q.x, y: q.y, r: 7, life: 3, color: 'rgba(255,90,72,0.9)' }); addFx({ type: 'float', x: q.x, y: q.y, text: '⚔ war with ' + ev.war.bName, life: 4, color: '#ff6a55' }); soundAt('death', q.x, q.y); } break; }
     case 'truce': { const q = agentOf(ev.by); if (q) { addFx({ type: 'ring', x: q.x, y: q.y, r: 7, life: 3, color: 'rgba(143,224,192,0.9)' }); addFx({ type: 'float', x: q.x, y: q.y, text: 'truce', life: 4, color: '#8fe0c0' }); soundAt('pledged', q.x, q.y); } break; }
     case 'stance': if (a) { addFx({ type: 'ring', x: a.x, y: a.y, r: 5, life: 2.2, color: ev.stance === 'enemy' ? 'rgba(255,90,72,0.9)' : 'rgba(143,224,192,0.9)' }); soundAt('pledged', a.x, a.y, voice); } break;
@@ -856,7 +865,29 @@ function onWorldEvent(ev) {
     case 'cast': { const f = ev.field; burst(f.x, f.y, fieldColor(f), 26); addFx({ type: 'ring', x: f.x, y: f.y, r: f.r + 0.5, life: 2, color: fieldColor(f) }); addFx({ type: 'float', x: f.x, y: f.y, text: '✦ ' + (f.name || f.law), life: 3.2, color: fieldColor(f) }); soundAt('cast', f.x, f.y, voice); break; }
     case 'awakened': if (a) { burst(a.x, a.y, '#ffffff', 30); addFx({ type: 'ring', x: a.x, y: a.y, r: 4, life: 2.4, color: 'rgba(255,255,255,0.9)' }); soundAt('awakened', a.x, a.y, voice); } break;
     case 'stole': if (a) { addFx({ type: 'float', x: a.x, y: a.y, text: ev.seen ? 'thief!' : '…', life: 1.6, color: ev.seen ? '#ff8f6b' : '#9aa7ad' }); soundAt('stole', a.x, a.y, voice); } break;
-    case 'traded': if (a && b) { addFx({ type: 'slash', x: a.x, y: a.y, x2: b.x, y2: b.y, life: 0.7, color: '#8fe0c0' }); soundAt('gave', a.x, a.y, voice); } break;
+    case 'traded': if (a && b) { addFx({ type: 'slash', x: a.x, y: a.y, x2: b.x, y2: b.y, life: 0.9, color: '#8fe0c0' }); glyph(a.x, a.y, ev.gave + ' for ' + ev.got, '#8fe0c0', 2.6); motes(b.x, b.y, '#8fe0c0', 5); soundAt('traded', a.x, a.y, voice); } break;
+    case 'offer': if (a) { glyph(a.x, a.y, ev.give + ' for ' + ev.want + '?', '#8fe0c0', 2.2); soundAt('offer', a.x, a.y, voice); } break;
+    case 'mined': sparks(ev.x, ev.y, '#ffe9a0', ev.first ? 6 : 3); soundAt('mined', ev.x, ev.y, voice); if (ev.first && a) glyph(a.x, a.y, ev.kind, '#ffe9a0', 2.4); break;
+    case 'felled': burst(ev.x, ev.y, '#b98a55', 5); soundAt('wood', ev.x, ev.y); break;
+    case 'bridged': case 'paved': burst(ev.x, ev.y, '#b9a27a', 5); soundAt('wood', ev.x, ev.y); break;
+    case 'dismantled': burst(ev.x, ev.y, '#b98a55', 8); soundAt('wood', ev.x, ev.y); break;
+    case 'stashed': burst(ev.x, ev.y, '#d9c08a', 4); soundAt('stashed', ev.x, ev.y); break;
+    case 'tamed': if (a) { glyph(a.x, a.y, '\u2665 ' + ev.kind, '#ffb3c7', 2.6); motes(a.x, a.y, '#ffb3c7', 6); soundAt('tamed', a.x, a.y, voice); } break;
+    case 'fed': if (a) motes(a.x, a.y, '#ffd9a0', 3); break;
+    case 'rode': if (a && !ev.off) { burst(a.x, a.y, '#cdbb96', 4); soundAt('rode', a.x, a.y); } break;
+    case 'telling': if (a) { motes(a.x, a.y, '#ffc67a', 12); glyph(a.x, a.y, '\u266a', '#ffe9a0', 2.6); addFx({ type: 'ring', x: a.x, y: a.y, r: 3, life: 2.4, color: 'rgba(255,198,122,0.7)' }); soundAt('telling', a.x, a.y, voice); } break;
+    case 'made': if (a) { motes(a.x, a.y, '#e9c8ff', 10); glyph(a.x, a.y, ev.thing || ev.what, '#e9c8ff', 2.6); soundAt('rite', a.x, a.y, voice); } break;
+    case 'shared': if (a) { motes(a.x, a.y, '#ffd9a0', 5); soundAt('shared', a.x, a.y); } break;
+    case 'mended': if (a && b) { addFx({ type: 'slash', x: a.x, y: a.y, x2: b.x, y2: b.y, life: 1.2, color: '#b9f0c0' }); motes(a.x, a.y, '#b9f0c0', 6); soundAt('shared', a.x, a.y); } break;
+    case 'claimed': addFx({ type: 'ring', x: ev.x, y: ev.y, r: 4, life: 3, color: 'rgba(255,233,160,0.9)' }); glyph(ev.x, ev.y, ev.name || 'claimed', '#ffe9a0', 3.2); soundAt('claimed', ev.x, ev.y, voice); break;
+    case 'arrived': { const f = agentOf((ev.ids || [])[0]); if (f) { addFx({ type: 'ring', x: f.x, y: f.y, r: 6, life: 3.5, color: 'rgba(190,225,255,0.9)' }); motes(f.x, f.y, '#bee1ff', 14); glyph(f.x, f.y, 'newcomers', '#bee1ff', 3.5); soundAt('arrived', f.x, f.y); } break; }
+    case 'aged': if (a) { addFx({ type: 'ring', x: a.x, y: a.y, r: 1.5, life: 1.6, color: 'rgba(244,230,192,0.8)' }); motes(a.x, a.y, '#f4e6c0', 5); soundAt('aged', a.x, a.y, voice); } break;
+    case 'grown': if (a) motes(a.x, a.y, '#cfe9ff', 5); break;
+    case 'read': if (a) motes(a.x, a.y, '#f4e6c0', 3); break;
+    case 'rallied': if (a) { addFx({ type: 'ring', x: a.x, y: a.y, r: w.laws.body.hearing, life: 1.2, color: 'rgba(255,120,90,0.7)' }); glyph(a.x, a.y, 'rally!', '#ff8f6b', 2.2); soundAt('rallied', a.x, a.y); } break;
+    case 'herdcame': addFx({ type: 'ring', x: ev.x, y: ev.y, r: 5, life: 3, color: 'rgba(205,187,150,0.8)' }); glyph(ev.x, ev.y, ev.n + ' ' + ev.kind, '#cdbb96', 3); soundAt('herd', ev.x, ev.y); break;
+    case 'drank': if (a && !ev.pot) addFx({ type: 'ripple', x: a.x, y: a.y, r: 0.7, life: 1.1, color: 'rgba(159,211,230,0.8)' }); break;
+    case 'weather': SWA.event('weather', { near: 0.7 }); break;
     case 'pledged': if (a && b) { addFx({ type: 'slash', x: a.x, y: a.y, x2: b.x, y2: b.y, life: 1, color: SW.hslToHex(b.hue, 0.85, 0.6) }); addFx({ type: 'ring', x: b.x, y: b.y, r: 1.6, life: 1.4, color: SW.hslToHex(b.hue, 0.85, 0.6) }); soundAt('pledged', b.x, b.y, voice); } break;
     case 'broke': if (a) { addFx({ type: 'float', x: a.x, y: a.y, text: '✕', life: 1.6, color: '#ff8f6b' }); soundAt('stole', a.x, a.y, voice); } break;
     case 'razed': burst(ev.x, ev.y, '#b9b1a2', 16); soundAt('razed', ev.x, ev.y); break;
@@ -1598,7 +1629,7 @@ window.addEventListener('pointerup', function () { setTimeout(function () { U.pa
 function updatePanels() {
   if (U.panelDown && Date.now() - U.panelDown < 1500) return; /* never rebuild under a finger */
   const c = SW.census(w);
-  $('clockText').innerHTML = '<b>Day ' + SW.day(w) + '</b> · ' + SW.SEASONS[SW.season(w)] + ' · ' + SW.phaseName(w) + ' · <b>' + w.weather.kind + '</b>';
+  $('clockText').innerHTML = '<b>Day ' + SW.day(w) + '</b> · ' + SW.SEASONS[SW.season(w)] + ' · ' + SW.phaseName(w) + ' · <b>' + skyHere() + '</b>';
   drawDial();
   $('census').innerHTML = '<span class="chip glass"><i style="background:var(--accent)"></i><b>' + c.agents + '</b>beings</span><span class="chip glass"><i style="background:#c9a877"></i><b>' + c.hopper + '</b>grazers</span><span class="chip glass"><i style="background:#a68bd8"></i><b>' + c.stalker + '</b>hunters</span><span class="chip glass"><i style="background:var(--life)"></i><b>' + c.plants + '</b>plants</span><span class="chip glass"><b>' + (c.plantKinds + c.creatureKinds) + '</b>kinds</span>';
   $('meter').innerHTML = '<b>' + st.used + '</b> / ' + st.settings.budget + ' thoughts' + (st.inflight ? ' · ' + st.inflight + ' thinking' : '') + (st.on && U.pace != null && U.pace < 0.93 ? ' · <span title="The world has slowed so that every being still comes to think about once in ' + (st.settings.thinkEvery || 90) + ' moments. Change this in Setup.">time ×' + U.pace.toFixed(2) + '</span>' : '');
@@ -1629,7 +1660,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 20, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 21, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1681,7 +1712,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 20, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 21, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }
@@ -1729,7 +1760,7 @@ function attach(state) {
   if (w.agents.length) { cam.x = w.agents.reduce(function (s, a) { return s + a.x; }, 0) / w.agents.length + 0.5; cam.y = w.agents.reduce(function (s, a) { return s + a.y; }, 0) / w.agents.length + 0.5; }
   else { cam.x = w.W / 2; cam.y = w.H / 2; }
   clampCam(); syncButtons();
-  window.SWdebug = { st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld };
+  window.SWdebug = { st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere };
 }
 function newWorld(seed) {
   const keep = st ? st.settings : null;
@@ -1768,7 +1799,7 @@ function frame(ts) {
   if (ts - U.lastPanel > 260) { U.lastPanel = ts; updatePanels(); }
   if (ts - U.lastMini > 400) { U.lastMini = ts; drawMini(); }
   if (ts - (U.lastRec || 0) > 5000) { U.lastRec = ts; recFlush(false); SWK.tick(st); }
-  if (ts - U.lastScene > 500) { U.lastScene = ts; if (!U.eraT || ts - U.eraT > 6000) { U.eraT = ts; let er = 1; w.agents.forEach(function (a) { for (const k in a.knows) er = Math.max(er, (w.laws.tree[k] || {}).era || 1); }); U.era = er; } const R0 = SW.regionAt(w, clamp(Math.round(cam.x), 0, w.W - 1), clamp(Math.round(cam.y), 0, w.H - 1)); SWA.scene(nightLevel(), SW.season(w), w.weather.kind, { biome: R0 ? R0.biome : 'mixed', mood: w.musicMood || 'calm', era: U.era || 1, crowd: w.settlements.length }); }
+  if (ts - U.lastScene > 500) { U.lastScene = ts; if (!U.eraT || ts - U.eraT > 6000) { U.eraT = ts; let er = 1; w.agents.forEach(function (a) { for (const k in a.knows) er = Math.max(er, (w.laws.tree[k] || {}).era || 1); }); U.era = er; } const R0 = SW.regionAt(w, clamp(Math.round(cam.x), 0, w.W - 1), clamp(Math.round(cam.y), 0, w.H - 1)); SWA.scene(nightLevel(), SW.season(w), skyHere(), { warm: SW.climate(w, ((Math.round(cam.x) % w.W) + w.W) % w.W, clamp(Math.round(cam.y), 0, w.H - 1)) === 1, biome: R0 ? R0.biome : 'mixed', mood: w.musicMood || 'calm', era: U.era || 1, crowd: w.settlements.length }); }
   if (ts - U.lastSave > 30000 && !U.choosing) { U.lastSave = ts; save(); }
   requestAnimationFrame(frame);
 }
