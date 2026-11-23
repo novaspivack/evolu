@@ -67,6 +67,30 @@ These were taken by Nova from one world, Wenenvale, on days 36 to 38 of its life
 </tr>
 </table>
 
+### Two days by the water: teaching, courting, a child, a death
+
+The same world three weeks later, days 58 and 59, in winter. Nobody told these beings to teach, to court or to console. It is raining here because this is the warm belt about the equator; the snow lies on the heights beside it.
+
+<table>
+<tr>
+<td valign="top" width="33%"><a href="docs/images/life-1-night-seeds-and-ember-metal.jpg"><img src="docs/images/life-1-night-seeds-and-ember-metal.jpg" alt="Day 58, a winter night in a gale" width="100%"></a><br><b>Day 58, a winter night in a gale</b><br><sub>Tonka: "Stay near the shelter and help me put these seeds in the ground by the water. When we are done we sit together and sing the night through." To the south an old one teaches: "Kragog, learn this: Ember-metal: beat ore in a hot fire into metal."</sub></td>
+<td valign="top" width="33%"><a href="docs/images/life-2-will-you-court-me.jpg"><img src="docs/images/life-2-will-you-court-me.jpg" alt="Day 59, morning" width="100%"></a><br><b>Day 59, morning</b><br><sub>"Shohua, you have stayed by me and planted beside me. I want a child with you, and a home here. Will you court me?" Nearby, one whose "years are nearly gone" hands on fire-keeping: "Elyys, learn this: Ember-keeping: keep the fire alive, build it first, and everything else follows from it."</sub></td>
+<td valign="top" width="33%"><a href="docs/images/life-3-i-court-you.jpg"><img src="docs/images/life-3-i-court-you.jpg" alt="The answer" width="100%"></a><br><b>The answer</b><br><sub>"Tonka, I court you. I want a child with you and a home here by the water. Come into the shelter, the icebear is near."</sub></td>
+</tr>
+<tr>
+<td valign="top" width="33%"><a href="docs/images/life-4-learn-this.jpg"><img src="docs/images/life-4-learn-this.jpg" alt="A tool is taught" width="100%"></a><br><b>A tool is taught</b><br><sub>"Shohua, learn this: One wood and one stone make an amber-hafted gatherer; it makes picking stronger and lasts many uses."</sub></td>
+<td valign="top" width="33%"><a href="docs/images/life-5-i-am-small.jpg"><img src="docs/images/life-5-i-am-small.jpg" alt="Dusk" width="100%"></a><br><b>Dusk</b><br><sub>A small one named Tonchi is with them now: "An icebear is three steps north and I am small, so I stay near Shohua and Tonka in the shelter, where I am safe." Aloud: "Shohua, the icebear is close. I am hungry. Will you share your food?"</sub></td>
+<td width="33%"></td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="50%"><a href="docs/images/life-6-an-old-one.jpg"><img src="docs/images/life-6-an-old-one.jpg" alt="Night: an old one takes stock" width="100%"></a><br><b>Night: an old one takes stock</b><br><sub>"I am old, and most of my life is behind me. I have spent my days walking, drinking, resting and picking, and I have taught only Vesys."</sub></td>
+<td valign="top" width="50%"><a href="docs/images/life-7-grief.jpg"><img src="docs/images/life-7-grief.jpg" alt="Night: a death, and a stranger's kindness" width="100%"></a><br><b>Night: a death, and a stranger's kindness</b><br><sub>Elyis has died. Zurar thinks: "I will not push a grieving m..." and says: "Elyys, I am sorry for Elyis. I am Zurar of the Kragrek. I would sit with you in the hall tonight, and learn your tending, if you will have me near."</sub></td>
+</tr>
+</table>
+
 Click any being and the panel shows it from the inside. This is Ilyae of the Phizhi, a founder, on day 38: "I have never hunted, and a penguin walks three steps south; meat for the store would be a first, and it would make my table heavier than Vorok's."
 
 <table>
