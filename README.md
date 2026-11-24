@@ -389,7 +389,6 @@ Since Generation 33 a new check is also run against the generation before, where
 - Only a world begun under Generation 20 or later is a globe, only one begun under 27 or later has seas, and only one begun under 30 or later starts mostly unknown. Older worlds keep what they were made with.
 - An act can pass every check on the body and still never be reachable by a mind: claiming and venturing were in that state for two generations. One suite now drives each act through the mind's own path, and reads the list of acts out of the prompt to check the body accepts every one.
 - The real service cannot be made to refuse in a test, and no test can show whether a mind will choose to remember.
-- The sound has been written without being heard by its author.
 
 ## Licence and credit
 
