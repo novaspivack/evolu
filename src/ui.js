@@ -98,7 +98,7 @@ function kindLook(name, owner) {
       case 'apothecary': R(0, 0.2, 0.24, 0.17, plaster); Tr(0, -0.06, 0.3, slate); for (let q = 0; q < 4; q++) R(-0.18 + q * 0.12, 0.1, 0.06, 0.03, q % 2 ? '#f0f0e8' : 'hsl(150,50%,40%)'); R(-0.1, 0.24, 0.07, 0.06, 'hsl(160,50%,70%)'); R(0.12, 0.28, 0.04, 0.08, dark); El(0.3, 0.0, 0.05, 0.05, 'hsl(150,56%,42%)'); R(0.3, 0.0, 0.03, 0.01, '#fff'); R(0.3, 0.0, 0.01, 0.03, '#fff'); break;
       case 'aqueduct': R(0, -0.1, 0.48, 0.05, stone); Ln(-0.48, -0.16, 0.48, -0.16, 0.025, 'hsl(200,60%,62%)'); for (let q = 0; q < 4; q++) R(-0.42 + q * 0.28, 0.16, 0.045, 0.22, stone2); for (let q = 0; q < 3; q++) El(-0.28 + q * 0.28, -0.04, 0.095, 0.05, stone); break;
       case 'lighthouse': R(0, 0.26, 0.11, 0.12, '#f0f0ec'); R(0, 0.06, 0.095, 0.08, '#d23c3c'); R(0, -0.1, 0.08, 0.08, '#f0f0ec'); R(0, -0.24, 0.07, 0.06, '#d23c3c'); R(0, -0.36, 0.09, 0.06, '#2c3440'); El(0, -0.36, 0.05, 0.04, '#fff3a0'); Ln(0.06, -0.36, 0.46, -0.46, 0.02, 'rgba(255,243,160,0.5)'); Ln(0.06, -0.36, 0.46, -0.28, 0.02, 'rgba(255,243,160,0.3)'); Tr(0, -0.46, 0.07, '#2c3440'); break;
-      case 'beacon': Ln(-0.1, 0.38, 0, -0.1, 0.03, line); Ln(0.1, 0.38, 0, -0.1, 0.03, line); Ln(-0.06, 0.16, 0.06, 0.16, 0.02, line); R(0, -0.14, 0.09, 0.04, '#3a3a3a'); Tr(0, -0.28, 0.1, '#ff8a2a'); Tr(0, -0.25, 0.06, '#ffd060'); break;
+      case 'beacon': sh[0] = { t: 'ellipse', y: 0.38, w: 0.2, h: 0.05, fill: 'rgba(0,0,0,0.3)' }; Ln(-0.14, 0.38, -0.02, -0.06, 0.045, line); Ln(0.14, 0.38, 0.02, -0.06, 0.045, line); Ln(-0.08, 0.18, 0.08, 0.18, 0.03, line); R(0, -0.1, 0.11, 0.045, '#3a3a3a'); Tr(0, -0.26, 0.13, '#ff8a2a'); Tr(0, -0.22, 0.075, '#ffd060'); break;
       case 'harbour': R(0, 0.3, 0.46, 0.08, stone2); for (let q = 0; q < 5; q++) R(-0.4 + q * 0.2, 0.2, 0.02, 0.03, '#2a2a2a'); Ln(-0.26, 0.22, -0.26, -0.3, 0.03, steel2); Ln(-0.26, -0.3, 0.06, -0.18, 0.025, steel2); Ln(0.06, -0.18, 0.06, 0.0, 0.01, '#222'); R(0.06, 0.04, 0.045, 0.04, 'hsl(28,50%,44%)'); R(0.28, 0.14, 0.12, 0.08, wood); Tr(0.28, 0.0, 0.12, thatch); break;
       case 'landing': R(0, 0.24, 0.4, 0.035, wood); for (let q = 0; q < 4; q++) Ln(-0.34 + q * 0.226, 0.4, -0.34 + q * 0.226, 0.14, 0.035, line); Ln(0.34, 0.14, 0.34, -0.14, 0.02, line); El(0.34, -0.16, 0.035, 0.035, '#ffd060'); break;
       /* older kinds that shared a look with another (Generation 32: hall and igloo, kiln and workshop, moot and school, press and engine house, barracks and forge were drawn the same) */
@@ -113,14 +113,24 @@ function kindLook(name, owner) {
   }
   if (name === 'pen') { sh.length = 0; sh.push({ t: 'ellipse', y: 0.14, w: 0.42, h: 0.26, fill: 'rgba(120,96,60,0.35)' }, { t: 'ring', n: 11, d: 0.86, y: 0.14, s: 0.05, fill: wood }, { t: 'line', x: -0.4, y: 0.06, x2: 0.4, y2: 0.06, lw: 0.02, stroke: line }, { t: 'line', x: -0.34, y: 0.3, x2: 0.34, y2: 0.3, lw: 0.02, stroke: line }); return (KIND_CACHE[key] = { anim: 'none', shapes: sh }); }
   if (name === 'weir') { sh.length = 0; sh.push({ t: 'ellipse', y: 0.2, w: 0.46, h: 0.16, fill: 'rgba(60,120,160,0.55)' }); for (let q = 0; q < 6; q++) sh.push({ t: 'line', x: -0.36 + q * 0.145, y: 0.34 - (q % 2) * 0.05, x2: -0.36 + q * 0.145, y2: -0.04 - (q % 2) * 0.05, lw: 0.035, stroke: line }); sh.push({ t: 'line', x: -0.38, y: 0.08, x2: 0.38, y2: 0.02, lw: 0.02, stroke: wood }); return (KIND_CACHE[key] = { anim: 'none', shapes: sh }); }
-  if (name === 'field') { sh.length = 0; sh.push({ t: 'rect', y: 0.14, w: 0.8, h: 0.5, fill: 'hsl(34,36%,24%)' }); for (let q = 0; q < 4; q++) sh.push({ t: 'line', x: -0.36, y: -0.04 + q * 0.12, x2: 0.36, y2: -0.04 + q * 0.12, lw: 0.035, stroke: 'hsl(48,62%,52%)' }); return (KIND_CACHE[key] = { anim: 'none', shapes: sh }); }
+  if (name === 'field') { /* tilled ground seen from above and a little aslant: dark earth, furrows, and rows of green with ears of grain (Generation 33: it was a brown slab with four yellow lines) */
+    sh.length = 0; sh.push({ t: 'poly', pts: [[-0.47, -0.4], [0.5, -0.4], [0.47, 0.46], [-0.5, 0.46]], fill: 'hsl(30,34%,22%)' }, { t: 'poly', pts: [[-0.43, -0.36], [0.46, -0.36], [0.43, 0.42], [-0.46, 0.42]], fill: 'hsl(31,36%,28%)' });
+    for (let q = 0; q < 6; q++) { const y = -0.29 + q * 0.13, lean = (y + 0.4) * 0.035; sh.push({ t: 'line', x: -0.41 - lean, y: y + 0.045, x2: 0.42 - lean, y2: y + 0.045, lw: 0.022, stroke: 'hsl(28,36%,17%)' }, { t: 'line', x: -0.39 - lean, y: y, x2: 0.4 - lean, y2: y, lw: 0.05, stroke: q % 2 ? 'hsl(92,42%,36%)' : 'hsl(84,44%,40%)' });
+      for (let e = 0; e < 7; e++) sh.push({ t: 'ellipse', x: -0.36 - lean + e * 0.12 + ((q * 5 + e * 3 + tone) % 3) * 0.012, y: y - 0.028, w: 0.016, h: 0.03, fill: (q + e) % 3 ? 'hsl(46,72%,56%)' : 'hsl(52,66%,64%)' }); }
+    return (KIND_CACHE[key] = { anim: 'none', shapes: sh }); }
   const special = { cave: 10, stone: 11, statue: 12, pyramid: 13, well: 14, mill: 15, windmill: 15, temple: 16, market: 17, dock: 18 }[name];
   if (special) {
     const sand = '#c9b27a', pale = 'hsl(' + (205 + tone * 5) + ',8%,70%)';
     if (special === 10) { sh.length = 0; sh.push({ t: 'ellipse', y: 0.1, w: 0.44, h: 0.34, fill: '#6e6a66' }, { t: 'ellipse', x: -0.1, y: -0.08, w: 0.2, h: 0.12, fill: '#84807b' }, { t: 'ellipse', y: 0.18, w: 0.25, h: 0.24, fill: '#15120f' }, { t: 'ellipse', x: -0.34, y: 0.32, w: 0.13, h: 0.08, fill: '#5a5652' }, { t: 'ellipse', x: 0.34, y: 0.3, w: 0.12, h: 0.07, fill: '#7a7672' }); }
     else if (special === 11) sh.push({ t: 'ellipse', y: 0, w: 0.12, h: 0.38, fill: stone }, { t: 'ellipse', x: -0.03, y: -0.1, w: 0.05, h: 0.22, fill: pale }, { t: 'ring', n: 5, d: 0.5, y: 0.32, s: 0.05, fill: stone2 });
     else if (special === 12) sh.push({ t: 'rect', y: 0.32, w: 0.36, h: 0.08, fill: stone2 }, { t: 'rect', y: 0.06, w: 0.13, h: 0.4, fill: stone }, { t: 'line', x: -0.13, y: -0.06, x2: -0.28, y2: -0.22, lw: 0.07, stroke: stone }, { t: 'line', x: 0.13, y: -0.06, x2: 0.2, y2: 0.12, lw: 0.07, stroke: stone }, { t: 'circle', y: -0.32, s: 0.12, fill: pale }, { t: 'line', x: -0.06, y: 0.0, x2: -0.06, y2: 0.24, lw: 0.015, stroke: stone2 });
-    else if (special === 13) sh.push({ t: 'tri', y: 0.02, s: 0.66, fill: sand }, { t: 'tri', x: 0.14, y: 0.08, s: 0.42, rot: 0, fill: '#b39a62' }, { t: 'line', x: -0.3, y: 0.22, x2: 0.3, y2: 0.22, lw: 0.012, stroke: '#8a7648' }, { t: 'line', x: -0.2, y: 0.06, x2: 0.2, y2: 0.06, lw: 0.012, stroke: '#8a7648' }, { t: 'line', x: -0.1, y: -0.1, x2: 0.1, y2: -0.1, lw: 0.012, stroke: '#8a7648' }, { t: 'tri', y: -0.31, s: 0.09, fill: '#f2d28a' });
+    else if (special === 13) { /* a pyramid seen from a corner: a lit face and a face in shade meeting at an edge, courses of stone, a capstone, a door (Generation 33: it was two triangles laid one on the other) */
+      const ap = [0.02, -0.46], lf = [-0.5, 0.3], fr = [0.1, 0.42], rt = [0.5, 0.26], mix = function (p, q2, t) { return [p[0] + (q2[0] - p[0]) * t, p[1] + (q2[1] - p[1]) * t]; };
+      sh[0] = { t: 'ellipse', y: 0.37, w: 0.54, h: 0.09, fill: 'rgba(0,0,0,0.28)' };
+      sh.push({ t: 'poly', pts: [ap, lf, fr], fill: '#e2c98a' }, { t: 'poly', pts: [ap, fr, rt], fill: '#a98c56' });
+      for (let q = 1; q <= 5; q++) { const t = q / 6, a1 = mix(ap, lf, t), b1 = mix(ap, fr, t), c1 = mix(ap, rt, t); sh.push({ t: 'line', x: a1[0], y: a1[1], x2: b1[0], y2: b1[1], lw: 0.012, stroke: '#b9a068' }, { t: 'line', x: b1[0], y: b1[1], x2: c1[0], y2: c1[1], lw: 0.012, stroke: '#84693c' }); }
+      sh.push({ t: 'line', x: ap[0], y: ap[1], x2: fr[0], y2: fr[1], lw: 0.014, stroke: '#f0dca6' }, { t: 'poly', pts: [ap, mix(ap, lf, 0.14), mix(ap, fr, 0.14)], fill: '#f6e3a0' }, { t: 'poly', pts: [ap, mix(ap, fr, 0.14), mix(ap, rt, 0.14)], fill: '#d2b25e' });
+      { const d0 = mix(lf, fr, 0.52), d1 = mix(lf, fr, 0.68), up = mix(ap, mix(lf, fr, 0.6), 0.84); sh.push({ t: 'poly', pts: [d0, d1, [d1[0] - 0.012, up[1]], [d0[0] + 0.012, up[1]]], fill: '#2a2014' }); } return (KIND_CACHE[key] = { anim: 'none', shapes: sh }); } /* it stands on the sand as it is: no footing, pennant or chimney of a later age */
     else if (special === 14) sh.push({ t: 'ellipse', y: 0.22, w: 0.26, h: 0.13, fill: stone2 }, { t: 'ellipse', y: 0.18, w: 0.18, h: 0.075, fill: '#0e2a3a' }, { t: 'line', x: -0.2, y: 0.2, x2: -0.2, y2: -0.2, lw: 0.04, stroke: line }, { t: 'line', x: 0.2, y: 0.2, x2: 0.2, y2: -0.2, lw: 0.04, stroke: line }, { t: 'tri', y: -0.3, s: 0.3, fill: thatch }, { t: 'line', x: 0, y: -0.16, x2: 0, y2: 0.1, lw: 0.015, stroke: dark });
     else if (special === 15) sh.push({ t: 'rect', y: 0.16, w: 0.2, h: 0.36, fill: stone }, { t: 'tri', y: -0.12, s: 0.25, fill: thatch }, { t: 'rect', y: 0.28, w: 0.07, h: 0.12, fill: dark }, { t: 'line', x: -0.36, y: -0.46, x2: 0.36, y2: 0.22, lw: 0.045, stroke: '#e8dcc0' }, { t: 'line', x: 0.36, y: -0.46, x2: -0.36, y2: 0.22, lw: 0.045, stroke: '#e8dcc0' }, { t: 'circle', y: -0.12, s: 0.04, fill: dark });
     else if (special === 16) sh.push({ t: 'rect', y: 0.34, w: 0.6, h: 0.06, fill: stone2 }, { t: 'line', x: -0.21, y: 0.3, x2: -0.21, y2: -0.1, lw: 0.07, stroke: pale }, { t: 'line', x: -0.07, y: 0.3, x2: -0.07, y2: -0.1, lw: 0.07, stroke: pale }, { t: 'line', x: 0.07, y: 0.3, x2: 0.07, y2: -0.1, lw: 0.07, stroke: pale }, { t: 'line', x: 0.21, y: 0.3, x2: 0.21, y2: -0.1, lw: 0.07, stroke: pale }, { t: 'tri', y: -0.24, s: 0.52, fill: stone }, { t: 'star', y: -0.24, s: 0.07, n: 6, fill: '#f2d28a' });
@@ -144,6 +154,10 @@ function kindLook(name, owner) {
     sh.push(k4 === 0 ? { t: 'star', x: -0.38, y: -0.2, s: 0.09, n: 5, fill: col } : k4 === 1 ? { t: 'circle', x: -0.38, y: -0.2, s: 0.075, fill: col } : k4 === 2 ? { t: 'rect', x: -0.38, y: -0.2, w: 0.07, h: 0.07, fill: col } : { t: 'tri', x: -0.38, y: -0.2, s: 0.1, fill: col }); }
   return (KIND_CACHE[key] = { anim: 'none', shapes: aged(sh) });
 }
+/* HOW LARGE A KIND IS DRAWN ON THE MAP (Generation 33): every kind was drawn at one size, so a beacon stood as tall as a block of apartments.
+   1 is the size of a hall. A field is exactly its tile, so fields laid side by side make one ground. */
+const KIND_SIZE = { field: 0.69, beacon: 0.58, beaconfire: 0.5, well: 0.72, stone: 0.8, shrine: 0.82, pen: 0.9, weir: 0.85, landing: 0.85, igloo: 0.8, kiln: 0.8, apothecary: 0.86, house: 0.88, tavern: 0.92, guesthouse: 0.92, granary: 0.92, bathhouse: 0.92, townhouse: 0.95, roadhouse: 0.95, statue: 0.9,
+  tenement: 1.08, apartments: 1.2, office: 1.25, castle: 1.18, keep: 1.05, parliament: 1.15, ministry: 1.12, pyramid: 1.3, temple: 1.1, factory: 1.08, powerhouse: 1.1, reactor: 1.15, launchpad: 1.2, orbitalyard: 1.25, spaceport: 1.2, mast: 1.15, lighthouse: 1.05, refinery: 1.1, datacentre: 1.05, fusionplant: 1.15 };
 function structLook(kind, owner, i) {
   if (kind === 'shelter' && w.bkind && w.bkind[i] && ((w.laws.buildings && w.laws.buildings[w.bkind[i]]) || w.bkind[i] === 'cave')) return kindLook(w.bkind[i], owner > 0 ? owner : 0);
   owner = owner || 0;
@@ -294,6 +308,7 @@ function drawLook(c, look, px, py, S, o) {
         c.closePath(); break;
       }
       case 'line': c.moveTo(x, y); c.lineTo((q.x2 || 0) * S, (q.y2 || 0) * S); break;
+      case 'poly': { const P = q.pts || []; for (let i = 0; i < P.length; i++) { if (i) c.lineTo(P[i][0] * S, P[i][1] * S); else c.moveTo(P[i][0] * S, P[i][1] * S); } c.closePath(); break; } /* any flat shape of straight sides (Generation 33) */
       case 'ring': {
         const d = (q.d == null ? 0.2 : q.d) * S, r = (q.s || 0.05) * S;
         for (let i = 0; i < n; i++) { const a = i / n * 6.2832 - 1.5708; c.moveTo(x + Math.cos(a) * d + r, y + Math.sin(a) * d); c.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, r, 0, 6.2832); }
@@ -333,6 +348,9 @@ function buildTerrain() {
   const ELEV = [-2.4, 0.1, 1, 1.3, 3.4, -1, 0.6, 1.1, 2.7, 0.4];
   const PAL = [[22, 52, 80], [196, 178, 136], [104, 132, 74], [70, 100, 62], [122, 114, 106], [54, 108, 120], [82, 98, 70], [194, 152, 96], [222, 229, 234], [34, 38, 52]]; /* the last is the unknown: mist */
   const el = new Float32Array(Wt * Ht), eb = new Float32Array(Wt * Ht);
+  const nearRoad = new Uint8Array(Wt * Ht); /* 2 on a made road, 1 within two tiles of one */
+  for (const k in (w.roads || {})) { if (w.roads[k] === 3) continue; const i = +k, x = i % Wt, y = (i - x) / Wt; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { const yy = y + dy; let xx = x + dx; if (yy < 0 || yy >= Ht) continue; if (w.wrap) xx = ((xx % Wt) + Wt) % Wt; else if (xx < 0 || xx >= Wt) continue; if (!nearRoad[yy * Wt + xx]) nearRoad[yy * Wt + xx] = 1; } nearRoad[i] = 2; }
+  U.roadsPainted = Object.keys(w.roads || {}).length;
   for (let i = 0; i < Wt * Ht; i++) el[i] = ELEV[w.terrain[i]] + (hash(i % Wt, Math.floor(i / Wt), 3) - 0.5) * 0.5;
   for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) {
     let sum = 0, n = 0;
@@ -424,8 +442,8 @@ function buildTerrain() {
       for (let k = 0; k < 2; k++) { const gx = ox + hash(x, y, 200 + k) * TP, gy = oy + hash(x, y, 210 + k) * TP; b.strokeStyle = 'rgba(150,172,196,0.5)'; b.lineWidth = 1.5; b.beginPath(); b.moveTo(gx - 7, gy); b.quadraticCurveTo(gx, gy - 3.5, gx + 7, gy); b.stroke(); }
     } else if (t === 4) {
       /* mountains of several sizes (Generation 30): boulders and foothills, peaks, great mountains and a few huge ones, by a slow-changing measure of the range */
-      const mz = vnoise(x * 0.16, y * 0.16, 301), huge = mz > 0.74 && hash(x, y, 305) < 0.2, great = !huge && mz > 0.58 && hash(x, y, 303) < 0.4, low = mz < 0.4;
-      for (let k = 0; k < (huge || great ? 1 : low ? 3 : 2); k++) {
+      const nr = nearRoad[y * Wt + x], mz = vnoise(x * 0.16, y * 0.16, 301), huge = !nr && mz > 0.74 && hash(x, y, 305) < 0.2, great = !nr && !huge && mz > 0.58 && hash(x, y, 303) < 0.4, low = mz < 0.4; /* a road is cut through the rock: no peak stands on it, and none beside it is great enough to lie across it (Generation 33) */
+      for (let k = 0; k < (nr === 2 ? 0 : huge || great ? 1 : low ? 3 : 2); k++) {
         const gx = huge || great ? ox + TP * 0.5 : ox + 5 + hash(x, y, 220 + k) * (TP - 10), gy = huge || great ? oy + TP * 0.7 : oy + 8 + hash(x, y, 230 + k) * (TP - 10), r = huge ? 24 + hash(x, y, 240) * 12 : great ? 14 + hash(x, y, 240) * 7 : low ? 2.5 + hash(x, y, 240 + k) * 2.5 : 5 + hash(x, y, 240 + k) * 6;
         b.fillStyle = 'rgba(48,46,52,0.75)'; b.beginPath(); b.moveTo(gx, gy - r); b.lineTo(gx + r * 0.95, gy + r * 0.55); b.lineTo(gx - r * 0.2, gy + r * 0.55); b.closePath(); b.fill();
         b.fillStyle = 'rgba(176,170,160,0.85)'; b.beginPath(); b.moveTo(gx, gy - r); b.lineTo(gx - r * 0.2, gy + r * 0.55); b.lineTo(gx - r * 0.95, gy + r * 0.55); b.closePath(); b.fill();
@@ -435,7 +453,7 @@ function buildTerrain() {
   }
   /* trees last, so crowns overlap their neighbours: broadleaf in the warm south, conifer in the cold north */
   for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) {
-    if (w.terrain[y * Wt + x] !== 3) continue;
+    if (w.terrain[y * Wt + x] !== 3 || nearRoad[y * Wt + x] === 2) continue; /* no tree stands in a road */
     const bio = ((w.regions || [])[(w.region || [])[y * Wt + x]] || {}).biome, palm = bio === 'rainforest', cold = !palm && (bio === 'tundra' || bio === 'highland' || bio === 'arctic' || bio === 'antarctic' || (bio !== 'desert' && bio !== 'steppe' && y / Ht < 0.36 + (hash(x, y, 260) - 0.5) * 0.12)); /* pine in the cold and the high country, palms in the rainforest (Generation 30) */
     for (let k = 0; k < 3; k++) {
       const gx = (x + 0.12 + hash(x, y, 270 + k) * 0.76) * TP, gy = (y + 0.12 + hash(x, y, 280 + k) * 0.76) * TP, r = 5 + hash(x, y, 290 + k) * 4.5;
@@ -688,15 +706,22 @@ function drawFlat() {
     }
     c.stroke();
   }
-  drawWays(c, x0, x1, y0, y1, z, true);  /* tracks worn by feet lie under what grows */
-  /* things on the ground */
-  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+  /* THE ORDER OF THE GROUND (Generation 33). What lies flat is drawn first, what stands is drawn over it: the bare earth of felled wood, then worn
+     tracks, then made roads with the paths to doors, and only then stores, buildings, plants and beings. A road was drawn over the houses beside it
+     and Nova saw it at once: "roads are on top of them which is not proper fake 3D". */
+  if (z > 5) for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
     const i = y * w.W + x;
-    if (w.terrain[i] === 3 && w.trees[i] < 3 && z > 5 && !(w.roads[i] && w.roads[i] !== 3) && !(w.shelters[i] > 0) && !w.stores[i]) { /* where trees were felled: bare earth and stumps (not under a street or a building) */
+    if (w.terrain[i] === 3 && w.trees[i] < 3 && !(w.roads[i] && w.roads[i] !== 3) && !(w.shelters[i] > 0) && !w.stores[i]) { /* where trees were felled: bare earth and stumps (not under a street or a building) */
       const gone = 3 - w.trees[i], px = sx(x), py = sy(y);
       c.fillStyle = 'rgba(104,88,62,' + (0.3 + 0.2 * gone) + ')'; c.beginPath(); c.ellipse(px, py, z * (0.3 + 0.09 * gone), z * (0.26 + 0.08 * gone), hash(x, y, 430) * 3, 0, 6.2832); c.fill();
       if (z > 11) for (let k = 0; k < gone; k++) { const gx = px + (hash(x, y, 440 + k) - 0.5) * z * 0.6, gy = py + (hash(x, y, 450 + k) - 0.5) * z * 0.5, r = z * 0.07; c.fillStyle = '#4a3826'; c.beginPath(); c.ellipse(gx, gy + r * 0.5, r, r * 0.7, 0, 0, 6.2832); c.fill(); c.fillStyle = '#b89a6a'; c.beginPath(); c.ellipse(gx, gy, r, r * 0.6, 0, 0, 6.2832); c.fill(); }
     }
+  }
+  drawWays(c, x0, x1, y0, y1, z, true);  /* tracks worn by feet */
+  drawWays(c, x0, x1, y0, y1, z, false); /* made roads: over the ground, under everything that stands */
+  /* things on the ground */
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const i = y * w.W + x;
     if (w.lodes && w.lodes[i] && z > 5.5) {
       const hu = (L.minerals[w.lodes[i].k] || {}).hue || 0, kq = w.lodes[i].k, grey = kq === 'coal' || kq === 'obsidian' || kq === 'peat';
       for (let k = 0; k < 5; k++) { const gx = sx(x) + (hash(x, y, 470 + k) - 0.5) * z * 0.7, gy = sy(y) + (hash(x, y, 480 + k) - 0.5) * z * 0.55, r = z * (0.07 + 0.05 * hash(x, y, 490 + k)); c.fillStyle = grey ? (k % 2 ? '#1c1a22' : '#3a3644') : 'hsl(' + hu + ',' + (kq === 'salt' ? 12 : 68) + '%,' + (k === 0 ? 84 : k % 2 ? 62 : 48) + '%)'; c.beginPath(); c.moveTo(gx, gy - r); c.lineTo(gx + r * 0.8, gy); c.lineTo(gx, gy + r * 0.7); c.lineTo(gx - r * 0.8, gy); c.closePath(); c.fill(); }
@@ -715,7 +740,7 @@ function drawFlat() {
     }
     if (w.fires[i] > w.tick) drawLook(c, DEFAULT_FIRE, sx(x), sy(y), z * (0.8 + 0.25 * Math.min(1, (w.fires[i] - w.tick) / 200)), { phase: i * 1.7 });
     if (w.stores[i]) drawLook(c, w.looks[i] || structLook('store', w.stores[i].by, i), sx(x), sy(y), z * 1.1, { phase: i });
-    if (w.shelters[i]) drawLook(c, w.looks[i] || structLook('shelter', w.shelters[i], i), sx(x), sy(y), z * (w.bkind && w.bkind[i] ? 1.45 : 1.15), { phase: i });
+    if (w.shelters[i]) { const bk = w.bkind && w.bkind[i], sz = bk ? 1.45 * (KIND_SIZE[bk] || 1) : 1.15; drawLook(c, w.looks[i] || structLook('shelter', w.shelters[i], i), sx(x), sy(y) + (bk && KIND_SIZE[bk] < 1 && bk !== 'field' ? z * 0.5 * (1 - KIND_SIZE[bk]) : 0), z * sz, { phase: i }); } /* a small thing is drawn small and stands on the ground of its tile */
     else if (w.walls[i]) drawLook(c, w.looks[i] || structLook('wall', w.walls[i], i), sx(x), sy(y), z * 1.05, { phase: i });
     const p = w.plants[i];
     if (p) {
@@ -727,7 +752,6 @@ function drawFlat() {
       c.globalAlpha = 1;
     }
   }
-  drawWays(c, x0, x1, y0, y1, z, false); /* made roads lie over the ground and under what is built */
   /* workings: places where a law of the world has been bent */
   for (let k = 0; k < w.fields.length; k++) {
     const f = w.fields[k], px = sx(f.x), py = sy(f.y), R = (f.r + 0.5) * z, col = fieldColor(f), left = (f.until - w.tick) / L.magic.duration;
@@ -1171,7 +1195,7 @@ function onWorldEvent(ev) {
     case 'offer': if (a) { glyph(a.x, a.y, ev.give + ' for ' + ev.want + '?', '#8fe0c0', 2.2); soundAt('offer', a.x, a.y, voice); } break;
     case 'mined': sparks(ev.x, ev.y, '#ffe9a0', ev.first ? 6 : 3); soundAt('mined', ev.x, ev.y, voice); if (ev.first && a) glyph(a.x, a.y, ev.kind, '#ffe9a0', 2.4); break;
     case 'felled': burst(ev.x, ev.y, '#b98a55', 5); soundAt('wood', ev.x, ev.y); break;
-    case 'bridged': case 'paved': burst(ev.x, ev.y, '#b9a27a', 5); soundAt('wood', ev.x, ev.y); break;
+    case 'bridged': case 'paved': burst(ev.x, ev.y, '#b9a27a', 5); soundAt('wood', ev.x, ev.y); U.landStale = performance.now(); break; /* the peaks and trees about a new road are painted again to leave it room */
     case 'dismantled': burst(ev.x, ev.y, '#b98a55', 8); soundAt('wood', ev.x, ev.y); break;
     case 'stashed': burst(ev.x, ev.y, '#d9c08a', 4); soundAt('stashed', ev.x, ev.y); break;
     case 'tamed': if (a) { glyph(a.x, a.y, '\u2665 ' + ev.kind, '#ffb3c7', 2.6); motes(a.x, a.y, '#ffb3c7', 6); soundAt('tamed', a.x, a.y, voice); } break;
@@ -1286,6 +1310,8 @@ cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', e
 cv.addEventListener('pointerleave', function () { $('tip').hidden = true; });
 cv.addEventListener('dblclick', function (e) { if (isGlobe()) { cam.z = zGlobe() * 1.6; clampCam(); } else zoomAt(e.offsetX, e.offsetY, 1.8); });
 cv.addEventListener('wheel', function (e) { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, Math.exp(-e.deltaY * 0.0016)); }, { passive: false });
+{ const mark = function (e) { let t = e.target; while (t && !(t.classList && t.classList.contains('pane'))) t = t.parentNode; if (t && !(e.type === 'scroll' && t._setAt && performance.now() - t._setAt < 120)) t._scrollAt = performance.now(); }; /* a pane being scrolled is not built again under the hand */
+  ['scroll', 'wheel', 'touchmove'].forEach(function (k) { $('panel').addEventListener(k, mark, { capture: true, passive: true }); }); }
 if ($('farOut')) { $('farOut').addEventListener('click', function () { if (w.wrap) farTo(4); }); $('farHome').addEventListener('click', function () { if (w.wrap) { farTo(0); fitWorld(); } }); }
 window.addEventListener('keydown', function (e) {
   const tag = (e.target.tagName || '').toLowerCase(); if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
@@ -1606,11 +1632,17 @@ function renderChronicle() {
   }
   drawEco();
 }
+/* A PANE KEEPS ITS PLACE (Generation 33). The Kinds pane was built again whenever the count of any plant changed, which in a running world is
+   every moment, and its place was not kept: it leapt about under the hand. A pane is now left alone while it is being scrolled, is built again
+   no oftener than its clock says, and is put back where it was. */
+function paneBusy(pane) { return pane && pane._scrollAt && performance.now() - pane._scrollAt < 1400; }
+function setPane(pane, h) { const keep = pane.scrollTop; pane._setAt = performance.now(); pane.innerHTML = h; if (pane.scrollTop !== keep) pane.scrollTop = keep; }
 function renderKinds() {
+  if (paneBusy($('pane-kinds'))) return;
   const L = w.laws, cp = {}, cc = {};
   for (let i = 0; i < w.plants.length; i++) if (w.plants[i]) cp[w.plants[i].sp] = (cp[w.plants[i].sp] || 0) + 1;
   w.creatures.forEach(function (c) { cc[c.sp] = (cc[c.sp] || 0) + 1; });
-  const key = Object.keys(L.plants).join() + Object.keys(L.creatures).join() + JSON.stringify(cp) + JSON.stringify(cc) + Math.floor(U.time / 4) + Object.keys(L.buildings || {}).length + ':' + Object.keys(L.recipes || {}).length + ':' + Object.keys(L.minerals || {}).length;
+  const key = Object.keys(L.plants).join() + Object.keys(L.creatures).join() + Math.floor(U.time / 5) + Object.keys(L.buildings || {}).length + ':' + Object.keys(L.recipes || {}).length + ':' + Object.keys(L.minerals || {}).length;
   if (U.keys.kinds === key) return; U.keys.kinds = key;
   const card = function (table, n, count) { const s = L[table][n]; return '<button class="kind" data-act="kind" data-table="' + table + '" data-name="' + esc(n) + '">' + lookCanvas(s.look, 64, { scale: 1.1, food: s.maxFood }) + '<b>' + esc(n) + '</b><span>' + (count || 0) + ' alive' + (s.by ? ' · bred by ' + esc(s.byName || '?') : s.from ? ' · wild' : '') + '</span></button>'; };
   let h = '<h2>Kinds</h2><p class="muted">Every kind of living thing carries its own law and its own look. New kinds arise in the wild by mutation, and beings can breed their own.</p><h3>Flora <small>' + Object.keys(L.plants).length + ' of ' + L.ecology.maxPlantKinds + '</small></h3><div class="kinds">' + Object.keys(L.plants).map(function (n) { return card('plants', n, cp[n]); }).join('') + '</div>';
@@ -1625,7 +1657,7 @@ function renderKinds() {
     const tb = (w.tally && w.tally.built) || {}, tm = (w.tally && w.tally.made) || {};
     h += '<h3>Buildings <small>' + Object.keys(L.buildings || {}).length + ' kinds</small></h3><div class="kinds">' + Object.keys(L.buildings || {}).map(function (k) { const B = L.buildings[k], big = (B.wood || 0) + (B.stone || 0) > 14; return '<div class="kind">' + lookCanvas(kindLook(k, 0), 64, { scale: 1 }) + '<b>' + esc(k) + '</b><span>' + (B.wood || 0) + ' wood, ' + (B.stone || 0) + ' stone' + (big ? ' · a great work' : '') + (B.way ? '<br>way of ' + esc(B.way) : '') + '<br>' + (tb[k] || 0) + ' built' + (B.maker ? ' · added by the maker' : '') + '</span></div>'; }).join('') + '</div>';
     h += '<h3>Things made and done <small>' + Object.keys(L.recipes || {}).length + '</small></h3><ul class="events">' + Object.keys(L.recipes || {}).map(function (k) { const R = L.recipes[k], G = R.gives && R.gives.thing && L.goods && L.goods[R.gives.thing]; return '<li><b>' + esc(k) + '</b>' + (R.way ? ' <span class="muted">way of ' + esc(R.way) + '</span>' : '') + (G ? ' <span class="muted">' + (G.float ? 'vessel' : G.fight ? 'for war' : 'carries') + '</span>' : '') + ' · done ' + (tm[k] || 0) + ' times' + (held[R.gives && R.gives.thing] ? ' · ' + held[R.gives.thing] + ' held' : '') + '<br><span class="muted">' + esc(R.hint || '') + '</span></li>'; }).join('') + '</ul>'; }
-  const pane = $('pane-kinds'); pane.innerHTML = h; paintPending(pane);
+  const pane = $('pane-kinds'); setPane(pane, h); paintPending(pane);
 }
 
 /* ---------- the story of the world, and the maker's notebook ---------- */
@@ -1845,6 +1877,7 @@ function renderPeoples() {
 }
 /* ---------- ways: what the world allows, and what each being made of it ---------- */
 function renderWays() {
+  if (paneBusy($('pane-ways'))) return;
   const key = Math.floor(U.time / 2) + ':' + w.inventions.length + ':' + Object.keys(w.laws.tools).length;
   if (U.keys.ways === key) return; U.keys.ways = key;
   const T2 = w.laws.tree, eras = {}, ERA = { 1: 'The first age: the wild', 2: 'The second age: settled', 3: 'The third age: metal and cities', 4: 'The fourth age: machines', 5: 'The fifth age: beyond', 6: 'Later still' };
@@ -1866,7 +1899,7 @@ function renderWays() {
   h += '<h3>Made things <small>' + dk.length + ' designs</small></h3>' + (dk.length ? '<div class="kinds">' + dk.map(function (k) { const d = reg[k], holders = w.agents.filter(function (a) { return a.tools.some(function (q) { return q.k === k; }); }).length; return '<div class="kind">' + lookCanvas(toolLook(d), 56, { scale: 1.05 }) + '<b>' + esc(k) + '</b><span>' + (d.use === 'device' ? 'device: ' + d.rules.map(ruleWords).map(esc).join('; ') : d.use + ' ×' + d.power) + ' · by ' + esc(d.byName) + (d.from ? ' · from ' + esc(d.from) : '') + ' · ' + holders + ' carried</span></div>'; }).join('') + '</div>' : '<p class="muted">Nothing has been invented yet. Tools begin when someone who has worked enough with wood reflects deeply.</p>');
   const tl = lineageHtml('tools', function (d) { return d.use + (d.use === 'device' ? '' : ' ×' + d.power) + ' · ' + esc(d.byName); });
   if (tl) h += '<h3>Lines of descent <small>each bettering under what it bettered</small></h3>' + tl;
-  const pane = $('pane-ways'); pane.innerHTML = h; paintPending(pane);
+  const pane = $('pane-ways'); setPane(pane, h); paintPending(pane);
 }
 
 /* ---------- laws: the registry, open to the observer ---------- */
@@ -1878,7 +1911,7 @@ function renderLaws() {
   ['time', 'body', 'drives', 'age', 'land', 'water', 'weather', 'disease', 'fight', 'mate', 'build', 'craft', 'magic', 'mood', 'ecology'].forEach(function (g) { h += '<details class="grp"' + (g === 'body' ? ' open' : '') + '><summary>' + g + '</summary><div class="laws">' + rows(L[g], g) + '</div></details>'; });
   Object.keys(L.plants).forEach(function (n) { h += '<details class="grp"><summary>plant: ' + esc(n) + '</summary><div class="laws">' + rows(L.plants[n], 'plants.' + n) + '</div></details>'; });
   Object.keys(L.creatures).forEach(function (n) { h += '<details class="grp"><summary>animal: ' + esc(n) + '</summary><div class="laws">' + rows(L.creatures[n], 'creatures.' + n) + '</div></details>'; });
-  $('pane-laws').innerHTML = h;
+  setPane($('pane-laws'), h);
 }
 $('pane-laws').addEventListener('change', function (e) {
   const el = e.target; if (!el.dataset || !el.dataset.path) return;
@@ -1996,7 +2029,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 32, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 33, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -2066,7 +2099,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 32, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 33, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }
@@ -2114,7 +2147,7 @@ function attach(state) {
   if (w.agents.length) { cam.x = w.agents.reduce(function (s, a) { return s + a.x; }, 0) / w.agents.length + 0.5; cam.y = w.agents.reduce(function (s, a) { return s + a.y; }, 0) / w.agents.length + 0.5; }
   else { cam.x = w.W / 2; cam.y = w.H / 2; }
   clampCam(); syncButtons();
-  window.SWdebug = { wayLinks: wayLinks, drawWays: drawWays, kindLook: kindLook, vehicleOf: vehicleOf, drawVehicle: drawVehicle, farTo: farTo, cosmosOf: cosmosOf, bubbleAt: bubbleAt, openBubble: openBubble, st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco, bubble: bubble, placeBubbles: placeBubbles, hudRects: hudRects };
+  window.SWdebug = { KIND_SIZE: KIND_SIZE, buildTerrain: buildTerrain, wayLinks: wayLinks, drawWays: drawWays, kindLook: kindLook, vehicleOf: vehicleOf, drawVehicle: drawVehicle, farTo: farTo, cosmosOf: cosmosOf, bubbleAt: bubbleAt, openBubble: openBubble, st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco, bubble: bubble, placeBubbles: placeBubbles, hudRects: hudRects };
 }
 function newWorld(seed) {
   const keep = st ? st.settings : null;
@@ -2154,6 +2187,7 @@ function frame(ts) {
   if (ts - U.lastPanel > 260) { U.lastPanel = ts; updatePanels(); }
   if (ts - U.lastMini > 400) { U.lastMini = ts; drawMini(); }
   if (ts - (U.lastRec || 0) > 5000) { U.lastRec = ts; recFlush(false); amendCheck(); SWK.tick(st); }
+  if (U.landStale && ts - U.landStale > 1500) { U.landStale = 0; buildTerrain(); SPACE.tex = null; }
   if (ts - U.lastScene > 500) { U.lastScene = ts; if (!U.eraT || ts - U.eraT > 6000) { U.eraT = ts; let er = 1; w.agents.forEach(function (a) { for (const k in a.knows) er = Math.max(er, (w.laws.tree[k] || {}).era || 1); }); U.era = er; } const R0 = SW.regionAt(w, clamp(Math.round(cam.x), 0, w.W - 1), clamp(Math.round(cam.y), 0, w.H - 1)); SWA.scene(nightLevel(), SW.season(w), skyHere(), { warm: SW.climate(w, ((Math.round(cam.x) % w.W) + w.W) % w.W, clamp(Math.round(cam.y), 0, w.H - 1)) === 1, biome: R0 ? R0.biome : 'mixed', mood: w.musicMood || 'calm', era: U.era || 1, crowd: w.settlements.length }); }
   if (ts - U.lastSave > 30000 && !U.choosing) { U.lastSave = ts; save(); }
   requestAnimationFrame(frame);

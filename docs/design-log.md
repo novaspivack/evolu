@@ -12,7 +12,41 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
-## Generation 32 (built, not yet run with real minds): towns of their age, horses, vehicles, streets, the sound of an age
+## Generation 33 (built the same morning, from Nova's pictures of a running world): what lies flat under what stands, sizes by kind, a field and a pyramid that look like what they are, a pane that keeps its place
+
+Nova ran a world begun in a later age under Generation 32 (180 thoughts when he took the pictures) and sent four pictures and five faults. No run file came with them, so there is no run to write up; this generation is the page only. The engine, the minds and the maker are as they were.
+
+### The five faults, and what was wrong
+
+- **"Roads are on top of them which is not proper fake 3D."** Made roads and the paths to doors were drawn after the buildings, so a path ran up the front of the block it led to. The land picture also had peaks and trees painted on the tiles a road ran through, with the road over them.
+- **"Fields don't look like fields."** A field was a rounded brown slab one and a half tiles wide with four yellow lines.
+- **"Beacons are too big."** Every kind of building was drawn at one size, so a beacon stood as tall as a block of apartments.
+- **"Pyramids don't look like pyramids."** A pyramid was two flat triangles, one laid on the other.
+- **The Kinds pane "auto scrolls all over the place" while the world runs.** The pane was built again whenever the count of any plant or animal changed, which in a running world is all the time: measured on the published page, 16 times in six seconds of scrolling, each time repainting about 150 small pictures, and its place was not kept.
+
+### Built
+
+- **The order of the ground.** What lies flat is drawn first and what stands is drawn over it: the bare earth of felled wood, worn tracks, made roads with the paths to doors, and only then stores, buildings, plants, animals and beings. A building in front of a road now hides the part of the road behind it, and a path to a door ends at the door.
+- **Peaks and trees leave a road room.** The land is one painted picture, so a peak cannot be drawn in front of a road tile by tile. The picture now paints no peak and no tree on a tile a road runs through, and no great or huge mountain within two tiles of one, so nothing of the land lies across a road and no road lies across a peak. When someone makes a road, the picture is painted again a second and a half later.
+- **Sizes by kind** (`KIND_SIZE`): a beacon is 0.58 of a hall, a well 0.72, a house 0.88, a tenement 1.08, apartments 1.2, an office tower 1.25, a pyramid 1.3. A small thing stands on the ground of its tile.
+- **A field** is tilled ground seen a little aslant: dark earth, furrows, six rows of green and ears of grain. It is drawn at exactly one tile, so fields side by side make one ground.
+- **A pyramid** is seen from a corner: a lit face and a face in shade meeting at an edge, courses of stone, a capstone, a door, and no footing or pennant of a later age. Shapes may now be any flat figure of straight sides (`poly`).
+- **A pane keeps its place.** A pane is not built again while it is being scrolled (within 1.4 seconds of a wheel, a touch or a scroll), the Kinds pane is built again at most every five seconds, and a pane that is built again is put back where it was. The browser is told not to shift it either (`overflow-anchor: none`).
+
+### Tested
+
+- **931 checks in 28 numbered files, the two mind pipelines, the long ecology run and 14 checks of the page: all pass.** No numbered file is added, because nothing changed outside the page; the new check is `tests/browser/ground.js` (9 checks).
+- **The new page check, run against the published Generation 32 as well as this one**, so that each part is known to fail on the fault it is for: where an office stands across a road, the point is the same with and without the road (it differed by 222 of 765 before); the Kinds pane is built again 0 times during six seconds of scrolling in a running world (16 before) and, left alone for seven seconds, twice (30 before), and stays where it was.
+- **My first version of the scrolling check passed on the published page**, which had the fault: in headless Chrome the pane did not leap, however often it was rebuilt. I could not make the leaping itself happen there. What I can show is the cause Nova's description fits (the pane rebuilt under the hand about three times a second) and that it no longer happens. Whether it is the whole of what he saw, only his browser can say.
+- I looked at pictures of the fields, the pyramid, a beacon beside a hall, and a fifth-age town with the roads under the buildings.
+
+### Not done
+
+- A peak in front of a road. Peaks keep clear of roads; they do not overlap them. A road that winds behind a mountain would need the peaks drawn as things, not painted into the land.
+- The other panes (Voices, Events, Inspect) are still built again on their own clocks; Ways and Laws now keep their place.
+- `K.SEED` is unchanged: nothing here is something the maker can see or act on.
+
+## Generation 32 (run once with real minds, of which only pictures came back): towns of their age, horses, vehicles, streets, the sound of an age
 
 Built on 24 November from Nova's notes on two worlds begun old (the twentieth and twenty-first runs, below). He asked for these adjustments and held two things back for discussion: groups, and the troubles of later ages. A proposal on groups is in [`groups-proposal.md`](groups-proposal.md). Neither is built.
 

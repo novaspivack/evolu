@@ -283,3 +283,4 @@ A short index; the detail is in the design log.
 | 30 | A world that begins mostly unknown and is found on foot; the pull of the unknown on the hungry, crowded and ambitious; fifteen new plants; mountains of several sizes, mesas, cactus, pine and palm |
 | 31 | The library to the sixth age; works that clear and foul the land; a world begun in a later age with its history; tradition pressing less in later ages; the view beyond the planet |
 | 32 | Towns of their age (looks by family, dwellings by age, streets that bend, branch and cross, nothing built on a road); horses, work animals and riding; vehicles as made things; music and sounds by age; a mind told its age and what it holds; no two kinds alike; a named thing of the heritage placed once |
+| 33 | The page only: roads under what stands, peaks and trees clear of roads, sizes by kind, a field and a pyramid redrawn, a pane that keeps its place while the world runs |
