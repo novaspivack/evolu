@@ -12,6 +12,52 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## Generation 34 (built, not yet run with real minds): the many, and the groups that speak for them
+
+Nova, 24 November, after reading the proposal ([`groups-proposal.md`](groups-proposal.md)): "Just build it, because a population of 40 won't work... Build it, make it good." This is that proposal built: the three layers, rising into a mind, and the page. The troubles of later ages are still held.
+
+### What it is
+
+- **Persons** are as they were: a body and a mind, about forty in a world at most (`many.persons`, 40).
+- **The many** are everyone past that number. They are households: a home, a number of people, a stock of food, a kind of work, a mood. A household lives in a dwelling that stands in a person's name. In a world begun old the dwellings are peopled at the start (a fifth-age world on seed 7 has 1,075 of the many beside 15 persons; a second-age world 102). In a world begun young there are none until the persons number forty; after that a child born to two persons grows up among the many.
+- **Their day** (once a day, `manyDay`): the land about a place and the hands on it give food, more with the tools of a later age; households eat; the fed and housed have children; people die of age, and of hunger when there is none; a household too large for its home parts into room elsewhere, or the many raise a new dwelling of their age beside a street, carrying the street on when no plot is left; those with nothing to eat for three days leave. A little of what is over goes into the stores, where persons eat.
+- **Work.** Enough of a place's people work the land to feed it, and the rest work at its works. In the fifth age 99 of 351 in one town are on the land; in the second age 26 of 35. That share falls out of the tools of the age, not out of a rule about towns.
+- **Groups.** Households of one place and one kind of work are a group: those of the land, of the works, of the markets and inns, of the schools and temples, of the halls. A group of twelve or more is a mind. It thinks once a day (and sooner, up to three times, when it is spoken to or goes hungry), is told only what its people could see, and answers as "we". It can speak, to everyone or to one person; back a person or oppose them, which adds to or takes from that person's standing by its numbers; lay down its work and take it up again; give food to a person; or leave. What it notes and hears is kept in the world with it.
+- **Work laid down.** If those of the land lay down their work they keep what they grow, and the rest of the place goes hungry until the hungry go to the land themselves. If another group does, the works it keeps stand idle and give nothing to one who goes into them.
+- **Persons and the many.** A person in a place is told of the many about them, group by group. They can speak to a group by its name and give it food from their hands. What they say aloud in a place is heard by its groups.
+- **Rising.** When a person dies, one of the many comes forward within a few days and takes the place: a body of their people, some of its ways, and a mind told where it came from. The watcher can also choose one: click a dwelling, "Give one of them a mind" (up to three more than the world keeps by itself).
+- **On the page:** the count of the many at the top and beside each place's name; small figures walking the streets between home, work and the middle of the place, by the hour, few at night; tilled land about the place, as much as there are people on it; a group's words in a box over its place and among the Voices; the many and their groups at the head of the Peoples pane, with each group's mood, whom it backs, what it thinks and what it last said.
+- **For the maker:** figures for every place and group, and every number in the laws of the many can be tuned with the law op.
+
+### Measured
+
+- **A world begun young runs exactly as it did** until its persons number forty: on three seeds, ten days, the same beings in the same places with the same stream of chance as Generation 33. A world begun without the option has no many at all.
+- **Fed and housed, the many grow:** in a fifth-age world, 1,075 to 1,504 in 24 days (777 born, 348 died, none of hunger).
+- **Where the land gives almost nothing:** hunger is told on the second day, 54 starve, 63 households leave, and a place of 112 shrinks to 9 in fourteen days.
+- **Growing fast (a test law), the many raise 54 town houses in twenty days,** each beside a street and none on one.
+- **The accounts close.** Over 25 days on good land, on starved land, and where those of the land of one place keep what they grow, the number of the many at the end is the number at the start plus the born, less the dead and those gone from the world; no household is ever below nothing or a fraction of a person. The first run of this found a fault in the counting: those who moved to another place were counted as gone from the world (off by 6 in one world). They are counted apart now, and `tests/29` holds the check.
+- **Cost:** 2.91 ms a moment with 1,121 of the many in a fifth-age world, against 2.82 without them and 2.80 in Generation 33. Not measurable.
+- **Calls:** a fifth-age world has 13 groups, so 13 thoughts a day more, and at most 39. A group's prompt is 2,200 to 3,500 characters. A person in a place with four groups is told 800 to 1,100 characters more (the largest person's prompt in the scripted run was 44,800).
+
+### Tested
+
+- **980 checks in 29 numbered files, the two mind pipelines, the long ecology run and 15 checks of the page: all pass.**
+- **The new file (`tests/29`, 49 checks):** peopling and its sameness for a seed; the day of the many (work, food, growth, hunger, leaving); dwellings raised beside streets in a living person's name; groups by place and work; a group's reply taken up through the same door as a real one (speech told to the person, backing and opposing moving standing by the group's numbers, work laid down and taken up, giving, leaving); persons speaking to a group and giving to it **by a plan through the mind**; a group thinking through a call, counted, capped at three a day, and unharmed by a refused call; a child born past the limit; one of the many rising with a mind; a place left empty filled, and no more; saving, restoring and carrying on a world of Generation 31; the maker's figures and levers; the accounts of the many closing on good land, on starved land and where some move.
+- **On the page (`tests/browser/many.js`, 9 checks):** the counts; the view differing by 14,399 points with and without the many; every step of every household's way between door and work lying on made road; tilled land clear of roads, buildings and water; a group's words in a placed box that lies over no other; the Voices and Peoples panes; the watcher giving one of the many a mind.
+- **A fifth-age world run six days through the real prompts with a scripted stand-in for persons and groups:** no error; 55 things said by groups, 10 backings, 9 opposings, 8 layings-down of work, 18 gifts; the world restores with its groups and their notes. Sixty acts failed in it, and I read why: 58 were the stand-in trying to eat or give with empty hands (each told its reason), and one went into a bank whose people had laid down their work and was told so.
+- I looked at pictures: a fourth-age town with people on its streets, a group's words over it, and the Peoples pane.
+
+### What is not known, and not built
+
+- **Whether a group's voice reads as a people or as a committee.** This was the risk named in the proposal and it stands. Only a run with real minds can show it. If the groups talk like minutes of a meeting, the prompt (`M.groupPrompt`) is the place to look first.
+- **How persons will treat the many:** whether they speak to them, court them, feed them or ignore them.
+- **Balance over a long run.** The numbers of the many (yield, births, the tithe) are set so that a place fed by its land grows about one in a hundred a day. They have been run for 24 days by rule, not for a hundred days with persons acting on them.
+- **Returning.** A person does not go back into the many. The number of persons only falls by death.
+- **Levies and trading parties.** A group cannot send bodies anywhere. What passes between a city and a village is still only persons, and the many who leave a hungry place go to another place of their people or out of the known world.
+- **Rent, wages, money.** The many live in dwellings that stand in persons' names and work at works persons hold, and a little grain reaches the stores. Nothing more is owed either way yet.
+- **A world of Generation 31 to 33 carried on** gains the many in whatever dwellings it has. Worlds begun old before Generation 32 had only shelters, so they gain few (26 in the one checked).
+- **The troubles of later ages** are still held. Hunger, work laid down and opposition are in the world now because they follow from the laws of the many; nothing else of that list is built.
+
 ## Generation 33 (built the same morning, from Nova's pictures of a running world): what lies flat under what stands, sizes by kind, a field and a pyramid that look like what they are, a pane that keeps its place
 
 Nova ran a world begun in a later age under Generation 32 (180 thoughts when he took the pictures) and sent four pictures and five faults. No run file came with them, so there is no run to write up; this generation is the page only. The engine, the minds and the maker are as they were.

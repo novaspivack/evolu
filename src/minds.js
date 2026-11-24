@@ -84,7 +84,7 @@ M.record = function (st, item) {
 M.digest = function (st) {
   const w = st.world;
   return {
-    run: st.runId, generation: 33, seed: w.seed, culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {}, verse: C.verse || { asked: {}, made: {}, lapsed: {} }, verses: (function () { const v = []; for (const id in C.items) { const it = C.items[id]; if (it.occasion || it.kind === 'poem' || it.kind === 'song' || it.kind === 'myth' || it.kind === 'fable') v.push({ kind: it.kind, occasion: it.occasion || null, form: it.form || null, title: it.title, text: it.text, by: it.by, about: it.about || null, day: it.day, held: Object.keys(it.holders).length }); } return v.slice(-60); })(), traditions: (w.peoples || []).map(function (P) { return { people: P.name, tradition: P.tradition || null }; }) }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
+    run: st.runId, generation: 34, seed: w.seed, many: w.many ? { people: SW.manyTotal(w), households: w.many.hh.length, places: w.many.places, groups: (w.groups || []).map(function (g) { return { name: g.name, n: g.n, cls: g.cls, mood: g.mood, hungry: g.hungry, withhold: !!g.withhold, gone: g.gone || 0, stance: g.stance, thoughts: g.mind.thoughts || 0, journal: (g.mind.journal || []).slice(-5), log: (g.mind.log || []).slice(-2) }; }) } : null, /* kept short: the head of the final state must stay well under the store's limit; every thought of a group is in the record as it happens (gthought) */ culture: (function () { const C = w.culture || { items: {} }, out = []; for (const id in C.items) { const it = C.items[id], lv = M.cultLive(st, it); if (it.kind === 'lesson' && lv.n < 2) continue; out.push({ kind: it.kind, title: it.title, text: it.kind === 'way' ? '' : it.text, by: it.by, day: it.day, held: lv.n, ever: Object.keys(it.holders).length, peoples: Object.keys(it.reach).length, passed: it.tellings, changed: it.changed }); } out.sort(function (x, y) { return y.ever - x.ever; }); return { ideas: out.slice(0, 40), log: (C.log || []).slice(-60), rites: C.rites || {}, relics: (w.relics || []).slice(-30), faiths: w.faiths || {}, verse: C.verse || { asked: {}, made: {}, lapsed: {} }, verses: (function () { const v = []; for (const id in C.items) { const it = C.items[id]; if (it.occasion || it.kind === 'poem' || it.kind === 'song' || it.kind === 'myth' || it.kind === 'fable') v.push({ kind: it.kind, occasion: it.occasion || null, form: it.form || null, title: it.title, text: it.text, by: it.by, about: it.about || null, day: it.day, held: Object.keys(it.holders).length }); } return v.slice(-60); })(), traditions: (w.peoples || []).map(function (P) { return { people: P.name, tradition: P.tradition || null }; }) }; })(), tick: w.tick, day: SW.day(w), season: SW.SEASONS[SW.season(w)], weather: w.weather.kind, thoughts: st.used, settings: st.settings,
     peoples: (w.peoples || []).map(function (P) { return { name: P.name, noun: P.noun, kind: P.kind, way: P.way, custom: P.custom, land: P.region != null && w.regions[P.region] ? w.regions[P.region].name : '', alive: w.agents.filter(function (a) { return a.people === P.id; }).length }; }), lands: (w.regions || []).map(function (R) { return { name: R.name, biome: R.biome, minerals: R.minerals || [], beings: w.agents.filter(function (a) { return w.region[a.y * w.W + a.x] === R.id; }).length }; }), tally: w.tally || {}, alive: w.agents.length, creatures: w.creatures.length, plants: w.plants.filter(Boolean).length, wars: w.wars, settlements: w.settlements.map(function (q) { return q.name; }), ways: Object.keys(w.laws.tree).filter(function (k) { return w.agents.some(function (a) { return a.knows[k]; }); }), designs: Object.keys(w.laws.tools),
     beings: Object.keys(st.minds).map(function (id) {
       const m = st.minds[id], a = agentById(w, +id);
@@ -429,6 +429,7 @@ function witnesses(st, x, y, except) {
   return out;
 }
 M.onEvent = function (st, ev) {
+  if (st.world.many && /^(rose|gsaid|withheld|resumed|backed|opposed|stoodoff|ggave|gavemany|many|group)/.test(ev.type)) { SW.use(st.world); if (M.manyEvent(st, ev)) { if (st.ui) st.ui(ev); return; } }
   SW.use(st.world);
   const w = st.world, A = nameOf(st, ev.a), B = nameOf(st, ev.b), a = agentById(w, ev.a), L0 = w.laws;
   ties(st, ev);
@@ -1059,6 +1060,7 @@ M.buildPrompt = function (st, mind, kind, lean) {
   {
     { const hi = SW.idx(w, a.x, a.y), K0 = w.shelters[hi] > 0 && (w.shelters[hi] === a.id || SW.allied(w, a, w.shelters[hi])) ? (SW.buildingAt(w, hi) || 'shelter') : null;
       if (kind === 'deep' || mind.thoughts % 3 === 0) { const stx = M.settlementsText(st, mind, a); if (stx) out.push(stx); }
+      { const mt = M.manyText(st, a); if (mt) out.push(mt); }
       if (K0) { const up = Object.keys(L.buildings).filter(function (k) { const B = L.buildings[k]; return B.from === K0 && (!B.way || a.knows[B.way] || SW.heldInCommon(w, a, B.way)); });
         if (up.length) out.push('YOU STAND IN A ' + K0.toUpperCase() + ' of ' + (w.shelters[hi] === a.id ? 'yours' : 'your band') + '. It can be raised into something better where it stands, and half of what it took is used again: ' + up.map(function (k) { const B = L.buildings[k], O = K0 === 'shelter' ? { wood: L.build.shelterWood, stone: 0 } : L.buildings[K0], ru = L.build.reuse == null ? 0.5 : L.build.reuse; return k + ' (build {what: ' + k + '} here: ' + Math.max(0, (B.wood || 0) - Math.floor(ru * (O.wood || 0))) + ' wood, ' + Math.max(0, (B.stone || 0) - Math.floor(ru * (O.stone || 0))) + ' stone): ' + clip(B.hint || '', 90); }).join('; ') + '. What is more than you can carry at once is brought in loads, by you or your band, and this ' + K0 + ' serves until the new one is done.'); } }
     const rc = L.recipes || {}, mk = M.makeable(st, a);
@@ -1163,9 +1165,11 @@ M.apply = function (st, mind, kind, d, meta) {
   /* what it had seen when it began this thought is now behind it; what arrives from here on is new */
   mind.events = mind.events.filter(function (e) { return e.seq > (mind.seenSeq || 0); });
   if (d.say && typeof d.say === 'object' && d.say.text) {
-    const to = clip(d.say.to || 'all', 16);
+    const gTo = w.groups && d.say.to ? SW.groupNamed(w, d.say.to, a) : null; /* a group of the many may be spoken to by its name (Generation 34) */
+    const to = gTo ? 'all' : clip(d.say.to || 'all', 16);
     SW.speak(w, a, to, d.say.text, st.emit);
-    entry.say = { to: to, text: clip(d.say.text, 700) };
+    if (w.groups) w.groups.forEach(function (g) { if (g.gone) return; if (g === gTo) SW.tellGroup(w, g, a, d.say.text, true); else if (SW.cheb(a.x, a.y, g.x, g.y) <= 14) SW.tellGroup(w, g, a, d.say.text, false); });
+    entry.say = { to: gTo ? gTo.name : to, text: clip(d.say.text, 700) };
     const cl = d.say.claim;
     if (cl && typeof cl === 'object' && cl.food && (cl.effect === 'feeds' || cl.effect === 'hurts')) {
       const fk = String(cl.food).toLowerCase().replace(/[^a-z]/g, '').slice(0, 20);
@@ -1696,6 +1700,7 @@ M.pump = function (st) {
   M.recover(st, Date.now());
   if (Date.now() - st.lastStart < 60000 / Math.max(1, Math.min(st.settings.perMinute, st.rate || st.settings.perMinute))) return;
   const narrow = st.narrow && typeof st.inView === 'function'; /* while the pace is being refused even at its slowest, only those in view think */
+  { const g = M.groupDue(st); if (g) { M.groupThink(st, g); return; } } /* a group of the many thinks once a day, in its turn */
   let best = null;
   for (const id in st.minds) {
     const m = st.minds[id];
@@ -1708,6 +1713,91 @@ M.pump = function (st) {
 };
 
 /* ---------- saving ---------- */
+/* ---------- GENERATION 34: THE MANY AS PERSONS SEE THEM, AND GROUPS THAT THINK ----------
+   A group of the many is a mind of another kind. It thinks once a day, or sooner when it is spoken to or goes hungry. It is told only what its
+   people could see and feel: how many they are, whether they eat, where they live and work, who among the named has spoken in their hearing and
+   who has spoken to them, and what it noted to itself before. It answers as "we". What it keeps (its notes, what it heard) lives in the world
+   (w.groups[k].mind) and so is saved and carried with it. */
+function personsAt(st, x, y, r) { const w = st.world; return w.agents.filter(function (a) { return !a.dead && SW.cheb(a.x, a.y, x, y) <= r; }); }
+function settById(w, id) { const S = w.settlements || []; for (let k = 0; k < S.length; k++) if (S[k].id === id) return S[k]; return null; }
+function moodWord(m, hungry) { return hungry > 0.3 ? 'hungry' : m >= 0.75 ? 'content' : m >= 0.5 ? 'steady' : m >= 0.3 ? 'restless' : 'angry'; }
+/* what one of the named sees of the many about them */
+M.manyText = function (st, a) { const w = st.world; if (!w.many || !w.many.hh.length) return ''; let S = null, bd = 1e9; (w.settlements || []).forEach(function (s) { const d = SW.cheb(a.x, a.y, s.x, s.y); if (d <= s.r + 8 && d < bd) { bd = d; S = s; } }); if (!S) return '';
+  const B = SW.manyBrief(w, S); if (!B.people) return ''; const era = SW.eraOf(w);
+  const gl = B.groups.map(function (g) { const G = w.groups.filter(function (q) { return q.id === g.id; })[0], sv = G && G.stance[a.id]; return g.name + ' (' + g.n + ' people, ' + moodWord(g.mood, g.hungry) + (g.withhold ? ', THEIR WORK LAID DOWN' : '') + (sv > 0 ? ', they back you' : sv < 0 ? ', they oppose you' : '') + (G && G.mind.last ? '; they last said: "' + clip(G.mind.last, 80) + '"' : '') + ')'; });
+  return 'THE MANY OF ' + S.name.toUpperCase() + '. Beyond those you know by name, about ' + B.people + ' people live here in ' + B.households + ' households' + (B.hungry > B.people * 0.2 ? ', and ' + B.hungry + ' of them are going hungry' : '') + '. They have no single voice. ' + (gl.length ? 'They speak as groups: ' + gl.join('; ') + '. ' : 'They are too few yet to speak as a group. ') +
+    'They feed themselves from the land about the place' + (era >= 2 ? ' and work at its works' : '') + ', and a little of what they have over comes into the stores. ' + (gl.length ? 'You may speak to a group (say, with to: its name); it will answer in its own time, as "we". You may give food from your hands to a group (plan step give, with name: its name). A group that backs you raises your standing; one that opposes you lowers it; one that lays down its work leaves the works idle.' : ''); };
+/* what a group is told and asked */
+M.groupPrompt = function (st, g) { const w = st.world, S = settById(w, g.sid), B = S ? SW.manyBrief(w, S) : { people: g.n, groups: [] }, P = (w.many.places || {})[g.sid] || {}, era = SW.eraOf(w), named = S ? personsAt(st, S.x, S.y, S.r + 8) : [];
+  const AGE = ['', 'an early age of gathering, fire and stone', 'an age of smiths, wheels, roads and writing', 'an age of castles, towns, guilds, markets and iron', 'an age of steam, engines, factories, printing and science', 'an age of fuel, electric power, motor cars, radio and flight', 'an age of thinking machines, networks and craft beyond the sky'][Math.min(6, era)];
+  const work = g.cls === 'land' ? 'You work the land about ' + g.place + ': what feeds the whole place comes from your hands.' : g.cls === 'makers' ? 'You work at the works of ' + g.place + ' (' + Object.keys(w.many.hh.filter(function (h) { return h.g === g.id; }).reduce(function (o, h) { o[h.work] = 1; return o; }, {})).slice(0, 5).join(', ') + '). You do not grow your food: it comes from those who work the land.' : g.cls === 'traders' ? 'You keep the markets, inns and landings of ' + g.place + '. You do not grow your food.' : g.cls === 'keepers' ? 'You keep the schools, temples and houses of healing of ' + g.place + '. You do not grow your food.' : 'You serve in the halls of ' + g.place + ' where the named decide things. You do not grow your food.';
+  const others = B.groups.filter(function (q) { return q.id !== g.id; }).map(function (q) { return q.name + ' (' + q.n + ', ' + moodWord(q.mood, q.hungry) + (q.withhold ? ', their work laid down' : '') + ')'; });
+  const who = named.slice(0, 14).map(function (a) { const sv = g.stance[a.id], own = []; for (const i in (w.bkind || {})) if (w.shelters[i] === a.id && SW.manyClass(w.bkind[i]) === g.cls && g.cls !== 'land') { own.push(w.bkind[i]); if (own.length >= 2) break; } return a.name + ' (standing ' + SW.status(w, a) + (a.leader == null && w.agents.some(function (o) { return o.leader === a.id; }) ? ', leads a band' : '') + (own.length ? ', holds the ' + own.join(' and the ') + ' where some of you work' : '') + (sv > 0 ? ', you back them' : sv < 0 ? ', you oppose them' : '') + ')'; });
+  const heard = (g.mind.heard || []).slice(-8).map(function (h) { return '- ' + h.from + (h.direct ? ' said TO YOU: ' : h.gift ? ' ' : ' said in your hearing: ') + '"' + h.text + '"'; });
+  const notes = (g.mind.journal || []).slice(-8).map(function (n) { return '- day ' + n.day + ': ' + n.text; });
+  return 'You are not one person. You are ' + g.name + ': ' + g.n + ' people in ' + g.hh + ' households of ' + g.place + ', speaking with one voice. You have no single body, no name but this, and no leader among you who is known by name. You live in ' + AGE + '; think and speak as people of that age would, plainly, as "we".\n\n' +
+    work + '\n\n' +
+    'HOW YOU FARE. ' + (g.hungry > 0.3 ? Math.round(g.hungry * 100) + ' in a hundred of you had nothing to eat today. ' : 'You ate today. ') + 'Your mood is ' + moodWord(g.mood, g.hungry) + '. ' + (P.born != null ? 'In all of ' + g.place + ' yesterday ' + P.born + ' were born and ' + P.died + ' died among the many. ' : '') + 'The whole place holds about ' + B.people + ' of the many; there is room under its roofs for ' + (P.rooms || '?') + '. ' + (P.need ? 'The land gave ' + Math.round(P.made || 0) + ' days of bread today where ' + P.need + ' are needed; ' + Math.round(P.pool || 0) + ' days are laid by in common. ' : '') + (g.withhold ? 'YOU HAVE LAID DOWN YOUR WORK since day ' + (g.withheldDay || '?') + '. ' + (g.cls === 'land' ? 'You keep what you grow and share none of it.' : 'The works you keep stand idle.') + ' ' : '') + '\n\n' +
+    (others.length ? 'THE OTHER GROUPS HERE: ' + others.join('; ') + '.\n\n' : '') +
+    (who.length ? 'THE NAMED WHO LIVE AMONG YOU (each one a single person, who decides for themself): ' + who.join('; ') + '.\n\n' : 'None of the named lives among you now.\n\n') +
+    (heard.length ? 'WHAT YOU HAVE HEARD since you last spoke:\n' + heard.join('\n') + '\n\n' : '') +
+    (notes.length ? 'WHAT YOU NOTED BEFORE:\n' + notes.join('\n') + '\n\n' : '') +
+    'WHAT YOU CAN DO, together. You may speak: to everyone in ' + g.place + ', or to one of the named. You may back one of the named, or oppose them, or stand off: your numbers add to their standing or take from it. You may lay down your work (withhold) and take it up again (work)' + (g.cls === 'land' ? ': while it is laid down you keep what you grow and the rest of the place goes without' : ': while it is laid down the works you keep give nothing') + '. You may give some of your food to one of the named (give). You may leave: a third of you go from this place for good. You may also do nothing. Nothing is asked of you and nothing is forbidden; what you do has consequences for you and for everyone here.\n\n' +
+    'Reply with ONLY one JSON object, no other text:\n{"thought": "what you as a people feel, want and intend, 2-3 sentences, as we", "feeling": "one or two words", "say": null or {"to": "one name of the named, or all", "text": "what you say aloud, as we, at most two sentences"}, "stance": null or {"a name": "back" or "oppose" or "none"}, "do": null or "work" or "withhold" or "give" or "leave", "to": "the name you give to, if you give", "note": "one line to remember tomorrow"}'; };
+M.groupDue = function (st) { const w = st.world; if (!w.groups || !w.laws.many) return null; const day = SW.day(w), dl = w.laws.time.dayLength, tod = w.tick % dl; let best = null;
+  w.groups.forEach(function (g) { if (g.gone || g.mind.busy || g.n < w.laws.many.groupAt) return; if (g.mind.dayOf === day && (g.mind.dayN || 0) >= 3) return; /* at most three thoughts in a day, however often it is spoken to */ const fresh = g.mind.day !== day && tod >= (g.id * 37) % Math.round(dl * 0.6) + 20, urgent = (g.mind.urge || 0) >= 6 && w.tick - (g.mind.tick || -1e9) >= 60; if (!fresh && !urgent) return; if (!best || (g.mind.urge || 0) > (best.mind.urge || 0)) best = g; }); return best; };
+M.groupApply = function (st, g, d, meta) { const w = st.world, day = SW.day(w); SW.use(w);
+  const done = SW.groupDo(w, g, { say: d.say && typeof d.say === 'object' && d.say.text ? { to: /^all$/i.test(String(d.say.to || 'all')) ? null : d.say.to, text: clip(d.say.text, 380) } : null, stance: d.stance, do: typeof d.do === 'string' ? d.do.toLowerCase() : null, to: d.to }, st.emit);
+  if (d.say && d.say.text) g.mind.last = clip(d.say.text, 380);
+  if (d.note) { g.mind.journal.push({ day: day, text: clip(d.note, 200) }); if (g.mind.journal.length > 14) g.mind.journal.splice(0, g.mind.journal.length - 14); }
+  if (g.mind.dayOf !== day) { g.mind.dayOf = day; g.mind.dayN = 0; } g.mind.dayN++;
+  g.mind.heard = []; g.mind.day = day; g.mind.tick = w.tick; g.mind.urge = 0; g.mind.thoughts = (g.mind.thoughts || 0) + 1; g.mind.feeling = clip(d.feeling || '', 40); g.mind.thought = clip(d.thought || '', 500);
+  const entry = { tick: w.tick, day: day, thought: g.mind.thought, feeling: g.mind.feeling, say: d.say && d.say.text ? { to: d.say.to || 'all', text: clip(d.say.text, 380) } : null, did: done, model: meta && meta.model, ms: meta && meta.ms }; g.mind.log = (g.mind.log || []).concat([entry]).slice(-8);
+  M.record(st, { t: 'gthought', g: g.id, name: g.name, n: g.n, thought: entry.thought, feeling: entry.feeling, say: entry.say, did: done, ms: entry.ms }); st.ui({ type: 'gthought', g: g.id, entry: entry }); return entry; };
+M.groupThink = async function (st, g) { const w = st.world; if (!g || g.gone || g.mind.busy || !st.sample) return null;
+  const cfg = st.settings.routine, model = M.MODELS.filter(function (m) { return m.id === cfg.model; })[0], opts = { cache: false, modelTier: model ? model.tier : 'default' }; if (model) opts.model = model.id; if (cfg.effort) opts.effort = cfg.effort;
+  const t0 = Date.now(), prompt = M.groupPrompt(st, g); g.mind.busy = true; st.inflight++; st.used++; st.total = (st.total || 0) + 1; st.lastStart = Date.now(); let entry = null;
+  try { const res = await st.sample(prompt, opts), d = M.parseReply(res && res.text); if (!d) throw { code: 'invalid_json', message: 'no JSON object in the reply', text: res && res.text };
+    entry = M.groupApply(st, g, d, { model: res.modelApplied || res.modelTierApplied || opts.modelTier, ms: Date.now() - t0 }); st.errStreak = 0;
+    if ((g.mind.thoughts || 0) % 6 === 1) M.record(st, { t: 'gprompt', g: g.id, name: g.name, prompt: prompt, reply: String(res.text || '').slice(0, 3000) });
+  } catch (e) { const code = (e && e.code) || 'upstream_error';
+    if (code === 'rate_limited' && e.reason === 'usage_limit') { st.on = false; st.notice = 'You have reached your Claude usage limit. The minds are asleep; wake them again later.'; }
+    else if (code === 'rate_limited') M.ease(st, Date.now());
+    else if (code === 'session_expired') { st.on = false; st.notice = 'Your session expired. Sign in again, then wake the minds.'; }
+    else if (code !== 'cancelled') st.errStreak++;
+    g.mind.tick = w.tick; g.mind.urge = Math.min(5, g.mind.urge || 0); /* it will try again in a while, by itself */
+    M.record(st, { t: 'gfailed', g: g.id, name: g.name, code: code, raw: e && e.text ? String(e.text).slice(0, 800) : (e && e.message) || '' });
+  } finally { g.mind.busy = false; st.inflight--; }
+  return entry; };
+/* the events of the many, told to those who could see them and kept for the chronicle */
+M.manyEvent = function (st, ev) { const w = st.world, at = { x: ev.x, y: ev.y }, S = ev.sid ? settById(w, ev.sid) : null, near = function (r) { return ev.x == null ? [] : personsAt(st, ev.x, ev.y, r || (S ? S.r + 8 : 12)); };
+  switch (ev.type) {
+    case 'rose': { const a = agentById(w, ev.a); if (!a) return true; if (!st.minds[a.id]) st.minds[a.id] = M.newMind(a); st.names[a.id] = a.name;
+      story(st, a.id, 'Until today I was one of the many of ' + (ev.place || 'this place') + ', nameless among them' + (ev.group ? ', one of ' + ev.group : '') + (ev.work && ev.work !== 'land' ? ', working at the ' + ev.work : ev.work === 'land' ? ', working the land' : '') + '. Now I stand out from them and am known by my own name, ' + a.name + '.');
+      tell(st, a.id, 'YOU HAVE COME OUT FROM THE MANY. Until now you were one of the unnamed people of ' + (ev.place || 'this place') + (ev.group ? ', one of ' + ev.group : '') + (ev.work === 'land' ? ', working its land' : ev.work ? ', working at its ' + ev.work : '') + '. You lived in the household at (' + (a.fromMany.home % w.W) + ',' + Math.floor(a.fromMany.home / w.W) + '), and your kin are still there. You know this place, its streets and its people as one who was raised here. From today you are known by your own name and you decide for yourself.', 7, true);
+      near().forEach(function (o) { if (o.id !== a.id) tell(st, o.id, a.name + ', until now one of the many of ' + (ev.place || 'this place') + ', has come forward and is known by name.', 3); });
+      chron(st, 'rose', a.name + ' came out from the many of ' + (ev.place || 'the land') + (ev.group ? ', one of ' + ev.group : '') + ', and is now known by name.', [a.id], at); return true; }
+    case 'gsaid': { const g = w.groups.filter(function (q) { return q.id === ev.g; })[0], hear = near(); hear.forEach(function (o) { const mine = ev.to === o.id; tell(st, o.id, ev.name + ' (' + ev.n + ' of the many, speaking as one) ' + (mine ? 'say TO YOU' : ev.toName ? 'say to ' + ev.toName : 'say to everyone') + ': "' + ev.text + '"' + (mine ? ' To answer them, say with to: ' + ev.name + '.' : ''), mine ? 7 : 4, mine); });
+      st.voices.push({ tick: w.tick, a: null, g: ev.g, name: ev.name, to: ev.toName || 'all', text: ev.text, heard: hear.map(function (o) { return o.name; }), x: ev.x, y: ev.y });
+      w.groups.forEach(function (q) { if (!q.gone && q.id !== ev.g && q.sid === ev.sid) { q.mind.heard.push({ t: w.tick, from: ev.name, text: clip(ev.text, 200) }); if (q.mind.heard.length > 8) q.mind.heard.shift(); } });
+      if (g && (g.mind.thoughts || 0) <= 1) chron(st, 'gsaid', ev.name + ' spoke for the first time, ' + ev.n + ' people with one voice: "' + clip(ev.text, 160) + '"', [], at); return true; }
+    case 'withheld': near().forEach(function (o) { tell(st, o.id, ev.name + ' (' + ev.n + ' people) HAVE LAID DOWN THEIR WORK. ' + (ev.cls === 'land' ? 'They keep what they grow and share none of it: the rest of the place will go hungry until they take it up again.' : 'The works they keep stand idle and give nothing until they take it up again.'), 7, true); }); chron(st, 'withheld', ev.name + ', ' + ev.n + ' people, laid down their work.', [], at); return true;
+    case 'resumed': near().forEach(function (o) { tell(st, o.id, ev.name + ' have taken up their work again.', 5); }); chron(st, 'resumed', ev.name + ' took up their work again.', [], at); return true;
+    case 'backed': case 'opposed': case 'stoodoff': { const a = agentById(w, ev.a); if (!a) return true; const b = ev.type === 'backed';
+      tell(st, a.id, ev.type === 'stoodoff' ? ev.name + ' no longer take a side for or against you.' : ev.name + ' (' + ev.n + ' people) now ' + (b ? 'BACK YOU. Their numbers stand behind you and your standing is the greater for it.' : 'OPPOSE YOU. Their numbers stand against you and your standing is the less for it.'), ev.type === 'stoodoff' ? 4 : 7, true);
+      near().forEach(function (o) { if (o.id !== a.id && ev.type !== 'stoodoff') tell(st, o.id, ev.name + ' now ' + (b ? 'back ' : 'oppose ') + a.name + '.', 4); });
+      if (ev.type !== 'stoodoff') chron(st, ev.type, ev.name + ', ' + ev.n + ' people, ' + (b ? 'gave their backing to ' : 'set themselves against ') + a.name + '.', [a.id], at); return true; }
+    case 'ggave': { const a = agentById(w, ev.a); if (a && ev.n) { tell(st, a.id, ev.name + ' gave you ' + ev.n + ' of grain from what they had over.', 5); chron(st, 'ggave', ev.name + ' gave ' + ev.n + ' of grain to ' + a.name + '.', [a.id], at); } return true; }
+    case 'gavemany': { const a = agentById(w, ev.a); if (a) { tell(st, a.id, 'You gave ' + ev.n + ' of food to ' + ev.name + '. It went into what they hold in common.', 2); chron(st, 'gavemany', a.name + ' gave food from their own hands to ' + ev.name + '.', [a.id], { x: a.x, y: a.y }); } return true; }
+    case 'manyhunger': near().forEach(function (o) { tell(st, o.id, 'THE MANY OF ' + String(ev.place).toUpperCase() + ' ARE GOING HUNGRY: ' + ev.n + ' of ' + ev.of + ' had nothing to eat today, for the second day. The land about the place is not giving enough for all who live here.', 6, true); }); chron(st, 'manyhunger', 'Hunger came to the many of ' + ev.place + ': ' + ev.n + ' of ' + ev.of + ' went without.', [], at); return true;
+    case 'manyfed': near().forEach(function (o) { tell(st, o.id, 'The hunger among the many of ' + ev.place + ' has passed.', 3); }); chron(st, 'manyfed', 'The hunger in ' + ev.place + ' passed.', [], at); return true;
+    case 'manyleft': if (ev.n >= 5) { near(14).forEach(function (o) { tell(st, o.id, ev.n + ' of the many ' + (ev.name ? '(of ' + ev.name + ') ' : '') + 'have left ' + (ev.place || 'this place') + (ev.to ? ' for ' + ev.to : ' and gone beyond the known land') + '.', 4); }); chron(st, 'manyleft', ev.n + ' of the many left ' + (ev.place || 'their homes') + (ev.to ? ' for ' + ev.to : '') + '.', [], at); } return true;
+    case 'manybuilt': { const o = agentById(w, ev.owner); if (o) tell(st, o.id, 'The many of ' + ev.place + ' have raised a ' + ev.kind + ' at (' + ev.x + ',' + ev.y + ') for their growing numbers. It stands in your name.', 3); if ((w.tally.manyBuilt || 0) % 5 === 1) chron(st, 'manybuilt', 'The many of ' + ev.place + ' raised new dwellings as their numbers grew.', [], at); return true; }
+    case 'groupformed': near(16).forEach(function (o) { tell(st, o.id, 'Among the many of ' + ev.place + ', ' + ev.n + ' people who share one kind of work have begun to speak with one voice. They are called ' + ev.name + '.', 4); }); chron(st, 'groupformed', ev.name + ' came to be: ' + ev.n + ' of the many of ' + ev.place + ', speaking as one.', [], at); return true;
+    case 'groupgone': chron(st, 'groupgone', ev.name + ' are too few now to speak as one.', [], at); return true;
+    case 'manychild': { const a = agentById(w, ev.a); if (a) tell(st, a.id, 'A child was born to you. There are already as many named people as this world can hold, so the child grows up among the many, in the household of your home (' + ev.n + ' there now).', 4); return true; }
+  }
+  return false; };
 M.snapshot = function (st) {
   const minds = {};
   for (const id in st.minds) {
@@ -1725,6 +1815,7 @@ M.restore = function (snap) {
   if (got.v === base.v || got.v === 10 || got.v === 11 || got.v === 12) { for (const k in got) if (k in base) base[k] = got[k]; if (got.v === 10 && got.perMinute === 24) base.perMinute = 40; if (got.v === 11 && got.parallel === 6) base.parallel = 4; /* six at once was more than Claude allows a page */ base.v = 13; } /* settings from the generation before are kept, and its pace moves to the new one where it was never changed; older settings give way to the defaults */
   SW.upgrade(snap.world);
   const st = M.createState(snap.world, base);
+  (snap.world.groups || []).forEach(function (g) { if (g.mind) g.mind.busy = false; }); /* a group caught in mid-thought by the save is free to think again */
   st.minds = snap.minds || {}; st.names = snap.names || {}; st.chron = snap.chron || []; st.voices = snap.voices || []; st.deepKept = Array.isArray(snap.deep) ? snap.deep : [];
   st.used = 0; st.total = snap.total || snap.used || 0;
   if (snap.runId) { st.runId = snap.runId; st.rec.chunk = snap.recChunk || 0; }

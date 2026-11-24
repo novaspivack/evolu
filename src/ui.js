@@ -216,6 +216,50 @@ function topMood(a) { let k = null, v = 0.35; for (const m in MOOD_COLOR) if (a.
 const GRAVE = { anim: 'none', shapes: [{ t: 'rect', y: 0.05, w: 0.13, h: 0.17, fill: '#8d939c' }, { t: 'circle', y: -0.1, s: 0.13, fill: '#8d939c' }] };
 
 /* ---------- the look interpreter ---------- */
+/* THE MANY ON THE MAP (Generation 34). The land they work is shown as tilled plots about the place, as many as there are people on the land; and the
+   people themselves as small figures going between home, work and the middle of the place along its streets. The figures are a picture of the
+   households' day (where each is at this hour comes from its number and the time), not bodies of the world: one figure for each person up to a
+   few hundred in view, then one for every few. */
+function manyPlots(S) { /* which tiles about a place are tilled: the nearest open, fertile ground, kept until the day turns */
+  const day = SW.day(w), k = S.id + ':' + day + ':' + Object.keys(w.roads || {}).length; U.plots = U.plots || {}; if (U.plots[S.id] && U.plots[S.id].k === k) return U.plots[S.id].list;
+  let land = 0; w.many.hh.forEach(function (h) { if (h.sid === S.id && h.work === 'land') land += h.n; }); const want = Math.min(260, Math.ceil(land * 0.5)), list = [], R = S.r + ((w.laws.many || {}).reach || 10);
+  const cand = []; for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) { const d = Math.hypot(dx, dy); if (d <= S.r + 0.5 || d > R) continue; let X = S.x + dx; const Y = S.y + dy; if (Y < 0 || Y >= w.H) continue; if (w.wrap) X = ((X % w.W) + w.W) % w.W; else if (X < 0 || X >= w.W) continue; const i = Y * w.W + X, t = w.terrain[i];
+    if (t === 0 || t === 5 || t === 9 || t === 4 || t === 3 || w.shelters[i] || w.stores[i] || w.walls[i] || (w.roads[i] && w.roads[i] !== 3) || (w.fert[i] || 0) < 0.25) continue; cand.push([d + vnoise(X * 0.35, Y * 0.35, 612) * 7, i]); } /* the nearest good ground first, in patches and not in rings */
+  cand.sort(function (p, q) { return p[0] - q[0]; }); for (let q = 0; q < cand.length && list.length < want; q++) list.push(cand[q][1]);
+  U.plots[S.id] = { k: k, list: list }; return list; }
+function drawTilth(c, x0, x1, y0, y1, z) {
+  if (!w.many || !w.many.hh.length || z < 5) return; const season = SW.season(w);
+  (w.settlements || []).forEach(function (S) { const list = manyPlots(S); for (let q = 0; q < list.length; q++) { const i = list[q], x = i % w.W, y = (i - x) / w.W; if (y < y0 || y > y1 || x < x0 || x > x1) continue; const px = sx(x), py = sy(y); if (px < -z || px > W + z) continue;
+      c.fillStyle = season === 3 ? 'rgba(96,78,58,0.62)' : 'rgba(92,70,44,0.66)'; c.fillRect(px - z * 0.46, py - z * 0.44, z * 0.92, z * 0.88);
+      if (z >= 9) { c.strokeStyle = season === 3 ? 'rgba(60,46,32,0.7)' : season === 2 ? 'rgba(214,176,74,0.85)' : season === 1 ? 'rgba(122,168,70,0.85)' : 'rgba(104,140,72,0.7)'; c.lineWidth = Math.max(1, z * 0.055); c.beginPath(); const horiz = hash(x, y, 611) < 0.5; for (let r = 0; r < 4; r++) { const o = (-0.3 + r * 0.2) * z; if (horiz) { c.moveTo(px - z * 0.38, py + o); c.lineTo(px + z * 0.38, py + o); } else { c.moveTo(px + o, py - z * 0.36); c.lineTo(px + o, py + z * 0.36); } } c.stroke(); } } }); }
+/* the way a household goes: along the streets from the road at its door to the road nearest where it is going, then the last steps across the ground.
+   Found once for each household and kept until the roads or its work change. Steps are given from its home, so they hold across the line where east meets west. */
+function manyPath(h, tx, ty, slot) {
+  U.mpath = U.mpath || {}; const nroads = U.roadsN || 0, key = h.id + ':' + slot, ck = nroads + ':' + h.home + ':' + tx + ':' + ty, got = U.mpath[key]; if (got && got.k === ck) return got.p;
+  const made = function (x, y) { if (y < 0 || y >= w.H) return false; if (w.wrap) x = ((x % w.W) + w.W) % w.W; else if (x < 0 || x >= w.W) return false; const g = w.roads[y * w.W + x]; return !!g && g !== 3; };
+  let sx0 = null; for (let q = 0; q < 8 && !sx0; q++) { const dx = [0, 1, -1, 0, 1, -1, 1, -1][q], dy = [1, 0, 0, -1, 1, 1, -1, -1][q]; if (made(h.x + dx, h.y + dy)) sx0 = [dx, dy]; }
+  const end = [wrapd(tx - h.x), ty - h.y]; let p;
+  if (!sx0) p = [[0, 0.3], [end[0], end[1] + 0.3]];
+  else { const seen = {}, q = [[sx0[0], sx0[1], -1]], dist = function (n) { return Math.max(Math.abs(n[0] - end[0]), Math.abs(n[1] - end[1])); }; seen[sx0[0] + ',' + sx0[1]] = 1; let best = 0, at = 0;
+    while (at < q.length && q.length < 260) { const n = q[at]; if (dist(n) < dist(q[best])) best = at; if (dist(n) <= 1) break; const L = wayLinks(h.x + n[0], h.y + n[1], false); for (let l = 0; l < L.length; l++) { const m = [n[0] + L[l][0], n[1] + L[l][1], at], mk = m[0] + ',' + m[1]; if (!seen[mk]) { seen[mk] = 1; q.push(m); } } at++; }
+    p = []; for (let n = best; n >= 0; n = q[n][2]) p.unshift([q[n][0], q[n][1]]); p.unshift([0, 0.3]); p.push([end[0], end[1] + 0.3]); }
+  let len = 0; const cum = [0]; for (let k = 1; k < p.length; k++) { len += Math.hypot(p[k][0] - p[k - 1][0], p[k][1] - p[k - 1][1]); cum.push(len); } p.len = len; p.cum = cum;
+  U.mpath[key] = { k: ck, p: p }; return p; }
+function drawMany(c, x0, x1, y0, y1, z) {
+  if (!w.many || !w.many.hh.length) return; const HH = w.many.hh, dl = w.laws.time.dayLength, tod = (w.tick % dl + frac()) / dl, night = tod > 1 - (w.laws.time.nightFraction || 0.35);
+  U.manyBy = {}; for (let k = 0; k < HH.length; k++) U.manyBy[HH[k].sid] = (U.manyBy[HH[k].sid] || 0) + HH[k].n;
+  if (z < 7) return; let inView = 0; const vis = []; for (let k = 0; k < HH.length; k++) { const h = HH[k]; if (h.y < y0 - 6 || h.y > y1 + 6) continue; const px = sx(h.x); if (px < -z * 8 || px > W + z * 8) continue; vis.push(h); inView += h.n; }
+  if (!vis.length) return; U.roadsN = Object.keys(w.roads || {}).length;
+  const per = inView > 420 ? Math.ceil(inView / 420) : 1, S = Math.max(2.2, z * 0.25), byS = {}, CLOTH = ['#b5524a', '#4f7fb5', '#5a9a62', '#c9a23f', '#8a62b5', '#b57a4f', '#4fa5a5', '#a8a39a', '#d07a8a', '#6b7fd0']; (w.settlements || []).forEach(function (q) { byS[q.id] = q; });
+  for (let k = 0; k < vis.length; k++) { const h = vis[k], st2 = byS[h.sid], n = Math.max(1, Math.round(h.n / per)), hx = sx(h.x), hy = sy(h.y);
+    let tx = h.x, ty = h.y; if (h.at >= 0) { tx = h.at % w.W; ty = (h.at - tx) / w.W; } else if (st2) { const pl = manyPlots(st2); if (pl.length) { const i = pl[(h.id * 13) % pl.length]; tx = i % w.W; ty = (i - tx) / w.W; } }
+    const toWork = manyPath(h, tx, ty, 0), toMid = st2 ? manyPath(h, st2.x, st2.y, 1) : toWork;
+    for (let j = 0; j < n; j++) { const r1 = hash(h.id, j, 630), r2 = hash(h.id, j, 631), r3 = hash(h.id, j, 632); if (night && r1 > 0.1) continue; /* at night nearly all are indoors */
+      const P = r3 < 0.62 ? toWork : toMid; if (!P.len) continue; const ph = (tod * (2 + Math.floor(r2 * 3)) + r1) % 1, t = ph < 0.5 ? ph * 2 : (1 - ph) * 2, d = t * P.len; let seg = 1; while (seg < P.cum.length - 1 && P.cum[seg] < d) seg++;
+      const a = P[seg - 1], b = P[seg], f = (d - P.cum[seg - 1]) / Math.max(1e-6, P.cum[seg] - P.cum[seg - 1]), px = hx + (a[0] + (b[0] - a[0]) * f) * z + (r2 - 0.5) * z * 0.2, py = hy + (a[1] + (b[1] - a[1]) * f) * z + (r1 - 0.5) * z * 0.16; if (px < -8 || px > W + 8 || py < -8 || py > H + 8) continue;
+      c.fillStyle = 'rgba(12,14,18,0.35)'; c.beginPath(); c.ellipse(px, py + S * 0.5, S * 0.34, S * 0.13, 0, 0, 6.2832); c.fill();
+      c.fillStyle = h.hungry > 0 ? '#8d8a84' : CLOTH[Math.floor(r1 * 97 + h.id) % CLOTH.length]; if (c.roundRect) { c.beginPath(); c.roundRect(px - S * 0.2, py - S * 0.28, S * 0.4, S * 0.78, S * 0.14); c.fill(); } else c.fillRect(px - S * 0.2, py - S * 0.28, S * 0.4, S * 0.78);
+      c.fillStyle = ['#e8cfae', '#c99a70', '#8a5c3c', '#f0dcc4'][Math.floor(r3 * 4)]; c.beginPath(); c.arc(px, py - S * 0.46, S * 0.21, 0, 6.2832); c.fill(); } } }
 /* WAYS ON THE MAP (Generation 32, reworked the same day). A way was drawn as a slab filling its tile, so a street was as wide as a house, its
    corners were square and nothing led to a door. Now a way is a ribbon along the middle of its tiles, about a third of a building wide: each tile
    is joined to its neighbours (straight on to the four beside it, and aslant only where there is no squared way round), a tile with two neighbours
@@ -717,8 +761,10 @@ function drawFlat() {
       if (z > 11) for (let k = 0; k < gone; k++) { const gx = px + (hash(x, y, 440 + k) - 0.5) * z * 0.6, gy = py + (hash(x, y, 450 + k) - 0.5) * z * 0.5, r = z * 0.07; c.fillStyle = '#4a3826'; c.beginPath(); c.ellipse(gx, gy + r * 0.5, r, r * 0.7, 0, 0, 6.2832); c.fill(); c.fillStyle = '#b89a6a'; c.beginPath(); c.ellipse(gx, gy, r, r * 0.6, 0, 0, 6.2832); c.fill(); }
     }
   }
+  drawTilth(c, x0, x1, y0, y1, z);        /* the land the many work lies flat, under the roads */
   drawWays(c, x0, x1, y0, y1, z, true);  /* tracks worn by feet */
   drawWays(c, x0, x1, y0, y1, z, false); /* made roads: over the ground, under everything that stands */
+  drawMany(c, x0, x1, y0, y1, z);         /* the many going about the streets: on the roads, under the buildings */
   /* things on the ground */
   for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
     const i = y * w.W + x;
@@ -975,7 +1021,7 @@ function drawLabels(c) {
   for (let k = 0; k < w.settlements.length; k++) {
     const stl = w.settlements[k], root = agentOf(stl.root), px = sx(stl.x), py = sy(stl.y) - (stl.r + 0.9) * z; if (px < -120 || py < -30 || px > W + 120 || py > H + 30) continue;
     c.font = '800 ' + Math.round(clamp(z * 0.62, 12, 22)) + 'px "Bricolage Grotesque", sans-serif';
-    c.lineWidth = 4; c.strokeStyle = 'rgba(5,8,11,0.8)'; const nm = stl.name + (stl.age > 1 ? ' \u00b7 ' + ['', 'I', 'II', 'III', 'IV', 'V', 'VI'][stl.age] : ''); /* the age its buildings have reached */ c.strokeText(nm, px, py); c.fillStyle = SW.hslToHex(root ? root.hue : 40, 0.85, 0.72); c.fillText(nm, px, py);
+    c.lineWidth = 4; c.strokeStyle = 'rgba(5,8,11,0.8)'; const nm = stl.name + (stl.age > 1 ? ' \u00b7 ' + ['', 'I', 'II', 'III', 'IV', 'V', 'VI'][stl.age] : '') + (U.manyBy && U.manyBy[stl.id] ? ' \u00b7 ' + U.manyBy[stl.id] : ''); /* the age its buildings have reached */ c.strokeText(nm, px, py); c.fillStyle = SW.hslToHex(root ? root.hue : 40, 0.85, 0.72); c.fillText(nm, px, py);
   }
   /* the names beings have given to places */
   for (let k = 0; k < w.places.length; k++) {
@@ -1011,8 +1057,8 @@ function drawLabels(c) {
   const keep = [], groups = [], byId = {};
   for (let k = 0; k < U.bubbles.length; k++) {
     const b = U.bubbles[k], age = U.time - b.t0; if (age > b.life) continue; keep.push(b);
-    const a = agentOf(b.id); if (!a) continue;
-    const px = sx(ex(a)), py = sy(ey(a)), top = py - z * 0.95;
+    const a = b.at || agentOf(b.id); if (!a) continue; /* a group of the many speaks from its place (Generation 34) */
+    const px = sx(ex(a)), py = sy(ey(a)), top = py - z * (b.at ? 1.6 : 0.95);
     if (px < 0 || top < 0 || px > W || top > H + 60) continue;
     b.al = clamp(Math.min(1, age / 0.2, (b.life - age) / 0.6), 0, 1);
     let g = byId[b.id]; if (!g) { g = byId[b.id] = { id: b.id, ax: px, top: top, bot: py + z * 0.85, t0: b.t0, list: [], boxes: [] }; groups.push(g); }
@@ -1195,6 +1241,14 @@ function onWorldEvent(ev) {
     case 'offer': if (a) { glyph(a.x, a.y, ev.give + ' for ' + ev.want + '?', '#8fe0c0', 2.2); soundAt('offer', a.x, a.y, voice); } break;
     case 'mined': sparks(ev.x, ev.y, '#ffe9a0', ev.first ? 6 : 3); soundAt('mined', ev.x, ev.y, voice); if (ev.first && a) glyph(a.x, a.y, ev.kind, '#ffe9a0', 2.4); break;
     case 'felled': burst(ev.x, ev.y, '#b98a55', 5); soundAt('wood', ev.x, ev.y); break;
+    case 'gsaid': { U.bubbles = U.bubbles.filter(function (q) { return q.id !== 'g' + ev.g; }); const txt = ev.name + (ev.toName ? ', to ' + ev.toName : '') + ': ' + ev.text; U.bubbles.push({ id: 'g' + ev.g, kind: 'say', text: txt, at: { x: ev.x, y: ev.y, px: ev.x, py: ev.y }, t0: U.time, life: 6 + Math.min(6, txt.length * 0.04) }); addFx({ type: 'ring', x: ev.x, y: ev.y, r: 8, life: 1.4, color: 'rgba(230,197,138,0.7)' }); U.keys.voices = ''; U.keys.peoples = ''; break; }
+    case 'withheld': showNotice(ev.name + ' (' + ev.n + ' people) have laid down their work.'); addFx({ type: 'ring', x: ev.x, y: ev.y, r: 10, life: 3, color: 'rgba(240,120,90,0.8)' }); U.keys.peoples = ''; break;
+    case 'resumed': showNotice(ev.name + ' have taken up their work again.'); U.keys.peoples = ''; break;
+    case 'backed': case 'opposed': if (a) showNotice(ev.name + ' (' + ev.n + ' people) now ' + (ev.type === 'backed' ? 'back ' : 'oppose ') + a.name + '.'); U.keys.peoples = ''; break;
+    case 'manyhunger': showNotice('The many of ' + ev.place + ' are going hungry: ' + ev.n + ' of ' + ev.of + ' went without today.'); addFx({ type: 'ring', x: ev.x, y: ev.y, r: 12, life: 4, color: 'rgba(240,120,90,0.8)' }); break;
+    case 'groupformed': showNotice(ev.name + ' have begun to speak with one voice: ' + ev.n + ' of the many of ' + ev.place + '.'); U.keys.peoples = ''; break;
+    case 'rose': if (a) { burst(a.x, a.y, '#ffd86b', 14); addFx({ type: 'ring', x: a.x, y: a.y, r: 2.5, life: 1.5, color: 'rgba(255,216,107,0.9)' }); showNotice(a.name + ' has come out from the many of ' + (ev.place || 'the land') + ' and is now known by name.'); } break;
+    case 'manybuilt': burst(ev.x, ev.y, '#b9a27a', 8); soundAt('built', ev.x, ev.y); break;
     case 'bridged': case 'paved': burst(ev.x, ev.y, '#b9a27a', 5); soundAt('wood', ev.x, ev.y); U.landStale = performance.now(); break; /* the peaks and trees about a new road are painted again to leave it room */
     case 'dismantled': burst(ev.x, ev.y, '#b98a55', 8); soundAt('wood', ev.x, ev.y); break;
     case 'stashed': burst(ev.x, ev.y, '#d9c08a', 4); soundAt('stashed', ev.x, ev.y); break;
@@ -1530,6 +1584,7 @@ function renderInspect() {
     else h += '<h2>' + esc(SW.TERRAIN[w.terrain[i]]) + '</h2>';
     h += '<div class="kv">Tile <b>(' + s.x + ',' + s.y + ')</b> · ' + esc(SW.TERRAIN[w.terrain[i]]) + ' · fertility <b>' + w.fert[i] + '</b></div>';
     if (w.shelters[i]) h += '<h3>' + (w.bkind && w.bkind[i] ? esc(w.bkind[i].charAt(0).toUpperCase() + w.bkind[i].slice(1)) + '</h3><p class="muted">' + esc((w.laws.buildings[w.bkind[i]] || {}).hint || '') + '</p>' : 'Shelter</h3>') + '<div class="who">' + lookCanvas(w.looks[i] || structLook('shelter', w.shelters[i], i), 76, { scale: 1.1 }).replace('<canvas', '<canvas class="portrait"') + '<div>Built by ' + nameLink(w.shelters[i]) + '<div class="sub">' + (w.looks[i] ? 'to its own design' : 'plain: its builder has not designed one') + '</div></div></div>';
+    { const hs = w.many ? SW.manyAt(w, i) : []; if (hs.length) { let n = 0; hs.forEach(function (q) { n += q.n; }); const g = (w.groups || []).filter(function (q) { return !q.gone && q.id === hs[0].g; })[0]; h += '<h3>Of the many <small>' + n + ' people in ' + hs.length + (hs.length > 1 ? ' households' : ' household') + '</small></h3><div class="kv">' + hs.slice(0, 4).map(function (q) { return '<b>' + q.n + '</b> ' + (q.work === 'land' ? 'who work the land' : 'who work at the ' + esc(q.work)) + (q.hungry > 0 ? ', <b style="color:#f0a08a">hungry ' + q.hungry + (q.hungry > 1 ? ' days' : ' day') + '</b>' : ', fed') + ' · ' + Math.round(q.food / Math.max(1, q.n)) + ' days of bread'; }).join('<br>') + (g ? '<br>They are of <b>' + esc(g.name) + '</b>.' : '') + '</div><p class="muted">They have no minds of their own. One of them can be given a name and a mind, and will then think and act for themself.</p><button class="btn" data-act="rise" data-i="' + i + '">Give one of them a mind</button>'; } }
     if (w.fires[i] > w.tick) h += '<h3>Fire</h3><div class="kv">Burning for <b>' + (w.fires[i] - w.tick) + '</b> more moments. Warms those within ' + w.laws.craft.fireReach + ' steps, keeps hunting beasts off, and cooks meat eaten beside it.</div>';
     if (w.stores[i]) { const tl = {}; w.stores[i].items.forEach(function (q) { tl[q.k] = (tl[q.k] || 0) + 1; }); h += '<h3>Store</h3><div class="kv">Built by ' + nameLink(w.stores[i].by) + '. Holding <b>' + (Object.keys(tl).map(function (k) { return esc(k) + ' ×' + tl[k]; }).join(', ') || 'nothing') + '</b>.</div>'; }
     if (w.devices[i]) { const dv = w.devices[i], law = w.laws.tools[dv.k]; h += '<h3>Device</h3><div class="who">' + lookCanvas(law ? toolLook(law) : DEFAULT_DEVICE, 76, { scale: 1.05 }).replace('<canvas', '<canvas class="portrait"') + '<div><b>' + esc(dv.k) + '</b><div class="sub">set by ' + nameLink(dv.by) + ', ' + esc(when(dv.born)) + (dv.barred ? ' · barring the way' : '') + (dv.hold.length ? ' · holding ' + dv.hold.length + ' food' : '') + '</div></div></div>' + (law ? '<ol class="rules">' + law.rules.map(function (r) { return '<li>' + esc(ruleWords(r)) + '</li>'; }).join('') + '</ol>' + (law.idea ? '<div class="kv"><i>' + esc(law.idea) + '</i></div>' : '') : ''); }
@@ -1543,6 +1598,7 @@ function renderInspect() {
 $('panel').addEventListener('click', function (e) {
   const el = e.target.closest('[data-act]'); if (!el) return;
   const act = el.dataset.act, s = U.sel;
+  if (act === 'rise') { const hs = w.many ? SW.manyAt(w, +el.dataset.i) : [], Mn = w.laws.many || {}; if (!hs.length) return; if (w.agents.length >= (Mn.persons || 40) + 3) { showNotice('There are already ' + w.agents.length + ' people with minds, three more than this world keeps by itself. One must die before another can be chosen.'); return; } const a = SW.rise(w, hs[0], st.emit, true); if (a) { U.keys.inspect = ''; select({ t: 'agent', id: a.id }, true); } return; }
   if (act === 'sel') { const id = +el.dataset.id; if (agentOf(id) || st.minds[id]) select({ t: 'agent', id: id }, !!agentOf(id)); }
   else if (act === 'follow') toggleFollow();
   else if (act === 'cultp') { U.cultP = el.dataset.id === 'all' ? null : +el.dataset.id; U.keys.culture = ''; }
@@ -1585,7 +1641,7 @@ function renderVoices() {
   for (let i = st.voices.length - 1; i >= 0 && rows.length < 90; i--) {
     const v = st.voices[i];
     if (U.onlySel && name && v.name !== name && v.heard.indexOf(name) < 0) continue;
-    const sp = agentOf(v.a);
+    const sp = v.g ? null : agentOf(v.a);
     rows.push('<div class="line jump face' + (U.voiceFocus === i ? ' focus' : '') + '" data-act="voice" data-i="' + i + '">' + (sp ? lookCanvas(sp.look, 30, { scale: 1.1 }) : '<span></span>') + '<div><div class="when">' + esc(when(v.tick)) + '</div><span class="sp">' + esc(v.name) + '</span> <span class="muted">to ' + esc(v.to === 'all' ? 'everyone' : v.to) + ':</span> “' + esc(v.text) + '”<div class="heard">' + (v.heard.length ? 'heard by ' + esc(v.heard.join(', ')) : 'no one was near enough to hear') + '</div></div></div>');
   }
   h += rows.length ? rows.join('') : '<p class="empty">No one has spoken yet. Beings speak when they think, so wake the minds.</p>';
@@ -1842,6 +1898,14 @@ function lineageHtml(table, label) {
 }
 
 /* ---------- peoples: bands, their customs and how they stand toward each other ---------- */
+function manyHtml() { /* the many and their groups, place by place */
+  if (!w.many || !w.many.hh.length) return '';
+  let h = '<h3>The many <small>' + SW.manyTotal(w) + ' people in ' + w.many.hh.length + ' households</small></h3><p class="muted">People beyond those who think for themselves. They live under the same laws, as households. Those of one place who share a kind of work speak as a group, once a day.</p>';
+  (w.settlements || []).forEach(function (S) { const B = SW.manyBrief(w, S); if (!B.people) return;
+    h += '<div class="line jump" data-act="place" data-x="' + S.x + '" data-y="' + S.y + '"><span class="tag variety">place</span><span class="sp">' + esc(S.name) + '</span> <span class="muted">· ' + B.people + ' of the many in ' + B.households + ' households' + (B.hungry ? ', <b style="color:#f0a08a">' + B.hungry + ' hungry</b>' : '') + ' · room for ' + (B.rooms || 0) + ' · ' + (B.pool || 0) + ' days of bread laid by</span></div>';
+    SW.groupsOf(w, S).forEach(function (g) { const st2 = Object.keys(g.stance).map(function (id) { const o = agentOf(+id); return o ? '<span class="tag ' + (g.stance[id] > 0 ? 'gift' : 'fight') + '">' + (g.stance[id] > 0 ? 'backs' : 'opposes') + '</span>' + esc(o.name) : ''; }).filter(Boolean).join(' ');
+      h += '<div class="way known" style="margin-left:14px"><b>' + esc(g.name) + '</b> <span class="muted">' + g.n + ' people · ' + (g.hungry > 0.3 ? 'hungry' : g.mood >= 0.75 ? 'content' : g.mood >= 0.5 ? 'steady' : g.mood >= 0.3 ? 'restless' : 'angry') + (g.withhold ? ' · <b style="color:#f0a08a">work laid down</b>' : '') + (g.mind.busy ? ' · thinking' : '') + '</span>' + (st2 ? '<div>' + st2 + '</div>' : '') + (g.mind.thought ? '<div class="muted" style="margin-top:3px"><i>' + esc(g.mind.thought) + '</i></div>' : '') + (g.mind.last ? '<div style="margin-top:3px">\u201c' + esc(g.mind.last) + '\u201d</div>' : '') + '</div>'; }); });
+  return h; }
 function renderPeoples() {
   const key = Math.floor(U.time / 2) + ':' + w.agents.length + ':' + w.places.length + ':' + w.settlements.length + ':' + w.wars.length;
   if (U.keys.peoples === key) return; U.keys.peoples = key;
@@ -1849,6 +1913,7 @@ function renderPeoples() {
   w.agents.forEach(function (a) { const r = SW.rootOf(w, a); (roots[r.id] = roots[r.id] || { root: r, members: [] }).members.push(a); });
   const bands = Object.keys(roots).map(function (id) { return roots[id]; }).sort(function (p, q) { return q.members.length - p.members.length; });
   let h = '<h2>Peoples</h2><p class="muted">Bands form when beings pledge to a leader. A band can name itself, hold customs, and declare others ally or enemy. Click a name to go there.</p>';
+  h += manyHtml(); /* the many first: where there are any, they are most of the people */
   bands.filter(function (b) { return b.members.length > 1; }).forEach(function (b) {
     const r = b.root, col = SW.hslToHex(r.hue, 0.85, 0.6);
     h += '<div class="people" style="border-color:' + col + '"><h3 style="margin-top:0"><span style="color:' + col + ';letter-spacing:0;text-transform:none;font-size:15px;font-family:var(--display)">' + esc(r.bandName || r.name + "'s band") + '</span><small>' + b.members.length + ' members</small></h3>' +
@@ -2000,7 +2065,7 @@ function updatePanels() {
   const c = SW.census(w);
   $('clockText').innerHTML = '<b>Day ' + SW.day(w) + '</b> · ' + SW.SEASONS[SW.season(w)] + ' · ' + SW.phaseName(w) + ' · <b>' + skyHere() + '</b>';
   drawDial();
-  $('census').innerHTML = '<span class="chip glass"><i style="background:var(--accent)"></i><b>' + c.agents + '</b>beings</span><span class="chip glass"><i style="background:#c9a877"></i><b>' + c.hopper + '</b>grazers</span><span class="chip glass"><i style="background:#a68bd8"></i><b>' + c.stalker + '</b>hunters</span><span class="chip glass"><i style="background:var(--life)"></i><b>' + c.plants + '</b>plants</span><span class="chip glass"><b>' + (c.plantKinds + c.creatureKinds) + '</b>kinds</span>';
+  $('census').innerHTML = '<span class="chip glass"><i style="background:var(--accent)"></i><b>' + c.agents + '</b>' + (w.many && w.many.hh.length ? 'named</span><span class="chip glass" title="people beyond those who think: households of the many"><i style="background:#e6c58a"></i><b>' + SW.manyTotal(w) + '</b>of the many</span>' : 'beings</span>') + '<span class="chip glass"><i style="background:#c9a877"></i><b>' + c.hopper + '</b>grazers</span><span class="chip glass"><i style="background:#a68bd8"></i><b>' + c.stalker + '</b>hunters</span><span class="chip glass"><i style="background:var(--life)"></i><b>' + c.plants + '</b>plants</span><span class="chip glass"><b>' + (c.plantKinds + c.creatureKinds) + '</b>kinds</span>';
   $('meter').innerHTML = '<b>' + st.used + '</b> / ' + st.settings.budget + ' thoughts' + (st.inflight ? ' · ' + st.inflight + ' thinking' : '') + (st.on && U.pace != null && U.pace < 0.93 ? ' · <span title="The world has slowed so that every being still comes to think about once in ' + (st.settings.thinkEvery || 90) + ' moments. Change this in Setup.">time ×' + U.pace.toFixed(2) + '</span>' : '') + (function () { if (!st.on) return ''; const e = SWM.eased(st); return e.narrow ? ' · <span style="color:#f2b84b" title="Claude kept asking for a slower pace, so for now only the beings in view think. The rest live on their reflexes. It widens again by itself.">minds in view only</span>' : e.rate || e.par ? ' · <span style="color:#f2b84b" title="Claude asked for a slower pace. Nothing is switched off: fewer thoughts at a time and the clock slows. It quickens again by itself.">pace eased</span>' : ''; })();
   if (st.notice) { const again = st.budgetHit; showNotice(st.notice, again ? { label: 'Another round', run: function () { wakeMinds(true); } } : null); st.notice = ''; syncButtons(); }
   if (st.blocked && !U.toldBlocked && st.sample === null) U.toldBlocked = true;
@@ -2029,7 +2094,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 33, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 34, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -2099,7 +2164,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 33, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 34, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }
@@ -2147,13 +2212,13 @@ function attach(state) {
   if (w.agents.length) { cam.x = w.agents.reduce(function (s, a) { return s + a.x; }, 0) / w.agents.length + 0.5; cam.y = w.agents.reduce(function (s, a) { return s + a.y; }, 0) / w.agents.length + 0.5; }
   else { cam.x = w.W / 2; cam.y = w.H / 2; }
   clampCam(); syncButtons();
-  window.SWdebug = { KIND_SIZE: KIND_SIZE, buildTerrain: buildTerrain, wayLinks: wayLinks, drawWays: drawWays, kindLook: kindLook, vehicleOf: vehicleOf, drawVehicle: drawVehicle, farTo: farTo, cosmosOf: cosmosOf, bubbleAt: bubbleAt, openBubble: openBubble, st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco, bubble: bubble, placeBubbles: placeBubbles, hudRects: hudRects };
+  window.SWdebug = { select: select, manyPath: manyPath, manyPlots: manyPlots, KIND_SIZE: KIND_SIZE, buildTerrain: buildTerrain, wayLinks: wayLinks, drawWays: drawWays, kindLook: kindLook, vehicleOf: vehicleOf, drawVehicle: drawVehicle, farTo: farTo, cosmosOf: cosmosOf, bubbleAt: bubbleAt, openBubble: openBubble, st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco, bubble: bubble, placeBubbles: placeBubbles, hudRects: hudRects };
 }
 function newWorld(seed) {
   const keep = st ? st.settings : null;
   const legacy = st ? SWK.legacy(st) : null;
   if (st && !U.choosing) save(); /* the world being left is kept under its name */
-  const fresh = SWM.createState(SW.createWorld(seed, window.EVOLU_SEAS === 0 ? {} : { seas: 1, flora: 1, fog: window.EVOLU_FOG === 0 ? 0 : 1 }), keep ? JSON.parse(JSON.stringify(keep)) : SWM.defaultSettings()); fresh.world.name = worldName(null);
+  const fresh = SWM.createState(SW.createWorld(seed, window.EVOLU_SEAS === 0 ? {} : { seas: 1, flora: 1, fog: window.EVOLU_FOG === 0 ? 0 : 1, many: window.EVOLU_MANY === 0 ? 0 : 1 }), keep ? JSON.parse(JSON.stringify(keep)) : SWM.defaultSettings()); fresh.world.name = worldName(null);
   attach(fresh); U.playing = true;
   if (st.settings.autoWake && st.sample) st.on = true;
   SWK.inherit(st, legacy);

@@ -28,7 +28,7 @@ Nova's message of 23 Nov 22:10, in full substance. Work in waves; each wave is a
 
 ## Wave 4: Generation 32
 - [x] Zoom out farther from the planet: the solar system, the local group, the galaxy, other galaxies. A quick way to zoom all the way out, or back to the planet, from planet view or farther.
-- [ ] Groups: HELD by Nova on 24 Nov ("Let's discuss it before you implement that stuff"). A proposal is in `docs/groups-proposal.md`. Do not build until he answers. The troubles of later ages are held with it.
+- [x] Groups: built in Generation 34 on Nova's word of 24 Nov ("Build it, make it good"): the many, groups that think, rising into a mind, the page. The troubles of later ages are still held.
 
 ## Roadmap only (recorded, not tonight)
 Terrorism, dictatorships, oligarchies, gilded ages, stock markets in full, technology bubbles; superintelligence and its benefits and harms, nanotech, biowar, mass unemployment, robotics, conflict between humans and robots; contact with aliens; planet, species and galaxy levels of play.

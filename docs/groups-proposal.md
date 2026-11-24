@@ -1,5 +1,7 @@
 # Groups: a proposal for discussion
 
+> **Status, 24 November 2026:** Nova read this and said "Build it, make it good." It was built as Generation 34: see the design log. What follows is the proposal as it was put, kept for the record. Of its four stages, the many, groups that speak, and rising are built; returning, levies and trading parties are not.
+
 Written by Claude for Nova Spivack, 24 November 2026, after Generation 32. **Nothing here is built.** You asked for the thinking first and a decision afterwards. This page puts one question to you, with the options, the answer I propose and why, and then the smaller questions that follow from it.
 
 ## The problem, stated with the numbers we have

@@ -1260,7 +1260,7 @@ SW.beginAt = function (w, age) {
       if (L.creatures.horse) for (let q = 0; q < Math.min(3, band.length); q++) { const a = band[(q + 1) % band.length]; let X = a.x, Y = a.y; for (let t = 0; t < 12; t++) { const X2 = wrapX(w, a.x + ri(w, 5) - 2), Y2 = a.y + ri(w, 5) - 2; if (inb(w, X2, Y2) && free(idx(w, X2, Y2))) { X = X2; Y = Y2; break; } }
         const c = newCreature(w, 'horse', X, Y, { e: 80, age: 700 + ri(w, 900) }); c.owner = head.id; c.keeper = a.id; c.calm = 30; w.creatures.push(c); a.stats.tamed = (a.stats.tamed || 0) + 1; } }
   }
-  w.startAge = age; w.eraT = null; w.rng = keep; SW.findSettlements(w, noop); return raisedN;
+  w.startAge = age; w.eraT = null; { const own = w.rng; w.rng = keep; SW.findSettlements(w, noop); if (w.laws.many && w.many) { const k2 = w.rng; w.rng = own; manySettle(w); w.rng = k2; } } return raisedN; /* the towns are peopled by a chance of their own */
 };
 /* ---------- GENERATION 32: horses and work animals, vehicles, dwellings by age, looks that differ ---------- */
 /* an area of the unknown made known at once (for a world begun old: a people that has lived somewhere for generations knows the land about it) */
@@ -1305,6 +1305,136 @@ SW.distinctLooks = function (w) {
       before.push(sp.look); }); });
   return changed;
 };
+/* ---------- GENERATION 34: THE MANY, AND THE GROUPS THAT SPEAK FOR THEM ----------
+   A world can hold only so many who think (each is a call to Claude). Past that number (many.persons) people are not persons with minds but
+   households of THE MANY: a home, a number of people, a stock of food, a work, a mood. They live under laws of the same kind as bodies do: they eat
+   what the land about their place and their own hands can give, they are born when fed and housed, they die of age and of hunger, they raise new
+   dwellings beside the streets when they outgrow the old, and they leave when there is nothing to eat. Households of one place that share a kind
+   of work are a GROUP, and a group of enough people is a mind: it thinks once a day and speaks as "we" (minds.js). One of the many becomes a person
+   when a place among the persons falls empty, or when the watcher chooses one. Only a world begun with opts.many has them. */
+SW.MANY = { persons: 40, fill: 0.55, groupAt: 12, reach: 10, landYield: 0.3, handYield: 2.2, workers: 0.6, tools: [1, 1, 1.25, 1.6, 2.4, 3.6, 5], season: [0.9, 1.2, 1.4, 0.25], keep: 14, poolDays: 6, birth: 0.03, hungerDeath: 0.05, tithe: 0.08, backing: 0.015, jobs: 8, riseDays: 2, giveMost: 6,
+  rooms: { shelter: 3, house: 4, longhall: 6, igloo: 3, townhouse: 6, rowhouse: 8, tenement: 22, apartments: 40 } };
+const MANY_CLASS = [['retainers', /^(hall|townhall|parliament|ministry|castle|keep|barracks|moot|tower)$/], ['keepers', /^(temple|shrine|school|library|university|hospital|infirmary|apothecary|laboratory|observatory|bathhouse)$/], ['traders', /^(market|tavern|guesthouse|roadhouse|bank|dock|harbour|landing|station|airport|hangar|granary|guildhall|office|datacentre|mast)$/]];
+function manyClass(kind) { if (!kind || kind === 'land') return 'land'; for (let k = 0; k < MANY_CLASS.length; k++) if (MANY_CLASS[k][1].test(kind)) return MANY_CLASS[k][0]; return 'makers'; }
+function manyName(cls, era, place) { const n = cls === 'land' ? (era >= 4 ? 'Farmers' : era >= 2 ? 'Tillers' : 'Kin') : cls === 'makers' ? (era >= 4 ? 'Hands' : era >= 2 ? 'Smiths' : 'Makers') : cls === 'traders' ? 'Traders' : cls === 'keepers' ? 'Keepers' : (era >= 4 ? 'Clerks' : 'Retainers'); return 'the ' + n + ' of ' + place; }
+function manyRoom(w, i) { const Mn = w.laws.many; if (!(w.shelters[i] > 0)) return 0; return Mn.rooms[(w.bkind && w.bkind[i]) || 'shelter'] || 0; }
+function manyDwelling(w, era) { const B = w.laws.buildings, Mn = w.laws.many, order = ['apartments', 'tenement', 'rowhouse', 'townhouse', 'house'], min = { apartments: 6, tenement: 5, rowhouse: 4, townhouse: 3, house: 2 }; for (let k = 0; k < order.length; k++) if (B[order[k]] && era >= min[order[k]] && Mn.rooms[order[k]]) return order[k]; return 'shelter'; }
+/* the place a tile belongs to: a settlement that reaches it, or the tile itself for a lone home */
+function manyPlace(w, x, y) { let best = null, bd = 1e9; const S = w.settlements || []; for (let k = 0; k < S.length; k++) { const d = cheb(x, y, S[k].x, S[k].y); if (d <= S[k].r + 3 && d < bd) { bd = d; best = S[k]; } } return best; }
+function manyOwner(w, x, y, people) { let best = null, bd = 1e9; for (let k = 0; k < w.agents.length; k++) { const a = w.agents[k]; if (a.dead) continue; const d = cheb(a.x, a.y, x, y) + (a.people === people ? 0 : 40) + (a.leader == null ? 0 : 6); if (d < bd) { bd = d; best = a; } } return best; }
+function manyLand(w, cx, cy, R) { let n = 0; for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) { const X = wrapX(w, cx + dx), Y = cy + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y), t = w.terrain[i]; if (t === T.WATER || t === T.SHALLOWS || t === T.VOID || t === T.ROCK) continue; if (w.shelters[i] || w.stores[i] || w.walls[i] || (w.roads[i] && w.roads[i] !== 3)) continue; n += Math.min(1, (w.fert[i] || 0) * 1.6 + 0.1); } return n; }
+SW.manyTotal = function (w) { let n = 0; if (w.many) for (let k = 0; k < w.many.hh.length; k++) n += w.many.hh[k].n; return n; };
+SW.manyAt = function (w, i) { const out = []; if (w.many) for (let k = 0; k < w.many.hh.length; k++) if (w.many.hh[k].home === i) out.push(w.many.hh[k]); return out; };
+SW.groupsOf = function (w, S) { return (w.groups || []).filter(function (g) { return !g.gone && g.sid === (S ? S.id : 0); }); };
+SW.groupNamed = function (w, name, a) { if (!name || !w.groups) return null; const s = String(name).toLowerCase().replace(/^the\s+/, ''); let best = null, bd = 1e9; w.groups.forEach(function (g) { if (g.gone) return; const gn = g.name.toLowerCase().replace(/^the\s+/, ''); if (gn !== s && gn.split(' of ')[0] !== s && !(s.length >= 6 && gn.indexOf(s) === 0)) return; /* a name cut short by a plan step (sixteen letters) still finds its group */ const d = a ? cheb(a.x, a.y, g.x, g.y) : 0; if (d < bd) { bd = d; best = g; } }); return best; };
+/* the many of a place in brief, as one standing there would see them */
+SW.manyBrief = function (w, S) { const out = { people: 0, households: 0, hungry: 0, groups: [] }; if (!w.many || !S) return out; w.many.hh.forEach(function (h) { if (h.sid !== S.id) return; out.people += h.n; out.households++; if (h.hungry > 0) out.hungry += h.n; }); out.groups = SW.groupsOf(w, S).map(function (g) { return { id: g.id, name: g.name, n: g.n, mood: g.mood, hungry: g.hungry, withhold: !!g.withhold, cls: g.cls }; }); const P = (w.many.places || {})[S.id]; if (P) { out.pool = Math.round(P.pool); out.land = Math.round(P.land); out.short = P.short || 0; out.rooms = P.rooms; } return out; };
+function manyNew(w, home, n, people, o) { o = o || {}; const x = home % w.W, y = Math.floor(home / w.W), h = { id: w.many.next++, home: home, n: n, food: n * (o.food == null ? 5 : o.food), work: 'land', at: -1, people: people, mood: 0.6, hungry: 0, since: w.tick, kin: o.kin || 0, sid: 0, x: x, y: y }; w.many.hh.push(h); return h; }
+/* a child born when every place among the persons is taken joins the household of its mother's home */
+function manyJoin(w, a, emit) { const Mn = w.laws.many; if (!Mn || !w.many) return false; let home = -1, bd = 1e9; for (let dy = -6; dy <= 6; dy++) for (let dx = -6; dx <= 6; dx++) { const X = wrapX(w, a.x + dx), Y = a.y + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y); if (w.shelters[i] === a.id || (w.shelters[i] > 0 && manyRoom(w, i) > 0 && Math.max(Math.abs(dx), Math.abs(dy)) <= 2)) { const d = Math.max(Math.abs(dx), Math.abs(dy)) + (w.shelters[i] === a.id ? 0 : 3); if (d < bd) { bd = d; home = i; } } } if (home < 0) home = idx(w, a.x, a.y);
+  let h = null; for (let k = 0; k < w.many.hh.length; k++) if (w.many.hh[k].home === home && w.many.hh[k].kin === a.id) h = w.many.hh[k]; if (!h) h = manyNew(w, home, 0, a.people, { kin: a.id }); h.n++; h.food += 4; w.tally.manyBorn = (w.tally.manyBorn || 0) + 1; w.tally.lived = (w.tally.lived || 0) + 1; emit({ type: 'manychild', a: a.id, hh: h.id, n: h.n }); return true; }
+/* the dwellings of a world begun old are peopled: no more than the land about the place can feed */
+function manySettle(w) { const Mn = w.laws.many; if (!Mn || !w.many) return 0; const era = SW.eraOf(w), byPlace = {}; let total = 0;
+  for (let i = 0; i < w.shelters.length; i++) { const room = manyRoom(w, i); if (!room) continue; const S = manyPlace(w, i % w.W, Math.floor(i / w.W)); if (!S) continue; (byPlace[S.id] = byPlace[S.id] || { S: S, homes: [] }).homes.push(i); }
+  for (const k in byPlace) { const P = byPlace[k], S = P.S, land = manyLand(w, S.x, S.y, S.r + Mn.reach), cap = Math.floor(land * Mn.landYield * Math.sqrt(Mn.tools[Math.min(6, era)]) * 0.94 * 0.85); let left = cap;
+    P.homes.forEach(function (i) { if (left <= 0) return; const room = manyRoom(w, i), n = Math.min(left, Math.max(1, Math.round(room * Mn.fill * (0.7 + 0.6 * rnd(w))))), own = agentById(w, w.shelters[i]); manyNew(w, i, n, own ? own.people : null, { food: 8 }); left -= n; total += n; }); }
+  manyDay(w, noop, true); return total; }
+/* a street is carried on a few steps outward when no plot is left beside one */
+function manyStreet(w, S, grade) { const made = function (i) { return w.roads[i] && w.roads[i] !== 3; }; let best = -1, bd = -1, bdir = null;
+  for (const k in w.roads) { if (!made(k)) continue; const i = +k, x = i % w.W, y = (i - x) / w.W, d = cheb(x, y, S.x, S.y); if (d > S.r + 6 || d <= bd) continue; let sx2 = Math.sign(wdx(x - S.x)), sy2 = Math.sign(y - S.y); if (!sx2 && !sy2) sx2 = 1; const X = wrapX(w, x + sx2), Y = y + sy2; if (!inb(w, X, Y)) continue; const j = idx(w, X, Y), t = w.terrain[j]; if (made(j) || w.shelters[j] || w.stores[j] || w.walls[j] || t === T.WATER || t === T.SHALLOWS || t === T.VOID) continue; bd = d; best = i; bdir = [sx2, sy2]; }
+  if (best < 0) return 0; let x = best % w.W, y = Math.floor(best / w.W), n = 0; for (let s = 0; s < 5; s++) { let dx = bdir[0], dy = bdir[1]; if (s === 2 && rnd(w) < 0.5) { if (dx && dy) { if (rnd(w) < 0.5) dx = 0; else dy = 0; } else if (dx) dy = rnd(w) < 0.5 ? 1 : -1; else dx = rnd(w) < 0.5 ? 1 : -1; } const X = wrapX(w, x + dx), Y = y + dy; if (!inb(w, X, Y)) break; const j = idx(w, X, Y), t = w.terrain[j]; if (made(j) || w.shelters[j] || w.stores[j] || w.walls[j] || t === T.WATER || t === T.SHALLOWS || t === T.VOID) break;
+    let sq = false; for (let ox = -1; ox <= 0 && !sq; ox++) for (let oy = -1; oy <= 0 && !sq; oy++) { let c = 0; for (let ax = 0; ax <= 1; ax++) for (let ay = 0; ay <= 1; ay++) { const X2 = wrapX(w, X + ox + ax), Y2 = Y + oy + ay; if ((X2 !== X || Y2 !== Y) && inb(w, X2, Y2) && made(idx(w, X2, Y2))) c++; } if (c >= 3) sq = true; } if (sq) break;
+    w.roads[j] = grade; w.plants[j] = null; if (w.trees && w.trees[j]) w.trees[j] = 0; x = X; y = Y; n++; }
+  return n; }
+/* the many raise a dwelling of their age on open ground beside a street (or beside another building where there are no streets) */
+function manyRaise(w, S, people, emit) { const era = SW.eraOf(w), kind = manyDwelling(w, era), made = function (i) { return w.roads[i] && w.roads[i] !== 3; }; let anyRoad = false; for (const k in w.roads) if (made(k) && cheb((+k) % w.W, Math.floor((+k) / w.W), S.x, S.y) <= S.r + 6) { anyRoad = true; break; }
+  const find = function () { let best = -1, bd = 1e9; const R = S.r + 4; for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) { const X = wrapX(w, S.x + dx), Y = S.y + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y), t = w.terrain[i]; if (t === T.WATER || t === T.SHALLOWS || t === T.VOID || t === T.ROCK || w.shelters[i] || w.stores[i] || w.walls[i] || w.roads[i] || (w.lodes && w.lodes[i]) || (w.works && w.works[i])) continue; let by = false; for (let q = 0; q < 8 && !by; q++) { const X2 = wrapX(w, X + HEAD[q][0]), Y2 = Y + HEAD[q][1]; if (!inb(w, X2, Y2)) continue; const j = idx(w, X2, Y2); if (anyRoad ? made(j) : w.shelters[j] > 0) by = true; } if (!by) continue; const d = Math.max(Math.abs(dx), Math.abs(dy)); if (d < bd) { bd = d; best = i; } } return best; };
+  let i = find(); if (i < 0 && anyRoad && manyStreet(w, S, era >= 3 ? 1 : 4)) { emit({ type: 'paved', x: S.x, y: S.y, many: 1 }); i = find(); } if (i < 0) return -1;
+  const own = manyOwner(w, i % w.W, Math.floor(i / w.W), people); if (!own) return -1;
+  w.shelters[i] = own.id; if (kind !== 'shelter') { w.bkind = w.bkind || {}; w.bkind[i] = kind; } w.plants[i] = null; if (w.trees && w.trees[i]) w.trees[i] = 0; w.tally.built = w.tally.built || {}; w.tally.built[kind] = (w.tally.built[kind] || 0) + 1; w.tally.manyBuilt = (w.tally.manyBuilt || 0) + 1;
+  emit({ type: 'manybuilt', x: i % w.W, y: Math.floor(i / w.W), kind: kind, owner: own.id, place: S.name }); return i; }
+/* one of the many becomes a person, with a body and (in minds.js) a mind */
+SW.rise = function (w, h, emit, chosen) { emit = emit || noop; use(w); if (!h || h.n < 1) return null; const x0 = h.home % w.W, y0 = Math.floor(h.home / w.W); let model = null, bd = 1e9; w.agents.forEach(function (a) { if (a.dead) return; const d = cheb(a.x, a.y, x0, y0) + (a.people === h.people ? 0 : 60); if (d < bd) { bd = d; model = a; } });
+  let x = x0, y = y0; for (let q = 0; q < 8; q++) { const X = wrapX(w, x0 + HEAD[q][0]), Y = y0 + HEAD[q][1]; if (inb(w, X, Y) && passable(w, X, Y) && !w.shelters[idx(w, X, Y)]) { x = X; y = Y; break; } }
+  const a = newAgent(w, x, y, { adult: 1, people: h.people != null ? h.people : (model ? model.people : null), lang: model ? model.lang : null, tongues: model ? JSON.parse(JSON.stringify(model.tongues || {})) : {}, e: h.hungry > 0 ? 45 : 75, gen: model ? model.gen : 1, look: model ? SW.mutateLook(w, model.look, 0.7) : null, shelterLook: model ? model.shelterLook : null, wallLook: model ? model.wallLook : null, tall: model ? model.tall : 1 });
+  a.age = Math.round(a.life * (0.2 + 0.25 * rnd(w))); if (model) { a.leader = model.leader != null ? model.leader : (model.people === a.people ? model.id : null); for (const id in model.knows) if (rnd(w) < 0.6) { const k = model.knows[id]; a.knows[id] = { how: 'people', name: k.name, idea: k.idea, look: k.look, tick: w.tick, by: k.by, byName: k.byName }; } }
+  a.fromMany = { hh: h.id, home: h.home, work: h.work, g: h.g || 0, sid: h.sid || 0, day: SW.day(w) }; h.n--; h.food = Math.max(0, h.food - 1); w.agents.push(a); w.tally.rose = (w.tally.rose || 0) + 1; w.many.roseT = w.tick;
+  const S = manyPlace(w, x0, y0), g = (w.groups || []).filter(function (q) { return q.id === h.g && !q.gone; })[0];
+  emit({ type: 'rose', a: a.id, hh: h.id, x: x, y: y, place: S ? S.name : null, group: g ? g.name : null, work: h.work, chosen: !!chosen }); return a; };
+/* THE DAY OF THE MANY: what the land and their hands give, what they eat, who is born and who dies, where they live, what work they do */
+function manyDay(w, emit, quiet) {
+  const Mn = w.laws.many; if (!Mn || !w.many) return; const HH = w.many.hh; if (!HH.length && !(w.groups || []).length) return;
+  const era = Math.min(6, SW.eraOf(w)), tools = Mn.tools[era] || 1, season = Mn.season[SW.season(w)] || 1, lifeDays = w.laws.body.lifespan / w.laws.time.dayLength, places = {}, PL = w.many.places = w.many.places || {};
+  const some = function (x) { const f = Math.floor(x); return f + (rnd(w) < x - f ? 1 : 0); };
+  HH.forEach(function (h) { const S = manyPlace(w, h.x, h.y); h.sid = S ? S.id : 0; const key = S ? S.id : 'h' + h.home; (places[key] = places[key] || { S: S, key: key, hh: [], x: S ? S.x : h.x, y: S ? S.y : h.y, r: S ? S.r : 2 }).hh.push(h); });
+  for (const key in places) { const P = places[key], S = P.S, st0 = PL[key] = PL[key] || { pool: 0, short: 0 }; let people = 0; P.hh.forEach(function (h) { people += h.n; });
+    const land = manyLand(w, P.x, P.y, P.r + Mn.reach); st0.land = land;
+    /* work: enough of the people on the land to feed everyone, the rest at the works of the place as far as there is work */
+    const works = {}; let jobs = 0, rooms = 0; if (S) for (let dy = -S.r - 3; dy <= S.r + 3; dy++) for (let dx = -S.r - 3; dx <= S.r + 3; dx++) { const X = wrapX(w, S.x + dx), Y = S.y + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y); if (!(w.shelters[i] > 0)) continue; if (!quiet && !agentById(w, w.shelters[i])) { const heir = manyOwner(w, X, Y, P.hh[0].people); if (heir) w.shelters[i] = heir.id; } /* where the many live, what the dead held passes to the nearest of the living, so that the place stays a place */ const k = (w.bkind && w.bkind[i]) || 'shelter'; rooms += Mn.rooms[k] || 0; if (!Mn.rooms[k] && k !== 'field' && k !== 'pen' && k !== 'weir') { works[i] = k; jobs += Mn.jobs; } } st0.rooms = rooms; st0.jobs = jobs;
+    const share = Math.min(1, 1.15 / (Mn.workers * Mn.handYield * tools * 0.94)); let onLand = 0, atWork = 0; P.hh.forEach(function (h) { if (h.work === 'land') onLand += h.n; else if (works[h.at]) atWork += h.n; else { h.work = 'land'; h.at = -1; onLand += h.n; } });
+    const wk = Object.keys(works).map(Number); for (let pass = 0; pass < (quiet ? 400 : 2); pass++) { if (onLand / Math.max(1, people) > share + 0.04 && atWork < jobs && wk.length) { let pick = null; P.hh.forEach(function (h) { if (h.work === 'land' && h.n > 0 && !(h.hungry > 1) && (!pick || h.id > pick.id)) pick = h; }); if (!pick) break; const at = wk[(pick.id * 7 + pass) % wk.length]; pick.work = works[at]; pick.at = at; onLand -= pick.n; atWork += pick.n; }
+      else if (onLand / Math.max(1, people) < share - 0.04 || st0.short > 0) { let pick = null; P.hh.forEach(function (h) { if (h.work !== 'land' && (!pick || h.hungry > pick.hungry || (h.hungry === pick.hungry && h.id < pick.id))) pick = h; }); if (!pick) break; pick.work = 'land'; pick.at = -1; onLand += pick.n; atWork -= pick.n; if (!quiet) break; } else break; }
+    if (quiet) continue;
+    /* what the land and their hands give today */
+    const landG = (w.groups || []).filter(function (g) { return !g.gone && g.sid === (S ? S.id : -1) && g.cls === 'land'; })[0], held = !!(landG && landG.withhold);
+    const give = Math.min(onLand * Mn.workers * Mn.handYield * tools, land * Mn.landYield * Math.sqrt(tools)) * season; st0.made = Math.round(give * 10) / 10; st0.need = people;
+    P.hh.forEach(function (h) { if (h.work !== 'land' || !onLand) return; h.food += give * h.n / onLand; const keep = h.n * Mn.keep * (held ? 3 : 1); if (h.food > keep) { if (!held) st0.pool += h.food - keep; h.food = keep; } });
+    st0.pool = Math.min(st0.pool, people * Mn.poolDays);
+    /* a share of what is over goes into the stores of the place, where persons eat */
+    if (!held && S && st0.pool > people * 2) { let t = Math.min(4, Math.floor(st0.pool * Mn.tithe)); for (let dy = -S.r - 2; dy <= S.r + 2 && t > 0; dy++) for (let dx = -S.r - 2; dx <= S.r + 2 && t > 0; dx++) { const X = wrapX(w, S.x + dx), Y = S.y + dy; if (!inb(w, X, Y)) continue; const so = w.stores[idx(w, X, Y)]; if (!so || so.items.length >= w.laws.craft.storeMax) continue; while (t > 0 && so.items.length < w.laws.craft.storeMax) { so.items.push({ k: 'grain', n: 1, t: w.tick }); st0.pool -= 1; t--; w.tally.tithed = (w.tally.tithed || 0) + 1; } } }
+    /* eating, hunger, births and deaths */
+    let fed = 0, hungry = 0, born = 0, died = 0, starved = 0; const order = P.hh.slice().sort(function (p, q) { return (p.work === 'land' ? 0 : 1) - (q.work === 'land' ? 0 : 1) || p.id - q.id; });
+    order.forEach(function (h) { if (h.n <= 0) return; if (h.food < h.n && st0.pool > 0) { const take = Math.min(st0.pool, h.n * 2 - h.food); h.food += take; st0.pool -= take; }
+      if (h.food >= h.n) { h.food -= h.n; h.hungry = 0; h.mood = Math.min(1, h.mood + 0.04); fed += h.n; } else { h.food = 0; h.hungry = (h.hungry || 0) + 1; h.mood = Math.max(0, h.mood - 0.1); hungry += h.n; const d = Math.min(h.n, some(h.n * Mn.hungerDeath * (h.hungry >= 2 ? 1 : 0.3))); h.n -= d; died += d; starved += d; }
+      const old = Math.min(h.n, some(h.n / lifeDays)); h.n -= old; died += old;
+      if (h.hungry === 0 && h.food >= h.n && h.n >= 2) { const crowd = rooms > 0 && people > rooms ? 0.3 : 1, b = some(h.n * Mn.birth * crowd); h.n += b; born += b; } });
+    w.tally.manyBorn = (w.tally.manyBorn || 0) + born; w.tally.manyDied = (w.tally.manyDied || 0) + died; w.tally.manyStarved = (w.tally.manyStarved || 0) + starved; w.tally.lived = (w.tally.lived || 0) + born;
+    st0.born = born; st0.died = died; st0.hungry = hungry; const was = st0.short || 0; st0.short = hungry > people * 0.2 ? was + 1 : 0;
+    if (S && st0.short === 2) emit({ type: 'manyhunger', place: S.name, sid: S.id, x: S.x, y: S.y, n: hungry, of: people }); if (S && was >= 2 && st0.short === 0) emit({ type: 'manyfed', place: S.name, sid: S.id, x: S.x, y: S.y, of: people });
+    /* housing: a household too large for its home parts, into room elsewhere or into a dwelling the many raise */
+    if (S) { const occ = {}; P.hh.forEach(function (h) { occ[h.home] = (occ[h.home] || 0) + h.n; }); let raised = false;
+      P.hh.slice().forEach(function (h) { const room = manyRoom(w, h.home) || 3; if (occ[h.home] <= room || h.n < 4) return; const move = Math.floor(h.n / 2); let to = -1; for (let dy = -S.r - 3; dy <= S.r + 3 && to < 0; dy++) for (let dx = -S.r - 3; dx <= S.r + 3 && to < 0; dx++) { const X = wrapX(w, S.x + dx), Y = S.y + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y), rm = manyRoom(w, i); if (rm && (occ[i] || 0) + move <= rm) to = i; }
+        if (to < 0 && !raised && h.hungry === 0) { to = manyRaise(w, S, h.people, emit); raised = true; } if (to < 0) { h.mood = Math.max(0, h.mood - 0.03); return; }
+        const nh = manyNew(w, to, move, h.people, { food: 0 }); nh.food = h.food * move / h.n; h.food -= nh.food; h.n -= move; nh.work = h.work; nh.at = h.at; nh.mood = h.mood; nh.sid = h.sid; occ[to] = (occ[to] || 0) + move; occ[h.home] -= move; }); }
+    /* those with nothing to eat for three days go: to a place of their own people that has food, or out of the known world */
+    P.hh.forEach(function (h) { if (!(h.hungry >= 3) || h.n <= 0 || rnd(w) > 0.5) return; let to = null; for (const k2 in places) { const Q = places[k2]; if (Q === P || !Q.S) continue; const q0 = PL[k2]; if (q0 && !q0.short && q0.pool > Q.hh.length && (q0.rooms || 0) > 0) { to = Q; break; } }
+      w.tally.manyLeft = (w.tally.manyLeft || 0) + h.n; emit({ type: 'manyleft', place: S ? S.name : null, sid: S ? S.id : 0, x: h.x, y: h.y, n: h.n, to: to ? to.S.name : null });
+      if (to) { let home = -1; for (let i = 0; i < w.shelters.length && home < 0; i++) if (manyRoom(w, i) && manyPlace(w, i % w.W, Math.floor(i / w.W)) === to.S) home = i; if (home >= 0) { h.home = home; h.x = home % w.W; h.y = Math.floor(home / w.W); h.hungry = 0; h.food = h.n; h.work = 'land'; h.at = -1; w.tally.manyMoved = (w.tally.manyMoved || 0) + h.n; /* gone from their place, not from the world: counted apart so that the accounts of the many close */ return; } } h.n = 0; });
+  }
+  if (quiet) return;
+  w.many.hh = HH.filter(function (h) { return h.n > 0; });
+  manyGroups(w, emit);
+  /* a place among the persons that has fallen empty is taken by one of the many */
+  w.many.seats = Math.min(Mn.persons, Math.max(w.many.seats || 0, w.agents.length)); /* the places among the persons: as many as there have been at once, and no more than the law allows */
+  if (w.agents.length < w.many.seats && w.many.hh.length && w.tick - (w.many.roseT || -1e9) >= Mn.riseDays * w.laws.time.dayLength && rnd(w) < 0.6) { let tot = 0; w.many.hh.forEach(function (h) { tot += h.n; }); let pick = rnd(w) * tot, h = null; for (let k = 0; k < w.many.hh.length; k++) { pick -= w.many.hh[k].n; if (pick <= 0) { h = w.many.hh[k]; break; } } if (h) SW.rise(w, h, emit, false); }
+}
+/* households of one place and one kind of work are a group; a group of enough people speaks */
+function manyGroups(w, emit) { const Mn = w.laws.many, era = SW.eraOf(w), by = {}; w.groups = w.groups || [];
+  w.many.hh.forEach(function (h) { if (!h.sid) { h.g = 0; return; } const key = h.sid + ':' + manyClass(h.work); (by[key] = by[key] || { n: 0, hh: 0, mood: 0, hungry: 0, sid: h.sid, cls: manyClass(h.work), list: [] }); const b = by[key]; b.n += h.n; b.hh++; b.mood += h.mood * h.n; if (h.hungry > 0) b.hungry += h.n; b.list.push(h); });
+  w.groups.forEach(function (g) { if (g.gone) return; const b = by[g.key]; if (!b || b.n < Mn.groupAt / 2) { g.gone = w.tick; g.n = 0; emit({ type: 'groupgone', g: g.id, name: g.name, x: g.x, y: g.y }); return; } const S = (w.settlements || []).filter(function (s) { return s.id === g.sid; })[0]; g.n = b.n; g.hh = b.hh; g.mood = Math.round(b.mood / b.n * 100) / 100; g.hungry = Math.round(b.hungry / b.n * 100) / 100; if (S) { g.x = S.x; g.y = S.y; g.place = S.name; } b.list.forEach(function (h) { h.g = g.id; }); b.done = 1;
+    if (g.hungry > 0.3 && !(g.mind.hungerDay === SW.day(w) - 1)) g.mind.urge = Math.max(g.mind.urge || 0, 6); if (g.hungry > 0.3) g.mind.hungerDay = SW.day(w); });
+  for (const key in by) { const b = by[key]; if (b.done || b.n < Mn.groupAt) { if (!b.done) b.list.forEach(function (h) { h.g = 0; }); continue; } const S = (w.settlements || []).filter(function (s) { return s.id === b.sid; })[0]; if (!S) continue; w.many.gnext = (w.many.gnext || 0) + 1;
+    const g = { id: w.many.gnext, key: key, sid: b.sid, cls: b.cls, name: manyName(b.cls, era, S.name), place: S.name, x: S.x, y: S.y, n: b.n, hh: b.hh, mood: Math.round(b.mood / b.n * 100) / 100, hungry: Math.round(b.hungry / b.n * 100) / 100, withhold: false, stance: {}, born: w.tick, mind: { journal: [], heard: [], day: -1, urge: 3, thoughts: 0, last: null } };
+    w.groups.push(g); b.list.forEach(function (h) { h.g = g.id; }); emit({ type: 'groupformed', g: g.id, name: g.name, n: g.n, x: g.x, y: g.y, place: S.name }); }
+  /* work withheld: the works of that kind in the place stand idle */
+  w.idle = {}; w.groups.forEach(function (g) { if (g.gone || !g.withhold || g.cls === 'land') return; w.many.hh.forEach(function (h) { if (h.g === g.id && h.at >= 0) w.idle[h.at] = g.id; }); });
+}
+/* what a group does, when its mind has spoken (minds.js): d = { say: { text, to }, stance: { name: 'back' | 'oppose' | 'none' }, do: 'work' | 'withhold' | 'give' | 'leave', to: name } */
+SW.groupDo = function (w, g, d, emit) { emit = emit || noop; use(w); if (!g || g.gone || !d) return []; const done = [], Mn = w.laws.many, byName = function (nm) { if (!nm) return null; const s = String(nm).toLowerCase(); let best = null, bd = 1e9; w.agents.forEach(function (a) { if (a.dead || a.name.toLowerCase() !== s) return; const dd = cheb(a.x, a.y, g.x, g.y); if (dd < bd) { bd = dd; best = a; } }); return best; };
+  if (d.say && d.say.text) { const to = byName(d.say.to); emit({ type: 'gsaid', g: g.id, name: g.name, text: String(d.say.text).slice(0, 400), to: to ? to.id : null, toName: to ? to.name : null, x: g.x, y: g.y, n: g.n, sid: g.sid }); done.push('spoke' + (to ? ' to ' + to.name : '')); }
+  if (d.stance && typeof d.stance === 'object') for (const nm in d.stance) { const a = byName(nm); if (!a) continue; const v = /^back/.test(String(d.stance[nm])) ? 1 : /^oppos/.test(String(d.stance[nm])) ? -1 : 0, was = g.stance[a.id] || 0; if (v === was) continue; if (v) g.stance[a.id] = v; else delete g.stance[a.id]; a.stat = null; emit({ type: v > 0 ? 'backed' : v < 0 ? 'opposed' : 'stoodoff', g: g.id, name: g.name, a: a.id, n: g.n, x: g.x, y: g.y }); done.push((v > 0 ? 'backs ' : v < 0 ? 'opposes ' : 'stands off from ') + a.name); }
+  if (d.do === 'withhold' && !g.withhold) { g.withhold = true; g.withheldDay = SW.day(w); emit({ type: 'withheld', g: g.id, name: g.name, n: g.n, cls: g.cls, x: g.x, y: g.y, sid: g.sid }); done.push('withholds its work'); manyGroups(w, noop); }
+  else if (d.do === 'work' && g.withhold) { g.withhold = false; emit({ type: 'resumed', g: g.id, name: g.name, n: g.n, cls: g.cls, x: g.x, y: g.y, sid: g.sid }); done.push('goes back to work'); manyGroups(w, noop); }
+  else if (d.do === 'give') { const a = byName(d.to); if (a) { let have = 0; const mine = w.many.hh.filter(function (h) { return h.g === g.id; }); mine.forEach(function (h) { have += Math.max(0, h.food - h.n * 2); }); const n = Math.min(Mn.giveMost, Math.floor(have)); if (n > 0) { let left = n; mine.forEach(function (h) { const t = Math.min(left, Math.max(0, h.food - h.n * 2)); h.food -= t; left -= t; }); let put = 0; for (let i = 0; i < w.stores.length && put < n; i++) { const so = w.stores[i]; if (so && so.by === a.id) while (put < n && so.items.length < w.laws.craft.storeMax) { so.items.push({ k: 'grain', n: 1, t: w.tick }); put++; } } while (put < n && a.carry.length < w.laws.body.carryMax) { a.carry.push({ k: 'grain', n: 8 }); put++; } emit({ type: 'ggave', g: g.id, name: g.name, a: a.id, n: put, x: g.x, y: g.y }); done.push('gave ' + put + ' of grain to ' + a.name); } } }
+  else if (d.do === 'leave') { const mine = w.many.hh.filter(function (h) { return h.g === g.id; }); let n = 0; mine.forEach(function (h, k) { if (k % 3 === 0) { n += h.n; h.n = 0; } }); if (n) { w.many.hh = w.many.hh.filter(function (h) { return h.n > 0; }); w.tally.manyLeft = (w.tally.manyLeft || 0) + n; emit({ type: 'manyleft', place: g.place, sid: g.sid, x: g.x, y: g.y, n: n, to: null, g: g.id, name: g.name }); done.push(n + ' of them left the place'); manyGroups(w, noop); } }
+  return done; };
+/* a person gives food to a group: it goes into the common stock of the place, and the group knows who gave */
+SW.giveToGroup = function (w, a, g, emit) { emit = emit || noop; if (!g || g.gone) return 0; let n = 0; const P = (w.many.places || {})[g.sid]; if (!P) return 0; for (let k = a.carry.length - 1; k >= 0; k--) { const it = a.carry[k], sp = w.laws.plants[it.k], nu = it.n != null && it.n > 2 ? it.n : (sp ? sp.nutrition : 6); if (nu <= 0) continue; P.pool += Math.max(0.3, nu / 8); a.carry.splice(k, 1); n++; }
+  if (n) { g.mind.heard.push({ t: w.tick, from: a.name, id: a.id, text: '(gave us ' + n + ' of food from their own hands)', gift: n }); g.mind.urge = Math.max(g.mind.urge || 0, 6); a.stats.gifts += n; emit({ type: 'gavemany', a: a.id, g: g.id, name: g.name, n: n }); } return n; };
+SW.tellGroup = function (w, g, a, text, direct) { if (!g || g.gone || !text) return; g.mind.heard.push({ t: w.tick, from: a.name, id: a.id, text: String(text).slice(0, 300), direct: direct ? 1 : 0 }); if (g.mind.heard.length > 8) g.mind.heard.splice(0, g.mind.heard.length - 8); g.mind.urge = Math.max(g.mind.urge || 0, direct ? 7 : 2.5); };
+SW.manyDay = function (w, emit) { use(w); manyDay(w, emit || noop, false); };
+SW.manySettle = function (w) { use(w); return manySettle(w); };
+SW.manyClass = manyClass;
 /* SEAS (Generation 27): a world begun with opts.seas has an ocean that divides the known land, a greater ocean on the far side of the world with
    islands large enough to live on, and two great lakes. Their hearts are open water: more than two steps from any shore, where no one can swim
    and only a vessel carries. They are laid out by a chance of their own (the seed, not the world's stream), so the lands, their names and their
@@ -1579,6 +1709,7 @@ SW.createWorld = function (seed, opts) {
     laws: SW.defaultLaws(), nextId: 1
   };
   if (opts.flora) { for (const k in SW.FLORA) w.laws.plants[k] = JSON.parse(JSON.stringify(SW.FLORA[k])); w.flora = 1; addFauna(w); }
+  if (opts.many) { w.laws.many = JSON.parse(JSON.stringify(SW.MANY)); w.many = { hh: [], next: 1, places: {} }; w.groups = []; } /* people beyond those who think (Generation 34) */
   if (opts.seas) w.seas = { m: opts.margin != null ? opts.margin : 36, my: opts.margin != null ? opts.margin : 14 };
   use(w); genTerrain(w);
   { const Mg = opts.margin != null ? opts.margin : 36, My = opts.margin != null ? opts.margin : 14; if (Mg > 0) veil(w, Mg, My); narrowWater(w); w.tally.lived = 0; }
@@ -1995,6 +2126,7 @@ function stepCreatures(w, emit) {
   if (w.tick % L.time.dayLength === 3) SW.openAges(w, emit);
   if (w.fogDirty && w.tick % 20 === 0) { w.fogDirty = 0; narrowWater(w); WF.delete(w.terrain); }
   if (w.tick % L.time.dayLength === 13 && (w.ageOpen || 0) >= 3) foulStep(w, emit);
+  if (L.many && w.many && w.tick % L.time.dayLength === 17) manyDay(w, emit, false);
   if (w.tick % L.time.dayLength === 5) fadeWear(w); if (w.tick % L.time.dayLength === 9) feedHounds(w, emit); /* the library: an age is opened when its people come near it (no chance is drawn) */
   if ((L.ecology.seaReturn || 0) > 0 && w.tick % 60 === 41) { /* looked at once in sixty moments, by a chance of its own, so the world's own stream of chance is left as it was */
     const ks = Object.keys(L.creatures).filter(function (k) { const q = L.creatures[k]; return q.sea && !q.retired && (counts[k] || 0) < (q.minPop || 2); });
@@ -2323,6 +2455,7 @@ SW.upgrade = function (w) {
     if (L.tree && L.tree.storage && L.tree.storage.n === 4) L.tree.storage.n = 3;
     if (L.body && L.body.lifespan === 14400) { L.body.lifespan = 19200; w.agents.forEach(function (a) { if (a.life && a.life < 18000) a.life = Math.round(a.life * 19200 / 14400); }); } }
   if (!w.relics) w.relics = []; if (!w.faiths) w.faiths = {}; if (!w.culture) w.culture = { seq: 1, items: {}, log: [], days: [], rites: {} };
+  if (w.many34 == null) { w.many34 = 1; if (w.flora && !w.laws.many) { w.laws.many = JSON.parse(JSON.stringify(SW.MANY)); w.many = { hh: [], next: 1, places: {} }; w.groups = []; if (w.startAge > 1) { use(w); manySettle(w); } } } /* a world of the page carried on gains the many; one begun old has its dwellings peopled (Generation 34) */
   if (w.looks32 == null) { w.looks32 = 1; SW.distinctLooks(w); if (w.flora && !w.laws.creatures.horse) addFauna(w);
     /* what the library has gained since this world opened its ages (dwellings by age, ploughs, wagons and engines) is given to it too: only what it lacks */
     for (let n = 1; n <= (w.ageOpen || 0); n++) { const A = SW.LIBRARY[n]; if (!A) continue; ['blocks', 'buildings', 'recipes', 'goods'].forEach(function (t) { const src = A[t] || {}; w.laws[t] = w.laws[t] || {}; for (const k in src) if (!w.laws[t][k]) w.laws[t][k] = t === 'blocks' || t === 'buildings' ? Object.assign({ age: n }, JSON.parse(JSON.stringify(src[k]))) : JSON.parse(JSON.stringify(src[k])); }); } } /* a world carried on: kinds that looked alike are told apart (Generation 32) */
@@ -2380,7 +2513,8 @@ SW.status = function (w, a) {
     + (S.followers || 0) * fol * 0.6 + (S.giving || 0) * Math.min(1.2, ((st.gifts || 0) + (st.taught || 0)) * 0.04) + (S.renown || 0) * Math.min(2.5, (a.sung || 0) * 0.25 + (SW.roleOf(w, a) ? 0.4 : 0))
     + ((w.faiths || {})[a.faith] && w.faiths[a.faith].by === a.id ? ((w.laws.culture || {}).faithStanding || 0) * Math.min(8, Math.max(0, w.faiths[a.faith].n - 1)) : 0)
     - (S.shame || 0) * (a.shame || 0);
-  a.stat = { t: w.tick, v: Math.round(Math.max(0, v) * 100) / 100 }; return a.stat.v;
+  let vm = 0; if (w.laws.many && w.groups) for (let k = 0; k < w.groups.length; k++) { const g = w.groups[k], sv = g.gone ? 0 : g.stance[a.id]; if (sv) vm += sv * w.laws.many.backing * g.n; } /* the many who back one, or oppose one, are standing gained or lost */
+  a.stat = { t: w.tick, v: Math.round(Math.max(0, v + vm) * 100) / 100 }; return a.stat.v;
 };
 /* what a being has become known as, from what it has mostly done */
 SW.roleOf = function (w, a) {
@@ -3029,6 +3163,7 @@ function act(w, a, r, S, emit) {
       a.doing = 'following ' + t.name; return true;
     }
     case 'give': {
+      { const g = w.groups && r.name ? SW.groupNamed(w, r.name, a) : null; if (g) { if (cheb(a.x, a.y, g.x, g.y) > 6) { if (!move(w, a, pathToward(w, a, g.x, g.y, 3))) return false; a.doing = 'carrying food to ' + g.name; return true; } const n = SW.giveToGroup(w, a, g, emit); if (!n && r === a.intent) emit({ type: 'fail', a: a.id, text: 'You have no food in your hands to give to ' + g.name + '. Take some from a store first.' }); a.doing = 'giving food to ' + g.name; return n > 0; } }
       const t = targetOf(w, a, S, 'agent', r.name); if (!t) return false;
       const what = r.what || 'food';
       if (a.things && a.things[what] > 0) { /* a made thing changes hands */
@@ -3203,12 +3338,13 @@ function act(w, a, r, S, emit) {
         emit({ type: 'fail', a: a.id, text: 'You and ' + t.name + ' court each other, but no child comes yet: ' + why + '.' }); }
       if (t.court && t.court.id === a.id && w.tick - t.court.t <= cwin && a.e >= M.minEnergy && t.e >= M.minEnergy &&
           a.mateCd <= 0 && t.mateCd <= 0 && a.age >= a.life * M.minAgeFraction && t.age >= t.life * M.minAgeFraction &&
-          w.agents.length < M.maxPopulation) {
+          (w.agents.length < M.maxPopulation || (L.many && w.many))) {
         const plenty = a.e >= 85 && t.e >= 85 && a.hp >= 80 && t.hp >= 80 && !((a.press || {}).famine > 0.5) && !((t.press || {}).famine > 0.5) && SW.season(w) !== 3; /* well fed and well, in a kind season: the next child may come sooner */
         a.e -= M.cost; t.e -= M.cost; a.mateCd = t.mateCd = Math.round(M.cooldown * (plenty ? (M.plentyCooldown || 1) : 1) * (/hall/.test((w.bkind || {})[here] || '') ? (M.hallCooldown || M.roofCooldown || 1) : (a.sheltered || t.sheltered) ? (M.roofCooldown || 1) : 1)); /* under a roof sooner, in a hall sooner still */ a.court = t.court = null; a.mateT = t.mateT = w.tick; a.partner = t.id; t.partner = a.id;
         const mix = function (k) { return Math.round(clamp((a.temperament[k] + t.temperament[k]) / 2 + (rnd(w) - 0.5) * 0.3, 0, 1) * 100) / 100; };
         const nKids = rnd(w) < (M.twinChance || 0) * (plenty ? 1.5 : 1) ? 2 : 1; /* twins are a girl and a boy */
-        for (let tw = 0; tw < nKids && w.agents.length + w.newborn.length < M.maxPopulation; tw++) {
+        for (let tw = 0; tw < nKids && (w.agents.length + w.newborn.length < M.maxPopulation || (L.many && w.many)); tw++) {
+        if (L.many && w.many && w.agents.length + w.newborn.length >= L.many.persons) { manyJoin(w, a, emit); a.stats.kids++; t.stats.kids++; feel(a, 'joy', 0.5); feel(t, 'joy', 0.5); a.fin = 1; continue; } /* every place among the persons is taken: the child is one of the many */
         const kid = newAgent(w, a.x, a.y, {
           sex: nKids > 1 ? (tw ? 'm' : 'f') : (rnd(w) < 0.5 ? 'f' : 'm'), e: M.childEnergy, gen: Math.max(a.gen, t.gen) + 1, parents: [a.id, t.id],
           temperament: { bold: mix('bold'), sociable: mix('sociable'), curious: mix('curious'), gentle: mix('gentle'), honest: mix('honest'), greedy: mix('greedy') },
@@ -3365,7 +3501,7 @@ function stepAgents(w, emit) {
     }
     { /* time spent in a building of some kind does what that kind does, once a day */
       const bi = idx(w, a.x, a.y), bk = buildingAt(w, bi);
-      if (bk) { const B = L.buildings[bk], used = a.used = a.used || {}; if ((used[bi] || -1e9) + L.time.dayLength < w.tick) { used[bi] = w.tick; if (B.fx) applyFx(w, a, B.fx, emit, 'the ' + bk); const wth = []; if (B.bond) for (let j = 0; j < w.agents.length; j++) { const o = w.agents[j]; if (o !== a && !o.dead && cheb(a.x, a.y, o.x, o.y) <= 2) { a.rel[o.id] = clamp((a.rel[o.id] || 0) + B.bond, -1, 1); o.rel[a.id] = clamp((o.rel[a.id] || 0) + B.bond, -1, 1); wth.push(o.id); } } emit({ type: 'used', a: a.id, kind: bk, with: wth, x: a.x, y: a.y }); } }
+      if (bk) { const B = L.buildings[bk], used = a.used = a.used || {}; if ((used[bi] || -1e9) + L.time.dayLength < w.tick) { used[bi] = w.tick; if (w.idle && w.idle[bi]) { if (a.intent) emit({ type: 'fail', a: a.id, text: 'The ' + bk + ' stands idle: those who work it have laid down their work, and it gives nothing until they take it up again.' }); } else if (B.fx) applyFx(w, a, B.fx, emit, 'the ' + bk); const wth = []; if (B.bond) for (let j = 0; j < w.agents.length; j++) { const o = w.agents[j]; if (o !== a && !o.dead && cheb(a.x, a.y, o.x, o.y) <= 2) { a.rel[o.id] = clamp((a.rel[o.id] || 0) + B.bond, -1, 1); o.rel[a.id] = clamp((o.rel[a.id] || 0) + B.bond, -1, 1); wth.push(o.id); } } emit({ type: 'used', a: a.id, kind: bk, with: wth, x: a.x, y: a.y }); } }
       if (a.mount) { let mc = null; for (let j = 0; j < w.creatures.length; j++) if (w.creatures[j].id === a.mount) mc = w.creatures[j]; if (!mc || mc.dead || mc.keeper !== a.id) a.mount = null; else if (!(L.creatures[mc.sp] || {}).ride && w.terrain[idx(w, a.x, a.y)] !== T.SNOW) { a.mount = null; emit({ type: 'rode', a: a.id, off: true, why: 'the snow has ended, and a sled goes no farther' }); } else if (mc.x !== a.x || mc.y !== a.y) { mc.px = mc.x; mc.py = mc.y; mc.x = a.x; mc.y = a.y; } }
     }
     /* a body mends when it is fed: fully above healAbove, at half pace down to healLow, and faster in the warm (under a roof or by a fire) */
