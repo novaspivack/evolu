@@ -10,7 +10,7 @@ const errs = []; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m)
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   page.on('pageerror', e => errs.push(e.message)); page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   await page.addInitScript(() => {
-    window.EVOLU_SEED = 7; window.DBwrites = [];
+    window.EVOLU_SEED = 7; window.EVOLU_FOG = 0; window.DBwrites = []; /* the seas are looked at whole here; a world that begins mostly unknown is checked below */
     const db = { doc: p => ({ get: () => Promise.resolve({ exists: false, data: () => null }), set: body => { const s = JSON.stringify(body); if (new Blob([s]).size > 262144) { window.DBwrites.push({ p: p, size: new Blob([s]).size, refused: 1 }); return Promise.reject({ code: 'invalid_argument' }); } window.DBwrites.push({ p: p, size: new Blob([s]).size }); return Promise.resolve(); } }) };
     window.claude = { use: name => Promise.resolve(name === 'db' ? db : null) };
   });
@@ -38,6 +38,8 @@ const errs = []; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m)
     const row = document.querySelector('#pane-voices .line.focus'); return { box: true, cut: box.cut, whole: box.text === long, hit: !!hit && hit.id === a.id, miss: !miss || miss.id !== a.id, tab: d.U.tab, focus: !!row && row.textContent.indexOf('We came down from the high ground') >= 0 }; });
   ok(bb.box && bb.cut && bb.whole && bb.hit && bb.miss, 'a long thing said is cut in its box, and the box under the pointer is found with the whole of what was said');
   ok(bb.tab === 'voices' && bb.focus, 'a click on it opens Voices at that line');
+  const fg = await page.evaluate(() => { const SWg = window.SW, a = SWg.createWorld(7, { seas: 1, flora: 1 }), b = SWg.createWorld(7, { seas: 1, flora: 1, fog: 1 }), known = x => x.terrain.filter(t => t !== 9).length, kinds = new Set(a.plants.filter(Boolean).map(p => p.sp).filter(k => SWg.FLORA[k])); return { all: known(a), fog: known(b), onLand: b.agents.every(q => b.terrain[q.y * b.W + q.x] !== 9), kinds: kinds.size }; });
+  ok(fg.fog < fg.all * 0.6 && fg.onLand && fg.kinds >= 10, 'in the browser a world that begins mostly unknown knows ' + fg.fog + ' tiles of ' + fg.all + ', with every founder on known land, and ' + fg.kinds + ' of the new kinds of plant grow in it');
   /* send everything now */
   await page.evaluate(() => { window.SWdebug.setTab('setup'); }); await page.waitForTimeout(600);
   const pressed = await page.evaluate(() => { const bt = document.querySelector('[data-act="recsend"]'); if (bt) bt.click(); return !!bt; });

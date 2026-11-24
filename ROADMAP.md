@@ -14,10 +14,13 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 29, to be watched and tuned
+## NOW: built in Generations 14 to 30, to be watched and tuned
 
 | Item | State |
 | --- | --- |
+| **A world that begins mostly unknown** and is found by going to its edge with a purpose or in need; the pull of the unknown on the hungry, the crowded and the ambitious | Built in 30, for new worlds. Watch: how fast the known land grows; whether need sends people out; whether peoples who begin apart find one another. |
+| **Fifteen new plants** with effects of their own, each in its country | Built in 30, for new worlds. Watch: whether poisons are learned and avoided, and the herbs used. |
+| **Mountains of several sizes, mesas, cactus, pine and palm** in the picture of the land | Built in 30. |
 | **Ways on the ground by grade:** tracks worn by feet, dirt roads anyone can beat, paved roads; walkers keep to them | Built in 29. Watch: where tracks form, whether anyone beats a road between two settlements. |
 | **A kept hunter** helps the hunt, keeps beasts off, and must be fed scraps or it leaves | Built in 29. Watch: `keptHuntersWalkingWithTheirKeepers`, how many leave unfed. |
 | **Settlements with names of their own; speech boxes that open; ice at the poles** | Built in 29. |
@@ -262,3 +265,4 @@ A short index; the detail is in the design log.
 | 27 | Verse on its occasions and at the head of each chapter; a tradition for every people and the act of offering; courting answered; seas, islands and great lakes for new worlds; a crossing recorded; band practice, labour as building, signals and alchemy; the waiting bar and the sending of the state mended |
 | 28 | Structures from blocks, designed by the maker; a library by age; works that depend on one another; settlements told of one another and of the paved ways between; food against beings by land; a crossing chronicled once for each land; an elder told what only it knows |
 | 29 | Ways on the ground by grade and walkers that keep to them; kept hunters fed on scraps; settlements named in their own tongue; speech boxes that open; ice at the poles; the maker's own blocks; fewer things break into a plan |
+| 30 | A world that begins mostly unknown and is found on foot; the pull of the unknown on the hungry, crowded and ambitious; fifteen new plants; mountains of several sizes, mesas, cactus, pine and palm |

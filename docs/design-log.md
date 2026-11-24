@@ -12,6 +12,40 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## Generation 30 (built, not yet run with real minds): the land as it is known, the pull of the unknown, more that grows
+
+The second wave of the night of 23 November (`docs/overnight-plan.md`). No run came between this generation and the last; nothing here answers a record.
+
+### Built
+
+- **A world begins mostly unknown.** A world begun on the page now knows only the land within 22 steps of its founders (in seed 7: 6,176 tiles where the whole known land was 13,824, 45%). The rest lies in the unknown exactly as the rim always did: nothing lives in it, and what is under it is kept and is there when it is found.
+- **It is found by going there.** One who goes to the edge with a purpose (any plan of its mind), or in hunger, sees three steps into the unknown and that much becomes known. The fed and idle at home bring nothing in: in forty days on instinct alone the known land grew from 6,176 tiles to 6,327. The deliberate push (`venture`) is as it was and opens a wide strip with finds and herds.
+- **The pull of the unknown.** It was felt only by one who could see the edge. In a world mostly unknown it is felt from up to 36 steps off, with the direction told, and it is stronger on the hungry (+0.2), the crowded (six or more others within eight steps, +0.15), and one whose aim speaks of trade, renown or discovery (+0.2); the greedy a little. Each is told why. Measured on one being: 0.32 at rest, 0.52 hungry, 0.47 crowded, 0.52 with a merchant's aim.
+- **Fifteen new plants,** as data, for worlds begun on the page: barrel cactus (slakes thirst), joshua fruit, scrub berries, vision bud (visions: understanding and gladness with fear), dune thorn and nightberry (poison and sickness), pine nut, elderberry (heals), heartroot (strength for two days), staghorn (endurance), palm fruit, calm root (eases fear and anger), brightcap (quickness of mind), luck leaf, iron moss (toughness and warmth). Each keeps to its own country. What each does is found by eating it, as with every food.
+- **The picture of the land.** Rock is drawn as boulders and foothills, peaks, great mountains and a few huge ones, by a slow-changing measure of the range, where it was two small peaks to every tile. Deserts have mesas, standing rocks, cactus and joshua trees. Forest is palm in the rainforest, pine in the cold and the high country, broadleaf elsewhere.
+- **For the maker:** how much is known, how much is still unknown and how much was found on foot; the new plants growing; `explore.see` and `explore.start` as levers.
+
+### Measured
+
+- **Balance on instinct, twelve seeds, forty days:** a world begun without the new options is the same as Generation 29 in every figure (15.2 alive, 0.5 deaths, 2,504 plants). A world with seas, mostly unknown, with the new plants: 16.2 alive, 2.2 deaths a world (1.0 starved, 0.3 to beasts, and 0.9 of other causes that I did not break down; two of the new plants are poisons and a body on instinct eats what it finds), 3.3 newcomers, 1,001 plants in the smaller known land.
+- **Speed:** 2.49 ms a moment against 2.55 for Generation 29 in the same sitting; 1.83 ms in a world mostly unknown, which holds less.
+
+### Tested
+
+- **859 checks in 26 numbered files, the two mind pipelines, the long ecology run and 12 checks of the page in headless Chrome: all pass.** The new file (`tests/26`, 19 checks): a world begun without the options is tile for tile what it was; a world mostly unknown knows 45% of what the whole did, with every founder on known land and nothing living in the unknown; one sent to a reachable edge by its mind's plan arrives and what it sees becomes known, with no strip opened; the fed and idle bring nothing in and the hungry do; the pull of the unknown measured on the same being at rest, hungry, crowded and with a merchant's aim; the plants each in their own country; five of them eaten by a mind's plan with their effects on the body; a world mostly unknown saved and loaded; a world saved by Generation 29 carried on with the land it knew.
+- **On the page:** a world mostly unknown and one whole are made in the browser from the same seed and compared; the picture of rock and desert was looked at.
+- **Not tested:** how fast minds open the land; the palms; the look of a world mostly unknown on the globe.
+
+### Not built, and not known
+
+- **An aphrodisiac:** not built. There is no effect in the world for desire; it needs one first.
+- **Plants that change other traits for good:** not built. Every effect here lasts two days or is felt at once.
+- **Fruit on the trees of the forest themselves:** the new kinds are plants that stand among the trees, as all food plants do; a forest tile's own trees still give only wood.
+- **Animals in land found on foot:** none come with it. They wander in, or arrive at the edge of the known as before.
+- **A carried-on world** keeps the land it knew and its own plants.
+- I have not seen the new drawing with minds running in it; the picture was checked in headless Chrome at night in seed 5614: mountains of several sizes, mesas and cactus are drawn and the page shows no error; I did not look at the palms.
+- What the tests cannot show is how real minds behave: whether they go to the edge, and whether need sends them.
+
 ## Generation 29 (built, not yet run with real minds): ways on the ground, kept hunters, names of their own, speech that opens
 
 Nova, 23 November, late, with the first run of a new world (Nimenvale, seas, 17 days) and a long list for the night, kept in full in `docs/overnight-plan.md`. This is the first wave of it.

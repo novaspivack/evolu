@@ -49,7 +49,7 @@ SW.defaultLaws = function () {
     /* when the living fall below a floor, a small band comes into the land from beyond its edge: of the people that has fewest left */
     arrivals: { floor: 14, size: 4, gapDays: 4, food: 5 },
     /* the known world ends in mist. One who stands at it may venture in: a band has a few attempts, then its will must return */
-    explore: { chance: 0.35, pushes: 3, restDays: 8, cost: 8, depth: 6, length: 40, gapDays: 1, finds: 3, beasts: 0.5, strangers: 0.2 },
+    explore: { start: 22, see: 3, chance: 0.35, pushes: 3, restDays: 8, cost: 8, depth: 6, length: 40, gapDays: 1, finds: 3, beasts: 0.5, strangers: 0.2 },
     /* standing among others: what earns it, what loses it, and how much of it one needs before another will follow */
     status: { wealth: 1, deeds: 1, knowledge: 1, children: 1, works: 1, followers: 1, giving: 1, renown: 1, shame: 1, leadNeeds: 1.2, shameFade: 0.9 },
     /* how ways are come to: what a being has suffered sharpens it toward the ways that would answer it; what it already knows in a line helps with the next */
@@ -816,7 +816,7 @@ SW.refreshLooks = function (w) {
   });
   w.lookV = 5; return true;
 };
-const BASE_KINDS = { berry: 1, grain: 1, redcap: 1, thornpear: 1, mudroot: 1, frostmoss: 1, ironnut: 1, sunleaf: 1, dreamcap: 1, emberroot: 1, hopper: 1, stalker: 1, skit: 1, hornback: 1, ridgecat: 1,
+const BASE_KINDS = { barrelcactus: 1, joshuafruit: 1, scrubberry: 1, visionbud: 1, dunethorn: 1, pinenut: 1, elderberry: 1, nightberry: 1, heartroot: 1, staghorn: 1, palmfruit: 1, calmroot: 1, brightcap: 1, luckleaf: 1, ironmoss: 1, berry: 1, grain: 1, redcap: 1, thornpear: 1, mudroot: 1, frostmoss: 1, ironnut: 1, sunleaf: 1, dreamcap: 1, emberroot: 1, hopper: 1, stalker: 1, skit: 1, hornback: 1, ridgecat: 1,
   /* the life of the ice, of the sea and of the rainforest, and the dog: these are never struck from the world's book, since their country may lie where no one has yet been */
   dog: 1, caribou: 1, mammoth: 1, penguin: 1, wolf: 1, icebear: 1, floeseal: 1, stormbird: 1, whale: 1, orca: 1, snowberry: 1, frostcap: 1, icekelp: 1, windroot: 1, glowcap: 1, cloudberry: 1,
   treeape: 1, mudsnout: 1, skybird: 1, shadowcat: 1, coilsnake: 1, rivermaw: 1, goldfruit: 1, canopynut: 1, vinebean: 1, feverbark: 1, firepod: 1 };
@@ -1054,6 +1054,59 @@ SW.joinedByRoad = function (w, A, B) {
   while (head < q.length && q.length < 6000) { const i = q[head++], x = i % w.W, y = (i - x) / w.W; if (cheb(x, y, B.x, B.y) <= B.r) return true;
     for (let d = 0; d < 8; d++) { const X = x + HEAD[d][0], Y = y + HEAD[d][1]; if (!inb(w, X, Y)) continue; const j = idx(w, X, Y); if (w.roads[j] && w.roads[j] !== 3 && !seen[j]) { seen[j] = 1; q.push(j); } } }
   return false;
+};
+/* THE LAND AS IT IS KNOWN (Generation 30). A world begun with opts.fog starts with only the land around its peoples known (explore.start steps
+   about each founder); the rest lies in the unknown, as the rim always did, and is found by going there. One who stands at the edge of the
+   known sees a little way into it (explore.see steps) and that much becomes known; the deliberate push (venture) still opens a wide strip
+   with what was always there and a little more. Nothing lives in the unknown until it is found. */
+function fogIn(w) {
+  const V = w.veil; if (!V) return; const R = (w.laws.explore || {}).start || 22, pts = w.agents.map(function (a) { return [a.x, a.y]; }); let known = 0;
+  for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) { const i = y * w.W + x; if (w.terrain[i] === T.VOID) continue;
+    let near = false; for (let k = 0; k < pts.length && !near; k++) if (cheb(x, y, pts[k][0], pts[k][1]) <= R) near = true; if (near) { known++; continue; }
+    V.t[i] = w.terrain[i]; V.f[i] = w.fert[i]; w.terrain[i] = T.VOID; w.fert[i] = 0; w.plants[i] = null;
+    if (w.lodes[i]) { V.lodes[i] = w.lodes[i]; delete w.lodes[i]; } if (w.ore && w.ore[i]) { V.ore[i] = w.ore[i]; delete w.ore[i]; } if (w.river && w.river[i]) { V.river[i] = w.river[i]; delete w.river[i]; }
+    if (w.shelters[i] === -1) { V.caves.push(i); w.shelters[i] = 0; if (w.bkind) delete w.bkind[i]; } }
+  w.creatures = w.creatures.filter(function (c) { return w.terrain[idx(w, c.x, c.y)] !== T.VOID; });
+  w.sites = (w.sites || []).filter(function (q) { return w.terrain[q.y * w.W + q.x] !== T.VOID; });
+  if (w.rich) w.rich = w.rich.filter(function (q) { return w.terrain[idx(w, q.x, q.y)] !== T.VOID; });
+  (w.regions || []).forEach(function (Rg) { Rg.openLand = 0; }); for (let i = 0; i < w.terrain.length; i++) { const tt = w.terrain[i], Rg = w.regions && w.regions[w.region[i]]; if (Rg && (tt === T.GRASS || tt === T.FOREST || tt === T.SAND || tt === T.MARSH)) Rg.openLand++; }
+  w.openTiles = known; w.fog = 1; narrowWater(w); WF.delete(w.terrain);
+}
+/* what one at the edge of the known can see becomes known (no finds, no herds: those come with a deliberate push) */
+function openAround(w, a, emit) {
+  const V = w.veil, r = (w.laws.explore || {}).see || 3; let n = 0, land = 0;
+  for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const X = wrapX(w, a.x + dx), Y = a.y + dy; if (Y < 0 || Y >= w.H || (!w.wrap && (X < 0 || X >= w.W))) continue; const i = Y * w.W + X; if (V.t[i] == null) continue;
+    w.terrain[i] = V.t[i]; w.fert[i] = V.f[i]; delete V.t[i]; delete V.f[i]; n++;
+    if (V.lodes[i]) { w.lodes[i] = V.lodes[i]; delete V.lodes[i]; } if (V.ore[i]) { w.ore[i] = V.ore[i]; delete V.ore[i]; } if (V.river && V.river[i]) { w.river[i] = V.river[i]; delete V.river[i]; }
+    const tt = w.terrain[i]; if (tt !== T.WATER && tt !== T.SHALLOWS) { land++; if (w.fert[i] > 0.1 && rnd(w) < 0.16 + w.fert[i] * 0.3) { const k = kindFor(w, i); if (k) w.plants[i] = newPlant(w, k, 1, i); } } }
+  if (!n) return 0;
+  V.caves = V.caves.filter(function (i) { if (w.terrain[i] !== T.VOID) { w.shelters[i] = -1; w.bkind[i] = 'cave'; return false; } return true; });
+  w.openTiles = (w.openTiles || 0) + n; w.fogDirty = 1; a.stats.seen = (a.stats.seen || 0) + n; w.tally.landSeen = (w.tally.landSeen || 0) + n;
+  if (Math.floor(a.stats.seen / 120) > Math.floor((a.stats.seen - n) / 120)) emit({ type: 'explored', a: a.id, tiles: a.stats.seen, x: a.x, y: a.y });
+  return n;
+}
+/* the nearest edge of the known, looked for farther than sight (coarsely): for the pull of the unknown on one who cannot see it from where it stands */
+SW.edgeFar = function (w, a, R) { const V = w.veil; if (!V) return null; use(w); let best = null, bd = 1e9; for (let dy = -R; dy <= R; dy += 3) for (let dx = -R; dx <= R; dx += 3) { const x = wrapX(w, a.x + dx), y = a.y + dy; if (y < 0 || y >= w.H || (!w.wrap && (x < 0 || x >= w.W))) continue; if (V.t[y * w.W + x] != null) { const d = Math.max(Math.abs(dx), Math.abs(dy)); if (d < bd) { bd = d; best = { x: x, y: y, d: d, dx: dx, dy: dy }; } } } return best; };
+SW.fogIn = fogIn;
+/* MORE THAT GROWS (Generation 30): for worlds begun with opts.flora. Fruit on trees, bushes, scrub and cactus, and herbs, each in its own
+   country: some feed well, some poison, some heal, some bring visions, some lend strength, endurance, luck or quickness of mind for a while.
+   What each does is found by eating it, as with every other food. Data: the maker can make more (op plant). */
+SW.FLORA = {
+  barrelcactus: { growth: 0.002, maxFood: 2, regrow: 0.0015, nutrition: 6, fx: [{ on: 'thirst', by: -35 }], seedRate: 0.0015, seedRadius: 3, lifespan: 9000, root: 'cactus', hardy: 1, biomes: ['desert'], soil: { desert: 1, sand: 0.4 }, form: { form: 'rosette', hue: 115 } },
+  joshuafruit: { growth: 0.002, maxFood: 3, regrow: 0.0015, nutrition: 11, seedRate: 0.0015, seedRadius: 3, lifespan: 9000, root: 'joshua', hardy: 1, biomes: ['desert', 'steppe'], soil: { desert: 0.8, sand: 0.5, grass: 0.15 }, form: { form: 'frond', hue: 95 } },
+  scrubberry: { growth: 0.004, maxFood: 3, regrow: 0.003, nutrition: 9, seedRate: 0.003, seedRadius: 2, lifespan: 4000, root: 'scrub', hardy: 1, biomes: ['steppe', 'desert', 'highland'], soil: { grass: 0.6, desert: 0.5, rock: 0.2 }, form: { form: 'bush', hue: 20 } },
+  visionbud: { growth: 0.002, maxFood: 1, regrow: 0.001, nutrition: -3, lore: 0.5, joy: 0.3, fx: [{ on: 'fear', by: 0.25 }], seedRate: 0.001, seedRadius: 2, lifespan: 6000, root: 'bud', hardy: 1, biomes: ['desert'], soil: { desert: 0.7 }, form: { form: 'cap', hue: 160 } },
+  dunethorn: { growth: 0.004, maxFood: 2, regrow: 0.003, nutrition: -6, fx: [{ on: 'health', by: -14 }, { on: 'sick', by: 1 }], seedRate: 0.002, seedRadius: 2, lifespan: 3000, root: 'thorn', hardy: 1, biomes: ['desert', 'steppe'], soil: { desert: 0.6, sand: 0.4 }, form: { form: 'bush', hue: 350 } },
+  pinenut: { growth: 0.002, maxFood: 3, regrow: 0.0015, nutrition: 17, seedRate: 0.0015, seedRadius: 3, lifespan: 10000, root: 'pine', hardy: 1, biomes: ['highland', 'tundra', 'woodland'], soil: { forest: 0.9, rock: 0.2 }, form: { form: 'stalk', hue: 140 } },
+  elderberry: { growth: 0.005, maxFood: 3, regrow: 0.004, nutrition: 8, fx: [{ on: 'health', by: 10 }], seedRate: 0.003, seedRadius: 2, lifespan: 3600, root: 'elder', biomes: ['woodland', 'lakeland'], soil: { forest: 0.7, grass: 0.4 }, form: { form: 'bush', hue: 275 } },
+  nightberry: { growth: 0.005, maxFood: 3, regrow: 0.004, nutrition: -5, fx: [{ on: 'health', by: -16 }, { on: 'sick', by: 1 }], seedRate: 0.002, seedRadius: 2, lifespan: 3000, root: 'night', biomes: ['woodland', 'marsh'], soil: { forest: 0.5, marsh: 0.4 }, form: { form: 'bush', hue: 255 } },
+  heartroot: { growth: 0.003, maxFood: 1, regrow: 0.002, nutrition: 6, fx: [{ on: 'strength', times: 1.3, for: 480 }], seedRate: 0.0015, seedRadius: 2, lifespan: 4000, root: 'heart', biomes: ['highland', 'steppe'], soil: { grass: 0.5, rock: 0.3 }, form: { form: 'rosette', hue: 5 } },
+  staghorn: { growth: 0.003, maxFood: 2, regrow: 0.002, nutrition: 4, fx: [{ on: 'vigor', times: 1.3, for: 480 }], seedRate: 0.002, seedRadius: 2, lifespan: 3000, root: 'stag', biomes: ['tundra', 'highland', 'woodland'], soil: { grass: 0.5, forest: 0.3, snow: 0.2 }, form: { form: 'flower', hue: 45 } },
+  palmfruit: { growth: 0.003, maxFood: 4, regrow: 0.002, nutrition: 16, fx: [{ on: 'thirst', by: -12 }], seedRate: 0.002, seedRadius: 3, lifespan: 9000, root: 'palm', biomes: ['rainforest'], soil: { forest: 0.8, sand: 0.5 }, form: { form: 'frond', hue: 100 } },
+  calmroot: { growth: 0.003, maxFood: 2, regrow: 0.002, nutrition: 3, fx: [{ on: 'fear', by: -0.3 }, { on: 'anger', by: -0.3 }], seedRate: 0.002, seedRadius: 2, lifespan: 3600, root: 'calm', biomes: ['rainforest', 'marsh'], soil: { forest: 0.5, marsh: 0.5 }, form: { form: 'vine', hue: 180 } },
+  brightcap: { growth: 0.003, maxFood: 1, regrow: 0.002, nutrition: 2, fx: [{ on: 'learning', times: 1.4, for: 480 }], seedRate: 0.0015, seedRadius: 2, lifespan: 2400, root: 'bright', biomes: ['rainforest', 'woodland'], soil: { forest: 0.5 }, form: { form: 'cap', hue: 55 } },
+  luckleaf: { growth: 0.003, maxFood: 2, regrow: 0.002, nutrition: 3, fx: [{ on: 'luck', times: 1.3, for: 480 }], seedRate: 0.0015, seedRadius: 2, lifespan: 3000, root: 'luck', biomes: ['lakeland', 'marsh', 'steppe'], soil: { grass: 0.5, marsh: 0.4 }, form: { form: 'flower', hue: 130 } },
+  ironmoss: { growth: 0.002, maxFood: 2, regrow: 0.0015, nutrition: 5, fx: [{ on: 'toughness', times: 1.3, for: 480 }, { on: 'warmth', times: 1.2, for: 240 }], seedRate: 0.0015, seedRadius: 2, lifespan: 5000, root: 'moss', hardy: 1, biomes: ['arctic', 'antarctic', 'tundra'], soil: { snow: 0.8, rock: 0.4 }, form: { form: 'rosette', hue: 205 } }
 };
 /* SEAS (Generation 27): a world begun with opts.seas has an ocean that divides the known land, a greater ocean on the far side of the world with
    islands large enough to live on, and two great lakes. Their hearts are open water: more than two steps from any shore, where no one can swim
@@ -1328,6 +1381,7 @@ SW.createWorld = function (seed, opts) {
     creatures: [], agents: [], graves: [], marks: [], places: [], inventions: [], edicts: [], devices: {}, settlements: [], looks: {}, wars: [], fished: {}, river: {}, ore: {}, sites: [], fields: [], regions: [], region: [], lodes: {}, bkind: {}, roads: {}, works: {}, peoples: [], tally: { made: {}, eaten: {}, built: {} }, weather: { kind: 'clear', until: 160 }, names: {},
     laws: SW.defaultLaws(), nextId: 1
   };
+  if (opts.flora) { for (const k in SW.FLORA) w.laws.plants[k] = JSON.parse(JSON.stringify(SW.FLORA[k])); w.flora = 1; }
   if (opts.seas) w.seas = { m: opts.margin != null ? opts.margin : 36, my: opts.margin != null ? opts.margin : 14 };
   use(w); genTerrain(w);
   { const Mg = opts.margin != null ? opts.margin : 36, My = opts.margin != null ? opts.margin : 14; if (Mg > 0) veil(w, Mg, My); narrowWater(w); w.tally.lived = 0; }
@@ -1362,6 +1416,7 @@ SW.createWorld = function (seed, opts) {
     if (per >= 4) { SW.settle(w, Math.ceil(per / 2), P); SW.settle(w, Math.floor(per / 2), P); } else SW.settle(w, per, P);
   }
   seedRich(w);
+  if (opts.fog) fogIn(w);
   return w;
 };
 
@@ -1735,6 +1790,7 @@ function stepCreatures(w, emit) {
   /* when grazers are few, a herd comes in from the rim; when hunters are few for the prey there is, a pair follows */
   /* the sea gives back what was fished and hunted out of it: a kind of the sea that has fallen below its least number comes in again on open water */
   if (w.tick % L.time.dayLength === 3) SW.openAges(w, emit);
+  if (w.fogDirty && w.tick % 20 === 0) { w.fogDirty = 0; narrowWater(w); WF.delete(w.terrain); }
   if (w.tick % L.time.dayLength === 5) fadeWear(w); if (w.tick % L.time.dayLength === 9) feedHounds(w, emit); /* the library: an age is opened when its people come near it (no chance is drawn) */
   if ((L.ecology.seaReturn || 0) > 0 && w.tick % 60 === 41) { /* looked at once in sixty moments, by a chance of its own, so the world's own stream of chance is left as it was */
     const ks = Object.keys(L.creatures).filter(function (k) { const q = L.creatures[k]; return q.sea && !q.retired && (counts[k] || 0) < (q.minPop || 2); });
@@ -2037,7 +2093,7 @@ SW.upgrade = function (w) {
   if (!w.regions || !w.regions.length) { w.regions = [{ id: 0, name: 'the Land', biome: 'mixed', x: w.W >> 1, y: w.H >> 1 }]; w.region = []; for (let i = 0; i < w.W * w.H; i++) w.region.push(0); }
   ['lodes', 'bkind', 'roads', 'works'].forEach(function (k) { if (!w[k]) w[k] = {}; });
   if (!w.peoples) w.peoples = []; if (!w.tally) w.tally = { made: {}, eaten: {}, built: {} }; ['made', 'eaten', 'built'].forEach(function (k) { if (!w.tally[k]) w.tally[k] = {}; });
-  if (w.laws.build && w.laws.build.near == null) w.laws.build.near = 12; if (w.laws.build && w.laws.build.trackAt == null) { w.laws.build.trackAt = 10; w.laws.build.trackFade = 0.8; w.laws.build.dirtCost = 1.5; } if (w.laws.ecology && w.laws.ecology.houndHunt == null) { w.laws.ecology.houndHunt = 0.4; w.laws.ecology.scrapDays = 3; } SW.openAges(w); /* a world made before Generation 28 is given the library of the ages it has reached */ if (!w.laws.traditions) w.laws.traditions = SW.defaultLaws().traditions; if (!w.laws.verse) w.laws.verse = SW.defaultLaws().verse; (w.peoples || []).forEach(function (P) { if (!P.tradition) P.tradition = traditionFor(w, P); }); /* a world made before Generation 27 is given its peoples' traditions */
+  if (w.laws.build && w.laws.build.near == null) w.laws.build.near = 12; if (w.laws.explore && w.laws.explore.see == null) { w.laws.explore.see = 3; w.laws.explore.start = 22; } if (w.laws.build && w.laws.build.trackAt == null) { w.laws.build.trackAt = 10; w.laws.build.trackFade = 0.8; w.laws.build.dirtCost = 1.5; } if (w.laws.ecology && w.laws.ecology.houndHunt == null) { w.laws.ecology.houndHunt = 0.4; w.laws.ecology.scrapDays = 3; } SW.openAges(w); /* a world made before Generation 28 is given the library of the ages it has reached */ if (!w.laws.traditions) w.laws.traditions = SW.defaultLaws().traditions; if (!w.laws.verse) w.laws.verse = SW.defaultLaws().verse; (w.peoples || []).forEach(function (P) { if (!P.tradition) P.tradition = traditionFor(w, P); }); /* a world made before Generation 27 is given its peoples' traditions */
   { const D0 = SW.defaultLaws().buildings, B0 = w.laws.buildings || {}; for (const k in D0) if (D0[k].from && B0[k] && B0[k].from == null) B0[k].from = D0[k].from; if (B0.longhall && B0.longhall.from == null && B0.hall) B0.longhall.from = 'hall'; } /* lines of descent between kinds of building (Generation 26) */
   const D = SW.defaultLaws(); ['minerals', 'goods', 'recipes', 'buildings', 'drives', 'status', 'discovery', 'culture', 'arrivals', 'explore', 'trade', 'climate', 'body', 'ecology', 'disease'].forEach(function (g) { if (!w.laws[g]) w.laws[g] = D[g]; else for (const k in D[g]) if (w.laws[g][k] == null && g !== 'recipes') w.laws[g][k] = D[g][k]; });
   for (const g in D) if (D[g] && typeof D[g] === 'object' && !Array.isArray(D[g]) && w.laws[g] && ['plants', 'creatures', 'tools', 'tree', 'recipes', 'buildings', 'minerals', 'goods'].indexOf(g) < 0) for (const k in D[g]) if (w.laws[g][k] == null) w.laws[g][k] = D[g][k];
@@ -3121,6 +3177,7 @@ function stepAgents(w, emit) {
       if (a.hp <= 0) { killAgent(w, a, 'starved', emit); continue; }
     } else if (a.faint && a.e > 10) a.faint = 0;
     if (a.age > a.life) { killAgent(w, a, 'old age', emit); continue; }
+    if (w.fog && w.veil && ((w.tick + a.id) & 1) === 0 && (a.intent || a.e < 40)) openAround(w, a, emit); /* one who goes with a purpose, or in need, looks into the unknown; one idling at home does not */
     if (!a.nearing && a.age > a.life * ((L.verse || {}).near || 2)) { a.nearing = 1; emit({ type: 'nearing', a: a.id }); } /* an elder feels its death near (no chance is drawn) */
     if (a.e < 25 && !a.lowFlag) { a.lowFlag = true; feel(a, 'fear', 0.3); SW.press(w, a, 'hunger', 1); if (winter || SW.season(w) === 2) SW.press(w, a, 'famine', 1); const hr = L.body.hearing, nearIds = [], kinIds = []; for (let j = 0; j < w.agents.length; j++) { const o = w.agents[j]; if (o === a || o.dead) continue; const dd = cheb(a.x, a.y, o.x, o.y); if (dd <= hr) nearIds.push(o.id); else if (dd <= hr * 3 && (rootOf(w, o) === rootOf(w, a) || (a.parents || []).indexOf(o.id) >= 0 || (o.parents || []).indexOf(a.id) >= 0)) kinIds.push(o.id); } emit({ type: 'low', a: a.id, near: nearIds, kin: kinIds, x: a.x, y: a.y }); }
     else if (a.e > 45) a.lowFlag = false;

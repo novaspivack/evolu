@@ -11,11 +11,11 @@ Nova's message of 23 Nov 22:10, in full substance. Work in waves; each wave is a
 - [x] Roads by stage: hunting tracks to rich places, dirt roads between settlements, stone roads, paved roads; people follow roads to get places; vehicles too.
 - [ ] (blocks the maker makes for itself: done in 29; the rest moved to Wave 3) Left from 28: vehicles and craft that move (cart on a road, train between stations, craft of the air); goods carried between settlements as a thing in the world (caravans, sea lanes); blocks the maker makes for itself; fuller library for ages three to six (most of this in Wave 3).
 
-## Wave 2: Generation 30
-- [ ] A new world starts with less land filled in: only around where people are; they explore the rest.
-- [ ] Lack of food or resources, or crowding, raises the urge to explore; so does a strong desire to be a great merchant or hero.
-- [ ] Plants: edible fruits and berries on trees, bushes, scrub and cactus; some poisonous, psychoactive, healing, more or less nutritious, giving strength and stamina, aphrodisiac for a while, changing other traits; herbs likewise.
-- [ ] Terrain drawing: mountains of different sizes (hills, boulders, foothills, big and huge mountains); mesas and rock formations in deserts; cactus, scrub and joshua trees in deserts, pine in temperate forest, palms in rainforest.
+## Wave 2: Generation 30 (LIVE)
+- [x] A new world starts with less land filled in: only around where people are; they explore the rest.
+- [x] Lack of food or resources, or crowding, raises the urge to explore; so does a strong desire to be a great merchant or hero.
+- [x] (all but the aphrodisiac and lasting changes of trait) Plants: edible fruits and berries on trees, bushes, scrub and cactus; some poisonous, psychoactive, healing, more or less nutritious, giving strength and stamina, aphrodisiac for a while, changing other traits; herbs likewise.
+- [x] Terrain drawing: mountains of different sizes (hills, boulders, foothills, big and huge mountains); mesas and rock formations in deserts; cactus, scrub and joshua trees in deserts, pine in temperate forest, palms in rainforest.
 
 ## Wave 3: Generation 31
 - [ ] Tech tree, other trees and catalogues built out so everything has attributes and works; think how each looks and what it does to the land.

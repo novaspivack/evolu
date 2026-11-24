@@ -274,11 +274,21 @@ function buildTerrain() {
         b.strokeStyle = 'rgba(120,84,40,0.38)'; b.lineWidth = 1.6; b.beginPath(); b.moveTo(gx - 9, gy + 1); b.quadraticCurveTo(gx, gy - 4, gx + 9, gy + 1); b.stroke();
         b.strokeStyle = 'rgba(240,214,160,0.4)'; b.lineWidth = 1.2; b.beginPath(); b.moveTo(gx - 9, gy - 0.5); b.quadraticCurveTo(gx, gy - 5.5, gx + 9, gy - 0.5); b.stroke();
       }
+      { /* Generation 30: mesas, standing rocks, cactus and joshua trees */
+        const hd = hash(x, y, 310), cx = ox + 6 + hash(x, y, 311) * (TP - 12), cy = oy + 9 + hash(x, y, 312) * (TP - 14);
+        if (hd < 0.045) { const mw = 8 + hash(x, y, 313) * 6, mh = 6 + hash(x, y, 314) * 5; b.fillStyle = '#9a5a36'; b.beginPath(); b.moveTo(cx - mw, cy + 4); b.lineTo(cx - mw * 0.72, cy - mh); b.lineTo(cx + mw * 0.72, cy - mh); b.lineTo(cx + mw, cy + 4); b.closePath(); b.fill();
+          b.fillStyle = 'rgba(70,34,20,0.45)'; b.beginPath(); b.moveTo(cx + mw * 0.2, cy - mh); b.lineTo(cx + mw * 0.72, cy - mh); b.lineTo(cx + mw, cy + 4); b.lineTo(cx + mw * 0.3, cy + 4); b.closePath(); b.fill(); b.strokeStyle = 'rgba(232,180,128,0.8)'; b.lineWidth = 1.2; b.beginPath(); b.moveTo(cx - mw * 0.72, cy - mh); b.lineTo(cx + mw * 0.72, cy - mh); b.stroke(); b.strokeStyle = 'rgba(120,60,36,0.5)'; b.lineWidth = 0.8; b.beginPath(); b.moveTo(cx - mw * 0.86, cy - mh * 0.3); b.lineTo(cx + mw * 0.86, cy - mh * 0.3); b.stroke(); }
+        else if (hd < 0.08) { b.fillStyle = '#8a5236'; b.beginPath(); b.moveTo(cx - 2.5, cy + 4); b.lineTo(cx - 1.5, cy - 8); b.lineTo(cx + 1.5, cy - 9); b.lineTo(cx + 3, cy + 4); b.closePath(); b.fill(); b.fillStyle = 'rgba(60,30,18,0.45)'; b.fillRect(cx + 0.5, cy - 8, 2, 12); }
+        else if (hd < 0.17) { b.strokeStyle = '#3f7a48'; b.lineWidth = 2.2; b.lineCap = 'round'; b.beginPath(); b.moveTo(cx, cy + 4); b.lineTo(cx, cy - 6); b.moveTo(cx, cy - 1); b.lineTo(cx - 3.5, cy - 1); b.lineTo(cx - 3.5, cy - 4.5); b.moveTo(cx, cy + 0.5); b.lineTo(cx + 3.5, cy + 0.5); b.lineTo(cx + 3.5, cy - 3); b.stroke(); b.lineCap = 'butt'; }
+        else if (hd < 0.22) { b.strokeStyle = '#6a5236'; b.lineWidth = 1.6; b.beginPath(); b.moveTo(cx, cy + 4); b.lineTo(cx, cy - 2); b.lineTo(cx - 3, cy - 5); b.moveTo(cx, cy - 2); b.lineTo(cx + 3, cy - 5.5); b.stroke(); b.fillStyle = '#5f8a4a'; [[-3, -6], [3, -6.5], [0, -4]].forEach(function (q) { b.beginPath(); b.arc(cx + q[0], cy + q[1], 2.2, 0, 6.2832); b.fill(); }); }
+      }
     } else if (t === 8) {
       for (let k = 0; k < 2; k++) { const gx = ox + hash(x, y, 200 + k) * TP, gy = oy + hash(x, y, 210 + k) * TP; b.strokeStyle = 'rgba(150,172,196,0.5)'; b.lineWidth = 1.5; b.beginPath(); b.moveTo(gx - 7, gy); b.quadraticCurveTo(gx, gy - 3.5, gx + 7, gy); b.stroke(); }
     } else if (t === 4) {
-      for (let k = 0; k < 2; k++) {
-        const gx = ox + 5 + hash(x, y, 220 + k) * (TP - 10), gy = oy + 8 + hash(x, y, 230 + k) * (TP - 10), r = 5 + hash(x, y, 240 + k) * 6;
+      /* mountains of several sizes (Generation 30): boulders and foothills, peaks, great mountains and a few huge ones, by a slow-changing measure of the range */
+      const mz = vnoise(x * 0.16, y * 0.16, 301), huge = mz > 0.74 && hash(x, y, 305) < 0.2, great = !huge && mz > 0.58 && hash(x, y, 303) < 0.4, low = mz < 0.4;
+      for (let k = 0; k < (huge || great ? 1 : low ? 3 : 2); k++) {
+        const gx = huge || great ? ox + TP * 0.5 : ox + 5 + hash(x, y, 220 + k) * (TP - 10), gy = huge || great ? oy + TP * 0.7 : oy + 8 + hash(x, y, 230 + k) * (TP - 10), r = huge ? 24 + hash(x, y, 240) * 12 : great ? 14 + hash(x, y, 240) * 7 : low ? 2.5 + hash(x, y, 240 + k) * 2.5 : 5 + hash(x, y, 240 + k) * 6;
         b.fillStyle = 'rgba(48,46,52,0.75)'; b.beginPath(); b.moveTo(gx, gy - r); b.lineTo(gx + r * 0.95, gy + r * 0.55); b.lineTo(gx - r * 0.2, gy + r * 0.55); b.closePath(); b.fill();
         b.fillStyle = 'rgba(176,170,160,0.85)'; b.beginPath(); b.moveTo(gx, gy - r); b.lineTo(gx - r * 0.2, gy + r * 0.55); b.lineTo(gx - r * 0.95, gy + r * 0.55); b.closePath(); b.fill();
         if (y < Ht * 0.45 || hash(x, y, 250 + k) < 0.25) { b.fillStyle = 'rgba(240,244,248,0.9)'; b.beginPath(); b.moveTo(gx, gy - r); b.lineTo(gx + r * 0.3, gy - r * 0.45); b.lineTo(gx - r * 0.28, gy - r * 0.4); b.closePath(); b.fill(); }
@@ -288,11 +298,14 @@ function buildTerrain() {
   /* trees last, so crowns overlap their neighbours: broadleaf in the warm south, conifer in the cold north */
   for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) {
     if (w.terrain[y * Wt + x] !== 3) continue;
-    const cold = y / Ht < 0.36 + (hash(x, y, 260) - 0.5) * 0.12;
+    const bio = ((w.regions || [])[(w.region || [])[y * Wt + x]] || {}).biome, palm = bio === 'rainforest', cold = !palm && (bio === 'tundra' || bio === 'highland' || bio === 'arctic' || bio === 'antarctic' || (bio !== 'desert' && bio !== 'steppe' && y / Ht < 0.36 + (hash(x, y, 260) - 0.5) * 0.12)); /* pine in the cold and the high country, palms in the rainforest (Generation 30) */
     for (let k = 0; k < 3; k++) {
       const gx = (x + 0.12 + hash(x, y, 270 + k) * 0.76) * TP, gy = (y + 0.12 + hash(x, y, 280 + k) * 0.76) * TP, r = 5 + hash(x, y, 290 + k) * 4.5;
       b.fillStyle = 'rgba(8,22,16,0.4)'; b.beginPath(); b.ellipse(gx + 2.5, gy + 3.5, r, r * 0.8, 0, 0, 6.2832); b.fill();
-      if (cold) {
+      if (palm) {
+        b.strokeStyle = '#5a4630'; b.lineWidth = 1.6; b.beginPath(); b.moveTo(gx, gy + r * 0.7); b.quadraticCurveTo(gx + r * 0.25, gy, gx, gy - r * 0.7); b.stroke();
+        b.strokeStyle = hash(x, y, 300 + k) < 0.5 ? '#2f7a46' : '#3c8a4e'; b.lineWidth = 2; for (let f = 0; f < 5; f++) { const an = -2.6 + f * 0.52; b.beginPath(); b.moveTo(gx, gy - r * 0.7); b.quadraticCurveTo(gx + Math.cos(an) * r * 0.7, gy - r * 0.7 + Math.sin(an) * r * 0.9, gx + Math.cos(an) * r * 1.15, gy - r * 0.55 + Math.sin(an) * r * 0.35); b.stroke(); }
+      } else if (cold) {
         b.fillStyle = '#1f3d33'; b.beginPath(); b.moveTo(gx, gy - r * 1.25); b.lineTo(gx + r * 0.9, gy + r * 0.7); b.lineTo(gx - r * 0.9, gy + r * 0.7); b.closePath(); b.fill();
         b.fillStyle = 'rgba(96,140,112,0.5)'; b.beginPath(); b.moveTo(gx, gy - r * 1.25); b.lineTo(gx - r * 0.1, gy + r * 0.7); b.lineTo(gx - r * 0.9, gy + r * 0.7); b.closePath(); b.fill();
       } else {
@@ -1791,7 +1804,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 29, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 30, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1861,7 +1874,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 29, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 30, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }
@@ -1915,7 +1928,7 @@ function newWorld(seed) {
   const keep = st ? st.settings : null;
   const legacy = st ? SWK.legacy(st) : null;
   if (st && !U.choosing) save(); /* the world being left is kept under its name */
-  const fresh = SWM.createState(SW.createWorld(seed, window.EVOLU_SEAS === 0 ? {} : { seas: 1 }), keep ? JSON.parse(JSON.stringify(keep)) : SWM.defaultSettings()); fresh.world.name = worldName(null);
+  const fresh = SWM.createState(SW.createWorld(seed, window.EVOLU_SEAS === 0 ? {} : { seas: 1, flora: 1, fog: window.EVOLU_FOG === 0 ? 0 : 1 }), keep ? JSON.parse(JSON.stringify(keep)) : SWM.defaultSettings()); fresh.world.name = worldName(null);
   attach(fresh); U.playing = true;
   if (st.settings.autoWake && st.sample) st.on = true;
   SWK.inherit(st, legacy);
