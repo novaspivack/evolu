@@ -282,6 +282,23 @@ Each thought is a call to Claude on your account. The models are chosen in Setup
 
 Three things to know. Publishing a new version reloads an open page, so do not publish during a run; and if you are working with Claude in the same conversation while a world runs, ask it to do nothing until the run is over. A world saved under an older generation still loads and can be carried on: it takes the laws that were re-tuned since (and a world from Generation 30 or later gains the laws of the many), but not new lands, peoples, seas, the unknown, or heritage, so start a new world for those. And the run is written to the artifact's store as it goes, so a run that is cut short is not lost: Claude can read its final state from there.
 
+**As a desktop app (beta).** Claude for Mac and Windows can install an artifact as an app with its own icon and its own window. Evolu has not been changed for this and we have not yet tried it installed, so what follows is how the feature is described ([Install as app](https://claude.com/resources/articles/install-as-app)) and what to check the first time.
+
+1. Update Claude for Mac or Windows.
+2. Open the Evolu artifact in it.
+3. In the **Share** menu, choose **Install as app**.
+
+- **Permissions.** Choose the default level. Evolu asks for nothing an ordinary page could not do: no notifications, no shortcuts, no files on disk.
+- **Thoughts are spent the same way.** The app runs on your Claude account, with no key or separate login, and each thought counts toward your plan's usage as it does on the page. You must be online and signed in.
+- **It follows the artifact.** When a new generation is published the app updates by itself, and Claude asks about permissions again. As on the page, do not publish while a world is running.
+- **Where it is offered.** It is rolling out on all plans. On a Team plan it is on by default; on Enterprise an owner has to turn it on; it is not offered to HIPAA-ready organizations or hybrid deployments.
+
+Check these the first time, because we do not know them yet:
+
+- **Saved worlds.** They are kept in the browser's own storage, and the app may keep its own. If your worlds are not listed in the app, they are still in the browser where you ran them. Press **Download run log** before you move, so that nothing rests on it.
+- **A window behind others.** A browser slows a page it is not showing. See whether the world keeps its pace when the app's window is not in front.
+- **One place at a time.** Do not run the same world in the app and in a browser tab together: both would write to the same record.
+
 **Outside Claude.** Serve `src/` with any static web server and the world runs, on instinct only: the minds cannot wake, because there is nothing to call. This is how the browser tests run it, with a scripted stand-in for Claude.
 
 ## Export a run and build the next generation
@@ -385,6 +402,7 @@ Since Generation 33 a new check is also run against the generation before, where
 - **A world begun in a later age** has been run with real minds three times, for a few days each: twice on Generation 31, in the third and fourth ages, where the people of a town with a foundry and a parliament still talked and lived as gatherers, which is why a mind is now told its age; and once on Generation 32, from which only pictures came back. Horses, vehicles and the towns' streets have been seen by real minds only in that last run.
 - **The many and their groups** (Generation 34) have been run by rule and with scripted stand-ins only. Whether a group's voice reads as a people, and what the named make of the many, is not known.
 - The later ages are partly built. The ways, minerals, structures, towns, horses and vehicles exist and act; trade between settlements, money and wages, and the troubles of a crowded society do not. Thirteen of the 68 ways, all in ages four to six, still have nothing behind them but the next way.
+- Evolu installed as a desktop app has not been tried. The page was not changed for it, and whether saved worlds carry over and whether the world keeps its pace in a window that is not in front are not known.
 - Saved worlds live in the browser (IndexedDB, with one older slot as a fallback). They do not travel between browsers or devices; the run log does.
 - Only a world begun under Generation 20 or later is a globe, only one begun under 27 or later has seas, and only one begun under 30 or later starts mostly unknown. Older worlds keep what they were made with.
 - An act can pass every check on the body and still never be reachable by a mind: claiming and venturing were in that state for two generations. One suite now drives each act through the mind's own path, and reads the list of acts out of the prompt to check the body accepts every one.
