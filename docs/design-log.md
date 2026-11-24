@@ -12,6 +12,66 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## Generation 28 (built, not yet run with real minds): structures from blocks, a library by age, works that depend on one another
+
+Nova, 23 November, with the run file of day 77 ("looks better"): analyse it, go on with the plan for the next generation, and the next run will be a new world. The plan agreed for this generation: more kinds of structure; the maker composing structures from building blocks with attributes; libraries that load at the right ages; roads, vehicles and transport by sea and air; settlements whose works depend on one another.
+
+### What the eighteenth run showed (Generation 27, Wenenvale carried on, days 72 to 77)
+
+429 thoughts in five days, no call refused. Counted from `runs/generation-27-run-r5614-mwsokxmr-day77.json`.
+
+- **Verse was written.** 34 asked, 32 made, none lapsed (two were still pending): eight death poems, eight myths (one for each people), six love songs, four laments, four lullabies, two songs of a deed. Seventeen runs before had none. Vorok, dying: "Rain on the Vaia stone / what a hand teaches outlives the hand / I set the hammer down". Zurar's lament for him two days later: "Vorok, you lit the fire on Vaia stone / You dug the ore and taught us not to grieve alone / Your hammer rests, the rain falls on the hall / Your teaching lives in us, and we keep it all". The death poems keep their form (an image of the season, what life taught, a letting go); the rhymed forms mostly rhyme; the beats are uneven. The myths follow the traditions and name their own powers (Sulaq the Ice Mother, Gor the Hammer and Vael the Wind, Vaorun the Guardian). Three peoples of the Watching Dead told nearly the same myth, which is what one would expect of one tradition and is also a sign that the tradition's own words carry most of it.
+- **Chapters 17 and 18 are headed by death poems** (Vorok's, Nauwa's), as built.
+- **Births outran deaths:** seven born (one pair of twins) against six dead, five of age and one a day-old child gored by a mammoth. Nine courtings were answered. In the ten days before there were two births and nine deaths. 37 alive: 9 elders, 22 grown, 6 children.
+- **Water was crossed:** the first crossing on day 72 (Zichi), and 28 in all, most of them two beings going to and fro across the Tordan Lakes. Each was written into the chronicle as a discovery, which is too many.
+- **Ways spread at once when the band's practice began to count:** 82 insights in five days, 40 of them on the first day. Alchemy, lost at day 72, was found again (two hold it at day 77). Scholarship is new. 29 of 68 ways are held (27 at day 72), three of the third age.
+- **No offering was made, no trade, no forge, nothing raised in place.** Twelve entries under building: six takings-over of what the dead left, four fires, one longhall, one field. Fourteen settlements are listed.
+- **A third of thoughts still came in the middle of a plan** (136 of 429). With the sum gone, each of these was let through by one event of urge 6 or more; 233 of 257 things said were said to someone by name, and being spoken to is weighty. I think most of the third is conversation, which is as it should be, but the record did not say what let each one through. It does now.
+- **Prompts have grown:** a middle of 34,900 characters and a longest of 48,700 (a deep thought), against 30,700 in the fourteenth run. By section: standing text and the reply format about 13,300, the ways known 4,900, what can be made 1,800. The chronicler's prompt was 110,700 and 117,000.
+- **The maker** (one visit, day 74): sowed rimewort and ironnut where people were packed; saw that "the hunger gathered in the most crowded land rather than the barest"; and asked for one thing: for each land, the food bearing now set against the beings there and their median energy.
+
+### Built
+
+**From the plan**
+
+- **Blocks.** A structure is put together from parts with attributes of their own (`laws.blocks`): roof, hearth (warmth), beds (health), benches (craft), gathering (bond), altar (fear and grief), lookout (sight), garden (joy); in the second age baths, shelves, forgefire, beaconfire, courtyard; later vault, great hall, lamp, engine, wire, mast. `SW.compose` adds them: costs add, effects of one kind add, a boon keeps its strongest. **The maker designs with them** (op `structure`: two to five blocks, an optional way, what it grows out of, what it depends on, whether it must stand by water or a road). Anything above six wood or six stone is raised in loads, as since Generation 26.
+- **A library by age** (`SW.LIBRARY`, data). The first two ages are open in every world; a later age is opened into a world's laws when someone in it knows a way of the age before, so a world carries only what its people could yet raise. Opening is chronicled and noticed on the page. Ten structures and nineteen blocks are in it across five ages.
+- **Works that depend on one another.** A kind of building may ask for another to stand within twelve steps (`needs`) or for a paved way or water beside it. In the library: a guest house needs a store; a bath house a well; a road house a paved way; a lighthouse a dock; a harbour a market (and is raised in place of a dock); a station an engine house and a paved way; a mast a power house; a hangar an airport. A mind is told what each depends on and whether one is here; a plan that ignores it fails with the reason and spends nothing.
+- **Transport and signals.** A landing (the way of rafts) at the edge of water; a beacon (signals), a lighthouse and a mast carry a voice two to eight times as far for one who speaks beside them. Roads, carts, sleds, ships and airships were already in the world; nothing new was added to how they move.
+- **Settlements that know of one another.** A being is told of the settlements it has been near: where each lies, what stands there that its own lacks, what its own has that the other lacks, and whether a paved way joins them (a search along paved tiles). What it does about it is its own affair.
+
+**From the run**
+
+- **The maker's request:** `landsNow` gives, for each land, the beings there, their median and lowest energy, the food bearing now and food per being, the tightest first.
+- **A crossing is news once for each land a being lands in.** Every crossing is still counted and told to the one who crossed.
+- **Why a plan was broken is recorded** with the thought (`came.why`).
+- **An elder who feels death near is told which ways no one else alive knows,** and to teach them.
+- **Heritage:** the maker changed no law in this run. Its one new lesson is folded in without its last sentence ("Raising the lifespan does not save elders already near its end"), which was true of Generation 26 and is not since 27. 51 changes, 58 lessons, 34 ideas.
+
+### Measured
+
+- **Balance on instinct, twelve seeds, forty days,** against Generation 27 in the same sitting: every figure the same (15.1 alive, 0.3 deaths, 2,545 plants). Nothing here touches a body that is given no plan.
+- **Speed:** 2.39 ms a moment against 2.47 for Generation 27 in the same sitting (the difference is noise).
+- **Prompts:** unchanged at the start of a world; see below for what is added later.
+
+### Tested
+
+- **815 checks in 24 numbered files, the two mind pipelines, the long ecology run and 12 checks of the page in headless Chrome: all pass.** The new file (`tests/24`, 34 checks) goes through the mind: a plan to build a bath house fails where no well stands, with the reason told and nothing spent, and the same plan raises it once one does; a road house likewise by a paved way; a structure the maker designed from blocks is raised by a mind's plan and held to what it depends on; a word spoken beside a beacon is heard at twenty steps and not without it.
+- **Settlements:** a being is not told of a settlement it has never been near; once near, it is told what the other has and lacks against its own; a paved way laid between them joins them, and a one-tile gap unjoins them.
+- **The library:** a world begins with two ages open; knowing a way of the third age opens the third and makes the fourth ready, and not the fifth; a world saved by Generation 27 is given the library and runs on. The save check's fixture is now Generation 27's.
+- **Not tested:** anything a real mind does with any of it. The page was loaded with the new world in the browser checks and shows no error; the look of the new kinds of building is the default one.
+
+### Not built, and not known
+
+- **Vehicles and movement by air:** nothing new. The hangar and the station are places; no craft flies and no train runs.
+- **Goods moving between settlements by themselves** (caravans, routes with a yield): not built. Minds are told what another settlement has; carrying it is up to them.
+- **The maker adding a block of its own:** not built. It composes from the blocks of the ages open.
+- **Offerings:** none was made in the run and nothing was changed. None of that world's five traditions is the Angry Sky, whose text is the only one that speaks of gifts.
+- **A newborn can wander:** a day-old child was gored. Not looked into.
+- **Prompt size:** not reduced. Generation 28 adds nothing at the start of a world (22,754 characters for an ordinary thought and 29,340 for a deep one, as in 27); later, about 220 characters for each new structure whose way a being knows (nine kinds are shown at a time, as before) and about 450 for one other settlement known, in every deep thought and one ordinary thought in three.
+- **Three peoples telling nearly one myth:** left as it is.
+- What the tests cannot show is how real minds behave: whether anyone raises a guest house, walks to another settlement for its forge, or paves the way between two.
+
 ## Generation 27 (built, not yet run with real minds): verse, traditions, seas, courting answered
 
 Nova, 23 November, with the run file of day 72: he agreed to the audit's proposals, except that the thresholds for riding and currency stay and are watched, and that signals and alchemy should do something and not be folded away. He asked for poems and songs that are really composed (a poem of wisdom from one who is dying, a love poem, a poem by a band for its dead), for myths, fables and stories handed down, for chapter headings in the manner of Dune, for forms with rhyme and metre; for mythologies and religions that differ by people and shape how each lives, the kindly and the hard; for the run's own faults to be mended (mating that does not succeed, no one crossing water); for new worlds to have at least one great ocean, large lakes and islands large enough for a civilisation; and for the "send everything now" button to stop failing. "Make a plan for this big, big iteration, and then do it."

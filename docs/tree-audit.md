@@ -107,3 +107,7 @@ Run again with the fourth run file of the same world (`node tests/tools/tree-aud
 
 What Generation 27 did with the audit's proposals: (1) the practice of a band counts toward a way for each member (`culture.bandPractice`, half); (2) every six units carried to a work count as one building; (3) thresholds left alone and tracked; (4) signals carry a voice two and a half times as far and alchemy makes a tonic and a wakefire, so the ways with nothing behind them fell from 15 to 13 of 68, all of the fourth age and after; (5) how each way was come by is recorded on the being (`knows[way].how`: people, parents, taught, found, building) and in the final state (`body.came`), and the audit tool counts it for any run file that has it.
 
+## Added after the eighteenth run (day 77, under Generation 27)
+
+37 alive; 29 of 68 ways held (17 of the first age, 9 of 16 of the second, 3 of 11 of the third: sailing, scholarship, alchemy); the middle being holds 11. Alchemy came back (two holders) after dying with its one holder; signals still has one holder. In five days there were 82 insights, 40 on the day the band's practice began to count: the change let a people's shared practice open ways for its members, once, in a rush. Of the ways come by since Generation 27 records it: 48 from parents, 26 taught, 24 found alone. Riding and currency are still held by no one; no trade was made in the five days.
+

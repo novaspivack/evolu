@@ -1,8 +1,8 @@
-/* audit of the trees against the run files of one world (days 12, 25, 60, 72). From Generation 27 a run file also says how each way was come by (body.came). */
+/* audit of the trees against the run files of one world (days 12, 25, 60, 72, 77). From Generation 27 a run file also says how each way was come by (body.came). */
 const fs = require('fs'), SW = require('../../src/engine.js'), M = require('../../src/minds.js'), K = require('../../src/maker.js');
 const w0 = SW.createWorld(7), st0 = M.createState(w0); K.inherit(st0, null); const L = w0.laws, T = L.tree, ways = Object.keys(T);
 const out = {};
-for (const [name, file] of [['day 12', '../../runs/generation-20-run-r5614-mwsokxmr-day12.json'], ['day 25', '../../runs/generation-21-run-r5614-mwsokxmr-day25.json'], ['day 60', '../../runs/generation-22-run-r5614-mwsokxmr-day60.json'], ['day 72', '../../runs/generation-26-run-r5614-mwsokxmr-day72.json']]) {
+for (const [name, file] of [['day 12', '../../runs/generation-20-run-r5614-mwsokxmr-day12.json'], ['day 25', '../../runs/generation-21-run-r5614-mwsokxmr-day25.json'], ['day 60', '../../runs/generation-22-run-r5614-mwsokxmr-day60.json'], ['day 72', '../../runs/generation-26-run-r5614-mwsokxmr-day72.json'], ['day 77', '../../runs/generation-27-run-r5614-mwsokxmr-day77.json']]) {
   const r = JSON.parse(fs.readFileSync(require('path').join(__dirname, file), 'utf8')), B = (r.digest.beings || []).filter(b => !b.dead);
   const held = {}, self = {}, perBeing = [];
   const KN = b => { const kn = (b.body && b.body.knows) || {}, o = {}; if (Array.isArray(kn)) kn.forEach(q => { const id = typeof q === 'string' ? q.split(' ')[0].replace(/[^a-z]/g, '') : (q.way || q.id || q.k); if (id) o[id] = q; }); else for (const k in kn) o[k] = kn[k]; return o; };

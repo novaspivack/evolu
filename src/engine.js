@@ -134,7 +134,7 @@ SW.defaultLaws = function () {
       powerhouse: { way: 'electricity', wood: 10, stone: 30, sight: 4, fx: [{ on: 'joy', by: 0.3 }], hint: 'light without flame'  }
     },
     land: { rockMove: 1.8, marshMove: 1.6, snowMove: 1.6, shallowsMove: 3, forestMove: 1.1, desertThirst: 0.03, snowCold: 0.05 },
-    build: { reuse: 0.5, shelterWood: 3, wallWood: 2, razeChance: 0.25, woodChance: 0.5, woodMax: 6, fellChance: 0.25, treeRegrow: 0.5 },
+    build: { near: 12, reuse: 0.5, shelterWood: 3, wallWood: 2, razeChance: 0.25, woodChance: 0.5, woodMax: 6, fellChance: 0.25, treeRegrow: 0.5 },
     weather: { meanDuration: 200, rainGrowth: 1.6, droughtGrowth: 0.35, rainCold: 0.015, stormCold: 0.08, snowCold: 0.03, droughtThirst: 0.02, strikeChance: 0.006, strikeDamage: 24, fogSight: 4, bloom: 0.08, blight: 0.05, herd: 0.05, pack: 0.03, disaster: 0.04 },
     mood: { decay: 0.996 },
     device: { life: 3600, wood: 2, stone: 1, strike: 9, holdMax: 6 },
@@ -955,6 +955,103 @@ function skyAt(w, i) {
 }
 SW.skyAt = function (w, x, y) { return skyAt(w, idx(w, x, y)); };
 SW.regionAt = function (w, x, y) { return w.regions && w.region ? w.regions[w.region[idx(w, x, y)]] || null : null; };
+/* ---------- BLOCKS, AND THE LIBRARY BY AGE (Generation 28) ----------
+   A structure is put together from blocks: parts with attributes of their own (what they cost, what they give). SW.compose adds a list of
+   blocks into one kind of building; the maker does this with op structure, so it designs from parts and not from bare numbers.
+   The library holds blocks and structures by age. An age is opened into the laws of a world when someone in it knows a way of the age before
+   (the first two are open from the start), so a world carries only what its people could yet raise, and later ages can grow without every
+   world paying for them. Everything here is data.
+   A structure may ask for others to stand near it (needs: kinds within build.near steps) or for a road or water beside it: that is how the
+   works of a settlement come to depend on one another. reach: one who speaks in or beside it is heard that many times as far. */
+SW.LIBRARY = {
+  1: {
+    blocks: {
+      roof: { wood: 2, hint: 'a roof against the weather' },
+      hearth: { wood: 1, stone: 1, fx: [{ on: 'warmth', times: 1.3, for: 240 }], hint: 'a hearth: warm for a day after time spent by it' },
+      beds: { wood: 2, fx: [{ on: 'health', by: 8 }], hint: 'beds: the body mends' },
+      benches: { wood: 2, craft: 0.3, hint: 'work benches: what is made here is made more surely' },
+      gathering: { wood: 3, bond: 0.04, hint: 'room to gather: those who spend time in it together grow closer' },
+      altar: { stone: 2, fx: [{ on: 'fear', by: -0.3 }, { on: 'grief', by: -0.2 }], hint: 'an altar: fear and grief ease' },
+      lookout: { wood: 1, stone: 3, sight: 3, hint: 'a lookout: sight from it reaches farther' },
+      garden: { wood: 1, fx: [{ on: 'joy', by: 0.15 }], hint: 'a garden: gladness' }
+    },
+    buildings: {
+      landing: { way: 'rafts', wood: 4, stone: 0, beside: 'water', craft: 0.3, fx: [{ on: 'fear', by: -0.1 }], hint: 'a landing at the edge of water, where vessels are made more surely and those who cross set out and come in' },
+      guesthouse: { way: 'customs', wood: 5, stone: 2, needs: ['store'], bond: 0.05, fx: [{ on: 'lonely', by: -0.3 }, { on: 'health', by: 8 }], hint: 'a house kept for those who come from elsewhere: a traveller rests, mends and is less alone. It needs a store near it to feed them' }
+    }
+  },
+  2: {
+    blocks: {
+      baths: { stone: 3, fx: [{ on: 'health', by: 10 }, { on: 'sick', by: -1 }], hint: 'baths: health, and a sickness broken' },
+      shelves: { wood: 2, fx: [{ on: 'lore', by: 0.3 }], hint: 'shelves of signs and records: understanding grows' },
+      forgefire: { stone: 4, craft: 0.5, hint: 'a great fire for working: making is much surer' },
+      beaconfire: { wood: 2, stone: 2, reach: 2, hint: 'a beacon: a voice from it carries twice as far' },
+      courtyard: { stone: 3, bond: 0.05, hint: 'a paved court where many meet' }
+    },
+    buildings: {
+      beacon: { way: 'signals', wood: 3, stone: 4, reach: 2, sight: 2, hint: 'a beacon of fire and smoke: one who speaks, musters or rallies beside it is heard twice as far again' },
+      bathhouse: { way: 'wells', wood: 3, stone: 6, needs: ['well'], fx: [{ on: 'health', by: 15 }, { on: 'sick', by: -1 }, { on: 'joy', by: 0.1 }], hint: 'a house of hot water fed by a well: it mends, breaks sickness and gladdens. It needs a well near it' },
+      roadhouse: { way: 'roads', wood: 5, stone: 3, beside: 'road', bond: 0.04, fx: [{ on: 'health', by: 10 }, { on: 'lonely', by: -0.2 }], hint: 'a house by a road where those who travel between settlements rest and meet. It must stand beside a paved way' }
+    }
+  },
+  3: {
+    blocks: {
+      vault: { stone: 6, fx: [{ on: 'fear', by: -0.2 }], hint: 'a vault of stone: what is in it is safe, and so are you' },
+      greathall: { wood: 4, stone: 4, bond: 0.07, hint: 'a great hall: many grow close' },
+      lamp: { stone: 3, sight: 4, reach: 1.5, hint: 'a great lamp on high: far sight, and a voice that carries' }
+    },
+    buildings: {
+      lighthouse: { way: 'sailing', wood: 4, stone: 12, needs: ['dock'], beside: 'water', sight: 6, reach: 2, hint: 'a tower of light over the water: far sight for those near it and a voice that carries. It needs a dock near it. A great work' },
+      harbour: { way: 'cities', from: 'dock', wood: 8, stone: 10, needs: ['market'], beside: 'water', craft: 0.5, bond: 0.04, hint: 'a harbour: ships are built and laden here, and those of many settlements meet. It needs a market near it. A great work' }
+    }
+  },
+  4: {
+    blocks: { engine: { stone: 6, wood: 2, craft: 0.8, hint: 'an engine that drives the work' }, wire: { stone: 2, reach: 3, hint: 'a wire that carries a voice far' } },
+    buildings: {
+      station: { way: 'railways', wood: 6, stone: 12, needs: ['enginehouse'], beside: 'road', bond: 0.05, sight: 2, hint: 'a station on the iron road, where people and goods of far settlements come and go. It needs an engine house near it and a paved way beside it. A great work' }
+    }
+  },
+  5: {
+    blocks: { mast: { stone: 4, reach: 6, hint: 'a mast: a voice from it reaches across a land' } },
+    buildings: {
+      mast: { way: 'radio', wood: 2, stone: 10, needs: ['powerhouse'], reach: 8, hint: 'a mast that sends a voice across a whole land. It needs a power house near it. A great work' },
+      hangar: { way: 'flight', wood: 8, stone: 10, needs: ['airport'], craft: 0.8, hint: 'a hangar beside the field where the craft of the air are built and kept. It needs an airport near it. A great work' }
+    }
+  }
+};
+/* open into this world every age its people have come near: the first two always, and each later one once a way of the age before is known */
+SW.openAges = function (w, emit) {
+  const L = w.laws, upTo = Math.max(2, Math.min(6, (SW.eraOf ? SW.eraOf(w) : 1) + 1)); L.blocks = L.blocks || {};
+  for (let n = (w.ageOpen || 0) + 1; n <= upTo; n++) {
+    const A = SW.LIBRARY[n], got = [];
+    if (A) { for (const k in (A.blocks || {})) if (!L.blocks[k]) L.blocks[k] = Object.assign({ age: n }, JSON.parse(JSON.stringify(A.blocks[k])));
+      for (const k in (A.buildings || {})) if (!L.buildings[k]) { L.buildings[k] = Object.assign({ age: n }, JSON.parse(JSON.stringify(A.buildings[k]))); got.push(k); } }
+    w.ageOpen = n; if (emit && n > 2) emit({ type: 'ageopen', age: n, kinds: got });
+  }
+  return w.ageOpen;
+};
+/* put blocks together into one kind of building: costs add, effects of the same kind add (a boon keeps its strongest), the rest add up to their bounds */
+SW.compose = function (w, names) {
+  const BL = w.laws.blocks || {}, out = { wood: 0, stone: 0, fx: [], blocks: [] }, hints = [];
+  (names || []).forEach(function (nm) { const b = BL[String(nm).toLowerCase()]; if (!b || out.blocks.indexOf(String(nm).toLowerCase()) >= 0) return; out.blocks.push(String(nm).toLowerCase());
+    out.wood += b.wood || 0; out.stone += b.stone || 0; if (b.bond) out.bond = Math.min(0.1, (out.bond || 0) + b.bond); if (b.sight) out.sight = Math.min(8, (out.sight || 0) + b.sight); if (b.craft) out.craft = Math.min(1.5, (out.craft || 0) + b.craft); if (b.reach) out.reach = Math.min(8, Math.max(out.reach || 1, b.reach));
+    (b.fx || []).forEach(function (f) { const same = out.fx.filter(function (q) { return q.on === f.on; })[0]; if (!same) out.fx.push(JSON.parse(JSON.stringify(f))); else if (f.times != null) { same.times = Math.max(same.times || 1, f.times); same.for = Math.max(same.for || 0, f.for || 0); } else same.by = Math.round(((same.by || 0) + (f.by || 0)) * 100) / 100; });
+    if (b.hint) hints.push(b.hint.split(':')[0]); });
+  out.hint = hints.join(', '); return out;
+};
+/* what a kind of building asks to have near it, and which of that is missing where this being stands */
+function nearKind(w, x, y, kind, r) { for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const X = x + dx, Y = y + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y), k = kind === 'store' ? (w.stores[i] ? 'store' : null) : buildingAt(w, i); if (k && (k === kind || isOfLine(w, k, kind))) return true; } return false; }
+function roadBeside(w, a) { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const X = a.x + dx, Y = a.y + dy; if (inb(w, X, Y) && w.roads && w.roads[idx(w, X, Y)]) return true; } return false; }
+SW.infraLack = function (w, a, kind) { use(w); const B = (w.laws.buildings || {})[kind], r = (w.laws.build || {}).near || 12; return B && B.needs ? B.needs.filter(function (k) { return !nearKind(w, a.x, a.y, k, r); }) : []; };
+/* what stands in a settlement, by kind; and whether two settlements are joined by a paved way */
+SW.settlementKinds = function (w, S) { use(w); const out = {}; for (let dy = -S.r; dy <= S.r; dy++) for (let dx = -S.r; dx <= S.r; dx++) { const X = S.x + dx, Y = S.y + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y), k = buildingAt(w, i) || (w.stores[i] ? 'store' : w.shelters[i] ? 'shelter' : null); if (k) out[k] = (out[k] || 0) + 1; } return out; };
+SW.joinedByRoad = function (w, A, B) {
+  use(w); if (!w.roads) return false; const seen = {}, q = []; let head = 0;
+  for (let dy = -A.r; dy <= A.r; dy++) for (let dx = -A.r; dx <= A.r; dx++) { const X = A.x + dx, Y = A.y + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y); if (w.roads[i] && !seen[i]) { seen[i] = 1; q.push(i); } }
+  while (head < q.length && q.length < 6000) { const i = q[head++], x = i % w.W, y = (i - x) / w.W; if (cheb(x, y, B.x, B.y) <= B.r) return true;
+    for (let d = 0; d < 8; d++) { const X = x + HEAD[d][0], Y = y + HEAD[d][1]; if (!inb(w, X, Y)) continue; const j = idx(w, X, Y); if (w.roads[j] && !seen[j]) { seen[j] = 1; q.push(j); } } }
+  return false;
+};
 /* SEAS (Generation 27): a world begun with opts.seas has an ocean that divides the known land, a greater ocean on the far side of the world with
    islands large enough to live on, and two great lakes. Their hearts are open water: more than two steps from any shore, where no one can swim
    and only a vessel carries. They are laid out by a chance of their own (the seed, not the world's stream), so the lands, their names and their
@@ -1634,6 +1731,7 @@ function stepCreatures(w, emit) {
   w.creatures = list.filter(function (c) { return !c.dead; }).concat(born);
   /* when grazers are few, a herd comes in from the rim; when hunters are few for the prey there is, a pair follows */
   /* the sea gives back what was fished and hunted out of it: a kind of the sea that has fallen below its least number comes in again on open water */
+  if (w.tick % L.time.dayLength === 3) SW.openAges(w, emit); /* the library: an age is opened when its people come near it (no chance is drawn) */
   if ((L.ecology.seaReturn || 0) > 0 && w.tick % 60 === 41) { /* looked at once in sixty moments, by a chance of its own, so the world's own stream of chance is left as it was */
     const ks = Object.keys(L.creatures).filter(function (k) { const q = L.creatures[k]; return q.sea && !q.retired && (counts[k] || 0) < (q.minPop || 2); });
     if (ks.length) {
@@ -1905,7 +2003,7 @@ SW.upgrade = function (w) {
   if (!w.regions || !w.regions.length) { w.regions = [{ id: 0, name: 'the Land', biome: 'mixed', x: w.W >> 1, y: w.H >> 1 }]; w.region = []; for (let i = 0; i < w.W * w.H; i++) w.region.push(0); }
   ['lodes', 'bkind', 'roads', 'works'].forEach(function (k) { if (!w[k]) w[k] = {}; });
   if (!w.peoples) w.peoples = []; if (!w.tally) w.tally = { made: {}, eaten: {}, built: {} }; ['made', 'eaten', 'built'].forEach(function (k) { if (!w.tally[k]) w.tally[k] = {}; });
-  if (!w.laws.traditions) w.laws.traditions = SW.defaultLaws().traditions; if (!w.laws.verse) w.laws.verse = SW.defaultLaws().verse; (w.peoples || []).forEach(function (P) { if (!P.tradition) P.tradition = traditionFor(w, P); }); /* a world made before Generation 27 is given its peoples' traditions */
+  if (w.laws.build && w.laws.build.near == null) w.laws.build.near = 12; SW.openAges(w); /* a world made before Generation 28 is given the library of the ages it has reached */ if (!w.laws.traditions) w.laws.traditions = SW.defaultLaws().traditions; if (!w.laws.verse) w.laws.verse = SW.defaultLaws().verse; (w.peoples || []).forEach(function (P) { if (!P.tradition) P.tradition = traditionFor(w, P); }); /* a world made before Generation 27 is given its peoples' traditions */
   { const D0 = SW.defaultLaws().buildings, B0 = w.laws.buildings || {}; for (const k in D0) if (D0[k].from && B0[k] && B0[k].from == null) B0[k].from = D0[k].from; if (B0.longhall && B0.longhall.from == null && B0.hall) B0.longhall.from = 'hall'; } /* lines of descent between kinds of building (Generation 26) */
   const D = SW.defaultLaws(); ['minerals', 'goods', 'recipes', 'buildings', 'drives', 'status', 'discovery', 'culture', 'arrivals', 'explore', 'trade', 'climate', 'body', 'ecology', 'disease'].forEach(function (g) { if (!w.laws[g]) w.laws[g] = D[g]; else for (const k in D[g]) if (w.laws[g][k] == null && g !== 'recipes') w.laws[g][k] = D[g][k]; });
   for (const g in D) if (D[g] && typeof D[g] === 'object' && !Array.isArray(D[g]) && w.laws[g] && ['plants', 'creatures', 'tools', 'tree', 'recipes', 'buildings', 'minerals', 'goods'].indexOf(g) < 0) for (const k in D[g]) if (w.laws[g][k] == null) w.laws[g][k] = D[g][k];
@@ -1999,7 +2097,7 @@ SW.magicFactor = function (w) { return clamp(1 - (w.laws.magic.wane || 0) * Math
 function buildingAt(w, i) { const k = w.bkind && w.shelters[i] ? w.bkind[i] : null; return k && w.laws.buildings && w.laws.buildings[k] ? k : null; }
 SW.buildingAt = buildingAt; SW.newCreature = newCreature; SW.inb = inb;
 /* how far one is heard: one who knows signals (smoke and fire read from afar) is heard two and a half times as far (culture.signalReach); the way had nothing behind it before Generation 27 */
-SW.reach = function (w, a) { const L = w.laws; return Math.round(L.body.hearing * (a && a.knows && a.knows.signals ? ((L.culture || {}).signalReach || 1) : 1)); };
+SW.reach = function (w, a) { const L = w.laws; let f = a && a.knows && a.knows.signals ? ((L.culture || {}).signalReach || 1) : 1, b = 1; if (a) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { if (!inb(w, a.x + dx, a.y + dy)) continue; const k = buildingAt(w, idx(w, a.x + dx, a.y + dy)), r = k && L.buildings[k].reach; if (r > b) b = r; } return Math.round(L.body.hearing * f * b); }; /* and a beacon, a lamp or a mast beside the speaker carries it farther still (Generation 28) */
 /* the strongest of some property among the special buildings within a step (or the kind, if asked by name) */
 function nearB(w, a, prop, kind) { let v = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const x = a.x + dx, y = a.y + dy; if (!inb(w, x, y)) continue; const k = buildingAt(w, idx(w, x, y)); if (!k) continue; if (kind) { if (isOfLine(w, k, kind)) v = 1; } else v = Math.max(v, w.laws.buildings[k][prop] || 0); } return v; }
 /* a kind of building, or one that grew out of it: what needs a forge is served by a factory */
@@ -2435,7 +2533,9 @@ function act(w, a, r, S, emit) {
       if (L.buildings && L.buildings[r.what]) {
         const B = L.buildings[r.what], bw = B.wood || 0, bs = B.stone || 0, say = function (t) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: t }); return false; };
         if (B.way && !a.knows[B.way] && !(w.works[here] && w.works[here].kind === r.what) && !heldInCommon(w, a, B.way)) return say('You tried to raise a ' + r.what + ', but you do not know how. It belongs to the way of ' + B.way + ', and fewer than ' + ((L.culture || {}).commonAt || 2) + ' of your band hold it.');
-        if (B.beside === 'water' && !waterBeside(w, a)) return say('A ' + r.what + ' must stand at the edge of water. There is none beside you here.'); /* anyone may carry to a work that one who knows has begun */
+        if (B.beside === 'water' && !waterBeside(w, a)) return say('A ' + r.what + ' must stand at the edge of water. There is none beside you here.');
+        if (B.beside === 'road' && !roadBeside(w, a)) return say('A ' + r.what + ' must stand beside a paved way. There is none beside you here: pave one first (plan step pave).');
+        if (B.needs && !(w.works[here] && w.works[here].kind === r.what)) { const lk = SW.infraLack(w, a, r.what); if (lk.length) return say('A ' + r.what + ' depends on other works: it needs a ' + lk.join(' and a ') + ' standing within ' + ((L.build || {}).near || 12) + ' steps, and there is none. Raise that first, or raise this where one stands.'); } /* anyone may carry to a work that one who knows has begun */
         const taken = w.shelters[here] || w.walls[here] || w.stores[here] || w.plants[here] || w.fires[here] > w.tick;
         /* A better building may be raised in place of the one it grows out of (B.from): the old one's holder or one of the holder's band stands
            in it and builds; half of what the old one took is used again (build.reuse); whoever held the old one holds the new. */

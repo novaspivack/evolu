@@ -6,6 +6,7 @@ Evolu is a self-modifying world simulation by Nova Spivack that runs as a Claude
 
 - `src/` holds the artifact, exactly as published: `index.html`, `engine.js`, `minds.js`, `maker.js`, `audio.js`, `ui.js`. No build step.
 - The live artifact is titled "Evolu", slug `be8f1f8f-42db-4703-ac0d-c3e87d04f447`, owned by Nova. Publish the six files to that slug (base version = the live version). Its capabilities `sample`, `db`, `user`, `downloads` carry forward.
+- Nova stops the world before he asks for work (he said so on 23 Nov 2026): when he hands over a run file or asks for a build, the world is not running and the work may be published when it passes.
 - **While Nova is running a world, do nothing he can see.** Do not publish (it reloads the open page), do not send files into the conversation, do not show an artifact, do not attach or register anything. A run was cut short on 22 Nov 2026 by something of this kind. Finish every visible step before telling him a generation is ready, then stop, and wait for him to say the run is over.
 - One commit per published generation, message `Generation N: <one line>`. `src/` at that commit must be what is live.
 
@@ -70,6 +71,9 @@ The page writes each run to the artifact's store as it goes. With the artifact d
 - The final state is sent in parts (`M.parts(d, limit)`: a head at `state/latest` and full beings at `state/beings-N`); a document in the store may not pass 256 KiB. When reading a run from the store, read the head first: it says how many parts there are.
 - How far a voice carries is `SW.reach(w, a)` (signals), not `laws.body.hearing`, wherever the one who speaks, musters or rallies is known.
 - A law op on `body.lifespan` rescales the lives of the living by the same measure (`K.applyOp`).
+- **Blocks and the library** (Generation 28): new structures go in `SW.LIBRARY[age]` as data (`blocks`, `buildings`), not in `defaultLaws`; `SW.openAges(w, emit)` merges an age into a world's laws when its era comes within one of it (called from `M.createState`, `SW.upgrade` and once a day in the step; it draws no chance). `SW.compose(w, names)` adds blocks into a building; the maker's op `structure` uses it. A structure's `needs` (kinds within `build.near` steps; `store` counts), `beside` (`water` or `road`) and `reach` (a voice carries) are generic: prefer them to code. A bare `SW.createWorld(seed)` has no library until a state is made or a day passes: checks that count kinds of building must say which they mean.
+- Settlements: `SW.settlementKinds(w, S)`, `SW.joinedByRoad(w, A, B)` (a search along paved tiles, capped), `M.settlementsText`; a mind learns of a settlement by being within its radius plus twelve steps when a thought is applied (`mind.setts`).
+- A crossing is chronicled once for each land a being lands in (`mind.crossedTo`); do not chronicle a repeated act every time it happens (28 crossings by two beings filled the chronicle of the eighteenth run).
 - The audit of the trees is `docs/tree-audit.md`, made by `tests/tools/tree-audit.js` from the run files. Run it again after each full run.
 - When a script edits a document, end it by writing the file and check the result: the README said Generation 18 through Generation 19 because an edit was computed and never written.
 - Terrain 9 is the unknown (`T.VOID`): impassable, nothing lives there, and the true ground is kept in `w.veil`. Anything that picks a tile by position and not by terrain must skip it. Animals and newcomers come in at `edgeSpot(w)`, not at the map's rim.

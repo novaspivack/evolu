@@ -14,10 +14,15 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 27, to be watched and tuned
+## NOW: built in Generations 14 to 28, to be watched and tuned
 
 | Item | State |
 | --- | --- |
+| **Structures from blocks:** parts with attributes of their own; the maker composes a structure from two to five of them (op `structure`) | Built in 28. Watch: what the maker designs, and whether anyone raises it. |
+| **A library by age:** blocks and structures opened into a world when its people come near that age | Built in 28: ten structures and nineteen blocks across five ages. To grow with each generation. |
+| **Works that depend on one another:** a structure may need another near it, or a road or water beside it (guest house on a store, bath house on a well, road house on a paved way, lighthouse on a dock, harbour on a market, station on an engine house, mast on a power house, hangar on an airport) | Built in 28. Watch: whether chains of works appear in settlements. |
+| **Settlements that know of one another:** what each has that the other lacks, and whether a paved way joins them; a beacon, a lighthouse and a mast carry a voice | Built in 28. Watch: `pairsJoinedByAPavedWay`, visits for what another settlement has, trade between settlements. |
+| **Food against beings by land** (`landsNow`), for the maker | Built in 28 at its request. |
 | **Verse on its occasions:** a death poem when an elder nears death, a lament from whoever was closest, a love song when courting is answered, a lullaby for a first child, a song of a deed, the myth of each people; ten forms with lines, beats and rhyme; spoken aloud, carried, told on; one at the head of each chapter | Built in 27. Seventeen runs made none. Watch: asked, made, and asked but never given; whether the verse keeps its form; whether laments and myths are told on. |
 | **A tradition for every people** (nine: spirits of the land, the watching dead, the angry sky, warring gods, the guardian, the open hand, the inner path, the mother, the sky father): told to each mind, weighting its drives, saying whose word carries; the act of offering | Built in 27. Watch: whether peoples of different traditions come to live differently; whether anyone doubts, leaves or founds a teaching against it; whether offerings are made and by whom. |
 | **Courting answered:** one who is warm toward the one who courts answers without having planned it (`mate.answer`) | Built in 27. Twenty-seven plans to mate gave two births in the seventeenth run. Watch births against deaths of age. |
@@ -87,7 +92,7 @@ Answered by the seventh run: people do earn a following (nine pledges), and less
 
 1. **A community raises better buildings:** built in Generation 26.
 2. **The big round: the trees, and what is built from them** (its own section, after this one). The audit is done (`docs/tree-audit.md`); four of its five proposals were built in Generation 27 and the fifth (lower thresholds for riding and currency) was left alone by Nova's choice and is tracked.
-3. **Generation 28 (agreed 23 November):** more kinds of structure; the maker composing structures from blocks with attributes; libraries that load by age; roads, vehicles, and transport by sea and air; settlements that depend on one another. Also waiting: teaching before death (alchemy was lost with its one holder in the seventeenth run), a day that goes round the world, hatred, peacemakers, rivalry and heroes, a rite for the dead, islands in the near ocean, seas for a world carried on.
+3. **Generation 28 (agreed 23 November):** built: structures from blocks, the library by age, works that depend on one another, settlements that know of one another. **Left for 29 from that list:** vehicles and craft that move (a cart on a road, a train between stations, a craft of the air between fields), goods carried between settlements as a thing in the world (caravans, sea lanes), blocks the maker makes for itself, and more of the library for ages three to six. Also waiting: teaching before death (alchemy was lost with its one holder in the seventeenth run), a day that goes round the world, hatred, peacemakers, rivalry and heroes, a rite for the dead, islands in the near ocean, seas for a world carried on.
 4. **Generations 29 and 30:** groups (see SCALE).
 3. Then, as agreed earlier the same day: a day that goes round the world; hatred that lasts, peacemakers, rivalry for mates, heroes and duels.
 
@@ -211,6 +216,9 @@ These run through every stage and are picked up as runs call for them.
 - **Speed.** A world moment costs about 2.8 ms in the larger world, up from 2.
 - **Nothing passes between strangers.** In seven runs: no trade, no planned fight, no animal tamed, and peoples that meet a handful of times.
 - **No tale, song, myth or teaching has yet been made** by a real mind, though sayings and hard lessons spread and cross between peoples.
+- **Prompts are at a middle of 34,900 characters** (eighteenth run), with a longest of 48,700. About 13,300 is standing text and the reply format; the ways a being knows take 4,900. To be cut by section, measured first.
+- **A newborn can wander off and be killed** (a day-old child was gored in the eighteenth run). Not looked into.
+- **No offering, no trade and no forge** in the eighteenth run.
 - **Founders age out together.** In the seventeenth run nine died of age in ten days and two were born. Generation 27 answers with courting that is answered and with the maker's longer life reaching the living; the ages of founders were left as they are. If births still do not keep pace, spread the founders' ages.
 - **The chronicler's prompt is about 100,000 characters,** a quarter of it the numbers sent twice (now and at the last chapter).
 - **Almost all water in a world made before Generation 27 can be swum,** so a vessel matters little there. Only new worlds have seas.
@@ -248,3 +256,4 @@ A short index; the detail is in the design log.
 | 25 | Everything one knows how to make shown; pens and driven herds; weirs, fields and the larder; thought by plan; the sea gives back |
 | 26 | A community advances together: ways held in common, learned by all when a building stands; better buildings raised in place of older; works too big for the hands brought in loads; the age of a settlement shown |
 | 27 | Verse on its occasions and at the head of each chapter; a tradition for every people and the act of offering; courting answered; seas, islands and great lakes for new worlds; a crossing recorded; band practice, labour as building, signals and alchemy; the waiting bar and the sending of the state mended |
+| 28 | Structures from blocks, designed by the maker; a library by age; works that depend on one another; settlements told of one another and of the paved ways between; food against beings by land; a crossing chronicled once for each land; an elder told what only it knows |
