@@ -13,6 +13,55 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from a run you reported, in the sections headed "What the Nth run showed", or untested.
 - **Where the runs are written up.** Each run is under the generation that was built from it: the runs up to the fourteenth have sections of their own, and from the seventeenth on a run is the first part of the next generation's section. The count passes from the fourteenth to the seventeenth: nothing in this log is called the fifteenth or the sixteenth run. A heading says "built, not yet run" as it stood when written unless it has been brought up to date; the list of run files is in [`runs/README.md`](../runs/README.md).
 
+## Generation 35 (built, not yet run with real minds): room for new kinds
+
+Nova, on the fault found while taking pictures ("48 of 44" in the Kinds pane): "raise the cap to 60, and push that."
+
+### What was wrong
+
+A new kind of plant or animal arises in the wild, or is bred by a being, only while the world has fewer kinds than its law allows: 44 of plant, 30 of animal. A world as the page makes it begins with 48 kinds of plant (the fifteen new ones of Generation 30) and 34 of animal (the animals of the heritage, which passed 30 in Generation 29). So for six generations nothing new could arise in such a world, and a being who tried to breed a plant was told "the land already holds as many kinds of plant as it can bear". The maker's own limits had been raised as it went (60 and 44); the law of the wild was missed. It was the same fault for animals as for plants, so both are mended.
+
+### Built
+
+- **The law is 60 kinds of plant and 44 of animal** in a world with the newer plants (`kindRoom`). A bare world keeps 44 and 30, so every older check runs as it did: on three seeds a bare world runs ten days exactly as under Generation 34.
+- **A world of the page saved before gets the room when it is opened** (`w.kinds35`), unless its law was set otherwise.
+- **The maker keeps room of its own above the wild:** 16 kinds of plant and 14 of animal beyond the law, so that kinds arising by themselves can never shut it out. It is told how many kinds there are and how much room is left (`kindsOfPlantAndAnimal`).
+- **A kind that arises or is bred may not look like another** (the check of Generation 32 is now run then too).
+- **A wild kind that does not last is told as that** ("The pebird, a kind of skybird that arose in the wild, did not last"), with the weight of its arising and no sound, not as the loss of a kind the world began with. Most wild kinds do not last, and without this the chronicler would have been handed a dozen heavy lines a month about them.
+
+### Measured (ten seeds, a world as the page makes it, thirty days on instinct, Generation 34 beside 35)
+
+| | Generation 34 | Generation 35 |
+| --- | --- | --- |
+| New kinds of plant arising | 0 | 8.3 |
+| New kinds of animal arising | 0 | 13.5 |
+| Kinds struck off for having none alive | 3.2 | 12.5 |
+| Kinds of plant at the end | 46.5 | 55.0 |
+| Kinds of animal at the end | 32.3 | 36.3 |
+| People alive (of 15) | 15.7 | 15.4 |
+| People who died | 3.7 | 3.2 |
+| Plants, and of those food plants | 991, 962 | 1,044, 1,010 |
+| Animals | 234 | 236 |
+| Pairs of kinds that look alike | 0 | 0 |
+| A moment of the world | 2.6 ms | 2.5 ms |
+
+- **The balance did not move** beyond what seeds differ by: the same people alive, the same animals, a twentieth more plants.
+- **Most wild kinds do not last.** About thirteen kinds of animal arise in a month and about nine are gone within it. On five seeds, 30 to 34 of the 34 first kinds of animal were still there at day 30 (31 to 34 under Generation 34), and 97 to 99 of every hundred animals alive were of the first kinds. New kinds are not crowding out the old.
+- Kinds of animal come near their limit in about two months at this rate, after which one arises only as another is lost.
+
+### Tested
+
+- **998 checks in 30 numbered files, the two mind pipelines, the long ecology run and 15 checks of the page: all pass.**
+- **The new file (`tests/30`, 18 checks):** the law in a world of the page and in a bare one; kinds arising by themselves up to the law and no farther, none alike; a wild kind that does not last told as that; the maker's figures and its room when the wild is full; a being breeding a plant **by a plan through the mind**; a saved world of Generation 31 given the room, a law set by hand left alone, a bare save unchanged.
+- **Run against Generation 34** (`EVOLU_DIR=/home/claude/versions/gen34`), the checks of the law, of kinds arising and of breeding fail, as they should.
+- I looked at the Kinds pane on the page: after kinds had arisen at a raised rate it read "Flora 56 of 60" and "Fauna 43 of 44". A new world begins at 48 of 60 and 34 of 44.
+
+### Not known
+
+- Whether anyone will breed a plant now that they can. In the run files no being has: the act was refused in every world of the page since Generation 30, and before that the practice it needs (seeds planted) was rarely reached.
+- Whether kinds that arise matter to anyone: whether a people comes to prefer a better berry, or hunts a slower deer.
+- The names of wild kinds are made by rule from the kind they came from ("migoldgrass", "pebird"). They have not been looked at for sense.
+
 ## After Generation 34: the documents brought up to date (24 November)
 
 Nova asked for a pass on the README and the other documents, with new pictures. Nothing in `src/` changed and nothing was published.
@@ -21,7 +70,7 @@ Nova asked for a pass on the README and the other documents, with new pictures. 
 - **Pictures of the current page** are made by a tool, `tests/tools/readme-shots.js`, so they can be made again each generation: a young world, a being opened, a town of each age on one seed, a street with vehicles, the many, the way out in seven steps. They are made with a stand-in and say so. Nova's pictures of real minds (Wenenvale, Generation 22) are kept as they were.
 - **What real minds have done** was counted again from the thirteen run files, not carried over. By day 77 of the longest world: 29 of 68 ways held (17, 9 and 3 of the first three ages), 118 buildings of 8 kinds, 28 kinds of thing made, 68 claims, 27 musters, 32 of 34 verses made, two trades, 28 crossings of water, no war.
 - **The roadmap** had "last updated with Generation 17" at its head; it now has what Generations 32 to 34 built, the state of the step to groups, and the open problems since answered marked as such. **This log's** headings said "built, not yet run" for fourteen generations, eight of which were later run; each now says where its run is written up, or that there is no record on it alone. The count of runs passes from the fourteenth to the seventeenth, and that is now said at the top.
-- **A fault found while taking the pictures, not yet mended:** the Kinds pane reads "48 of 44" for plants. `ecology.maxPlantKinds` is 44 and a world with the new plants begins with 48, so since Generation 30 no new kind of plant can arise in the wild or be bred in a world made on the page. It is in the roadmap's open problems. Raising the law moves the world's stream of chance, so it wants a generation of its own with the balance measured.
+- **A fault found while taking the pictures** (mended in Generation 35, above): the Kinds pane reads "48 of 44" for plants. `ecology.maxPlantKinds` is 44 and a world with the new plants begins with 48, so since Generation 30 no new kind of plant can arise in the wild or be bred in a world made on the page. It is in the roadmap's open problems. Raising the law moves the world's stream of chance, so it wants a generation of its own with the balance measured.
 
 ## Generation 34 (built, not yet run with real minds): the many, and the groups that speak for them
 

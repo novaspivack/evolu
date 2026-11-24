@@ -8,7 +8,7 @@ Nothing in Evolu is hard-coded to happen. Things are made possible, and the bein
 
 A world begins with fifteen people, nothing built, and most of its globe unknown. As it grows, about forty of its people think for themselves; past that number they are **the many**, households that work, eat, build and starve under the world's laws, and that speak in groups. A world can also be begun in a later age, with towns already standing, though that has been tested far less.
 
-Created by **Nova Spivack**, built with Claude. Generation 34, November 2026.
+Created by **Nova Spivack**, built with Claude. Generation 35, November 2026.
 Source: <https://github.com/novaspivack/evolu>
 
 > Evolu was called Seedworld until Generation 14.
@@ -206,7 +206,7 @@ There are four loops, one inside the next.
           1. THE WORLD    a deterministic simulation whose laws are data
 ```
 
-**1. The world** (`src/engine.js`). A deterministic simulation: a globe of 216 by 124 tiles, 240 moments to a day, three days to a season. Terrain, seas, three climates, weather, calamities, plants, animals that mate in pairs and can be tamed, penned, driven and ridden, minerals in the ground, buildings, tracks, roads and bridges, vessels and vehicles. Bodies have energy, thirst, health, age, sickness, genes and feelings, and 46 acts they can do. What matters most is that **the laws are data**: every number that governs the world sits in one registry (`w.laws`), and plants, animals, recipes, goods, blocks, buildings, minerals, places of power, forms of verse, traditions and the 68 ways of the knowledge tree are entries in it, not code. All of them act through one small language of effects on attributes, so anything can be combined with anything.
+**1. The world** (`src/engine.js`). A deterministic simulation: a globe of 216 by 124 tiles, 240 moments to a day, three days to a season. Terrain, seas, three climates, weather, calamities, plants, animals that mate in pairs and can be tamed, penned, driven and ridden, minerals in the ground, buildings, tracks, roads and bridges, vessels and vehicles. New kinds of plant and animal arise in the wild, most of them briefly, and a being who has grown things long enough can breed a plant of its own. Bodies have energy, thirst, health, age, sickness, genes and feelings, and 46 acts they can do. What matters most is that **the laws are data**: every number that governs the world sits in one registry (`w.laws`), and plants, animals, recipes, goods, blocks, buildings, minerals, places of power, forms of verse, traditions and the 68 ways of the knowledge tree are entries in it, not code. All of them act through one small language of effects on attributes, so anything can be combined with anything.
 
 **2. The minds** (`src/minds.js`). Each person's thinking is a call to Claude. The prompt is built from what that being can see, feel, remember and has been told; the reply is JSON: a thought, perhaps something said, a plan of steps, changes to its own reflexes, creed, memory or body, a tale or a mark. Everyday thoughts are frequent and cheap; deep reflections are rare and can rewrite the being. Between thoughts the body runs on its plan and its reflexes, and a being in the middle of a plan waits for it unless something weighty happens. Drives (hunger, belonging, ambition, grief, standing, 48 in all) are computed from the being's state and press on its thinking without deciding it.
 
@@ -360,7 +360,7 @@ tests/run-all.sh            engine, minds and maker (needs only Node; about a qu
 tests/run-all.sh browser    the same, then the page in headless Chrome (needs Playwright and Chrome)
 ```
 
-There is one engine and every check runs against it. The 29 numbered files are grouped by subject, in the order the subjects entered the world, and together they are a regression suite of **980 checks**, so a change in one part that breaks an older part is caught.
+There is one engine and every check runs against it. The 30 numbered files are grouped by subject, in the order the subjects entered the world, and together they are a regression suite of **998 checks**, so a change in one part that breaks an older part is caught.
 
 | Files | What they cover |
 | --- | --- |
@@ -370,7 +370,7 @@ There is one engine and every check runs against it. The 29 numbered files are g
 | 15 to 18 | The warm belt, food in sight and trade; hunger answered, rich ground and the muster; a world that slows and does not sleep; memory in a window with history in files |
 | 19 to 22 | The placing of the boxes of speech and thought; what the chronicler is handed; what can be made, pens, fields and thought by plan; a community raising better buildings |
 | 23 to 26 | Verse, traditions, seas and courting answered; structures from blocks and the library by age; ways on the ground and kept hunters; the land as it is known and what grows on it |
-| 27 to 29 | The later ages and a world begun old; horses, vehicles, streets and looks that differ; the many and the groups that speak for them |
+| 27 to 30 | The later ages and a world begun old; horses, vehicles, streets and looks that differ; the many and the groups that speak for them; room for new kinds of plant and animal |
 
 Three more suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds. With `browser`, fifteen checks load the page in headless Chrome: the page at desktop and phone widths, the recorder, the outer loop, a bridge on the map, the culture tab, saved worlds, the globe, effects, the boxes of speech, a chapter amended from outside, verse, a town's streets, the order of the ground, and the many.
 

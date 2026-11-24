@@ -22,7 +22,7 @@ Days 41 to 50 of that world (the ninth run, on Generation 16) were stopped befor
 
 A world begun in a later age was also run under Generation 32 (24 November); pictures came back from it and no file, so it is not in the table.
 
-The analysis of each is in [`docs/design-log.md`](../docs/design-log.md). Earlier runs were recorded but their files are not kept here. Nothing has yet been run with real minds on Generation 33 or 34.
+The analysis of each is in [`docs/design-log.md`](../docs/design-log.md). Earlier runs were recorded but their files are not kept here. Nothing has yet been run with real minds on Generation 33, 34 or 35.
 
 ## What a run file holds
 

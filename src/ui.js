@@ -1204,7 +1204,7 @@ function onWorldEvent(ev) {
     case 'built': burst(ev.x, ev.y, '#d9a066', 10); soundAt('built', ev.x, ev.y); break;
     case 'marked': soundAt('marked', ev.x, ev.y, voice); break;
     case 'cultivated': case 'variety': burst(ev.x, ev.y, '#ffe9a0', 16); addFx({ type: 'ring', x: ev.x, y: ev.y, r: 2, life: 1.6, color: 'rgba(255,233,160,0.9)' }); addFx({ type: 'float', x: ev.x, y: ev.y, text: '✦ ' + ev.kind, life: 3, color: '#ffe9a0' }); soundAt('variety', ev.x, ev.y); break;
-    case 'extinct': if (SWA.on) SWA.event('extinct', {}); break;
+    case 'extinct': if (SWA.on && !ev.from) SWA.event('extinct', {}); break; /* the sound is for a kind the world began with, or one that was made or bred */
     case 'alarm': addFx({ type: 'ring', x: ev.x, y: ev.y, r: 14, life: 1.6, color: 'rgba(255,90,72,0.8)' }); addFx({ type: 'ring', x: ev.x, y: ev.y, r: 7, life: 1.1, color: 'rgba(255,200,90,0.9)' }); soundAt('pledged', ev.x, ev.y, { hue: 20 }); break;
     case 'snared': burst(ev.x, ev.y, '#d9a066', 10); soundAt('hunted', ev.x, ev.y); break;
     case 'devstruck': burst(ev.x, ev.y, '#ff5a48', 10); soundAt('attack', ev.x, ev.y); break;
@@ -2094,7 +2094,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 34, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 35, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -2164,7 +2164,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 34, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 35, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }

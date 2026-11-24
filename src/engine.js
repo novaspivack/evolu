@@ -825,6 +825,12 @@ function kindName(w, table, root) {
   return root + w.nextId++;
 }
 function vary(w, v, spread, lo, hi) { return clamp(Math.round(v * (1 - spread + 2 * spread * rnd(w)) * 10000) / 10000, lo, hi); }
+/* ROOM FOR NEW KINDS (Generation 35). A kind arises in the wild, or is bred, only while there are fewer kinds than the law allows. The laws
+   said 44 kinds of plant and 30 of animal; a world of the page begins with 48 and 34 (the new plants of Generation 30, the animals of the
+   heritage since 29), so nothing new could arise in it at all, and the Kinds pane read "48 of 44". The maker's own limits were raised to 60 and
+   44 as it went; in a world with the new plants the laws now say the same. A bare world keeps 44 and 30, so every older check runs as it did. */
+const KIND_ROOM = { maxPlantKinds: [44, 60], maxCreatureKinds: [30, 44] };
+function kindRoom(w) { const E = w.laws.ecology; for (const k in KIND_ROOM) if (E[k] === KIND_ROOM[k][0]) E[k] = KIND_ROOM[k][1]; }
 /* A new plant variety: a copy of its parent's law with shifted numbers and a shifted look. */
 function plantVariety(w, parent, o) {
   const L = w.laws, P = L.plants[parent]; o = o || {};
@@ -874,14 +880,14 @@ function creatureVariety(w, parent) {
   L.creatures[name] = sp;
   return name;
 }
-SW.pruneKinds = function (w) {
-  const L = w.laws, used = {};
+SW.pruneKinds = function (w, info) { /* info, if given, is filled with the kind each lost kind came from, where it arose by itself in the wild */
+  const L = w.laws, used = {}, note = function (n, sp) { if (info && sp.from && !sp.maker && !sp.by) info[n] = sp.from; };
   for (let i = 0; i < w.plants.length; i++) if (w.plants[i]) used[w.plants[i].sp] = 1;
   for (let k = 0; k < w.creatures.length; k++) used[w.creatures[k].sp] = 1;
   for (let k = 0; k < w.agents.length; k++) w.agents[k].seeds.forEach(function (sd) { used[sd] = 1; });
   const gone = [];
-  for (const n in L.plants) if (!used[n] && !BASE_KINDS[n]) { delete L.plants[n]; gone.push(n); }
-  for (const n in L.creatures) if (!used[n] && !BASE_KINDS[n]) { delete L.creatures[n]; gone.push(n); }
+  for (const n in L.plants) if (!used[n] && !BASE_KINDS[n]) { note(n, L.plants[n]); delete L.plants[n]; gone.push(n); }
+  for (const n in L.creatures) if (!used[n] && !BASE_KINDS[n]) { note(n, L.creatures[n]); delete L.creatures[n]; gone.push(n); }
   return gone;
 };
 
@@ -1708,7 +1714,7 @@ SW.createWorld = function (seed, opts) {
     creatures: [], agents: [], graves: [], marks: [], places: [], inventions: [], edicts: [], devices: {}, settlements: [], looks: {}, wars: [], fished: {}, river: {}, ore: {}, sites: [], fields: [], regions: [], region: [], lodes: {}, bkind: {}, roads: {}, works: {}, peoples: [], tally: { made: {}, eaten: {}, built: {} }, weather: { kind: 'clear', until: 160 }, names: {},
     laws: SW.defaultLaws(), nextId: 1
   };
-  if (opts.flora) { for (const k in SW.FLORA) w.laws.plants[k] = JSON.parse(JSON.stringify(SW.FLORA[k])); w.flora = 1; addFauna(w); }
+  if (opts.flora) { for (const k in SW.FLORA) w.laws.plants[k] = JSON.parse(JSON.stringify(SW.FLORA[k])); w.flora = 1; addFauna(w); kindRoom(w); }
   if (opts.many) { w.laws.many = JSON.parse(JSON.stringify(SW.MANY)); w.many = { hh: [], next: 1, places: {} }; w.groups = []; } /* people beyond those who think (Generation 34) */
   if (opts.seas) w.seas = { m: opts.margin != null ? opts.margin : 36, my: opts.margin != null ? opts.margin : 14 };
   use(w); genTerrain(w);
@@ -2455,6 +2461,7 @@ SW.upgrade = function (w) {
     if (L.tree && L.tree.storage && L.tree.storage.n === 4) L.tree.storage.n = 3;
     if (L.body && L.body.lifespan === 14400) { L.body.lifespan = 19200; w.agents.forEach(function (a) { if (a.life && a.life < 18000) a.life = Math.round(a.life * 19200 / 14400); }); } }
   if (!w.relics) w.relics = []; if (!w.faiths) w.faiths = {}; if (!w.culture) w.culture = { seq: 1, items: {}, log: [], days: [], rites: {} };
+  if (w.kinds35 == null) { w.kinds35 = 1; if (w.flora) kindRoom(w); } /* a world of the page carried on gets room for new kinds (Generation 35) */
   if (w.many34 == null) { w.many34 = 1; if (w.flora && !w.laws.many) { w.laws.many = JSON.parse(JSON.stringify(SW.MANY)); w.many = { hh: [], next: 1, places: {} }; w.groups = []; if (w.startAge > 1) { use(w); manySettle(w); } } } /* a world of the page carried on gains the many; one begun old has its dwellings peopled (Generation 34) */
   if (w.looks32 == null) { w.looks32 = 1; SW.distinctLooks(w); if (w.flora && !w.laws.creatures.horse) addFauna(w);
     /* what the library has gained since this world opened its ages (dwellings by age, ploughs, wagons and engines) is given to it too: only what it lacks */
@@ -3080,6 +3087,7 @@ function act(w, a, r, S, emit) {
       const v = plantVariety(w, parent, { aim: r.aim, name: nm.length >= 3 ? nm : null, look: SW.sanitizeLook(r.look), by: a.id, byName: a.name });
       if (!v) { emit({ type: 'fail', a: a.id, text: 'The land already holds as many kinds of plant as it can bear. No new variety took.' }); return false; }
       let left = 2; a.seeds = a.seeds.filter(function (sd) { if (sd === parent && left > 0) { left--; return false; } return true; });
+      if (w.flora) SW.distinctLooks(w); /* a kind that is bred may not look like another (Generation 35) */
       a.seeds.push(v); a.e -= L.craft.cultivateCost; a.stats.bred++; a.fin = 1; a.lore += 0.5;
       emit({ type: 'cultivated', a: a.id, kind: v, from: parent, aim: r.aim || null, x: a.x, y: a.y });
       a.doing = 'breeding ' + v; return true;
@@ -3574,6 +3582,7 @@ SW.step = function (w, emit) {
     const alive = function (id) { for (let k = 0; k < w.agents.length; k++) if (w.agents[k].id === id) return !w.agents[k].dead && w.agents[k].leader == null; return false; };
     if (!alive(r.a) || !alive(r.b)) { r.ended = w.tick; r.how = 'one side breaking up'; emit({ type: 'warend', war: r }); }
   });
+  if (w.fresh.length && w.flora) SW.distinctLooks(w); /* a kind that arises by itself may not look like another (Generation 35); it draws no chance */
   for (let k = 0; k < w.fresh.length; k++) emit({ type: 'variety', kind: w.fresh[k].kind, from: w.fresh[k].from, x: w.fresh[k].x, y: w.fresh[k].y, flora: w.fresh[k].flora });
   delete w.fresh;
   if (w.fields.length) {
@@ -3588,7 +3597,7 @@ SW.step = function (w, emit) {
     const life = w.laws.craft.markLife;
     w.marks = w.marks.filter(function (m) { return w.tick < (m.until || m.tick + life); });
   }
-  if (w.tick % 600 === 0) { const gone = SW.pruneKinds(w); for (let k = 0; k < gone.length; k++) emit({ type: 'extinct', kind: gone[k] }); }
+  if (w.tick % 600 === 0) { const info = {}, gone = SW.pruneKinds(w, info); for (let k = 0; k < gone.length; k++) emit(info[gone[k]] ? { type: 'extinct', kind: gone[k], from: info[gone[k]] } : { type: 'extinct', kind: gone[k] }); } /* a kind that arose in the wild and did not last is told as that, with what it came from (Generation 35) */
 };
 
 SW.speak = function (w, a, to, text, emit) {

@@ -1,6 +1,6 @@
 # Evolu roadmap
 
-Set by Nova Spivack; sequenced so that the world is not asked to hold everything at once. Last updated with Generation 34 (24 November 2026).
+Set by Nova Spivack; sequenced so that the world is not asked to hold everything at once. Last updated with Generation 35 (24 November 2026).
 
 ## How this file is used
 
@@ -14,10 +14,11 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 34, to be watched and tuned
+## NOW: built in Generations 14 to 35, to be watched and tuned
 
 | Item | State |
 | --- | --- |
+| **Room for new kinds:** in a world of the page, kinds of plant and of animal can again arise in the wild and be bred, to 60 and 44; the maker keeps room of its own beyond | Mended in 35: such a world had begun over its limit since Generation 30. Watch: whether anyone breeds a plant; whether new kinds matter to anyone; `kindsOfPlantAndAnimal`. |
 | **The many:** people past about forty are households that work, eat, have children, build, starve and leave under laws of their own, stepped once a day | Built in 34. Never yet run with minds. Watch: whether a place fed by its land holds steady; `theManyAndTheirGroups` in the maker's figures. |
 | **Groups that speak for the many:** the households of one place and one kind of work think once a day and answer as we; they speak, back or oppose one of the named, lay down their work, give, or leave | Built in 34. Watch: whether a group's voice reads as a people or as a committee; whether the named speak to them, feed them or ignore them. |
 | **One of the many rising to be a person** when one of the named dies, or when the watcher chooses | Built in 34. |
@@ -241,7 +242,7 @@ These run through every stage and are picked up as runs call for them.
 - **Speed.** A world moment costs about 2.8 ms in the larger world, up from 2.
 - **Little is traded and nothing is fought over.** In seven runs: no trade, no planned fight, no animal tamed, and peoples that met a handful of times. By day 77 of Wenenvale much passes between peoples as gifts and ideas (249 gifts, 911 ideas crossing), but there had been two trades, no war and no planned battle.
 - **No tale, song, myth or teaching had been made** by a real mind in seventeen runs. Answered in Generation 27 by asking for verse on its occasions: 32 of the first 34 asked were made, and 28 in the first days of the next world. Teachings begun and taken up are still not seen.
-- **No new kind of plant can arise in a world made on the page since Generation 30.** A kind arises in the wild, or is bred, only while there are fewer kinds than `ecology.maxPlantKinds` (44); a world with the new plants begins with 48, so the Kinds pane reads "48 of 44" and nothing new comes. The maker's own limit was raised to 60 in Generation 32 and this one was missed. Found on 24 November while taking pictures; not changed yet, because raising it moves the world's stream of chance and wants measuring on ten seeds.
+- **No new kind of plant or animal could arise in a world made on the page** from Generation 30 to 34: it began with 48 kinds of plant against a law of 44, and 34 of animal against 30. Mended in Generation 35 (60 and 44), measured on ten seeds: about eight kinds of plant and thirteen of animal arise in a month, most do not last, and the balance did not move.
 - **The many, open questions** (Generation 34): balance over a long run with persons acting on them; nothing owed between the many and the persons whose houses and works they fill; no group where there is no settlement.
 - **Asked for on 23 November and not yet built** (in the order I would take them):
   1. Vehicles and work animals: **built in Generation 32** as things a being holds (horse, plough, wagon, traction engine, steam wagon, motor car, truck, tractor, armoured car). Still not built: a vehicle that carries several people; trains between stations, ships between harbours, craft of the air; goods carried between settlements as a thing in the world (caravans, sea lanes); roads that wear out and need mending; mounted and motor war beyond a harder blow.
@@ -300,3 +301,4 @@ A short index; the detail is in the design log.
 | 32 | Towns of their age (looks by family, dwellings by age, streets that bend, branch and cross, nothing built on a road); horses, work animals and riding; vehicles as made things; music and sounds by age; a mind told its age and what it holds; no two kinds alike; a named thing of the heritage placed once |
 | 33 | The page only: roads under what stands, peaks and trees clear of roads, sizes by kind, a field and a pyramid redrawn, a pane that keeps its place while the world runs |
 | 34 | The many: households beyond those who think, under laws of their own kind; groups of them that think once a day and speak as we; persons who speak to them, feed them, are backed and opposed by them; one of the many rising to be a person; people on the streets and tilled land on the page |
+| 35 | Room for new kinds: plants and animals can again arise in the wild and be bred in a world of the page; a wild kind that does not last told as that |
