@@ -2,14 +2,14 @@
 
 Nova's message of 23 Nov 22:10, in full substance. Work in waves; each wave is a generation (built, whole suite passed, published, committed, pushed, design log sent). What does not pass goes to `ROADMAP.md`. This file is the checklist: tick items as they ship, so the work can be picked up after a break in the session.
 
-## Wave 1: Generation 29
-- [ ] Analyse `runs/generation-28-run-r5614-mwu324lo-day17.json` (new world Nimenvale, seas, 17 days) with code; fix what it shows; maker's requests; heritage.
-- [ ] Settlement label is never the same as a building label near it ("Balul's Hall" twice): the settlement has a different name of its own.
-- [ ] Speech box with a continuation: hover expands to the whole message and collapses on leaving; click focuses it in Voices.
-- [ ] Poles: why are they never filled in or explorable? Make them land that is seen and can be reached (not empty voids on the globe).
-- [ ] A tamed dog or beast helps its keeper hunt and defends them, and must be fed scraps of their food.
-- [ ] Roads by stage: hunting tracks to rich places, dirt roads between settlements, stone roads, paved roads; people follow roads to get places; vehicles too.
-- [ ] Left from 28: vehicles and craft that move (cart on a road, train between stations, craft of the air); goods carried between settlements as a thing in the world (caravans, sea lanes); blocks the maker makes for itself; fuller library for ages three to six (most of this in Wave 3).
+## Wave 1: Generation 29 (LIVE: version 1795494687-1fb4)
+- [x] Analyse `runs/generation-28-run-r5614-mwu324lo-day17.json` (new world Nimenvale, seas, 17 days) with code; fix what it shows; maker's requests; heritage.
+- [x] Settlement label is never the same as a building label near it ("Balul's Hall" twice): the settlement has a different name of its own.
+- [x] Speech box with a continuation: hover expands to the whole message and collapses on leaving; click focuses it in Voices.
+- [x] Poles: why are they never filled in or explorable? Make them land that is seen and can be reached (not empty voids on the globe).
+- [x] A tamed dog or beast helps its keeper hunt and defends them, and must be fed scraps of their food.
+- [x] Roads by stage: hunting tracks to rich places, dirt roads between settlements, stone roads, paved roads; people follow roads to get places; vehicles too.
+- [ ] (blocks the maker makes for itself: done in 29; the rest moved to Wave 3) Left from 28: vehicles and craft that move (cart on a road, train between stations, craft of the air); goods carried between settlements as a thing in the world (caravans, sea lanes); blocks the maker makes for itself; fuller library for ages three to six (most of this in Wave 3).
 
 ## Wave 2: Generation 30
 - [ ] A new world starts with less land filled in: only around where people are; they explore the rest.

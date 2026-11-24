@@ -210,7 +210,7 @@ function buildTerrain() {
   for (let py = 0; py < shh; py++) for (let qx = 0; qx < sw; qx++) {
     const fx = (qx + 0.5) / SS, fy = (py + 0.5) / SS;
     const jx = fx + (vnoise(fx * 1.4, fy * 1.4, 11) - 0.5) * 1.0, jy = fy + (vnoise(fx * 1.4, fy * 1.4, 12) - 0.5) * 1.0;
-    const tx = clamp(Math.floor(jx), 0, Wt - 1), ty = clamp(Math.floor(jy), 0, Ht - 1), ti = ty * Wt + tx, t = w.terrain[ti], b = PAL[t];
+    const tx = clamp(Math.floor(jx), 0, Wt - 1), ty = clamp(Math.floor(jy), 0, Ht - 1), ti = ty * Wt + tx, t = w.terrain[ti], b = t === 9 && w.veil && w.veil.t && w.veil.t[ti] === 8 && (ty < 18 || ty > Ht - 19) ? [176, 186, 204] : PAL[t]; /* the ice at each end of the world is seen from afar, though no one has been there (Generation 29: the poles were blank mist) */
     let r = b[0], g = b[1], bl = b[2];
     const tone = vnoise(fx * 0.35, fy * 0.35, 5) - 0.5, grain = hash(qx, py, 7) - 0.5;
     if (t === 2) { const f = w.fert[ti] - 0.75; r += tone * 34 - f * 26; g += tone * 20 + f * 22; bl += tone * 10 - f * 16; }
@@ -495,6 +495,8 @@ function drawFlat() {
       if (z > 11) for (let k = 0; k < gone; k++) { const gx = px + (hash(x, y, 440 + k) - 0.5) * z * 0.6, gy = py + (hash(x, y, 450 + k) - 0.5) * z * 0.5, r = z * 0.07; c.fillStyle = '#4a3826'; c.beginPath(); c.ellipse(gx, gy + r * 0.5, r, r * 0.7, 0, 0, 6.2832); c.fill(); c.fillStyle = '#b89a6a'; c.beginPath(); c.ellipse(gx, gy, r, r * 0.6, 0, 0, 6.2832); c.fill(); }
     }
     if (w.roads && w.roads[i] === 2) { c.fillStyle = '#7a5a36'; c.fillRect(sx(x) - z * 0.5, sy(y) - z * 0.3, z, z * 0.6); c.strokeStyle = '#3f2c1a'; c.lineWidth = Math.max(1, z * 0.03); for (let k = -1; k <= 1; k++) { c.beginPath(); c.moveTo(sx(x) + k * z * 0.28, sy(y) - z * 0.3); c.lineTo(sx(x) + k * z * 0.28, sy(y) + z * 0.3); c.stroke(); } c.strokeRect(sx(x) - z * 0.5, sy(y) - z * 0.3, z, z * 0.6); }
+    else if (w.roads && w.roads[i] === 3) { if (z > 5) { c.fillStyle = 'rgba(120,98,66,0.55)'; c.fillRect(sx(x) - z * 0.5, sy(y) - z * 0.1, z, z * 0.2); } } /* a track worn by feet */
+    else if (w.roads && w.roads[i] === 4) { c.fillStyle = 'rgba(134,106,70,0.88)'; c.fillRect(sx(x) - z * 0.5, sy(y) - z * 0.22, z, z * 0.44); } /* a dirt road */
     else if (w.roads && w.roads[i]) { c.fillStyle = 'rgba(170,162,150,0.9)'; c.fillRect(sx(x) - z * 0.5, sy(y) - z * 0.28, z, z * 0.56); if (z > 12) { c.strokeStyle = 'rgba(96,90,82,0.7)'; c.lineWidth = 1; c.strokeRect(sx(x) - z * 0.5, sy(y) - z * 0.28, z * 0.5, z * 0.56); c.strokeRect(sx(x), sy(y) - z * 0.28, z * 0.5, z * 0.28); } }
     if (w.lodes && w.lodes[i] && z > 5.5) {
       const hu = (L.minerals[w.lodes[i].k] || {}).hue || 0, kq = w.lodes[i].k, grey = kq === 'coal' || kq === 'obsidian' || kq === 'peat';
@@ -798,7 +800,7 @@ function drawLabels(c) {
     g.list.sort(function (p, q) { return (p.kind === 'say' ? 0 : 1) - (q.kind === 'say' ? 0 : 1); }); /* what is said stands nearest the one who says it */
     g.list.forEach(function (b) {
       c.font = (b.kind === 'think' ? 'italic 400 ' : '500 ') + '12.5px "Instrument Sans", sans-serif';
-      b.lines = wrap(c, b.text, 210); const tw = Math.max.apply(null, b.lines.map(function (l) { return c.measureText(l).width; }));
+      b.lines = wrap(c, b.text, 210); b.cut = b.lines.length === 6 && /\u2026$/.test(b.lines[5]); const tw = Math.max.apply(null, b.lines.map(function (l) { return c.measureText(l).width; }));
       g.boxes.push({ w: tw + 18, h: b.lines.length * 16 + 10 });
     });
   });
@@ -817,7 +819,7 @@ function drawLabels(c) {
     const P = at[gi], n = P ? P.rects.length : 0;
     for (let i = 0; i < n; i++) {
       const b = g.list[i], r = P.rects[i], bx = r.x, by = r.y, bw = r.w, bh = r.h, tx = clamp(g.ax, bx + 12, bx + bw - 12), dn = P.below ? -1 : 1, edge = P.below ? by : by + bh;
-      U.laid.push({ id: g.id, kind: b.kind, x: bx, y: by, w: bw, h: bh, below: P.below, shift: P.shift });
+      U.laid.push({ id: g.id, kind: b.kind, x: bx, y: by, w: bw, h: bh, below: P.below, shift: P.shift, cut: !!b.cut, text: b.text });
       c.globalAlpha = b.al; c.font = (b.kind === 'think' ? 'italic 400 ' : '500 ') + '12.5px "Instrument Sans", sans-serif';
       c.beginPath();
       if (c.roundRect) c.roundRect(bx, by, bw, bh, 9); else c.rect(bx, by, bw, bh);
@@ -884,6 +886,13 @@ function hudRects() {
     if (r.width > 0 && r.height > 0) out.push({ x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height });
   });
   U.hudAt = U.time; U.hudR = out; return out;
+}
+/* which speech or thought box lies under a point of the screen, and what a click on one does (Generation 29) */
+function bubbleAt(x, y) { for (let k = U.laid.length - 1; k >= 0; k--) { const r = U.laid[k]; if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) return r; } return null; }
+function openBubble(hb) {
+  $('tip').hidden = true;
+  if (hb.kind === 'say') { let at = -1; const nm = st.names[hb.id]; for (let i = st.voices.length - 1; i >= 0 && at < 0; i--) if (st.voices[i].name === nm) at = i; U.voiceFocus = at; U.onlySel = false; U.keys.voices = ''; setTab('voices'); }
+  else { const a = agentOf(hb.id); if (a) select({ t: 'agent', id: a.id }, false); setTab('inspect'); }
 }
 function bubble(id, kind, text) {
   U.bubbles = U.bubbles.filter(function (b) { return b.id !== id || b.kind !== kind; });
@@ -1056,13 +1065,18 @@ cv.addEventListener('pointermove', function (e) {
     if (ptr.moved > 4) { if (isGlobe()) { const Rg = globeR(); cam.x -= dx / Rg * w.W / 6.2832; cam.y -= dy / Rg * w.H / 3.1416; U.spinAt = U.time + 8; } else { cam.x -= dx / cam.z; cam.y -= dy / cam.z; } U.follow = false; clampCam(); syncButtons(); }
     ptr.lx = e.offsetX; ptr.ly = e.offsetY; $('tip').hidden = true;
   } else {
-    const s = isGlobe() ? null : pick(e.offsetX, e.offsetY), html = s ? describe(s) : '', tip = $('tip');
+    const hb = isGlobe() ? null : bubbleAt(e.offsetX, e.offsetY), tip = $('tip');
+    if (hb) { /* a speech or thought box under the pointer opens to the whole of what was said, and stays while the pointer is on it */
+      U.bubbles.forEach(function (b) { if (b.id === hb.id && b.kind === hb.kind) b.t0 = Math.max(b.t0, U.time - b.life + 1.5); });
+      tip.innerHTML = '<div class="whole"><b>' + esc(st.names[hb.id] || '') + '</b> ' + (hb.kind === 'say' ? 'said' : 'thought') + ':<br>' + verse(hb.text) + '<div class="muted" style="margin-top:4px">click to read it in ' + (hb.kind === 'say' ? 'Voices' : 'its thoughts') + '</div></div>'; tip.hidden = false; tip.style.maxWidth = '340px'; tip.style.left = clamp(hb.x, 8, W - 350) + 'px'; tip.style.top = clamp(hb.y + hb.h + 6, 8, H - 60) + 'px'; cv.style.cursor = 'pointer'; return; }
+    cv.style.cursor = ''; tip.style.maxWidth = '';
+    const s = isGlobe() ? null : pick(e.offsetX, e.offsetY), html = s ? describe(s) : '';
     if (html) { tip.innerHTML = html; tip.hidden = false; tip.style.left = Math.min(W - 270, e.offsetX + 14) + 'px'; tip.style.top = Math.min(H - 40, e.offsetY + 16) + 'px'; } else tip.hidden = true;
   }
 });
 function endPtr(e) {
   delete ptr.pts[e.pointerId]; cv.classList.remove('drag');
-  if (ptr.down && ptr.moved <= 4 && e.type === 'pointerup' && !isGlobe()) select(pick(e.offsetX, e.offsetY), false);
+  if (ptr.down && ptr.moved <= 4 && e.type === 'pointerup' && !isGlobe()) { const hb = bubbleAt(e.offsetX, e.offsetY); if (hb) openBubble(hb); else select(pick(e.offsetX, e.offsetY), false); }
   if (!Object.keys(ptr.pts).length) ptr.down = false;
   ptr.pinch = 0;
 }
@@ -1332,7 +1346,7 @@ $('panel').addEventListener('click', function (e) {
 
 /* ---------- voices, chronicle, kinds ---------- */
 function renderVoices() {
-  const sel = U.sel && U.sel.t === 'agent' ? U.sel.id : null, key = st.voices.length + ':' + (st.voices.length ? st.voices[st.voices.length - 1].tick : 0) + ':' + U.onlySel + ':' + sel;
+  const sel = U.sel && U.sel.t === 'agent' ? U.sel.id : null, key = st.voices.length + ':' + (st.voices.length ? st.voices[st.voices.length - 1].tick : 0) + ':' + U.onlySel + ':' + sel + ':' + (U.voiceFocus == null ? '' : U.voiceFocus);
   if (U.keys.voices === key) return; U.keys.voices = key;
   const name = sel != null ? st.names[sel] : null;
   let h = '<h2>Voices</h2><p class="muted">Everything said aloud, newest first. Beings only know what they hear.</p><label class="kv"><input type="checkbox" id="onlySel"' + (U.onlySel ? ' checked' : '') + '> Only what ' + (name ? esc(name) : 'the selected being') + ' said or heard</label><div style="margin-top:10px">';
@@ -1341,10 +1355,11 @@ function renderVoices() {
     const v = st.voices[i];
     if (U.onlySel && name && v.name !== name && v.heard.indexOf(name) < 0) continue;
     const sp = agentOf(v.a);
-    rows.push('<div class="line jump face" data-act="voice" data-i="' + i + '">' + (sp ? lookCanvas(sp.look, 30, { scale: 1.1 }) : '<span></span>') + '<div><div class="when">' + esc(when(v.tick)) + '</div><span class="sp">' + esc(v.name) + '</span> <span class="muted">to ' + esc(v.to === 'all' ? 'everyone' : v.to) + ':</span> “' + esc(v.text) + '”<div class="heard">' + (v.heard.length ? 'heard by ' + esc(v.heard.join(', ')) : 'no one was near enough to hear') + '</div></div></div>');
+    rows.push('<div class="line jump face' + (U.voiceFocus === i ? ' focus' : '') + '" data-act="voice" data-i="' + i + '">' + (sp ? lookCanvas(sp.look, 30, { scale: 1.1 }) : '<span></span>') + '<div><div class="when">' + esc(when(v.tick)) + '</div><span class="sp">' + esc(v.name) + '</span> <span class="muted">to ' + esc(v.to === 'all' ? 'everyone' : v.to) + ':</span> “' + esc(v.text) + '”<div class="heard">' + (v.heard.length ? 'heard by ' + esc(v.heard.join(', ')) : 'no one was near enough to hear') + '</div></div></div>');
   }
   h += rows.length ? rows.join('') : '<p class="empty">No one has spoken yet. Beings speak when they think, so wake the minds.</p>';
   $('pane-voices').innerHTML = h + '</div>'; paintPending($('pane-voices'));
+  { const fe = $('pane-voices').querySelector('.line.focus'); if (fe && fe.scrollIntoView) fe.scrollIntoView({ block: 'center' }); }
   $('onlySel').onchange = function () { U.onlySel = this.checked; U.keys.voices = ''; };
 }
 const ECO = [['a', '#f2b84b', 'beings'], ['h', '#5fb6e6', 'grazers'], ['s', '#e0667a', 'hunters'], ['p', '#6fd38b', 'plants']];
@@ -1776,7 +1791,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 28, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 29, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1846,7 +1861,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 28, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 29, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }
@@ -1894,7 +1909,7 @@ function attach(state) {
   if (w.agents.length) { cam.x = w.agents.reduce(function (s, a) { return s + a.x; }, 0) / w.agents.length + 0.5; cam.y = w.agents.reduce(function (s, a) { return s + a.y; }, 0) / w.agents.length + 0.5; }
   else { cam.x = w.W / 2; cam.y = w.H / 2; }
   clampCam(); syncButtons();
-  window.SWdebug = { st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco, bubble: bubble, placeBubbles: placeBubbles, hudRects: hudRects };
+  window.SWdebug = { bubbleAt: bubbleAt, openBubble: openBubble, st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco, bubble: bubble, placeBubbles: placeBubbles, hudRects: hudRects };
 }
 function newWorld(seed) {
   const keep = st ? st.settings : null;

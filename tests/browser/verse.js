@@ -29,6 +29,15 @@ const errs = []; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m)
   ok(c.n === 2 && c.heads >= 3, 'a chapter that has one is headed by its epigraph; one written before has none and is shown as it was');
   ok(c.html.some(h => (h.match(/<br>/g) || []).length === 2) && c.bold === 0 && c.html.some(h => /&lt;b&gt;goes/.test(h)), 'the verse is set line under line, and what it holds is shown as text, never as markup');
   ok(c.text.some(t => t.indexOf('the death poem of ' + b.who + ' of ' + b.people + ', day 3') >= 0) && c.text.some(t => /from the teaching of the Open Hand, as held among /.test(t)), 'under it stands whose it is: "' + (c.text[1] || c.text[0] || '').split('\n').pop().slice(0, 80) + '"');
+  /* Generation 29: a speech box that was cut opens on hover and jumps to Voices on a click; settlements and ways */
+  const bb = await page.evaluate(async () => { const d = window.SWdebug, st = d.st, w = st.world, a = w.agents[0]; d.setTab('inspect'); d.cam.x = a.x + 0.5; d.cam.y = a.y + 0.5; d.cam.z = 24;
+    const long = 'We came down from the high ground when the snow closed the pass, and I tell you now that the reed beds by the water hold more food than the whole of the ridge, so we should stay here through the cold and lay by what we can before the frost takes the last of the berries and the herds move on to the south without us';
+    st.voices.push({ a: a.id, name: a.name, to: 'all', text: long, tick: w.tick, heard: [] }); d.event({ type: 'said', a: a.id, text: long, to: 'all' });
+    await new Promise(r => setTimeout(r, 900)); const box = d.U.laid.filter(q => q.id === a.id && q.kind === 'say')[0]; if (!box) return { box: false };
+    const hit = d.bubbleAt(box.x + 4, box.y + 4), miss = d.bubbleAt(box.x - 40, box.y - 40); d.openBubble(box); await new Promise(r => setTimeout(r, 500));
+    const row = document.querySelector('#pane-voices .line.focus'); return { box: true, cut: box.cut, whole: box.text === long, hit: !!hit && hit.id === a.id, miss: !miss || miss.id !== a.id, tab: d.U.tab, focus: !!row && row.textContent.indexOf('We came down from the high ground') >= 0 }; });
+  ok(bb.box && bb.cut && bb.whole && bb.hit && bb.miss, 'a long thing said is cut in its box, and the box under the pointer is found with the whole of what was said');
+  ok(bb.tab === 'voices' && bb.focus, 'a click on it opens Voices at that line');
   /* send everything now */
   await page.evaluate(() => { window.SWdebug.setTab('setup'); }); await page.waitForTimeout(600);
   const pressed = await page.evaluate(() => { const bt = document.querySelector('[data-act="recsend"]'); if (bt) bt.click(); return !!bt; });

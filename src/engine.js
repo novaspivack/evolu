@@ -134,13 +134,13 @@ SW.defaultLaws = function () {
       powerhouse: { way: 'electricity', wood: 10, stone: 30, sight: 4, fx: [{ on: 'joy', by: 0.3 }], hint: 'light without flame'  }
     },
     land: { rockMove: 1.8, marshMove: 1.6, snowMove: 1.6, shallowsMove: 3, forestMove: 1.1, desertThirst: 0.03, snowCold: 0.05 },
-    build: { near: 12, reuse: 0.5, shelterWood: 3, wallWood: 2, razeChance: 0.25, woodChance: 0.5, woodMax: 6, fellChance: 0.25, treeRegrow: 0.5 },
+    build: { near: 12, trackAt: 10, trackFade: 0.8, dirtCost: 1.5, reuse: 0.5, shelterWood: 3, wallWood: 2, razeChance: 0.25, woodChance: 0.5, woodMax: 6, fellChance: 0.25, treeRegrow: 0.5 },
     weather: { meanDuration: 200, rainGrowth: 1.6, droughtGrowth: 0.35, rainCold: 0.015, stormCold: 0.08, snowCold: 0.03, droughtThirst: 0.02, strikeChance: 0.006, strikeDamage: 24, fogSight: 4, bloom: 0.08, blight: 0.05, herd: 0.05, pack: 0.03, disaster: 0.04 },
     mood: { decay: 0.996 },
     device: { life: 3600, wood: 2, stone: 1, strike: 9, holdMax: 6 },
     home: { minStructures: 2, reach: 4, margin: 3, heal: 1.5, larder: 35 },
     magic: { wane: 0.22, loreToCast: 5, loreToLearnArt: 2.5, cost: 6, duration: 720, maxRadius: 5, maxFields: 12, teachGain: 0.25, greatLore: 10, greatArts: 2, greatHelpers: 2, greatCost: 50, helperCost: 10, greatDuration: 480 },
-    ecology: { seeding: 0.75, bounty: 0.6, springBreeding: 1.4, grazerTarget: 135, richSpread: 2, richBreed: 1.6, herdFollow: 0.5, herdReturn: 0.012, penReach: 3, penBreed: 1.4, driveChance: 0.55, driveReach: 8, seaReturn: 0.008, lodeRegrow: 0.01, tameChance: 0.3, leash: 4, pairRange: 5, milkEnergy: 12, rideCost: 0.4, rideCarry: 4, grazeWear: 0.006, pastureHeal: 0.0005, crowding: 4, dormantSeeds: 0.12, wildMutation: 0.004, maxPlantKinds: 44, maxCreatureKinds: 30, grazerCap: 280, hunterCap: 20 },
+    ecology: { houndHunt: 0.4, scrapDays: 3, seeding: 0.75, bounty: 0.6, springBreeding: 1.4, grazerTarget: 135, richSpread: 2, richBreed: 1.6, herdFollow: 0.5, herdReturn: 0.012, penReach: 3, penBreed: 1.4, driveChance: 0.55, driveReach: 8, seaReturn: 0.008, lodeRegrow: 0.01, tameChance: 0.3, leash: 4, pairRange: 5, milkEnergy: 12, rideCost: 0.4, rideCarry: 4, grazeWear: 0.006, pastureHeal: 0.0005, crowding: 4, dormantSeeds: 0.12, wildMutation: 0.004, maxPlantKinds: 44, maxCreatureKinds: 30, grazerCap: 280, hunterCap: 20 },
     craft: { cultivateSkill: 3, cultivateCost: 8, markWood: 1, markLife: 2400, signLife: 5, fireLife: 360, fireWarmth: 0.3, fireReach: 2, cookBonus: 1.5, storeMax: 20, farmGrowth: 1.6, sturdy: 0.4, toolPower: 1.3, toolGrowth: 1.15, toolLore: 0.12, toolWear: 60, maxTools: 3, maxDesigns: 60, stoneMax: 6, oreMax: 4, clayMax: 4, oreChance: 0.35, metalPower: 1.25, metalWear: 3, potWater: 3, potCarry: 2, potMax: 2, potClay: 2 },
     /* what lies in the ground, each in its own kind of land. Deep ones cannot be won by hand. Every one is a thing that can be carried, given, traded and made into other things. */
     minerals: {
@@ -522,15 +522,17 @@ function stepAway(w, e, tx, ty) {
 }
 /* Breadth-first search over walkable tiles within R of the mover.
    goal(x, y) says whether a tile ends the search. Returns the first step, or null if nothing is reachable. */
+function roadsAny(w) { if (w._rT !== w.tick) { w._rT = w.tick; w._rA = false; for (const k in w.roads) { w._rA = true; break; } } return w._rA; }
 function bfsStep(w, e, goal, R) {
-  const size = 2 * R + 1, seen = new Int8Array(size * size), qx = [e.x], qy = [e.y], first = [-1];
+  const pref = roadsAny(w), size = 2 * R + 1, seen = new Int8Array(size * size), qx = [e.x], qy = [e.y], first = [-1];
   seen[R * size + R] = 1;
   for (let h = 0; h < qx.length; h++) {
     const x = qx[h], y = qy[h];
     if (h > 0 && goal(x, y)) return HEAD[first[h]];
-    for (let d = 0; d < 8; d++) {
-      const nx = x + HEAD[d][0], ny = y + HEAD[d][1], lx = nx - e.x + R, ly = ny - e.y + R;
-      if (lx < 0 || ly < 0 || lx >= size || ly >= size || seen[ly * size + lx] || !passable(w, nx, ny, e)) continue;
+    for (let d2 = pref ? 0 : 8; d2 < 16; d2++) { /* where there are ways on the ground, neighbours that are roads are looked at first: of two ways equally short the road is taken */
+      const d = d2 & 7, nx = x + HEAD[d][0], ny = y + HEAD[d][1], lx = nx - e.x + R, ly = ny - e.y + R;
+      if (lx < 0 || ly < 0 || lx >= size || ly >= size || seen[ly * size + lx]) continue; if (d2 < 8 && !w.roads[idx(w, nx, ny)]) continue;
+      if (!passable(w, nx, ny, e)) continue;
       seen[ly * size + lx] = 1; qx.push(nx); qy.push(ny); first.push(h === 0 ? d : first[h]);
     }
   }
@@ -545,9 +547,10 @@ function pathToward(w, e, tx, ty, stop) {
     for (let h = 0; h < qx.length; h++) {
       const x = qx[h], y = qy[h], d = cheb(x, y, tx, ty);
       if (h > 0 && d < bd) { bd = d; best = h; }
-      for (let k = 0; k < 8; k++) {
-        const nx = x + HEAD[k][0], ny = y + HEAD[k][1], lx = nx - e.x + R, ly = ny - e.y + R;
-        if (lx < 0 || ly < 0 || lx >= size || ly >= size || seen[ly * size + lx] || !passable(w, nx, ny, e)) continue;
+      for (let k2 = roadsAny(w) ? 0 : 8; k2 < 16; k2++) { /* neighbours that are roads first, so that of two ways equally short the road is taken */
+        const k = k2 & 7, nx = x + HEAD[k][0], ny = y + HEAD[k][1], lx = nx - e.x + R, ly = ny - e.y + R;
+        if (lx < 0 || ly < 0 || lx >= size || ly >= size || seen[ly * size + lx]) continue; if (k2 < 8 && !(w.roads && w.roads[idx(w, nx, ny)])) continue;
+        if (!passable(w, nx, ny, e)) continue;
         seen[ly * size + lx] = 1; qx.push(nx); qy.push(ny); first.push(h === 0 ? k : first[h]);
       }
     }
@@ -1041,15 +1044,15 @@ SW.compose = function (w, names) {
 };
 /* what a kind of building asks to have near it, and which of that is missing where this being stands */
 function nearKind(w, x, y, kind, r) { for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const X = x + dx, Y = y + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y), k = kind === 'store' ? (w.stores[i] ? 'store' : null) : buildingAt(w, i); if (k && (k === kind || isOfLine(w, k, kind))) return true; } return false; }
-function roadBeside(w, a) { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const X = a.x + dx, Y = a.y + dy; if (inb(w, X, Y) && w.roads && w.roads[idx(w, X, Y)]) return true; } return false; }
+function roadBeside(w, a) { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const X = a.x + dx, Y = a.y + dy; if (inb(w, X, Y) && w.roads && w.roads[idx(w, X, Y)] && w.roads[idx(w, X, Y)] !== 3) return true; } return false; }
 SW.infraLack = function (w, a, kind) { use(w); const B = (w.laws.buildings || {})[kind], r = (w.laws.build || {}).near || 12; return B && B.needs ? B.needs.filter(function (k) { return !nearKind(w, a.x, a.y, k, r); }) : []; };
 /* what stands in a settlement, by kind; and whether two settlements are joined by a paved way */
 SW.settlementKinds = function (w, S) { use(w); const out = {}; for (let dy = -S.r; dy <= S.r; dy++) for (let dx = -S.r; dx <= S.r; dx++) { const X = S.x + dx, Y = S.y + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y), k = buildingAt(w, i) || (w.stores[i] ? 'store' : w.shelters[i] ? 'shelter' : null); if (k) out[k] = (out[k] || 0) + 1; } return out; };
 SW.joinedByRoad = function (w, A, B) {
   use(w); if (!w.roads) return false; const seen = {}, q = []; let head = 0;
-  for (let dy = -A.r; dy <= A.r; dy++) for (let dx = -A.r; dx <= A.r; dx++) { const X = A.x + dx, Y = A.y + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y); if (w.roads[i] && !seen[i]) { seen[i] = 1; q.push(i); } }
+  for (let dy = -A.r; dy <= A.r; dy++) for (let dx = -A.r; dx <= A.r; dx++) { const X = A.x + dx, Y = A.y + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y); if (w.roads[i] && w.roads[i] !== 3 && !seen[i]) { seen[i] = 1; q.push(i); } }
   while (head < q.length && q.length < 6000) { const i = q[head++], x = i % w.W, y = (i - x) / w.W; if (cheb(x, y, B.x, B.y) <= B.r) return true;
-    for (let d = 0; d < 8; d++) { const X = x + HEAD[d][0], Y = y + HEAD[d][1]; if (!inb(w, X, Y)) continue; const j = idx(w, X, Y); if (w.roads[j] && !seen[j]) { seen[j] = 1; q.push(j); } } }
+    for (let d = 0; d < 8; d++) { const X = x + HEAD[d][0], Y = y + HEAD[d][1]; if (!inb(w, X, Y)) continue; const j = idx(w, X, Y); if (w.roads[j] && w.roads[j] !== 3 && !seen[j]) { seen[j] = 1; q.push(j); } } }
   return false;
 };
 /* SEAS (Generation 27): a world begun with opts.seas has an ocean that divides the known land, a greater ocean on the far side of the world with
@@ -1708,7 +1711,7 @@ function stepCreatures(w, emit) {
         } else if (moves && !stepToward(w, c, prey.x, prey.y)) wanderHome(w, c, s);
       } else if (c.e < s.agentHunger) {
         const a = nearestAgentTo(w, c.x, c.y, 4);
-        if (a && !a.sheltered && !fireNear(w, a.x, a.y, 3) && !(c.e > s.agentHunger * 0.5 && packOf(w, a, a.x, a.y) > 0)) { /* a beast that is not starving will not come at two who stand together */
+        if (a && !a.sheltered && !fireNear(w, a.x, a.y, 3) && !(c.e > s.agentHunger * 0.5 && packOf(w, a, a.x, a.y) + houndsOf(w, a, 3) > 0)) { /* a beast that is not starving will not come at two who stand together */
           if (cheb(c.x, c.y, a.x, a.y) <= 1) { c.e += 10; feel(a, 'fear', 0.5); emit({ type: 'bitten', a: a.id, by: c.sp }); hurtAgent(w, a, s.bite || L.fight.predatorBite, 'killed by a ' + c.sp, emit); }
           else if (moves) stepToward(w, c, a.x, a.y);
         } else if (moves) wanderHome(w, c, s);
@@ -1731,7 +1734,8 @@ function stepCreatures(w, emit) {
   w.creatures = list.filter(function (c) { return !c.dead; }).concat(born);
   /* when grazers are few, a herd comes in from the rim; when hunters are few for the prey there is, a pair follows */
   /* the sea gives back what was fished and hunted out of it: a kind of the sea that has fallen below its least number comes in again on open water */
-  if (w.tick % L.time.dayLength === 3) SW.openAges(w, emit); /* the library: an age is opened when its people come near it (no chance is drawn) */
+  if (w.tick % L.time.dayLength === 3) SW.openAges(w, emit);
+  if (w.tick % L.time.dayLength === 5) fadeWear(w); if (w.tick % L.time.dayLength === 9) feedHounds(w, emit); /* the library: an age is opened when its people come near it (no chance is drawn) */
   if ((L.ecology.seaReturn || 0) > 0 && w.tick % 60 === 41) { /* looked at once in sixty moments, by a chance of its own, so the world's own stream of chance is left as it was */
     const ks = Object.keys(L.creatures).filter(function (k) { const q = L.creatures[k]; return q.sea && !q.retired && (counts[k] || 0) < (q.minPop || 2); });
     if (ks.length) {
@@ -1741,7 +1745,7 @@ function stepCreatures(w, emit) {
         for (let t = 0; t < 60; t++) {
           const X = ri(w, w.W), Y = ri(w, w.H), i = idx(w, X, Y); if (w.terrain[i] !== T.WATER || (t < 40 && w.narrow && w.narrow[i])) continue;
           let n = 0; for (let q = 0; q < 6 && n < 2; q++) { const x2 = X + ri(w, 3) - 1, y2 = Y + ri(w, 3) - 1; if (inb(w, x2, y2) && w.terrain[idx(w, x2, y2)] === T.WATER) { w.creatures.push(newCreature(w, k, wrapX(w, x2), y2, { age: L.creatures[k].matureAge })); n++; } }
-          if (n) { w.tally.seaReturned = (w.tally.seaReturned || 0) + n; emit({ type: 'herdcame', kind: k, n: n, x: X, y: Y, sea: true }); break; }
+          if (n) { w.tally.seaReturned = (w.tally.seaReturned || 0) + n; (function () { let nd = 999; for (let q = 0; q < w.agents.length; q++) if (!w.agents[q].dead) nd = Math.min(nd, cheb(w.agents[q].x, w.agents[q].y, X, Y)); const AR = w.tally.arrivals = w.tally.arrivals || []; AR.push({ kind: k, n: n, x: X, y: Y, day: SW.day(w), stepsFromNearestBeing: nd }); if (AR.length > 12) AR.shift(); })(); emit({ type: 'herdcame', kind: k, n: n, x: X, y: Y, sea: true }); break; }
         }
       }
       w.rng = keep;
@@ -1857,11 +1861,41 @@ function matches(vars, rule) {
 
 const RIDES = { seek: 1, goto: 1, explore: 1, follow: 1, flee: 1, wander: 1 };
 /* ---------- agents: actions. Each returns true if it did something. ---------- */
+/* WAYS ON THE GROUND (Generation 29). A way has a grade: 3 a track, worn by feet where people keep walking (build.trackAt passes; it fades
+   when no one uses it); 4 a dirt road, beaten by anyone who works at it; 1 a paved road of stone (the way of roads); 2 a bridge. A step on a
+   track costs 0.85 of a step on open ground, on a dirt road 0.7, on stone or a bridge 0.5. One who is finding a way takes a road where it
+   costs no more steps. Wear is kept beside the roads (w.wear) and draws no chance. */
+function wearAt(w, i, t) {
+  if (t === T.WATER || t === T.SHALLOWS || t === T.VOID) return; const rd = w.roads[i]; if (rd && rd !== 3) return;
+  const W = w.wear || (w.wear = {}), at = (w.laws.build || {}).trackAt || 10; W[i] = Math.min(at * 3, (W[i] || 0) + 1);
+  if (!rd && W[i] >= at) { w.roads[i] = 3; w.tally.tracks = (w.tally.tracks || 0) + 1; }
+}
+function fadeWear(w) {
+  const W = w.wear; if (!W) return; const f = (w.laws.build || {}).trackFade || 0.8, at = (w.laws.build || {}).trackAt || 10;
+  for (const i in W) { W[i] *= f; if (w.roads[i] === 3 && W[i] < at * 0.35) delete w.roads[i]; if (W[i] < 0.5) delete W[i]; }
+}
+SW.roadGrade = function (w, i) { const r = w.roads && w.roads[i]; return r === 1 ? 'paved' : r === 2 ? 'bridge' : r === 3 ? 'track' : r === 4 ? 'dirt' : null; };
+/* KEPT HUNTERS (Generation 29). A tamed dog, or any tamed beast that hunts, that walks with its keeper (not penned, within three steps) helps the
+   hunt (ecology.houndHunt for each, up to two) and stands with them as another would: a beast that is not starving will not come at the two.
+   It must be fed: once a day it takes one food from its keeper's hands, meat first; unfed for ecology.scrapDays days running, it leaves. */
+function isHound(w, c) { const s = w.laws.creatures[c.sp]; return !!s && !c.dead && c.pen == null && (s.pack || s.predator) && !s.sea; }
+function houndsOf(w, a, r) { let n = 0; for (let k = 0; k < w.creatures.length; k++) { const c = w.creatures[k]; if (c.keeper === a.id && isHound(w, c) && cheb(c.x, c.y, a.x, a.y) <= r) n++; } return n; }
+SW.houndsOf = function (w, a) { use(w); return houndsOf(w, a, 3); };
+function feedHounds(w, emit) {
+  const days = w.laws.ecology.scrapDays || 3;
+  for (let k = 0; k < w.creatures.length; k++) { const c = w.creatures[k]; if (c.keeper == null || !isHound(w, c)) continue;
+    let kp = null; for (let j = 0; j < w.agents.length; j++) if (w.agents[j].id === c.keeper) kp = w.agents[j]; if (!kp || kp.dead || cheb(kp.x, kp.y, c.x, c.y) > 8) continue; /* away from its keeper it fends for itself */
+    let ci = -1; for (let q = 0; q < kp.carry.length; q++) if (kp.carry[q].k === 'meat') { ci = q; break; } if (ci < 0 && kp.carry.length) ci = 0;
+    if (ci >= 0) { const food = kp.carry[ci].k; kp.carry.splice(ci, 1); c.unfed = 0; c.e = Math.min((w.laws.creatures[c.sp].maxEnergy || 60), c.e + 20); w.tally.scraps = (w.tally.scraps || 0) + 1; emit({ type: 'scraps', a: kp.id, kind: c.sp, food: food }); }
+    else if ((c.unfed = (c.unfed || 0) + 1) >= days) { c.owner = null; c.keeper = null; c.unfed = 0; if (kp.mount === c.id) kp.mount = null; w.tally.houndsLeft = (w.tally.houndsLeft || 0) + 1; emit({ type: 'houndleft', a: kp.id, kind: c.sp, days: days, x: c.x, y: c.y }); }
+    else emit({ type: 'houndhungry', a: kp.id, kind: c.sp, left: days - c.unfed }); }
+}
 function move(w, a, ok) {
   if (ok) {
     const L = w.laws.land, t = w.terrain[idx(w, a.x, a.y)];
     const fl0 = (t === T.SHALLOWS || t === T.WATER) ? floatOf(w, a) : 0;
-    const m = w.roads && w.roads[idx(w, a.x, a.y)] ? 0.5 : fl0 ? Math.min(fl0, L.shallowsMove) : t === T.ROCK ? L.rockMove : t === T.MARSH ? L.marshMove : t === T.SNOW ? L.snowMove : t === T.FOREST ? L.forestMove : (t === T.SHALLOWS || t === T.WATER) ? L.shallowsMove : 1;
+    const rd0 = w.roads && w.roads[idx(w, a.x, a.y)]; if (!fl0) wearAt(w, idx(w, a.x, a.y), t);
+    const m = rd0 ? (rd0 === 3 ? 0.85 : rd0 === 4 ? 0.7 : 0.5) : fl0 ? Math.min(fl0, L.shallowsMove) : t === T.ROCK ? L.rockMove : t === T.MARSH ? L.marshMove : t === T.SNOW ? L.snowMove : t === T.FOREST ? L.forestMove : (t === T.SHALLOWS || t === T.WATER) ? L.shallowsMove : 1;
     a.e -= w.laws.body.moveCost * m * (SW.stage(w, a) === 'elder' ? w.laws.age.elderMove : 1) * (a.mount ? w.laws.ecology.rideCost : 1) / boon(a, 'vigor');
   }
   return ok;
@@ -2003,7 +2037,7 @@ SW.upgrade = function (w) {
   if (!w.regions || !w.regions.length) { w.regions = [{ id: 0, name: 'the Land', biome: 'mixed', x: w.W >> 1, y: w.H >> 1 }]; w.region = []; for (let i = 0; i < w.W * w.H; i++) w.region.push(0); }
   ['lodes', 'bkind', 'roads', 'works'].forEach(function (k) { if (!w[k]) w[k] = {}; });
   if (!w.peoples) w.peoples = []; if (!w.tally) w.tally = { made: {}, eaten: {}, built: {} }; ['made', 'eaten', 'built'].forEach(function (k) { if (!w.tally[k]) w.tally[k] = {}; });
-  if (w.laws.build && w.laws.build.near == null) w.laws.build.near = 12; SW.openAges(w); /* a world made before Generation 28 is given the library of the ages it has reached */ if (!w.laws.traditions) w.laws.traditions = SW.defaultLaws().traditions; if (!w.laws.verse) w.laws.verse = SW.defaultLaws().verse; (w.peoples || []).forEach(function (P) { if (!P.tradition) P.tradition = traditionFor(w, P); }); /* a world made before Generation 27 is given its peoples' traditions */
+  if (w.laws.build && w.laws.build.near == null) w.laws.build.near = 12; if (w.laws.build && w.laws.build.trackAt == null) { w.laws.build.trackAt = 10; w.laws.build.trackFade = 0.8; w.laws.build.dirtCost = 1.5; } if (w.laws.ecology && w.laws.ecology.houndHunt == null) { w.laws.ecology.houndHunt = 0.4; w.laws.ecology.scrapDays = 3; } SW.openAges(w); /* a world made before Generation 28 is given the library of the ages it has reached */ if (!w.laws.traditions) w.laws.traditions = SW.defaultLaws().traditions; if (!w.laws.verse) w.laws.verse = SW.defaultLaws().verse; (w.peoples || []).forEach(function (P) { if (!P.tradition) P.tradition = traditionFor(w, P); }); /* a world made before Generation 27 is given its peoples' traditions */
   { const D0 = SW.defaultLaws().buildings, B0 = w.laws.buildings || {}; for (const k in D0) if (D0[k].from && B0[k] && B0[k].from == null) B0[k].from = D0[k].from; if (B0.longhall && B0.longhall.from == null && B0.hall) B0.longhall.from = 'hall'; } /* lines of descent between kinds of building (Generation 26) */
   const D = SW.defaultLaws(); ['minerals', 'goods', 'recipes', 'buildings', 'drives', 'status', 'discovery', 'culture', 'arrivals', 'explore', 'trade', 'climate', 'body', 'ecology', 'disease'].forEach(function (g) { if (!w.laws[g]) w.laws[g] = D[g]; else for (const k in D[g]) if (w.laws[g][k] == null && g !== 'recipes') w.laws[g][k] = D[g][k]; });
   for (const g in D) if (D[g] && typeof D[g] === 'object' && !Array.isArray(D[g]) && w.laws[g] && ['plants', 'creatures', 'tools', 'tree', 'recipes', 'buildings', 'minerals', 'goods'].indexOf(g) < 0) for (const k in D[g]) if (w.laws[g][k] == null) w.laws[g][k] = D[g][k];
@@ -2333,9 +2367,11 @@ function act(w, a, r, S, emit) {
       emit({ type: 'dismantled', a: a.id, what: what, wood: gw, stone: gs, x: ti % w.W, y: Math.floor(ti / w.W) }); return true;
     }
     case 'pave': {
-      if (!a.knows.roads) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You do not know how to pave a road.' }); return false; }
-      const tt = w.terrain[here]; if (tt === T.WATER || tt === T.SHALLOWS || w.roads[here] || a.stone < 1) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: w.roads[here] ? 'This ground is already paved. Step on and pave the next.' : a.stone < 1 ? 'Paving takes 1 stone a step and you have none.' : 'Water cannot be paved.' }); return false; }
-      a.stone--; w.roads[here] = 1; if (w.plants[here] && !w.plants[here].t) w.plants[here] = null; a.stats.paved = (a.stats.paved || 0) + 1; a.fin = 1; a.doing = 'paving a road';
+      const tt = w.terrain[here], g0 = w.roads[here], stoneWay = !!a.knows.roads && a.stone >= 1;
+      if (tt === T.WATER || tt === T.SHALLOWS || g0 === 1 || g0 === 2 || (g0 === 4 && !stoneWay)) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: g0 === 1 || g0 === 2 ? 'This ground is already paved. Step on and pave the next.' : g0 === 4 ? 'A dirt road already runs here. To lay stone on it takes the way of roads and 1 stone a step. Step on and work the next.' : 'Water cannot be paved.' }); return false; }
+      if (!stoneWay) { /* anyone can beat a dirt road: it costs effort and no stone */
+        a.e -= (L.build.dirtCost || 1.5); w.roads[here] = 4; if (w.plants[here] && !w.plants[here].t) w.plants[here] = null; a.stats.paved = (a.stats.paved || 0) + 1; w.tally.dirtRoad = (w.tally.dirtRoad || 0) + 1; a.fin = 1; a.doing = 'beating a dirt road'; emit({ type: 'paved', a: a.id, x: a.x, y: a.y, n: a.stats.paved, grade: 'dirt' }); return true; }
+      a.stone--; w.roads[here] = 1; if (w.wear) delete w.wear[here]; if (w.plants[here] && !w.plants[here].t) w.plants[here] = null; a.stats.paved = (a.stats.paved || 0) + 1; a.fin = 1; a.doing = 'paving a road';
       emit({ type: 'paved', a: a.id, x: a.x, y: a.y, n: a.stats.paved }); return true;
     }
     case 'pen': { /* put the loose animals you keep into the pen beside you, or (what: out) lead them out to follow you again */
@@ -2655,7 +2691,7 @@ function act(w, a, r, S, emit) {
       if (cheb(a.x, a.y, c.x, c.y) <= 1) {
         const s = L.creatures[c.sp];
         const pack = packOf(w, a, c.x, c.y), skill = 1 + Math.min(0.6, (a.stats.hunted || 0) * 0.04); /* two together overwhelm what one cannot; each hunt teaches the next */
-        if ((c.pen != null && c.keeper != null && (c.keeper === a.id || allied(w, a, c.keeper))) || rnd(w) < L.fight.huntChance * (1 + (L.fight.packBonus == null ? 0.8 : L.fight.packBonus) * pack) * skill * useTool(w, a, 'hunt', emit) * boon(a, 'luck') * (c.owner != null && c.owner === rootOf(w, a).id ? 4 : 1) / c.quick) {
+        if ((c.pen != null && c.keeper != null && (c.keeper === a.id || allied(w, a, c.keeper))) || rnd(w) < L.fight.huntChance * (1 + (L.fight.packBonus == null ? 0.8 : L.fight.packBonus) * pack) * (1 + (L.ecology.houndHunt || 0) * Math.min(2, houndsOf(w, a, 3))) * skill * useTool(w, a, 'hunt', emit) * boon(a, 'luck') * (c.owner != null && c.owner === rootOf(w, a).id ? 4 : 1) / c.quick) {
           c.wounds = (c.wounds || 0) + 1;
           if (c.wounds >= (s.tough || 1)) {
             c.dead = true; const n = Math.max(1, Math.round(s.meat * c.size));
@@ -3417,7 +3453,12 @@ SW.findSettlements = function (w, emit) {
     st.id = prev ? prev.id : w.nextId++;
     let named = null, nd = 99;
     w.places.forEach(function (pl) { const d = cheb(pl.x, pl.y, st.x, st.y); if (d <= st.r && d < nd && alive[pl.by] === st.root) { nd = d; named = pl.name; } });
-    st.name = named || (prev && prev.name) || ((root && root.bandName) ? 'Home of ' + root.bandName : (root ? root.name : 'Someone') + "'s Hold");
+    /* a settlement has a name of its own, never that of a place within it (Generation 29: the same words stood twice on the map), nor that of another settlement */
+    { const taken = function (nm) { return !nm || nm === named || w.places.some(function (pl) { return pl.name === nm && cheb(pl.x, pl.y, st.x, st.y) <= st.r + 3; }) || out.some(function (o) { return o !== st && o.name === nm; }); };
+      let nm = prev && prev.name; if (taken(nm)) nm = root && root.bandName ? 'Home of ' + root.bandName : null;
+      if (taken(nm)) { const P = root && root.people != null ? w.peoples[root.people] : null, T0 = SW.TONGUES[P ? P.tongue : 0] || SW.TONGUES[0], ends = ['stead', 'hold', 'garth', 'ham', 'wick', 'by'];
+        for (let t = 0; t < 12 && taken(nm); t++) { const h = (Math.imul((st.root | 0) + 7 + t * 31, 0x9E3779B1) ^ Math.imul(st.x * 131 + st.y + t, 0x85EBCA6B)) >>> 0; nm = T0.a[h % T0.a.length] + T0.syl[(h >>> 8) % T0.syl.length] + ends[(h >>> 16) % ends.length]; } }
+      st.name = nm || 'the Stead'; }
     st.since = prev ? prev.since : w.tick;
     if (!prev) emit({ type: 'settled', set: st });
   });

@@ -6,7 +6,7 @@ Evolu is an experimental world game that runs as a single page inside Claude. A 
 
 Nothing in Evolu is hard-coded to happen. Things are made possible, and the beings find them or do not.
 
-Created by **Nova Spivack**, built with Claude. Generation 28, November 2026.
+Created by **Nova Spivack**, built with Claude. Generation 29, November 2026.
 Source: <https://github.com/novaspivack/evolu>
 
 > Evolu was called Seedworld until Generation 14.
@@ -270,7 +270,7 @@ tests/run-all.sh            engine, minds and maker (about three minutes, needs 
 tests/run-all.sh browser    the same, then the page in headless Chrome (needs Playwright and Chrome)
 ```
 
-There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore, culture and necessity, peoples that last, a world with edges, what a mind is offered, a rim that opens slowly, a world that goes round, the warm belt with food in sight and trade, hunger answered with rich ground and the muster, a world that slows and does not sleep, memory in a window with history in files, the placing of the boxes of speech and thought on the page, what the chronicler is handed of a span, what can be made, pens, weirs, fields and thought by plan, a community raising better buildings, verse, traditions, seas and courting answered, and structures from blocks with a library by age. Together they are a regression suite of 815 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds. With `browser`, eleven more load the page in headless Chrome; the newest checks that no box of speech or thought is ever drawn over another or under a panel.
+There is one engine and every check runs against it. The numbered files are grouped by subject, in the order the subjects entered the world: land and craft, drives and the record, aims and bonds, chronicler and maker, animals and calamity, thirst and buildings, lands and peoples, standing and lore, culture and necessity, peoples that last, a world with edges, what a mind is offered, a rim that opens slowly, a world that goes round, the warm belt with food in sight and trade, hunger answered with rich ground and the muster, a world that slows and does not sleep, memory in a window with history in files, the placing of the boxes of speech and thought on the page, what the chronicler is handed of a span, what can be made, pens, weirs, fields and thought by plan, a community raising better buildings, verse, traditions, seas and courting answered, structures from blocks with a library by age, and ways on the ground with kept hunters. Together they are a regression suite of 840 checks, so a change in one part that breaks an older part is caught. The remaining suites run the whole mind pipeline with a scripted stand-in, a 20-day scripted run, and the ecology over several seeds. With `browser`, eleven more load the page in headless Chrome; the newest checks that no box of speech or thought is ever drawn over another or under a panel.
 
 ## What is and is not verified
 

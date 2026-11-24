@@ -12,6 +12,57 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## Generation 29 (built, not yet run with real minds): ways on the ground, kept hunters, names of their own, speech that opens
+
+Nova, 23 November, late, with the first run of a new world (Nimenvale, seas, 17 days) and a long list for the night, kept in full in `docs/overnight-plan.md`. This is the first wave of it.
+
+### What the nineteenth run showed (Generation 28, a new world with seas, days 1 to 17)
+
+1,013 thoughts, no call refused. Counted from `runs/generation-28-run-r5614-mwu324lo-day17.json`.
+
+- **The people grew:** fifteen founders and three bands of newcomers became 38 alive (29 grown, 9 children), with 13 births and two deaths (one starved on day 6, one killed by a wolf on day 10). Ten courtings were answered.
+- **Verse from the first day:** 28 made (ten love songs, ten lullabies, six myths, two laments). No death poems yet: no one is old.
+- **No one crossed the ocean** in 17 days, though 24 came to the way of rafts. Six times someone went past the edge of the known land instead.
+- **The maker designed a structure from blocks on day 5** (an ember hall: roof, hearth, gathering) and one was raised. Its lesson: "A building offered to a people is not raised just because it is better. The beings keep raising the kinds they already know."
+- **The third age of the library opened** by day 17. 205 insights in 17 days; 93 ways were found alone, 26 from parents, 2 taught.
+- **Builds:** 16 shelters, 9 halls, 8 fires, 5 stores, 2 longhalls, 2 fields, a weir, an ember hall. One trade (stone for gold).
+- **27% of thoughts came in the middle of a plan,** and now the record says why: an insight (21), a stranger coming onto one's ground (17), words said to everyone nearby (16), starving (8), a child born (7), being spoken to by name (6). The first three should not break a plan.
+- **Prompts:** a middle of 27,500 characters, a longest of 42,800.
+- **The maker asked four things:** that ideas carried from earlier worlds be marked, since they name beings who are not here; that stores be filled (it then saw them fill by themselves once ten knew storage, and wrote that down as a lesson); whether a trade can be offered to a stranger with no shared tongue; and where animals come in and how far from anyone.
+
+### Built
+
+- **Ways on the ground by grade.** A track wears in where feet keep passing (ten passes) and fades when unused; anyone can beat a dirt road with effort and no stone; the way of roads lays stone on bare ground or over a dirt road. A step on each costs less (measured over seven steps: open ground 0.87 energy, track 0.83, dirt road 0.79, paved 0.73). One who is finding a way now takes a road where it costs no more steps; without a road a walker bows off the straight line, as before. Two settlements count as joined by a dirt road or a paved one, not by a track. The page draws each grade differently.
+- **A kept hunter.** A tamed dog, or any tamed beast that hunts, that walks with its keeper makes the hunt surer and stands with them, so that a beast that is not starving will not come at the two. Once a day it takes one food from the keeper's hands, meat first; three days with nothing and it leaves and is wild again. The keeper is told each of these things.
+- **A settlement has a name of its own,** made in the tongue of its people, never the name of a place inside it. "Balul's Hall" stood twice because the settlement took the name of the hall.
+- **Speech and thought boxes open.** Hovering over one shows the whole of what was said and holds it up; a click on speech opens Voices at that line, and on a thought opens the being's thoughts.
+- **The poles.** They were never a gap in the map: the top row of the map is the pole itself. They were blank because the fourteen rows at each end start unknown, and the ice lands lie inside those rows. The ice is now painted as ice seen from afar, on the map and the globe. It can be reached as any unknown land is, by going past the edge of the known (`venture`).
+- **The maker** can make a block of its own (op `block`, within bounds) and build from it; ideas inherited from another world are marked as such; it reads where the last animals came in and how far that was from anyone, and the ways and kept hunters of the world.
+- **What no longer breaks into a plan:** an insight, a stranger on one's ground, a word said to everyone. They are still told and still bring the next thought nearer.
+- **Minds are told** that a trade needs no shared tongue.
+- **Heritage:** the ember hall and the shubbock (a woolly beast the maker made) are folded in with three lessons; two sites bound to an earlier world are again left out. 53 changes, 61 lessons, 34 ideas.
+
+### Measured
+
+- **Balance on instinct, twelve seeds, forty days,** against Generation 28 in the same sitting: 15.2 alive against 15.1; 0.5 deaths a world against 0.3 (0.2 starved and 0.3 to beasts, against 0.3 and 0.0); plants 2,504 against 2,545. Tracks now form under bodies on instinct too, which moves where they walk.
+- **Speed:** 2.59 ms a moment against 2.48 (about 4% more: every search now looks at road neighbours first when there are any ways on the ground).
+
+### Tested
+
+- **840 checks in 25 numbered files, the two mind pipelines, the long ecology run and 12 checks of the page in headless Chrome: all pass.** The new file (`tests/25`, 25 checks) goes through the mind: a track wears in under a being walking to and fro by its plans, with each arrival asserted, and fades in nine days unused; a plan step `pave` makes a dirt road for one who knows nothing of roads and a paved one for one who does; a walker keeps to a road laid along its line and bows off the line without one; a dog takes meat from its keeper's hands, the keeper is warned when it goes unfed, and it leaves on the third day.
+- **Controls:** the cost of seven steps on each grade of way against open ground; the same hunt in forty worlds with and without a dog (24 kills against 8); a settlement around a named hall takes another name and keeps it.
+- **On the page:** a long thing said is cut in its box; the box under the pointer is found with the whole text; a click opens Voices at that line.
+- **Older checks moved** (three): the paving check now expects a dirt road where it expected a refusal; one check placed a builder again before its plan, since a body between plans may drift a step. The new animal folded from the heritage first moved four files of older checks by standing in every world at its birth; it is now folded as a kind that comes in later, placed by a chance of its own, and that is the rule for folded heritage from here on.
+- **Not tested:** the hover itself (a pointer moving over a box) is exercised through the function it calls, not with a real pointer; the ice at the poles was not looked at in a picture.
+
+### Not built, and not known
+
+- **Vehicles and craft that move, and goods carried between settlements:** moved to the wave of the ages (Generation 31), where stations, harbours and airfields are built out.
+- **The ocean was not crossed in the new world.** Nothing was changed for it; the people are seventeen days old.
+- **Stores:** nothing changed; the maker saw them fill.
+- The hunt with a dog came out three times as sure in the check (24 of 40 against 8), more than the law's 0.4 would give alone; I did not find the rest of the cause.
+- What the tests cannot show is how real minds behave.
+
 ## Generation 28 (built, not yet run with real minds): structures from blocks, a library by age, works that depend on one another
 
 Nova, 23 November, with the run file of day 77 ("looks better"): analyse it, go on with the plan for the next generation, and the next run will be a new world. The plan agreed for this generation: more kinds of structure; the maker composing structures from building blocks with attributes; libraries that load at the right ages; roads, vehicles and transport by sea and air; settlements whose works depend on one another.

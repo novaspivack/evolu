@@ -14,10 +14,14 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 28, to be watched and tuned
+## NOW: built in Generations 14 to 29, to be watched and tuned
 
 | Item | State |
 | --- | --- |
+| **Ways on the ground by grade:** tracks worn by feet, dirt roads anyone can beat, paved roads; walkers keep to them | Built in 29. Watch: where tracks form, whether anyone beats a road between two settlements. |
+| **A kept hunter** helps the hunt, keeps beasts off, and must be fed scraps or it leaves | Built in 29. Watch: `keptHuntersWalkingWithTheirKeepers`, how many leave unfed. |
+| **Settlements with names of their own; speech boxes that open; ice at the poles** | Built in 29. |
+| **Blocks the maker makes for itself** | Built in 29. |
 | **Structures from blocks:** parts with attributes of their own; the maker composes a structure from two to five of them (op `structure`) | Built in 28. Watch: what the maker designs, and whether anyone raises it. |
 | **A library by age:** blocks and structures opened into a world when its people come near that age | Built in 28: ten structures and nineteen blocks across five ages. To grow with each generation. |
 | **Works that depend on one another:** a structure may need another near it, or a road or water beside it (guest house on a store, bath house on a well, road house on a paved way, lighthouse on a dock, harbour on a market, station on an engine house, mast on a power house, hangar on an airport) | Built in 28. Watch: whether chains of works appear in settlements. |
@@ -257,3 +261,4 @@ A short index; the detail is in the design log.
 | 26 | A community advances together: ways held in common, learned by all when a building stands; better buildings raised in place of older; works too big for the hands brought in loads; the age of a settlement shown |
 | 27 | Verse on its occasions and at the head of each chapter; a tradition for every people and the act of offering; courting answered; seas, islands and great lakes for new worlds; a crossing recorded; band practice, labour as building, signals and alchemy; the waiting bar and the sending of the state mended |
 | 28 | Structures from blocks, designed by the maker; a library by age; works that depend on one another; settlements told of one another and of the paved ways between; food against beings by land; a crossing chronicled once for each land; an elder told what only it knows |
+| 29 | Ways on the ground by grade and walkers that keep to them; kept hunters fed on scraps; settlements named in their own tongue; speech boxes that open; ice at the poles; the maker's own blocks; fewer things break into a plan |

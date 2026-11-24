@@ -50,7 +50,7 @@ const told = (st, a, re) => st.minds[a.id].events.some(e => re.test(e.text));
     way(b, 'masonry', a);
     const pr = M.buildPrompt(st, st.minds[c.id], 'deep');
     ok(SW.heldInCommon(w, c, 'masonry') && SW.commonWays(w, c).indexOf('masonry') >= 0 && /WAYS YOUR BAND HOLDS IN COMMON[^\n]*masonry[^\n]*Of these you do not yet know: [^\n]*masonry/.test(pr) && /- tower \([^\n]*your band holds its way, you do not yet/.test(pr), 'when two hold it the way is the band\'s: the third is told so, and is shown the tower among what it may raise');
-    think(st, c, { plan: [{ do: 'build', what: 'tower', ticks: 5 }] }); run(w, em, 3, [a, b, c]);
+    at(w, c, g.x + 2, g.y); /* placed again: a body between plans may drift a step */ think(st, c, { plan: [{ do: 'build', what: 'tower', ticks: 5 }] }); run(w, em, 3, [a, b, c]);
     const ti = SW.idx(w, g.x + 2, g.y);
     ok(SW.buildingAt(w, ti) === 'tower' && w.shelters[ti] === c.id, 'and the third, who does not know masonry, raises the tower');
     ok(c.knows.masonry && c.knows.masonry.from === 'tower' && w.tally.commonLearned === 1 && told(st, c, /YOU NOW KNOW THE WAY OF MASONRY/) && st.chron.some(q => /the way of masonry became known to all of/.test(q.text)), 'when it stands, the one who lacked the way has it, and the chronicle says the band learned it');
