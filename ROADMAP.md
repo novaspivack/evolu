@@ -1,6 +1,6 @@
 # Evolu roadmap
 
-Set by Nova Spivack; sequenced so that the world is not asked to hold everything at once. Last updated with Generation 17 (22 November 2026).
+Set by Nova Spivack; sequenced so that the world is not asked to hold everything at once. Last updated with Generation 34 (24 November 2026).
 
 ## How this file is used
 
@@ -14,10 +14,17 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 31, to be watched and tuned
+## NOW: built in Generations 14 to 34, to be watched and tuned
 
 | Item | State |
 | --- | --- |
+| **The many:** people past about forty are households that work, eat, have children, build, starve and leave under laws of their own, stepped once a day | Built in 34. Never yet run with minds. Watch: whether a place fed by its land holds steady; `theManyAndTheirGroups` in the maker's figures. |
+| **Groups that speak for the many:** the households of one place and one kind of work think once a day and answer as we; they speak, back or oppose one of the named, lay down their work, give, or leave | Built in 34. Watch: whether a group's voice reads as a people or as a committee; whether the named speak to them, feed them or ignore them. |
+| **One of the many rising to be a person** when one of the named dies, or when the watcher chooses | Built in 34. |
+| **People on the streets and tilled land about a place,** on the page | Built in 34. |
+| **Towns of their age:** streets that bend, branch and cross and are drawn as roads; dwellings by age; looks by family; nothing built on a road | Built in 32, redrawn in 33. Seen once by real minds, from which only pictures came back. |
+| **Horses and work animals; ploughs, wagons, engines, motor cars, trucks, tractors** as things a being holds, each doing something | Built in 32. Watch: whether anyone rides, ploughs or drives. |
+| **A mind told what age it lives in;** music by age; no two kinds of plant or animal alike | Built in 32, after the people of a fourth-age town talked as gatherers. |
 | **The library to the sixth age** (35 structures: castles and towns, steam and industry, fuel and power, thinking machines), each depending on other works | Built in 31. Never yet run with minds. |
 | **Works that clear the ground and works that foul it** (smoke sets plants back and costs health) | Built in 31. The first trouble a civilisation makes for itself. |
 | **A world begun in a later age,** with settlements, ways, a head for each people and a first page of history | Built in 31 (Setup, Begin at). For trying the later ages. |
@@ -105,8 +112,8 @@ Answered by the seventh run: people do earn a following (nine pledges), and less
 1. **A community raises better buildings:** built in Generation 26.
 2. **The big round: the trees, and what is built from them** (its own section, after this one). The audit is done (`docs/tree-audit.md`); four of its five proposals were built in Generation 27 and the fifth (lower thresholds for riding and currency) was left alone by Nova's choice and is tracked.
 3. **Generation 28 (agreed 23 November):** built: structures from blocks, the library by age, works that depend on one another, settlements that know of one another. **Left for 29 from that list:** vehicles and craft that move (a cart on a road, a train between stations, a craft of the air between fields), goods carried between settlements as a thing in the world (caravans, sea lanes), blocks the maker makes for itself, and more of the library for ages three to six. Also waiting: teaching before death (alchemy was lost with its one holder in the seventeenth run), a day that goes round the world, hatred, peacemakers, rivalry and heroes, a rite for the dead, islands in the near ocean, seas for a world carried on.
-4. **Generations 29 and 30:** groups (see SCALE).
-3. Then, as agreed earlier the same day: a day that goes round the world; hatred that lasts, peacemakers, rivalry for mates, heroes and duels.
+4. **Groups** (see SCALE): built in Generation 34.
+5. Then, as agreed earlier the same day: a day that goes round the world; hatred that lasts, peacemakers, rivalry for mates, heroes and duels.
 
 Left out by Nova's choice: flood in the season of rains. Farther out: the sim in groups, peoples, planets (the section SCALE, below).
 
@@ -158,6 +165,8 @@ The purpose: that progress along the trees really happens, that the trees work t
 
 ## LATER: ages three and four
 
+*State, 24 November: the structures of these ages are in the library (Generations 28 and 31) and a world can be begun in them (31, 32). What is listed below is still to build unless it says otherwise.*
+
 - **Monsters.** Dragons and great beasts that wander in rarely, attack, and can be killed only by a band acting together; slaying one gives much food and boons. With high skill they can be captured, tamed and bred as weapons of war or defence. They breed from eggs without mating, need a great deal of food, and the eggs hatch slowly, must be guarded, can be stolen and stolen back. Everyone wants them: those who learn of them organise to steal them, and their owners to defend them.
 
 - **Siege warfare and defensive works;** weapons of war carried to a siege.
@@ -168,6 +177,8 @@ The purpose: that progress along the trees really happens, that the trees work t
 
 ## FAR: ages five and six
 
+*State, 24 November: of this list, the buildings of a great city and land vehicles exist as structures and as things a being holds (Generations 31 and 32), and the many fill the dwellings (34). Power, speech at a distance and flight have structures (a power house, a mast that carries a voice, an airport) but no power that is carried and no machine that flies; the rest is not begun.*
+
 - **Sources of power, in order:** coal, oil and gas, falling water, wind, the atom, the sun, fusion, the ground of things. Each needs what must be found: oil fields, uranium, copper, silicon, rare earths, carbon, diamond. (Oil, uranium and diamond are in the ground; the rest are not.)
 - **Speech at a distance, in order:** marks, smoke, birds, radio, telephone, the joined machines, the machine in the hand. Reckoning machines need factories to make them.
 - **Machines that fly:** balloons, propellers, jets, for carrying and for war. Land vehicles for war.
@@ -176,7 +187,9 @@ The purpose: that progress along the trees really happens, that the trees work t
 - **Weapons beyond guns.**
 - **New materials far down the tree:** plastics, silicon, rare earths.
 
-## SCALE: from individuals to groups, to peoples, to planets (Nova, 23 November; farther out)
+## SCALE: from individuals to groups, to peoples, to planets (Nova, 23 November)
+
+**State, 24 November.** The first step is built (Generation 34): persons, the many in households, and groups that think for them, with anyone among the many able to be called up as a person. It followed the design below and `docs/groups-proposal.md`. Still to do at this step: a person returning to the many; levies and trading parties a group can send; rent, wages and money; the test that a settlement lived as a group comes out like the same settlement lived person by person. The later steps (a people or nation, a planet, a star system) are not begun; the view out to the galaxies is a picture only.
 
 **The problem.** Claude allows a page only so many thoughts in a given time, whatever the number of beings. At forty-five alive the clock of the world already runs at a third to under a half of its pace. Hundreds cannot each have a mind, let alone thousands or millions.
 
@@ -226,8 +239,10 @@ These run through every stage and are picked up as runs call for them.
 - **Acts that never reached a body.** `claim` and `venture` were unreachable for real minds in Generations 16 and 17 because tests called the body directly. Fixed in 18, with a check that reads the acts out of the prompt.
 - **Minds hunt very little:** 2 plan steps of 1,274 in the tenth run. Generation 18 points the hungry at prey; unknown whether they will go.
 - **Speed.** A world moment costs about 2.8 ms in the larger world, up from 2.
-- **Nothing passes between strangers.** In seven runs: no trade, no planned fight, no animal tamed, and peoples that meet a handful of times.
-- **No tale, song, myth or teaching has yet been made** by a real mind, though sayings and hard lessons spread and cross between peoples.
+- **Little is traded and nothing is fought over.** In seven runs: no trade, no planned fight, no animal tamed, and peoples that met a handful of times. By day 77 of Wenenvale much passes between peoples as gifts and ideas (249 gifts, 911 ideas crossing), but there had been two trades, no war and no planned battle.
+- **No tale, song, myth or teaching had been made** by a real mind in seventeen runs. Answered in Generation 27 by asking for verse on its occasions: 32 of the first 34 asked were made, and 28 in the first days of the next world. Teachings begun and taken up are still not seen.
+- **No new kind of plant can arise in a world made on the page since Generation 30.** A kind arises in the wild, or is bred, only while there are fewer kinds than `ecology.maxPlantKinds` (44); a world with the new plants begins with 48, so the Kinds pane reads "48 of 44" and nothing new comes. The maker's own limit was raised to 60 in Generation 32 and this one was missed. Found on 24 November while taking pictures; not changed yet, because raising it moves the world's stream of chance and wants measuring on ten seeds.
+- **The many, open questions** (Generation 34): balance over a long run with persons acting on them; nothing owed between the many and the persons whose houses and works they fill; no group where there is no settlement.
 - **Asked for on 23 November and not yet built** (in the order I would take them):
   1. Vehicles and work animals: **built in Generation 32** as things a being holds (horse, plough, wagon, traction engine, steam wagon, motor car, truck, tractor, armoured car). Still not built: a vehicle that carries several people; trains between stations, ships between harbours, craft of the air; goods carried between settlements as a thing in the world (caravans, sea lanes); roads that wear out and need mending; mounted and motor war beyond a harder blow.
   2. The troubles of later ages beyond smoke: crime, garbage, poverty, corruption, social unrest, political division, wars between settlements of one people; then booms, crashes and recessions, technology bubbles, gilded ages; then forms of rule (dictatorship, oligarchy) and terrorism.
@@ -246,7 +261,7 @@ These run through every stage and are picked up as runs call for them.
 - **Almost all water in a world made before Generation 27 can be swum,** so a vessel matters little there. Only new worlds have seas.
 - **The store is a quarter full:** 24 MB of 100 MB and 569 documents on 23 November, nearly all of it the chunks of past runs. Old runs will have to be pruned or the record thinned before it fills.
 - **The record of a run is too large to read from the store.** An interrupted run can be read only through its final state and, from Generation 15, the maker's own small document. A full analysis needs the downloaded run log.
-- **The later ages are sketches.** From about the fourth age the ways, minerals and buildings have names and looks but little that they do.
+- **The later ages are partly built.** Structures to the sixth age, works that depend on one another, towns, horses and vehicles exist and act (Generations 28, 31, 32). Thirteen of the 68 ways, all in ages four to six (the sciences, oil, radio, computing, rocketry and what follows them), still have nothing behind them but the next way (`tests/tools/tree-audit.js`).
 - **Prompts are long and growing:** a middle of 24,000 characters and a longest of 36,800 in the eighth run.
 - **The maker's report that recipe counts did not update** in the sixth run: no fault found.
 

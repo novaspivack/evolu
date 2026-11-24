@@ -1,6 +1,6 @@
 # Runs
 
-Exported records of real runs: worlds whose beings thought with Claude. Each file is what **Download run log** in Settings produces.
+Exported records of real runs: worlds whose beings thought with Claude. Each file is what **Download run log** in Setup produces.
 
 | File | Generation | Length | What it showed |
 | --- | --- | --- | --- |
@@ -20,13 +20,15 @@ Exported records of real runs: worlds whose beings thought with Claude. Each fil
 
 Days 41 to 50 of that world (the ninth run, on Generation 16) were stopped before a log was downloaded; what the page had written to its store is in the design log. The first 19 days of that world (the seventh run) were cut short before a log was downloaded; what could be read of them from the artifact's store is in the design log.
 
-The analysis of each is in [`docs/design-log.md`](../docs/design-log.md). Earlier runs were recorded but their files are not kept here.
+A world begun in a later age was also run under Generation 32 (24 November); pictures came back from it and no file, so it is not in the table.
+
+The analysis of each is in [`docs/design-log.md`](../docs/design-log.md). Earlier runs were recorded but their files are not kept here. Nothing has yet been run with real minds on Generation 33 or 34.
 
 ## What a run file holds
 
 - `_READ_ME_FIRST`: instructions to Claude for turning this run into the next generation.
 - `records`: everything, in order. Each has a type `t`: `thought` (with drives, plan and state), `voice`, `chron`, `prompt` (a sampled full prompt and the raw reply), `failed`, `story`, `maker`, `request`, `grief`.
-- `digest`: the final state of every being, the peoples, the lands and the tallies.
+- `digest`: the final state of every being, the peoples, the lands and the tallies. From Generation 34 it also carries `many`: the number of the many, each place, and each group with its stance and its last notes.
 - `story`, `maker`: the chronicler's and the maker's own state: chapters, visits, predictions, lessons, ideas.
 - `heritage`: every change the maker made and kept, to be folded into the next engine.
 - `chronicle`, `voices`: the last entries of the world's chronicle and of what was said.

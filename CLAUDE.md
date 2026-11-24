@@ -135,6 +135,17 @@ All suites must pass before publishing. Every check runs against the one current
 
 What the tests cannot show is how real minds behave. Say so in every report.
 
+## The README and the other documents
+
+Nova asked for a full pass on 24 Nov 2026 (after Generation 34). Keep it from going stale again:
+
+- **Pictures of the current page** are `docs/images/now-*`, made by `tests/tools/readme-shots.js` (`PLAYWRIGHT=... node tests/tools/readme-shots.js`, or name scenes: `young lead towns far ride panes`). Make them again after any generation that changes how something looks, and look at each one before committing. They are made with a stand-in, and the README says so beside them.
+- **Pictures from real minds** (`run-*`, `life-*`, `inspect-*`, `panel-*`) are Nova's, from Wenenvale under Generation 22. Do not remake or replace them with staged ones; add to them when he sends more.
+- **Nova's word on the later ages** (24 Nov): show the zoom out from the planet to the galaxy; say a world can begin in a later age, that this is little tested, and that "we recommend starting from the beginning and just letting it evolve". Keep the README saying so until runs show otherwise.
+- **Numbers in the README that move with a generation:** the generation (twice), the count of checks and of page checks, the heritage (changes, lessons, ideas), ways, drives, acts, the maker's operations, kinds of building at the beginning and in the fifth age, the many at each age, and the paragraph on what real minds have done, which is counted from the run files (tallies `trades`, `crossings`, `claimed`, `musters`, `answered`, the `wars` list, verses in `culture`). Count them; do not carry them over.
+- **A heading in the design log** that says "built, not yet run" is brought up to date when a run on that generation is written up.
+- The other documents: `ROADMAP.md` (the date in its first line, the NOW table, known open problems), `runs/README.md`, `docs/tree-audit.md` (its tool is run again after each full run), `docs/groups-proposal.md` and `docs/overnight-plan.md` (records of what was asked; note their state, do not rewrite them).
+
 ## How to write to Nova
 
 - When posing a decision: the question, the options, the proposed answer and why.

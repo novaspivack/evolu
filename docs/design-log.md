@@ -9,12 +9,25 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 ## How to read this
 
 - **Built** means it is in the published world and passed my tests.
-- **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
-- **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
+- **My tests** began as three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors. Since Generation 18 there is also a numbered file of checks for each subject (29 files and 980 checks at Generation 34) and a page check for each thing drawn.
+- **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from a run you reported, in the sections headed "What the Nth run showed", or untested.
+- **Where the runs are written up.** Each run is under the generation that was built from it: the runs up to the fourteenth have sections of their own, and from the seventeenth on a run is the first part of the next generation's section. The count passes from the fourteenth to the seventeenth: nothing in this log is called the fifteenth or the sixteenth run. A heading says "built, not yet run" as it stood when written unless it has been brought up to date; the list of run files is in [`runs/README.md`](../runs/README.md).
+
+## After Generation 34: the documents brought up to date (24 November)
+
+Nova asked for a pass on the README and the other documents, with new pictures. Nothing in `src/` changed and nothing was published.
+
+- **The README** was last rewritten around Generation 22 and patched since. It now says what the world is today: a globe that begins mostly unknown, seas, verse and tradition, structures from blocks and the library by age, ways on the ground, the six ages and a world begun old, towns, horses and vehicles, and the many with their groups. On Nova's word it shows the way out from a town to the galaxies as a sequence, and it recommends beginning at the beginning, because the later ages are little tested.
+- **Pictures of the current page** are made by a tool, `tests/tools/readme-shots.js`, so they can be made again each generation: a young world, a being opened, a town of each age on one seed, a street with vehicles, the many, the way out in seven steps. They are made with a stand-in and say so. Nova's pictures of real minds (Wenenvale, Generation 22) are kept as they were.
+- **What real minds have done** was counted again from the thirteen run files, not carried over. By day 77 of the longest world: 29 of 68 ways held (17, 9 and 3 of the first three ages), 118 buildings of 8 kinds, 28 kinds of thing made, 68 claims, 27 musters, 32 of 34 verses made, two trades, 28 crossings of water, no war.
+- **The roadmap** had "last updated with Generation 17" at its head; it now has what Generations 32 to 34 built, the state of the step to groups, and the open problems since answered marked as such. **This log's** headings said "built, not yet run" for fourteen generations, eight of which were later run; each now says where its run is written up, or that there is no record on it alone. The count of runs passes from the fourteenth to the seventeenth, and that is now said at the top.
+- **A fault found while taking the pictures, not yet mended:** the Kinds pane reads "48 of 44" for plants. `ecology.maxPlantKinds` is 44 and a world with the new plants begins with 48, so since Generation 30 no new kind of plant can arise in the wild or be bred in a world made on the page. It is in the roadmap's open problems. Raising the law moves the world's stream of chance, so it wants a generation of its own with the balance measured.
 
 ## Generation 34 (built, not yet run with real minds): the many, and the groups that speak for them
 
 Nova, 24 November, after reading the proposal ([`groups-proposal.md`](groups-proposal.md)): "Just build it, because a population of 40 won't work... Build it, make it good." This is that proposal built: the three layers, rising into a mind, and the page. The troubles of later ages are still held.
+
+![A town of the fourth age with the many on its streets, a group's words over it, and the Peoples pane](images/now-town-and-the-many.jpg)
 
 ### What it is
 
@@ -61,6 +74,8 @@ Nova, 24 November, after reading the proposal ([`groups-proposal.md`](groups-pro
 ## Generation 33 (built the same morning, from Nova's pictures of a running world): what lies flat under what stands, sizes by kind, a field and a pyramid that look like what they are, a pane that keeps its place
 
 Nova ran a world begun in a later age under Generation 32 (180 thoughts when he took the pictures) and sent four pictures and five faults. No run file came with them, so there is no run to write up; this generation is the page only. The engine, the minds and the maker are as they were.
+
+![A field, a pyramid and a beacon as they are drawn since Generation 33, with a road under what stands](images/fields-pyramid-beacon.png)
 
 ### The five faults, and what was wrong
 
@@ -202,7 +217,7 @@ The third wave of the night of 23 November, with the first part of the fourth (`
 - **Groups:** not begun. Every being still thinks for itself.
 - **Later ages have never been run with minds.** The prompts fit (28,700 characters for an ordinary thought and 36,800 for a deep one in the fourth age, with fifty ways known), and the checks show the world stands and runs on instinct. What minds make of a town with a parliament and a gas works is unknown.
 
-## Generation 30 (built, not yet run with real minds): the land as it is known, the pull of the unknown, more that grows
+## Generation 30 (built; met by real minds only in the short runs of worlds begun old, under Generations 31 and 32): the land as it is known, the pull of the unknown, more that grows
 
 The second wave of the night of 23 November (`docs/overnight-plan.md`). No run came between this generation and the last; nothing here answers a record.
 
@@ -236,7 +251,7 @@ The second wave of the night of 23 November (`docs/overnight-plan.md`). No run c
 - I have not seen the new drawing with minds running in it; the picture was checked in headless Chrome at night in seed 5614: mountains of several sizes, mesas and cactus are drawn and the page shows no error; I did not look at the palms.
 - What the tests cannot show is how real minds behave: whether they go to the edge, and whether need sends them.
 
-## Generation 29 (built, not yet run with real minds): ways on the ground, kept hunters, names of their own, speech that opens
+## Generation 29 (built; met by real minds only in the short runs of worlds begun old, under Generations 31 and 32): ways on the ground, kept hunters, names of their own, speech that opens
 
 Nova, 23 November, late, with the first run of a new world (Nimenvale, seas, 17 days) and a long list for the night, kept in full in `docs/overnight-plan.md`. This is the first wave of it.
 
@@ -287,7 +302,7 @@ Nova, 23 November, late, with the first run of a new world (Nimenvale, seas, 17 
 - The hunt with a dog came out three times as sure in the check (24 of 40 against 8), more than the law's 0.4 would give alone; I did not find the rest of the cause.
 - What the tests cannot show is how real minds behave.
 
-## Generation 28 (built, not yet run with real minds): structures from blocks, a library by age, works that depend on one another
+## Generation 28 (built; run for seventeen days in a new world: see the nineteenth run, under Generation 29 above): structures from blocks, a library by age, works that depend on one another
 
 Nova, 23 November, with the run file of day 77 ("looks better"): analyse it, go on with the plan for the next generation, and the next run will be a new world. The plan agreed for this generation: more kinds of structure; the maker composing structures from building blocks with attributes; libraries that load at the right ages; roads, vehicles and transport by sea and air; settlements whose works depend on one another.
 
@@ -347,7 +362,7 @@ Nova, 23 November, with the run file of day 77 ("looks better"): analyse it, go 
 - **Three peoples telling nearly one myth:** left as it is.
 - What the tests cannot show is how real minds behave: whether anyone raises a guest house, walks to another settlement for its forge, or paves the way between two.
 
-## Generation 27 (built, not yet run with real minds): verse, traditions, seas, courting answered
+## Generation 27 (built; run for five days: see the eighteenth run, under Generation 28 above): verse, traditions, seas, courting answered
 
 Nova, 23 November, with the run file of day 72: he agreed to the audit's proposals, except that the thresholds for riding and currency stay and are watched, and that signals and alchemy should do something and not be folded away. He asked for poems and songs that are really composed (a poem of wisdom from one who is dying, a love poem, a poem by a band for its dead), for myths, fables and stories handed down, for chapter headings in the manner of Dune, for forms with rhyme and metre; for mythologies and religions that differ by people and shape how each lives, the kindly and the hard; for the run's own faults to be mended (mating that does not succeed, no one crossing water); for new worlds to have at least one great ocean, large lakes and islands large enough for a civilisation; and for the "send everything now" button to stop failing. "Make a plan for this big, big iteration, and then do it."
 
@@ -427,7 +442,7 @@ Nova, 23 November, with the run file of day 72: he agreed to the audit's proposa
 - **The chronicler's prompt** is still about 100,000 characters.
 - Generation 28 (structures, the maker's building blocks, libraries by age, roads and vehicles, settlements that depend on one another) and the groups of 29 and 30 are as planned in `ROADMAP.md`.
 
-## Generation 26 (built, not yet run with real minds): a community raises better buildings; the audit of the trees
+## Generation 26 (built; run for ten days: see the seventeenth run, under Generation 27 above): a community raises better buildings; the audit of the trees
 
 Nova, 23 November, after Generation 25: communities should come to better buildings by the tree, when at least two members hold the new knowledge, and the whole community should have it once the building stands. Then a round on the trees themselves, and farther out the sim in groups, peoples and planets. He asked for a plan and for it to be carried out; the plan is in `ROADMAP.md`, and this generation is its first step: his rule for buildings, and the audit that the round on the trees begins with (`docs/tree-audit.md`).
 
@@ -464,7 +479,7 @@ Nova, 23 November, after Generation 25: communities should come to better buildi
 - **Knowledge is the band's, not the settlement's.** Nova said "community"; a band is who lives and builds together, and a settlement is where. If he means everyone who lives in a place whatever their band, that is a small change.
 - Whether minds raise forges and wells now that they can, whether bands come to hold ways in common, and whether settlements climb the ages: this needs a run.
 
-## Generation 25 (built, not yet run with real minds): what can be made, pens, weirs and fields, thought by plan
+## Generation 25 (built; no run recorded on it alone: the next record is the seventeenth run, on Generation 26): what can be made, pens, weirs and fields, thought by plan
 
 Built on 23 November from the list Nova approved (fewer thoughts; a pen and driven herds; a settlement that feeds itself; why no one crosses water; sea creatures that return), without the flood, which he left out. There was no new run file: the findings below come from the thirteenth and fourteenth runs, read again with these questions.
 
@@ -554,7 +569,7 @@ Nova, watching a world on day 61, sent four pictures: the white box of what a be
 
 **Not shown by this:** in a crowd of many speaking at once most are dots until the earlier boxes fade, and stacks are only moved up or down, never to the side. Whether that reads well with forty-five real minds is for Nova's eye.
 
-## Generation 24 (built, not yet run with real minds): memory in a window, history in files
+## Generation 24 (built; no run recorded on it alone: the next record is the seventeenth run, on Generation 26): memory in a window, history in files
 
 Nova asked why the prompts grow, and proposed a window on old history with files a being can page back through, markdown, stored inside the saved world; then, as a refinement, an index: "agents can have a kind of index of who they've met before, things they know, and then what file to look in for the history of that memory." There was no new run; this generation is built from that conversation and from measuring the prompts of the last three run files.
 
@@ -579,7 +594,7 @@ Nova asked why the prompts grow, and proposed a window on old history with files
 
 **What the tests cannot show:** whether a mind will ever ask to recall anything, whether what comes back changes what it does, and whether the lines I chose to keep are the ones a life turns on. The first run will show how often `recall` is used; every use is written in the record of the thought.
 
-## Generation 23 (built, not yet run with real minds): a world that slows and does not sleep
+## Generation 23 (built; no run recorded on it alone: the next record is the seventeenth run, on Generation 26): a world that slows and does not sleep
 
 Built from the fourteenth run and from what Nova said after it: "I did encounter rate limits and it turned off minds and I had to turn them back on ... the problem is the large population. What we should do is keep minds on in the visible area and turn them off in other areas rather than turn off all minds, ideally. And when rate limited perhaps slow time down so there are fewer global requests?" Both are built, in the other order: time slows first, and the minds narrow to those in view only if slowing is not enough.
 
@@ -625,7 +640,7 @@ The meter by the thought count says "pace eased" or "minds in view only" for as 
 - **The maker** made three visits (days 29, 33, 37) and then none: asleep with the minds, then refused once on day 58, as the chronicler was, with no second try.
 - **Prompts:** middle 30,700 characters, longest 45,600 (26,900 and 40,600 in the run before). A thought still took 7.2 seconds.
 
-## Generation 22 (built, not yet run with real minds): hunger that can be answered, rich ground, and a call to hunt together
+## Generation 22 (built; run for thirty-five days: see the fourteenth run above): hunger that can be answered, rich ground, and a call to hunt together
 
 Built from the thirteenth run and from Nova's notes of the morning of 23 November. He asked for a great deal in one message. What is cheap and safe is built; the rest is in the roadmap in order, and each is named below.
 
@@ -680,7 +695,7 @@ Built from the thirteenth run and from Nova's notes of the morning of 23 Novembe
 - **The maker** made three visits and eight changes, and five requests. Its prediction after the second visit, "no deaths from hunger", failed with Sitha; after the third, that the wounded Hawen would live, could not be reviewed. It sowed a hardy plant of the snow twice and raised a warm spring beside a wounded man, which is to say it was working on the same two problems Nova named: hunger in the north and no mending in the cold.
 - **Nova saw:** two lines of one colour on the chart and a scale that hid the beings; notices that had to be dismissed by hand; songs that did not read as songs; large stretches with no game or food near settlements; too much sickness from raw meat.
 
-## Generation 21 (built, not yet run with real minds): a warm equator, food that can be found, and things that can be traded
+## Generation 21 (built; run for thirteen days: see the thirteenth run above): a warm equator, food that can be found, and things that can be traded
 
 Built from the twelfth run and from what Nova asked for after it. In the order he gave them, then what the run called for.
 
@@ -729,7 +744,7 @@ Nova: "this worked well". The record agrees in the main, and shows one failure o
 - **The maker** made two visits and four changes. Its first prediction held in part and it kept the change (thirst from 54 to 29, sapcane eaten from 6 to 29, those who know fire from 6 to 11). Its second visit could not be reviewed before the run ended; it predicted "no one dies of hunger or cold" three days before four did.
 - **Snow lay on the equator** and the wind breathed: Nova saw and heard both; neither is in the record.
 
-## Generation 20 (built, not yet run with real minds): a globe
+## Generation 20 (built; run for twelve days: see the twelfth run above): a globe
 
 Built from Nova's notes of the evening of 22 November, which came while it was being built: a world that wraps and is seen as a globe; polar ice with its own life; igloos, sleds, kayaks and canoes; dogs; a warm belt with rainforest and its own peoples and creatures; peoples and animals that keep to their own kind of country; two poles that differ; and climate that differs by zone. No run stands between Generation 19 and this one.
 
@@ -785,7 +800,7 @@ From the downloaded run log (`runs/generation-18-run-r7-mwsfrgn7-day4.json`). Th
 - **Top drives:** ambition 56, curiosity 46, belonging 12, family 10. Plans added up to 70 moments (middle) against a thought every 87.
 - The maker had not yet visited.
 
-## Generation 19 (built, not yet run with real minds): a rim that opens slowly, and worlds with names
+## Generation 19 (built; no run recorded on it alone: the next run was on Generation 20): a rim that opens slowly, and worlds with names
 
 **The view passes the rim.** The camera can be carried past the edge of the map by most of half a screen, so land at the rim can always be brought clear of the controls; past the map of a world with an unknown, more mist is drawn.
 
@@ -829,7 +844,7 @@ From the downloaded run log (`runs/generation-17-run-r7-mws0f6n0-day66.json`), c
 - **Prompts:** 19,100 to 32,700 characters, middle 23,400. No failed calls.
 - **The maker** made five visits and kept every reviewed change: roots and canes sown where the thirsty stood (thirst fell from 66 to 0), the energy needed to conceive lowered from 75 to 68, hearing raised to 17 (not yet judged). Its eight requests are answered below.
 
-## Generation 18 (built, not yet run with real minds): what a mind is offered, its body can do
+## Generation 18 (built; run for four days: see the eleventh run above): what a mind is offered, its body can do
 
 Built from the tenth run, the maker's eight requests and Nova's notes of the evening of 22 November.
 
@@ -878,7 +893,7 @@ Read from what the page had written to its store (the maker's own document and t
 - **Still nothing:** no tale, no teaching, no animal tamed, no building of the dead claimed, cooked fish never made.
 - **The maker** made three visits and kept every change: fewer hunters allowed (26 to 20), winter growth raised, bounty raised to 0.6, a root sown. It wrote four requests: places of power are capped at twelve and all taken, mostly by places no one found; its counts of deaths and of everyone who ever lived went down between visits; sowing should take a place, because "hunger deaths come from food being too far from the person who needs it".
 
-## Generation 17 (built, not yet run with real minds): a world with edges
+## Generation 17 (built; run for sixteen days: see the tenth run above): a world with edges
 
 Built from the ninth run, the maker's four requests, and Nova's notes of 2:49 to 3:26 pm. The notes held far more than one generation can carry; what was not built is sequenced in `ROADMAP.md`.
 
