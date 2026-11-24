@@ -45,7 +45,7 @@ SW.defaultLaws = function () {
       speechCost: 0.02, foresightCost: 2, biteSeedChance: 0.3, thirstRate: 0.25, thirstHarm: 0.04, thirstWound: 0.12
     },
     fight: { packBonus: 0.8, agentDamage: 14, angerBonus: 0.5, huntChance: 0.45, predatorKillChance: 0.25, predatorBite: 14, fleshFood: 3, fleshEnergy: 18, stealChance: 0.6, noticeChance: 0.6 },
-    mate: { minEnergy: 70, cost: 25, childEnergy: 55, minAgeFraction: 0.14, cooldown: 900, maxPopulation: 60, twinChance: 0.2, sexes: 1, plentyCooldown: 0.6, roofCooldown: 0.75, hallCooldown: 0.5, courtWindow: 240 },
+    mate: { minEnergy: 70, cost: 25, childEnergy: 55, minAgeFraction: 0.14, cooldown: 900, maxPopulation: 60, twinChance: 0.2, sexes: 1, plentyCooldown: 0.6, roofCooldown: 0.75, hallCooldown: 0.5, courtWindow: 240, answer: 0.3 },
     /* when the living fall below a floor, a small band comes into the land from beyond its edge: of the people that has fewest left */
     arrivals: { floor: 14, size: 4, gapDays: 4, food: 5 },
     /* the known world ends in mist. One who stands at it may venture in: a band has a few attempts, then its will must return */
@@ -56,7 +56,38 @@ SW.defaultLaws = function () {
     discovery: { needBoost: 0.6, kinBoost: 0.04, floor: 0.35, pressFade: 0.85, pressMax: 3 },
     trade: { window: 240 }, /* how long an offer stands, in moments */
     climate: { belt: 0.11, rains: 1 }, /* the warm belt: half its width as a share of the height of a round world; whether the cold season there is a season of rain */
-    culture: { commonAt: 2, succour: 1, musterHold: 120, faithComfort: 0.004, faithStanding: 0.2, tameTrust: 0.6, grudgeDays: 40, kindDays: 60, mendGifts: 3 },
+    /* TRADITIONS (Generation 27): what a people has always held about the powers of the world. Each people is given one when it comes into being.
+       It is told to every mind of that people, it weights what they are driven by (drives: a factor on each drive), it says whose word carries
+       (order: mothers, fathers, elders, the strong, teachers, or none), and it colours the myths and the verse they make (verse: the form they
+       favour). Some are kindly and some are hard: nothing says which a people must stay with, and a mind may doubt it or found a teaching of its own.
+       They are data: the maker can add one (op tradition) and give it to a people. */
+    traditions: {
+      spirits: { name: 'the Spirits of the Land', holds: 'Every hill, water, beast and tree has a spirit that watches. Take with thanks and give back, and the land keeps you; take with greed and it turns away.', order: 'mothers', drives: { curiosity: 1.2, belonging: 1.2, ambition: 0.8 }, verse: 'chant', offering: 1.4 },
+      ancestors: { name: 'the Watching Dead', holds: 'The dead do not leave. They watch their children from the cairn and the hearth, and are kept alive in tale and song; to be forgotten is the only death, and shame before them the worst shame.', order: 'elders', drives: { family: 1.3, grief: 1.2, belonging: 1.2 }, verse: 'lament', offering: 1.3 },
+      angrysky: { name: 'the Angry Sky', holds: 'The powers above are hard and quick to punish. Storm, sickness and hunger are their anger. It is bought off with gifts, with obedience, and with the blood of what is hunted; one who angers them brings ruin on all.', order: 'fathers', drives: { fear: 1.3, dread: 1.4, resentment: 1.15 }, verse: 'dread', offering: 1.8 },
+      warring: { name: 'the Warring Gods', holds: 'The gods fight one another for the world and love those who fight well. Glory is won, never given. The strong are remembered and the weak are not.', order: 'strong', drives: { ambition: 1.4, anger: 1.3, envy: 1.2, fear: 0.8 }, verse: 'boast' },
+      guardian: { name: 'the Guardian', holds: 'One power stands between the people and the dark, and asks only that each of us stand so for whoever is weaker than ourselves.', order: 'none', drives: { family: 1.2, belonging: 1.2, fear: 0.9 }, verse: 'ballad' },
+      openhand: { name: 'the Open Hand', holds: 'What is given returns. No one eats while another starves, and a stranger fed is a friend made. The closed hand holds nothing in the end.', order: 'none', drives: { belonging: 1.3, envy: 0.7, temptation: 0.7 }, verse: 'ballad', offering: 0.5 },
+      innerpath: { name: 'the Inner Path', holds: 'The world outside is as the mind within. One who masters anger, craving and fear is free, and teaches others by being so. Kindness is the proof of it.', order: 'teachers', drives: { curiosity: 1.3, calling: 1.3, anger: 0.7, envy: 0.7, temptation: 0.7 }, verse: 'saying' },
+      mother: { name: 'the Mother', holds: 'All that lives was born of her and goes back to her. The hearth is the centre of the world, mothers speak first, and whatever feeds life is holy.', order: 'mothers', drives: { family: 1.4, longing: 1.2, ambition: 0.9 }, verse: 'lullaby' },
+      father: { name: 'the Sky Father', holds: 'One father above orders the world as a father orders his house. The eldest man speaks for the band; law, lineage and obedience keep the people whole, and a house divided falls.', order: 'fathers', drives: { ambition: 1.2, family: 1.2, resentment: 1.1 }, verse: 'law' }
+    },
+    /* VERSE (Generation 27): the occasions on which a verse is asked of a being, and the forms a verse may take. Data: the maker can add a form.
+       near: the part of a life after which an elder feels death near and is asked for a death poem. */
+    verse: { near: 0.9, tries: 3, mythEvery: 20,
+      forms: {
+        deathpoem: { lines: 3, how: 'three short lines, unrhymed: first something you can see in this season, then what your life has taught you, then a letting go' },
+        lament: { lines: 4, how: 'four lines of four beats, rhymed in pairs (the first with the second, the third with the fourth); the name of the dead in the first line, what they leave to the living in the last' },
+        lovesong: { lines: 4, how: 'four lines of three beats, rhymed by turns (the first with the third, the second with the fourth), in pictures of the land you both know; say the name once' },
+        ballad: { lines: 4, how: 'four lines of four beats, then three, then four, then three; the second and fourth lines rhyme; it tells the deed and what it cost' },
+        lullaby: { lines: 4, how: 'four very short lines of two beats, rhymed in pairs, soft sounds, something promised to the child' },
+        chant: { lines: 5, how: 'four to six lines that each begin with the same words, unrhymed, calling on the powers of the land by name' },
+        boast: { lines: 4, how: 'four lines of four beats, each broken in the middle, with two or three words in each line beginning with the same sound; no rhyme' },
+        saying: { lines: 2, how: 'two lines that balance, the second turning the first: a thing to be said again at need' },
+        dread: { lines: 4, how: 'four lines of four beats, rhymed in pairs: a warning of what the powers did to one who failed them' },
+        law: { lines: 3, how: 'three lines, each a command beginning with the same word, unrhymed, the last the heaviest' }
+      } },
+    culture: { orderStanding: 0.6, offerCalm: 0.3, offerRegard: 0.05, commonAt: 2, bandPractice: 0.5, signalReach: 2.5, succour: 1, musterHold: 120, faithComfort: 0.004, faithStanding: 0.2, tameTrust: 0.6, grudgeDays: 40, kindDays: 60, mendGifts: 3 },
     age: { childUntil: 0.1, elderFrom: 0.8, childStrength: 0.45, elderStrength: 0.7, childDrain: 0.75, elderMove: 1.5, elderTeach: 1.5, childLearn: 1.5 },
     water: { swim: 1, swimDrain: 0.15, fishChance: 0.09, fishFood: 14, fishRecover: 300, winterFish: 0.5, riverFert: 0.25, oreSeams: 0.1 },
     disease: { rawChance: 0.02, marshChance: 0.0005, spread: 0.008, drain: 0.045, harm: 0.035, length: 480, immunity: 2400 },
@@ -276,6 +307,9 @@ SW.defaultLaws = function () {
       coin: { way: 'currency', needs: { thing: 'gold', fire: true }, gives: { thing: 'coin', n: 3 }, hint: 'Gold struck into three coins: small, lasting, and the same everywhere. Something to trade with.' },
       jewel: { way: 'smelting', needs: { thing: 'gems', fire: true }, gives: { thing: 'jewel' }, hint: 'A cut stone set in metal. A thing of great worth to give or trade.' },
       lens: { way: 'glass', needs: { clay: 2, fire: true }, gives: { thing: 'lens', fx: [{ on: 'learning', times: 1.4, for: 720 }] }, hint: 'Clear glass that makes small things large.' },
+      /* Generation 27: alchemy does something (it had nothing behind it but the next way) */
+      tonic: { way: 'alchemy', needs: { food: 'any', foodN: 2, fire: 1 }, gives: { fx: [{ on: 'health', by: 35 }, { on: 'sick', by: -1 }] }, hint: 'Two foods boiled down beside a fire into a strong cure: it mends you much and breaks a sickness.' },
+      wakefire: { way: 'alchemy', needs: { wood: 2, ore: 1, fire: 1 }, gives: { fx: [{ on: 'learning', times: 1.5, for: 480 }] }, hint: 'Ore and wood burned to a strange bright flame: for two days, by its light, you learn half again as fast.' },
       firepot: { way: 'gunpowder', needs: { thing: 'coal', clay: 1 }, gives: { thing: 'firepot', fx: [{ on: 'strength', times: 2, for: 240 }] }, hint: 'A clay pot of black powder: for a while, your blows land twice as hard.' }
     },
     /* made things that help just by being held */
@@ -661,12 +695,35 @@ SW.TONGUES = [
   { a: ['Ton', 'Wa', 'Ki', 'Pa', 'Chu', 'Nau', 'Tla', 'Ho', 'Qui', 'Me', 'Sho', 'Ya', 'Te', 'Co', 'Zi', 'Hua'], b: ['tli', 'wa', 'ka', 'que', 'ma', 'hua', 'pan', 'chi', 'lo', 'ni', 'tec', 'xo', 'ya', 'mi'], syl: ['ton', 'wa', 'ki', 'pa', 'chu', 'tla', 'ho', 'qui', 'me', 'sho', 'te', 'co', 'tli', 'hua', 'pan', 'xo'] }
 ];
 const PEOPLE_HUES = [22, 205, 285, 140, 48, 330];
+/* The tradition of a people: most often the one that suits its country, and about one time in three another, by a chance of its own (the seed and
+   the people, not the world's stream), so that no two worlds need have the same faiths and a world made before can be given them the same way. */
+const TRAD_BY_KIND = { woodland: 'guardian', highland: 'father', lakeland: 'openhand', steppe: 'warring', desert: 'angrysky', marsh: 'mother', arctic: 'ancestors', antarctic: 'ancestors', rainforest: 'spirits', tundra: 'innerpath' };
+function traditionFor(w, p) {
+  const TR = (w.laws && w.laws.traditions) || {}, keys = Object.keys(TR); if (!keys.length) return null;
+  const h = (Math.imul((w.seed | 0) + 17, 0x9E3779B1) ^ Math.imul(p.id + 3, 0x85EBCA6B)) >>> 0, home = TRAD_BY_KIND[p.kind];
+  if (home && TR[home] && h % 3 !== 0) return home;
+  return keys[(h >>> 3) % keys.length];
+}
+SW.traditionOf = function (w, a) { const P = a && a.people != null ? (w.peoples || [])[a.people] : null, TR = w.laws.traditions || {}; return P && P.tradition && TR[P.tradition] ? TR[P.tradition] : null; };
+/* whose word carries, by the tradition of their people */
+function ofTheOrder(w, a) {
+  const TR = SW.traditionOf(w, a); if (!TR) return false; const st = a.stats || {};
+  switch (TR.order) {
+    case 'mothers': return a.sex === 'f' && (st.kids || 0) > 0;
+    case 'fathers': return a.sex === 'm' && (st.kids || 0) > 0;
+    case 'elders': return SW.stage(w, a) === 'elder';
+    case 'strong': return (st.won || 0) > 0 || (st.kills || 0) >= 3;
+    case 'teachers': return (st.taught || 0) >= 2;
+    default: return false;
+  }
+}
+SW.ofTheOrder = ofTheOrder;
 function newPeople(w, kind, rid) {
   const id = w.peoples.length, usedT = w.peoples.map(function (q) { return q.tongue; }); let tongue = { highland: 1, tundra: 1, woodland: 0, steppe: 3, lakeland: 2, marsh: 2, desert: 3 }[kind]; if (tongue == null || usedT.indexOf(tongue) >= 0) { tongue = 0; while (usedT.indexOf(tongue) >= 0 && tongue < SW.TONGUES.length - 1) tongue++; }
   const T0 = SW.TONGUES[tongue], K = SW.PEOPLE_KINDS[kind] || SW.PEOPLE_KINDS.woodland;
   const nm = T0.a[ri(w, T0.a.length)] + T0.syl[ri(w, T0.syl.length)];
   const p = { id: id, name: 'the ' + nm, noun: K.noun, kind: kind, tongue: tongue, hue: PEOPLE_HUES[id % PEOPLE_HUES.length], genes: K.genes, way: K.way, custom: K.custom, form: K.form, region: rid == null ? null : rid };
-  w.peoples.push(p); return p;
+  p.tradition = traditionFor(w, p); w.peoples.push(p); return p;
 }
 SW.newPeople = newPeople;
 SW.peopleOf = function (w, a) { return a.people != null && w.peoples ? w.peoples[a.people] || null : null; };
@@ -898,10 +955,38 @@ function skyAt(w, i) {
 }
 SW.skyAt = function (w, x, y) { return skyAt(w, idx(w, x, y)); };
 SW.regionAt = function (w, x, y) { return w.regions && w.region ? w.regions[w.region[idx(w, x, y)]] || null : null; };
+/* SEAS (Generation 27): a world begun with opts.seas has an ocean that divides the known land, a greater ocean on the far side of the world with
+   islands large enough to live on, and two great lakes. Their hearts are open water: more than two steps from any shore, where no one can swim
+   and only a vessel carries. They are laid out by a chance of their own (the seed, not the world's stream), so the lands, their names and their
+   hearts are those the same seed gives without seas. The ice at each end of the world is left: it is the hard way round.
+   seaAt: 2 deep water, 1 shallows, -1 an island (never under water), 0 nothing. */
+function seaPlan(w) {
+  const keep = w.rng, m = w.seas.m || 0, my = w.seas.my || 0, kw = w.W - 2 * m, S = { oceans: [], lakes: [] };
+  w.rng = Math.imul((w.seed | 0) + 101, 0x2545F491) | 0; rnd(w);
+  const sc = Math.max(1, w.W / 44); S.n1 = noiseGrid(w, Math.round(6 * sc) + 1, Math.round(4 * sc) + 1); S.n2 = noiseGrid(w, Math.round(9 * sc) + 1, Math.round(6 * sc) + 1);
+  const ax = kw >= 110 ? m + 48 + rnd(w) * (kw - 96) : w.W / 2;
+  S.oceans.push({ x: ax, half: kw >= 110 ? 8 + rnd(w) * 2.5 : Math.max(5, kw / 14), warp: 14, isles: [] });
+  if (w.wrap && w.W >= 180) { const bx = wrapX(w, Math.round(ax + w.W / 2 + (rnd(w) - 0.5) * 16)), O = { x: bx, half: 15 + rnd(w) * 3, warp: 10, isles: [] };
+    O.isles.push({ x: bx + (rnd(w) - 0.5) * 4, y: w.H * 0.34 + (rnd(w) - 0.5) * 10, r: 7 + rnd(w) * 1.5 }); O.isles.push({ x: bx + (rnd(w) - 0.5) * 4, y: w.H * 0.66 + (rnd(w) - 0.5) * 10, r: 7 + rnd(w) * 1.5 }); S.oceans.push(O); }
+  for (let t = 0; t < 80 && S.lakes.length < 2 && kw >= 110; t++) { const x = m + 10 + rnd(w) * (kw - 20), y = my + 14 + rnd(w) * (w.H - 2 * my - 28), r = 6.5 + rnd(w) * 2;
+    if (S.oceans.some(function (O) { return Math.abs(wdx(x - O.x)) < O.half * 1.2 + O.warp / 2 + r + 6; }) || S.lakes.some(function (Lk) { return Math.hypot(wdx(x - Lk.x), y - Lk.y) < 26; })) continue;
+    S.lakes.push({ x: x, y: y, r: r, isle: r > 7.6 ? 2.2 : 0 }); }
+  w.rng = keep; return S;
+}
+function seaAt(S, x, y, u, v) {
+  const n1 = sampleNoise(S.n1, u, v), n2 = sampleNoise(S.n2, u, v);
+  for (let k = 0; k < S.oceans.length; k++) { const O = S.oceans[k], d = Math.abs(wdx(x - (O.x + (n1 - 0.5) * O.warp))), e = O.half * (0.8 + 0.4 * n2);
+    if (d >= e) continue;
+    for (let q = 0; q < O.isles.length; q++) { const I = O.isles[q], r = Math.hypot(wdx(x - I.x), y - I.y), ir = I.r * (0.8 + 0.4 * n1); if (r < ir) return -1; if (r < ir + 1.2) return 1; }
+    return e - d < 1.3 ? 1 : 2; }
+  for (let k = 0; k < S.lakes.length; k++) { const Lk = S.lakes[k], r = Math.hypot(wdx(x - Lk.x), y - Lk.y), lr = Lk.r * (0.8 + 0.4 * n2); if (Lk.isle && r < Lk.isle) return -1; if (r < lr) return lr - r < 1.3 || (Lk.isle && r < Lk.isle + 1.2) ? 1 : 2; }
+  return 0;
+}
 function genTerrain(w) {
   const sc = Math.max(1, w.W / 44), g = function (a, b) { return noiseGrid(w, Math.round(a * sc) + 1, Math.round(b * sc) + 1); };
   const e1 = g(5, 4), e2 = g(12, 9), e3 = g(28, 20), m1 = g(5, 4), m2 = g(13, 9), t1 = g(4, 3), wa = g(7, 5), wb = g(7, 5), hs = [];
   genRegions(w); w.region = [];
+  const SEA = w.seas ? seaPlan(w) : null; if (SEA) w.seas.plan = { oceans: SEA.oceans.map(function (O) { return { x: Math.round(O.x), half: Math.round(O.half), isles: O.isles.map(function (I) { return { x: Math.round(I.x), y: Math.round(I.y), r: Math.round(I.r) }; }) }; }), lakes: SEA.lakes.map(function (Lk) { return { x: Math.round(Lk.x), y: Math.round(Lk.y), r: Math.round(Lk.r) }; }) };
   const regs = w.regions, one = regs.length === 1;
   for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
     const u = w.wrap ? x / w.W : x / (w.W - 1), v = y / (w.H - 1);
@@ -917,6 +1002,7 @@ function genTerrain(w) {
       /* toward each pole the land turns to ice and snow, whatever country it would have been */
       if (w.polar) { const lat = Math.min(y, w.H - 1 - y), edge = w.polar.rows + (sampleNoise(wa, u, v) - 0.5) * 5; if (lat < edge) { B = y < w.H / 2 ? 'arctic' : 'antarctic'; rid = y < w.H / 2 ? w.polar.n : w.polar.s; } }
     }
+    if (SEA && B !== 'arctic' && B !== 'antarctic') { const s = seaAt(SEA, x, y, u, v); if (s === 2) h = 0.2; else if (s === 1) h = 0.35; else if (s === -1) h = Math.max(h, 0.42); }
     if (h < 0.33) { t = T.WATER; f = 0; }
     else if (h < 0.368) { t = T.SHALLOWS; f = 0; }
     else if (h < 0.39) { t = T.SAND; f = 0.15; }
@@ -1142,6 +1228,7 @@ SW.createWorld = function (seed, opts) {
     creatures: [], agents: [], graves: [], marks: [], places: [], inventions: [], edicts: [], devices: {}, settlements: [], looks: {}, wars: [], fished: {}, river: {}, ore: {}, sites: [], fields: [], regions: [], region: [], lodes: {}, bkind: {}, roads: {}, works: {}, peoples: [], tally: { made: {}, eaten: {}, built: {} }, weather: { kind: 'clear', until: 160 }, names: {},
     laws: SW.defaultLaws(), nextId: 1
   };
+  if (opts.seas) w.seas = { m: opts.margin != null ? opts.margin : 36, my: opts.margin != null ? opts.margin : 14 };
   use(w); genTerrain(w);
   { const Mg = opts.margin != null ? opts.margin : 36, My = opts.margin != null ? opts.margin : 14; if (Mg > 0) veil(w, Mg, My); narrowWater(w); w.tally.lived = 0; }
   for (let i = 0; i < w.W * w.H; i++) {
@@ -1225,7 +1312,7 @@ SW.settle = function (w, n, people) {
     const genes = {}; for (const g in people.genes) genes[g] = Math.round(people.genes[g] * (0.96 + 0.08 * rnd(w)) * 100) / 100;
     const a = newAgent(w, x, y, { adult: true, hue: (people.hue + ri(w, 41) - 20 + 360) % 360, people: people.id, lang: people.tongue, genes: genes, tall: Math.round(((people.form && people.form.tall) || 1) * (0.97 + 0.06 * rnd(w)) * 100) / 100, temperament: { bold: j(t[0]), sociable: j(t[1]), curious: j(t[2]), gentle: j(t[3]), honest: j(t[4]), greedy: j(t[5]) } });
     a.look = SW.bornLook(w, a.hue, a.temperament, people.form);
-    if (people.way && w.laws.tree[people.way]) a.knows[people.way] = { name: 'the old way of ' + people.way, idea: 'known to ' + people.name + ' since before memory', look: null, tick: 0, by: 0, byName: people.name };
+    if (people.way && w.laws.tree[people.way]) a.knows[people.way] = { how: 'people', name: 'the old way of ' + people.way, idea: 'known to ' + people.name + ' since before memory', look: null, tick: 0, by: 0, byName: people.name };
     w.agents.push(a); made.push(a);
   }
   made.forEach(function (a) { made.forEach(function (o) { if (o !== a) a.seen[o.id] = w.tick || 1; }); });
@@ -1653,7 +1740,7 @@ SW.VARS = ['energy', 'health', 'age', 'food_carried', 'seeds', 'wood', 'stone', 
   'food_dist', 'prey_dist', 'predator_dist', 'agent_dist', 'friend_dist', 'foe_dist', 'leader_dist', 'tree_dist', 'shelter_dist', 'crowd', 'followers', 'random',
   'anger', 'fear', 'grief', 'joy', 'lonely', 'wet', 'storm', 'fog', 'drought', 'lore', 'in_working', 'enemy_dist', 'ally_dist', 'band_near', 'fire_dist', 'store_dist', 'home_dist', 'in_home', 'sick', 'water_dist', 'ore', 'clay', 'thirst', 'suffering', 'happiness', 'satisfaction'];
 SW.OPS = ['<', '<=', '>', '>=', '==', '!='];
-SW.ACTIONS = ['eat', 'harvest', 'plant', 'gather', 'build', 'raze', 'rest', 'wander', 'hunt', 'seek', 'flee', 'attack', 'steal', 'goto', 'explore', 'follow', 'give', 'trade', 'mate', 'mark', 'cultivate', 'heal', 'stash', 'take', 'linger', 'craft', 'place', 'fish', 'drop', 'make', 'tame', 'rally', 'milk', 'shear', 'ride', 'pave', 'bridge', 'dismantle', 'claim', 'venture', 'tell', 'muster', 'pen', 'drive', 'tend'];
+SW.ACTIONS = ['eat', 'harvest', 'plant', 'gather', 'build', 'raze', 'rest', 'wander', 'hunt', 'seek', 'flee', 'attack', 'steal', 'goto', 'explore', 'follow', 'give', 'trade', 'mate', 'mark', 'cultivate', 'heal', 'stash', 'take', 'linger', 'craft', 'place', 'fish', 'drop', 'make', 'tame', 'rally', 'milk', 'shear', 'ride', 'pave', 'bridge', 'dismantle', 'claim', 'venture', 'tell', 'muster', 'pen', 'drive', 'tend', 'offer'];
 SW.AIMS = ['richer', 'faster', 'fuller', 'spreading', 'hardy'];
 
 function test(vars, c) {
@@ -1818,6 +1905,7 @@ SW.upgrade = function (w) {
   if (!w.regions || !w.regions.length) { w.regions = [{ id: 0, name: 'the Land', biome: 'mixed', x: w.W >> 1, y: w.H >> 1 }]; w.region = []; for (let i = 0; i < w.W * w.H; i++) w.region.push(0); }
   ['lodes', 'bkind', 'roads', 'works'].forEach(function (k) { if (!w[k]) w[k] = {}; });
   if (!w.peoples) w.peoples = []; if (!w.tally) w.tally = { made: {}, eaten: {}, built: {} }; ['made', 'eaten', 'built'].forEach(function (k) { if (!w.tally[k]) w.tally[k] = {}; });
+  if (!w.laws.traditions) w.laws.traditions = SW.defaultLaws().traditions; if (!w.laws.verse) w.laws.verse = SW.defaultLaws().verse; (w.peoples || []).forEach(function (P) { if (!P.tradition) P.tradition = traditionFor(w, P); }); /* a world made before Generation 27 is given its peoples' traditions */
   { const D0 = SW.defaultLaws().buildings, B0 = w.laws.buildings || {}; for (const k in D0) if (D0[k].from && B0[k] && B0[k].from == null) B0[k].from = D0[k].from; if (B0.longhall && B0.longhall.from == null && B0.hall) B0.longhall.from = 'hall'; } /* lines of descent between kinds of building (Generation 26) */
   const D = SW.defaultLaws(); ['minerals', 'goods', 'recipes', 'buildings', 'drives', 'status', 'discovery', 'culture', 'arrivals', 'explore', 'trade', 'climate', 'body', 'ecology', 'disease'].forEach(function (g) { if (!w.laws[g]) w.laws[g] = D[g]; else for (const k in D[g]) if (w.laws[g][k] == null && g !== 'recipes') w.laws[g][k] = D[g][k]; });
   for (const g in D) if (D[g] && typeof D[g] === 'object' && !Array.isArray(D[g]) && w.laws[g] && ['plants', 'creatures', 'tools', 'tree', 'recipes', 'buildings', 'minerals', 'goods'].indexOf(g) < 0) for (const k in D[g]) if (w.laws[g][k] == null) w.laws[g][k] = D[g][k];
@@ -1855,11 +1943,13 @@ SW.commonWays = function (w, a) { use(w); const need = (w.laws.culture || {}).co
 function raised(w, a, kind, i, emit) {
   const B = w.laws.buildings[kind], way = B && B.way; if (!way || !w.laws.tree[way] || !heldInCommon(w, a, way)) return;
   const band = bandMembers(w, a), from = band.filter(function (o) { return o.knows[way]; })[0], got = [];
-  band.forEach(function (o) { if (o.knows[way]) return; const src = from.knows[way]; o.knows[way] = { name: src.name, idea: src.idea, look: src.look || null, tick: w.tick, by: src.by, byName: src.byName, from: kind }; o.lore = Math.round((o.lore + 0.15) * 100) / 100; o.loreWhy = 'a way learned from what the band built'; got.push(o.id); });
+  band.forEach(function (o) { if (o.knows[way]) return; const src = from.knows[way]; o.knows[way] = { how: 'building', name: src.name, idea: src.idea, look: src.look || null, tick: w.tick, by: src.by, byName: src.byName, from: kind }; o.lore = Math.round((o.lore + 0.15) * 100) / 100; o.loreWhy = 'a way learned from what the band built'; got.push(o.id); });
   if (got.length) { w.tally.commonLearned = (w.tally.commonLearned || 0) + got.length; emit({ type: 'commonway', a: a.id, ids: got, way: way, kind: kind, x: i % w.W, y: Math.floor(i / w.W) }); }
 }
 /* A making that takes more than two hands hold (a boat of ten wood, a ship of twenty-four) is done over time: the first step lays it down where the
    maker stands, and each later step by anyone adds what they carry, until all is there. Before, such things could never be made. */
+/* carrying to a work is building: every six of wood or stone brought to one counts as a thing built (before, only the one who laid the last load was counted) */
+function labour(a, n) { a.labourB = (a.labourB || 0) + (n || 0); while (a.labourB >= 6) { a.labourB -= 6; a.stats.built = (a.stats.built || 0) + 1; } }
 function tooBig(w, rc) { const N = (rc && rc.needs) || {}, L = w.laws; return (N.wood || 0) > L.build.woodMax || (N.stone || 0) > L.craft.stoneMax || (N.ore || 0) > (L.craft.oreMax || 99); }
 SW.tooBig = function (w, key) { const rc = (w.laws.recipes || {})[key]; return !!(rc && tooBig(w, rc)); };
 /* What a being lacks, this moment, of what a thing or a deed needs: the words it is told when it tries, and what its mind is shown beforehand. */
@@ -1890,7 +1980,7 @@ SW.status = function (w, a) {
   let ways = 0, first = 0; for (const k in a.knows) { ways++; if (a.knows[k].by === a.id) first++; }
   let fol = 0; for (let k = 0; k < w.agents.length; k++) if (w.agents[k].leader === a.id) fol++;
   const v = (S.wealth || 0) * Math.min(2.5, wealth + prized) + (S.deeds || 0) * Math.min(2.5, (st.kills || 0) * 0.06 + (st.invented || 0) * 0.15 + first * 0.35 + (st.raised || 0) * 0.03 + (st.tamed || 0) * 0.15 + (st.won || 0) * 0.5 + (st.found || 0) * 0.5)
-    + (S.knowledge || 0) * (a.lore * 0.25 + ways * 0.12) + (S.children || 0) * Math.min(1.5, (st.kids || 0) * 0.3) + (S.works || 0) * Math.min(2, (st.built || 0) * 0.08)
+    + (ofTheOrder(w, a) ? ((w.laws.culture || {}).orderStanding || 0) : 0) + (S.knowledge || 0) * (a.lore * 0.25 + ways * 0.12) + (S.children || 0) * Math.min(1.5, (st.kids || 0) * 0.3) + (S.works || 0) * Math.min(2, (st.built || 0) * 0.08)
     + (S.followers || 0) * fol * 0.6 + (S.giving || 0) * Math.min(1.2, ((st.gifts || 0) + (st.taught || 0)) * 0.04) + (S.renown || 0) * Math.min(2.5, (a.sung || 0) * 0.25 + (SW.roleOf(w, a) ? 0.4 : 0))
     + ((w.faiths || {})[a.faith] && w.faiths[a.faith].by === a.id ? ((w.laws.culture || {}).faithStanding || 0) * Math.min(8, Math.max(0, w.faiths[a.faith].n - 1)) : 0)
     - (S.shame || 0) * (a.shame || 0);
@@ -1907,7 +1997,9 @@ SW.roleOf = function (w, a) {
 SW.eraOf = function (w) { if (w.eraT != null && w.tick - w.eraT < 240) return w.eraMax || 1; let e = 1; for (let k = 0; k < w.agents.length; k++) for (const id in w.agents[k].knows) e = Math.max(e, (w.laws.tree[id] || {}).era || 1); w.eraMax = e; w.eraT = w.tick; return e; };
 SW.magicFactor = function (w) { return clamp(1 - (w.laws.magic.wane || 0) * Math.max(0, SW.eraOf(w) - 2), 0.15, 1); };
 function buildingAt(w, i) { const k = w.bkind && w.shelters[i] ? w.bkind[i] : null; return k && w.laws.buildings && w.laws.buildings[k] ? k : null; }
-SW.buildingAt = buildingAt; SW.newCreature = newCreature;
+SW.buildingAt = buildingAt; SW.newCreature = newCreature; SW.inb = inb;
+/* how far one is heard: one who knows signals (smoke and fire read from afar) is heard two and a half times as far (culture.signalReach); the way had nothing behind it before Generation 27 */
+SW.reach = function (w, a) { const L = w.laws; return Math.round(L.body.hearing * (a && a.knows && a.knows.signals ? ((L.culture || {}).signalReach || 1) : 1)); };
 /* the strongest of some property among the special buildings within a step (or the kind, if asked by name) */
 function nearB(w, a, prop, kind) { let v = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const x = a.x + dx, y = a.y + dy; if (!inb(w, x, y)) continue; const k = buildingAt(w, idx(w, x, y)); if (!k) continue; if (kind) { if (isOfLine(w, k, kind)) v = 1; } else v = Math.max(v, w.laws.buildings[k][prop] || 0); } return v; }
 /* a kind of building, or one that grew out of it: what needs a forge is served by a factory */
@@ -2106,7 +2198,7 @@ function act(w, a, r, S, emit) {
         w.makings = w.makings || {}; let M0 = w.makings[here]; if (M0 && M0.kind !== key) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'A ' + M0.kind + ' is already being made on this spot. Make the ' + key + ' a step away.' }); return false; }
         if (!M0) M0 = w.makings[here] = { kind: key, by: a.id, wood: 0, stone: 0, ore: 0, hands: {} };
         let gave = 0; ['wood', 'stone', 'ore'].forEach(function (k) { const g = Math.min(a[k] || 0, (N[k] || 0) - (M0[k] || 0)); if (g > 0) { a[k] -= g; M0[k] = (M0[k] || 0) + g; gave += g; } });
-        M0.hands[a.id] = (M0.hands[a.id] || 0) + gave; a.stats.raised = (a.stats.raised || 0) + gave;
+        M0.hands[a.id] = (M0.hands[a.id] || 0) + gave; a.stats.raised = (a.stats.raised || 0) + gave; labour(a, gave);
         const left = ['wood', 'stone', 'ore'].filter(function (k) { return (N[k] || 0) > (M0[k] || 0); }).map(function (k) { return ((N[k] || 0) - (M0[k] || 0)) + ' ' + k; });
         if (left.length) { a.fin = 1; a.doing = 'working on a ' + key; emit({ type: 'laboured', a: a.id, kind: key, x: a.x, y: a.y, gave: gave, left: left.join(' and '), making: true }); return true; }
         delete w.makings[here]; w.tally.madeOverTime = (w.tally.madeOverTime || 0) + 1;
@@ -2219,7 +2311,7 @@ function act(w, a, r, S, emit) {
     }
     case 'muster': { /* a call to hunt or to gather together. Those who follow the caller drop what they do and come; others of the band, kin and friends come if their hands are idle */
       const what = r.for === 'gather' || r.what === 'gather' ? 'gather' : 'hunt', hold = (L.culture || {}).musterHold || 120, came = [];
-      for (let j = 0; j < w.agents.length; j++) { const o = w.agents[j]; if (o === a || o.dead || o.e < 25 || o.sick > 0 || SW.stage(w, o) === 'child' || cheb(o.x, o.y, a.x, a.y) > L.body.hearing + 4) continue;
+      for (let j = 0; j < w.agents.length; j++) { const o = w.agents[j]; if (o === a || o.dead || o.e < 25 || o.sick > 0 || SW.stage(w, o) === 'child' || cheb(o.x, o.y, a.x, a.y) > SW.reach(w, a) + 4) continue;
         const mine = rootOf(w, o) === a, own = rootOf(w, o) === rootOf(w, a) || (a.parents || []).indexOf(o.id) >= 0 || (o.parents || []).indexOf(a.id) >= 0 || ((o.rel[a.id] || 0) >= 0.4);
         if (mine || (own && !o.intent && !(o.plan && o.plan.length))) { o.plan = [{ do: 'follow', name: a.name, ticks: 20 }, { do: what === 'hunt' ? 'hunt' : 'harvest', ticks: hold }]; o.intent = null; o.muster = { by: a.id, t: w.tick }; came.push(o.id); } }
       w.tally.musters = (w.tally.musters || 0) + 1; emit({ type: 'mustered', a: a.id, ids: came, what: what, x: a.x, y: a.y });
@@ -2231,11 +2323,25 @@ function act(w, a, r, S, emit) {
       if (rootOf(w, a) !== a) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'Only one who leads a band can call it to battle.' }); return false; }
       let t = r.name ? SW.findAgentByName(w, r.name) : null;
       if (!t) { let bd = 99; w.agents.forEach(function (o) { if (!o.dead && a.stances[rootOf(w, o).id] === 'enemy') { const d = cheb(o.x, o.y, a.x, a.y); if (d < bd) { bd = d; t = o; } } }); }
-      const mine = w.agents.filter(function (o) { return o !== a && !o.dead && rootOf(w, o) === a && cheb(o.x, o.y, a.x, a.y) <= L.body.hearing + 4 && SW.stage(w, o) !== 'child'; });
+      const mine = w.agents.filter(function (o) { return o !== a && !o.dead && rootOf(w, o) === a && cheb(o.x, o.y, a.x, a.y) <= SW.reach(w, a) + 4 && SW.stage(w, o) !== 'child'; });
       if (!t || t.dead || t === a || rootOf(w, t) === a || !mine.length) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: !mine.length ? 'You called for battle, but no grown follower of yours is near enough to hear.' : 'You called for battle, but named no one who can be fought.' }); return false; }
       mine.forEach(function (o) { o.plan = [{ do: 'attack', target: 'agent', name: t.name, ticks: 120 }]; o.intent = null; feel(o, 'anger', 0.3); });
       a.plan.unshift({ do: 'attack', target: 'agent', name: t.name, ticks: 120 }); a.fin = 1; a.stats.rallied = (a.stats.rallied || 0) + 1; a.doing = 'calling the band to battle';
       emit({ type: 'rallied', a: a.id, b: t.id, with: mine.map(function (o) { return o.id; }) });
+      return true;
+    }
+    case 'offer': {
+      /* Generation 27: a food given up to the powers one's people hold to, at a fire or a shrine. It costs what is given. It eases the fear and
+         grief of the one who gives (culture.offerCalm, times the tradition's own measure, offering), and those of the same tradition who see it
+         think better of the giver (culture.offerRegard). Nothing says it must be done, or that it moves the weather. */
+      const k = String(r.what || '').toLowerCase().trim(), ci = (function () { for (let q = a.carry.length - 1; q >= 0; q--) if (!k || a.carry[q].k === k) return q; return -1; })();
+      let holy = fireNear(w, a.x, a.y, 2); if (!holy) for (let dy = -1; dy <= 1 && !holy; dy++) for (let dx = -1; dx <= 1; dx++) { const x = a.x + dx, y = a.y + dy; if (inb(w, x, y) && isOfLine(w, buildingAt(w, idx(w, x, y)), 'shrine')) { holy = true; break; } }
+      if (ci < 0 || !holy) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: ci < 0 ? 'You meant to make an offering, but you carry no ' + (k || 'food') + ' to give up.' : 'You meant to make an offering, but there is no fire within two steps and no shrine beside you. An offering is made at one or the other.' }); return false; }
+      const TR = SW.traditionOf(w, a), C = L.culture || {}, m = TR && TR.offering != null ? TR.offering : 1, what = a.carry[ci].k, seen = [];
+      a.carry.splice(ci, 1); feel(a, 'fear', -(C.offerCalm || 0) * m); feel(a, 'grief', -(C.offerCalm || 0) * 0.5 * m);
+      for (let j = 0; j < w.agents.length; j++) { const o = w.agents[j]; if (o === a || o.dead || cheb(o.x, o.y, a.x, a.y) > 5) continue; seen.push(o.id); if (TR && SW.traditionOf(w, o) === TR) o.rel[a.id] = clamp((o.rel[a.id] || 0) + (C.offerRegard || 0) * m, -1, 1); }
+      a.fin = 1; a.doing = 'making an offering'; a.stats.offered = (a.stats.offered || 0) + 1; w.tally.offerings = (w.tally.offerings || 0) + 1;
+      emit({ type: 'offered', a: a.id, what: what, seenBy: seen, x: a.x, y: a.y });
       return true;
     }
     case 'drop': {
@@ -2350,7 +2456,7 @@ function act(w, a, r, S, emit) {
           if (!W1) { if (a.wood + a.stone < 1) return say('You tried to raise a ' + r.what + ' in place of this ' + oldK + '. Half of the old one is used again, so it takes ' + nw + ' wood and ' + ns + ' stone, brought in as many loads as it needs, and you carry neither.'); W1 = w.works[here] = { kind: r.what, by: a.id, wood: 0, stone: 0, hands: {}, tick: w.tick, inPlace: oldK }; }
           const gw = Math.min(a.wood, nw - W1.wood), gs = Math.min(a.stone, ns - W1.stone);
           if (gw + gs <= 0) return say('The ' + r.what + ' being raised here in place of the ' + oldK + ' still needs ' + (nw - W1.wood) + ' wood and ' + (ns - W1.stone) + ' stone, and you carry none of what it lacks.');
-          a.wood -= gw; a.stone -= gs; W1.wood += gw; W1.stone += gs; W1.hands[a.id] = (W1.hands[a.id] || 0) + gw + gs; a.stats.raised = (a.stats.raised || 0) + gw + gs; a.fin = 1; a.doing = 'labouring on a ' + r.what;
+          a.wood -= gw; a.stone -= gs; W1.wood += gw; W1.stone += gs; W1.hands[a.id] = (W1.hands[a.id] || 0) + gw + gs; a.stats.raised = (a.stats.raised || 0) + gw + gs; labour(a, gw + gs); a.fin = 1; a.doing = 'labouring on a ' + r.what;
           if (W1.wood >= nw && W1.stone >= ns) return done();
           emit({ type: 'laboured', a: a.id, kind: r.what, x: a.x, y: a.y, gave: gw + gs, left: (nw - W1.wood) + ' wood and ' + (ns - W1.stone) + ' stone' }); return true;
         }
@@ -2360,7 +2466,7 @@ function act(w, a, r, S, emit) {
           else if (W0.kind !== r.what) return say('A ' + W0.kind + ' is already being raised on this ground.');
           const gw = Math.min(a.wood, bw - W0.wood), gs = Math.min(a.stone, bs - W0.stone);
           if (gw + gs <= 0) return say('The ' + r.what + ' here still needs ' + (bw - W0.wood) + ' wood and ' + (bs - W0.stone) + ' stone, and you carry none of what it lacks.');
-          a.wood -= gw; a.stone -= gs; W0.wood += gw; W0.stone += gs; W0.hands[a.id] = (W0.hands[a.id] || 0) + gw + gs; a.stats.raised = (a.stats.raised || 0) + gw + gs; a.fin = 1; a.doing = 'labouring on a ' + r.what;
+          a.wood -= gw; a.stone -= gs; W0.wood += gw; W0.stone += gs; W0.hands[a.id] = (W0.hands[a.id] || 0) + gw + gs; a.stats.raised = (a.stats.raised || 0) + gw + gs; labour(a, gw + gs); a.fin = 1; a.doing = 'labouring on a ' + r.what;
           if (W0.wood >= bw && W0.stone >= bs) {
             delete w.works[here]; w.shelters[here] = W0.by; w.bkind[here] = r.what; delete w.looks[here]; a.stats.built++; w.tally.built[r.what] = (w.tally.built[r.what] || 0) + 1;
             const hands = Object.keys(W0.hands).map(Number); hands.forEach(function (p1) { hands.forEach(function (p2) { if (p1 === p2) return; const o = agentById(w, p1); if (o) o.rel[p2] = clamp((o.rel[p2] || 0) + 0.1, -1, 1); }); });
@@ -2608,7 +2714,7 @@ function act(w, a, r, S, emit) {
     }
     case 'tell': { /* to tell of what has been, by a fire, to those who are near */
       if (!fireNear(w, a.x, a.y, 2)) { if (S.near.fire && S.near.fire.d <= SW.sight(w)) { if (!move(w, a, pathToward(w, a, S.near.fire.x, S.near.fire.y, 1))) return false; a.doing = 'going to the fire to tell of what has been'; return true; } if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You meant to tell of what has been, but telling is done beside a fire, and none burns near.' }); return false; }
-      const hr = L.body.hearing, near = w.agents.filter(function (o) { return o !== a && !o.dead && cheb(o.x, o.y, a.x, a.y) <= hr; });
+      const hr = SW.reach(w, a), near = w.agents.filter(function (o) { return o !== a && !o.dead && cheb(o.x, o.y, a.x, a.y) <= hr; });
       if (!near.length) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You meant to tell of what has been, but no one is near enough to hear.' }); return false; }
       a.fin = 1; a.stats.told = (a.stats.told || 0) + 1; a.doing = 'telling of what has been, by the fire'; near.forEach(function (o) { feel(o, 'joy', 0.1); o.mood.lonely = Math.max(0, o.mood.lonely - 0.1); }); feel(a, 'joy', 0.1);
       emit({ type: 'telling', a: a.id, near: near.map(function (o) { return o.id; }) }); return true;
@@ -2680,8 +2786,13 @@ function act(w, a, r, S, emit) {
       const cwin = L.mate.courtWindow || 80; if (!a.court || a.court.id !== t.id || w.tick - a.court.t > cwin) { feel(t, 'joy', 0.12); emit({ type: 'court', a: a.id, b: t.id }); }
       a.court = { id: t.id, t: w.tick }; a.doing = 'courting ' + t.name;
       const M = L.mate;
+      /* A body answers a courting it welcomes. Before, a child needed both minds to plan the step mate within the same day; in the seventeenth run
+         27 of 789 thoughts planned it, two children were born while nine elders died, and the people fell from 45 to 36. Now the one courted, if
+         it is warm toward the one who courts (mate.answer, on the scale of its feeling) and is not courting another, answers without having planned
+         to. Its mind is told, and can still turn away. */
       { const pa = a.parents || [], pt = t.parents || [], kin = pa.indexOf(t.id) >= 0 || pt.indexOf(a.id) >= 0 || pa.some(function (q) { return pt.indexOf(q) >= 0; }); if (kin) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You and ' + t.name + ' are close kin (parent and child, or children of the same parent). No child can come of it.' }); a.court = null; return false; } }
       if (M.sexes && a.sex && t.sex && a.sex === t.sex) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'You and ' + t.name + ' are both ' + (a.sex === 'f' ? 'women' : 'men') + '. A child comes only of a woman and a man together.' }); a.court = null; return false; }
+      if ((M.answer || 0) > 0 && a.age >= a.life * M.minAgeFraction && t.age >= t.life * M.minAgeFraction && !(t.court && w.tick - t.court.t <= cwin) && (t.rel[a.id] || 0) >= M.answer && !(t.intent && t.intent.do === 'mate') && (t.answerT == null || w.tick - t.answerT > cwin)) { t.court = { id: a.id, t: w.tick }; t.answerT = w.tick; w.tally.answered = (w.tally.answered || 0) + 1; emit({ type: 'answered', a: t.id, b: a.id }); }
       if (t.court && t.court.id === a.id && w.tick - t.court.t <= cwin && r === a.intent && !(a.e >= M.minEnergy && t.e >= M.minEnergy && a.mateCd <= 0 && t.mateCd <= 0 && a.age >= a.life * M.minAgeFraction && t.age >= t.life * M.minAgeFraction && w.agents.length < M.maxPopulation) && (a.whyT || 0) + 200 < w.tick) { /* both are willing and no child comes: say why, once in a while */
         a.whyT = w.tick; const dl = L.time.dayLength, days = function (n) { const dd = Math.ceil(n / dl * 2) / 2; return dd <= 0.5 ? 'half a day' : dd + ' days'; };
         const why = a.age < a.life * M.minAgeFraction ? 'you are too young yet' : t.age < t.life * M.minAgeFraction ? t.name + ' is too young yet' : a.e < M.minEnergy ? 'your body is too thin (energy ' + Math.round(a.e) + ', and it takes ' + M.minEnergy + '): eat first' : t.e < M.minEnergy ? t.name + ' is too thin (it takes energy ' + M.minEnergy + '): they must eat first, and food given to them would help' : a.mateCd > 0 ? 'your body is not ready for another child for about ' + days(a.mateCd) : t.mateCd > 0 ? t.name + ' is not ready for another child for about ' + days(t.mateCd) : 'the land holds as many as it can feed';
@@ -2709,7 +2820,7 @@ function act(w, a, r, S, emit) {
         kid.leader = a.leader != null ? a.leader : (t.leader != null ? t.leader : null);
         kid.lore = Math.round((a.lore + t.lore) * 0.15 * 10) / 10; kid.teachers = [a.id, t.id];
         [a, t].forEach(function (par) { for (const dk in par.designs) kid.designs[dk] = 1; });
-        [a, t].forEach(function (par) { for (const id in par.knows) if (!kid.knows[id] && rnd(w) < 0.5) { const k = par.knows[id]; kid.knows[id] = { name: k.name, idea: k.idea, look: k.look, tick: w.tick, by: k.by, byName: k.byName, via: par.id }; } });
+        [a, t].forEach(function (par) { for (const id in par.knows) if (!kid.knows[id] && rnd(w) < 0.5) { const k = par.knows[id]; kid.knows[id] = { how: 'parents', name: k.name, idea: k.idea, look: k.look, tick: w.tick, by: k.by, byName: k.byName, via: par.id }; } });
         kid.rel[a.id] = 0.6; kid.rel[t.id] = 0.6; a.rel[kid.id] = 0.7; t.rel[kid.id] = 0.7;
         a.rel[t.id] = clamp((a.rel[t.id] || 0) + 0.3, -1, 1); t.rel[a.id] = clamp((t.rel[a.id] || 0) + 0.3, -1, 1);
         a.stats.kids++; t.stats.kids++; feel(a, 'joy', 0.6); feel(t, 'joy', 0.6); a.fin = 1;
@@ -2805,6 +2916,9 @@ function stepAgents(w, emit) {
     if (cold > 0 && fireNear(w, a.x, a.y, L.craft.fireReach)) cold *= L.craft.fireWarmth;
     drain *= 1 + Math.min(0.1, (a.stats.blows || 0) * 0.005); /* a body hardened by fighting needs a little more food */
     if (ground === T.DESERT && !night) drain += L.land.desertThirst;
+    /* a crossing: afloat on a vessel for three moments or more, and then ashore */
+    if (ground === T.WATER && floatOf(w, a) > 0) { a.afloat = (a.afloat || 0) + 1; if (!(w.narrow && w.narrow[idx(w, a.x, a.y)])) a.afloatDeep = (a.afloatDeep || 0) + 1; }
+    else if (a.afloat) { if (a.afloat >= 3 && ground !== T.WATER) { a.stats.crossed = (a.stats.crossed || 0) + 1; w.tally.crossings = (w.tally.crossings || 0) + 1; emit({ type: 'crossed', a: a.id, moments: a.afloat, open: a.afloatDeep || 0, x: a.x, y: a.y }); } a.afloat = 0; a.afloatDeep = 0; }
     if (ground === T.WATER && !(w.roads && w.roads[idx(w, a.x, a.y)]) && !floatOf(w, a)) { drain += L.water.swimDrain || 0; a.stats.swum = (a.stats.swum || 0) + 1; SW.press(w, a, 'water', 0.02); } /* and one who swims thinks about better ways over water */ /* swimming is hard work */
     if (w.fields.length) { cold *= fieldFactor(w, 'cold', a.x, a.y); drain *= fieldFactor(w, 'drain', a.x, a.y); }
     drain += cold;
@@ -2871,6 +2985,7 @@ function stepAgents(w, emit) {
       if (a.hp <= 0) { killAgent(w, a, 'starved', emit); continue; }
     } else if (a.faint && a.e > 10) a.faint = 0;
     if (a.age > a.life) { killAgent(w, a, 'old age', emit); continue; }
+    if (!a.nearing && a.age > a.life * ((L.verse || {}).near || 2)) { a.nearing = 1; emit({ type: 'nearing', a: a.id }); } /* an elder feels its death near (no chance is drawn) */
     if (a.e < 25 && !a.lowFlag) { a.lowFlag = true; feel(a, 'fear', 0.3); SW.press(w, a, 'hunger', 1); if (winter || SW.season(w) === 2) SW.press(w, a, 'famine', 1); const hr = L.body.hearing, nearIds = [], kinIds = []; for (let j = 0; j < w.agents.length; j++) { const o = w.agents[j]; if (o === a || o.dead) continue; const dd = cheb(a.x, a.y, o.x, o.y); if (dd <= hr) nearIds.push(o.id); else if (dd <= hr * 3 && (rootOf(w, o) === rootOf(w, a) || (a.parents || []).indexOf(o.id) >= 0 || (o.parents || []).indexOf(a.id) >= 0)) kinIds.push(o.id); } emit({ type: 'low', a: a.id, near: nearIds, kin: kinIds, x: a.x, y: a.y }); }
     else if (a.e > 45) a.lowFlag = false;
     if (S.near.agent) {
@@ -2942,7 +3057,7 @@ SW.speak = function (w, a, to, text, emit) {
   const hearers = [];
   for (let k = 0; k < w.agents.length; k++) {
     const o = w.agents[k];
-    if (o !== a && !o.dead && cheb(a.x, a.y, o.x, o.y) <= w.laws.body.hearing) { hearers.push(o.id); feel(o, 'lonely', -0.2); }
+    if (o !== a && !o.dead && cheb(a.x, a.y, o.x, o.y) <= SW.reach(w, a)) { hearers.push(o.id); feel(o, 'lonely', -0.2); }
   }
   let missed = null;
   if (to && to !== 'all') { const t = SW.findAgentByName(w, to); if (!t || hearers.indexOf(t.id) < 0) missed = String(to); }
@@ -3067,13 +3182,14 @@ SW.easeFor = function (w, a, id) {
 };
 SW.pathsFor = function (w, a) {
   const T2 = w.laws.tree, open = [], near = [];
+  const bandP = (w.laws.culture || {}).bandPractice == null ? 0.5 : w.laws.culture.bandPractice, mates = bandP > 0 ? bandMembers(w, a).filter(function (o) { return o !== a; }) : [];
   for (const id in T2) {
     if (a.knows[id]) continue;
     const n = T2[id], miss = [];
     n.needs.forEach(function (q) { if (!a.knows[q]) miss.push('first you would need ' + q); });
     const ez = SW.easeFor(w, a, id), seen = ez.f, needLore = Math.round(n.lore * seen * 10) / 10, needN = Math.max(1, Math.ceil(n.n * seen)), why = ez.need >= 0.5 && ez.by ? SW.PRESSURES[ez.by] : '';
     if (a.lore < needLore) miss.push('more lore (' + (Math.round(a.lore * 10) / 10) + ' of ' + needLore + ')');
-    const have = a.stats[n.stat] || 0;
+    const have = (a.stats[n.stat] || 0) + (n.stat && n.stat !== 'seasons' && mates.length ? Math.floor(bandP * mates.reduce(function (q, o) { return q + (o.stats[n.stat] || 0); }, 0)) : 0); /* what the band has done counts toward each member's practice (culture.bandPractice of it): a people advances together */
     if (n.has) for (const hk in n.has) if (((a.things || {})[hk] || 0) < n.has[hk]) miss.push('to hold ' + n.has[hk] + ' ' + hk);
     if (have < needN) miss.push('more practice (' + ({ tamed: 'taming animals', mined: 'winning minerals from the ground', crafted: 'making tools', seasons: 'seasons lived', raised: 'labour on great works', paved: 'paving', trades: 'trading', wood: 'gathering wood and stone', built: 'building', planted: 'planting', fished: 'catching fish', ore: 'breaking ore from rock', clay: 'digging clay', healed: 'eating healing plants', marks: 'leaving marks', taught: 'teaching', led: 'being followed' }[n.stat] || n.stat) + ': ' + have + ' of ' + needN + ')');
     if (miss.length) { if (miss.length <= 2 && !n.needs.some(function (q) { return !a.knows[q]; })) near.push({ id: id, missing: miss.join(' and ') + (why ? ' (' + why + ' has brought it closer)' : ''), hint: n.hint, glimpsed: !!a.glimpsed[id], need: ez.need, by: ez.by }); }
@@ -3087,7 +3203,7 @@ SW.discover = function (w, a, id, meta, emit) {
   if (!ok) return false;
   const clean = function (v, n) { return String(v || '').replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, n); };
   const k = { name: clean(meta.name, 28) || id, idea: clean(meta.idea, 160), look: SW.sanitizeLook(meta.look), tick: w.tick, by: a.id, byName: a.name };
-  a.knows[id] = k; a.loreWhy = 'coming to a new way'; a.lore = Math.round((a.lore + 0.3) * 10) / 10;
+  k.how = 'found'; a.knows[id] = k; a.loreWhy = 'coming to a new way'; a.lore = Math.round((a.lore + 0.3) * 10) / 10;
   w.inventions.push({ node: id, name: k.name, idea: k.idea, look: k.look, by: a.id, byName: a.name, tick: w.tick, x: a.x, y: a.y });
   if (w.inventions.length > 80) w.inventions.shift();
   emit({ type: 'discovered', a: a.id, node: id, name: k.name, idea: k.idea });
@@ -3101,7 +3217,7 @@ SW.teachPath = function (w, a, t, id, emit) {
   if (cheb(a.x, a.y, t.x, t.y) > w.laws.body.hearing) return 'too far to hear';
   if (SW.understands(t, a.lang) < 0.4) return 'the pupil does not yet understand your tongue well enough to be taught in it';
   for (let i = 0; i < n.needs.length; i++) if (!t.knows[n.needs[i]]) return 'the pupil must first know ' + n.needs[i];
-  t.knows[id] = { name: k.name, idea: k.idea, look: k.look, tick: w.tick, by: k.by, byName: k.byName, via: a.id };
+  t.knows[id] = { how: 'taught', name: k.name, idea: k.idea, look: k.look, tick: w.tick, by: k.by, byName: k.byName, via: a.id };
   emit({ type: 'learned', a: t.id, b: a.id, node: id, name: k.name });
   return '';
 };

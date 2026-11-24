@@ -972,6 +972,11 @@ function onWorldEvent(ev) {
     case 'tended': if (a) { glyph(ev.x, ev.y, ev.took ? '+' + ev.took + ' ' + ev.food : 'tending the ' + ev.kind, '#a8d08d', 2.2); motes(ev.x, ev.y, '#a8d08d', 4); } break;
     case 'fed': if (a) motes(a.x, a.y, '#ffd9a0', 3); break;
     case 'rode': if (a && !ev.off) { burst(a.x, a.y, '#cdbb96', 4); soundAt('rode', a.x, a.y); } break;
+    /* Generation 27 */
+    case 'versed': if (a) { motes(a.x, a.y, '#ffe9a0', 14); glyph(a.x, a.y, '\u266a ' + ({ dying: 'a death poem', elegy: 'a lament', love: 'a love song', birth: 'a lullaby', deed: 'a song of a deed', myth: 'a myth' }[ev.occasion] || 'a verse'), '#ffe9a0', 3.6); addFx({ type: 'ring', x: a.x, y: a.y, r: 4, life: 3, color: 'rgba(255,233,160,0.75)' }); soundAt('telling', a.x, a.y, voice); } break;
+    case 'offered': if (a) { glyph(a.x, a.y, 'an offering', '#e8c8ff', 2.6); motes(a.x, a.y, '#e8c8ff', 8); } break;
+    case 'answered': if (a) { addFx({ type: 'float', x: a.x, y: a.y, text: '\u2665\u2665', life: 2, color: '#ff8fb0' }); } break;
+    case 'crossed': if (a) { glyph(a.x, a.y, 'crossed the water', '#9fd8ff', 3.4); addFx({ type: 'ring', x: a.x, y: a.y, r: 5, life: 3, color: 'rgba(159,216,255,0.8)' }); } break;
     case 'telling': if (a) { motes(a.x, a.y, '#ffc67a', 12); glyph(a.x, a.y, '\u266a', '#ffe9a0', 2.6); addFx({ type: 'ring', x: a.x, y: a.y, r: 3, life: 2.4, color: 'rgba(255,198,122,0.7)' }); soundAt('telling', a.x, a.y, voice); } break;
     case 'made': if (a) { motes(a.x, a.y, '#e9c8ff', 10); glyph(a.x, a.y, ev.thing || ev.what, '#e9c8ff', 2.6); soundAt('rite', a.x, a.y, voice); } break;
     case 'shared': if (a) { motes(a.x, a.y, '#ffd9a0', 5); soundAt('shared', a.x, a.y); } break;
@@ -1411,7 +1416,7 @@ function renderStory() {
   if (SWK.error) h += '<p class="note">' + esc(SWK.error) + '</p>';
   if (S.trends.length) h += '<h3>Trends</h3><ul class="events">' + S.trends.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
   if (S.threads.length) h += '<h3>Threads</h3>' + S.threads.map(function (t) { return '<div class="mk"><b>' + esc(t.name) + '</b> <span class="v">' + esc(t.kind) + '</span><div class="q">' + esc(t.text) + '</div></div>'; }).join('');
-  h += S.chapters.length ? S.chapters.slice().reverse().map(function (c) { return '<h3>' + c.n + '. ' + esc(c.title) + ' <small>days ' + c.day0 + ' to ' + c.day1 + '</small></h3>' + (c.amended ? '<p class="note">' + esc(c.amended) + '</p>' : '') + '<p class="chapter">' + esc(c.text) + '</p>'; }).join('') : '<p class="muted">No chapter yet. The first is written on day ' + (1 + st.settings.story.every) + ' while the minds are awake, or press the button.</p>';
+  h += S.chapters.length ? S.chapters.slice().reverse().map(function (c) { return '<h3>' + c.n + '. ' + esc(c.title) + ' <small>days ' + c.day0 + ' to ' + c.day1 + '</small></h3>' + (c.amended ? '<p class="note">' + esc(c.amended) + '</p>' : '') + (c.epigraph && c.epigraph.text ? '<blockquote class="epi">' + verse(c.epigraph.text) + '<cite>' + esc(c.epigraph.kind === 'tradition' ? 'from the teaching of ' + c.epigraph.title + ', as held among ' + c.epigraph.people : ((({ dying: 'the death poem of ', elegy: 'a lament by ', love: 'a love song by ', birth: 'a lullaby by ', deed: 'a song by ', myth: 'a myth told by ' })[c.epigraph.occasion]) || 'from "' + c.epigraph.title + '", by ') + (c.epigraph.by || 'one whose name is lost') + (c.epigraph.people ? ' of ' + c.epigraph.people : '') + (c.epigraph.day ? ', day ' + c.epigraph.day : '')) + '</cite></blockquote>' : '') + '<p class="chapter">' + esc(c.text) + '</p>'; }).join('') : '<p class="muted">No chapter yet. The first is written on day ' + (1 + st.settings.story.every) + ' while the minds are awake, or press the button.</p>';
   const n = SWK.stats(st), kv = function (o) { return Object.keys(o).filter(function (k) { return o[k]; }).map(function (k) { return k + ' <b>' + o[k] + '</b>'; }).join(' · ') || 'none'; };
   h += '<h3>The numbers <small>day ' + n.day + ', ' + n.season + '</small></h3><div class="nums">alive <b>' + n.alive + '</b> (children <b>' + n.children + '</b>, elders <b>' + n.elders + '</b>) · ever lived <b>' + n.everBorn + '</b> · died <b>' + n.deaths + '</b>' + (n.deaths ? ' (' + kv(n.deathCauses) + ')' : '') +
     '<br>energy, middle being <b>' + n.energyMedian + '</b> · lowest health <b>' + n.healthLowest + '</b> · sick <b>' + n.sick + '</b><br>bonds <b>' + n.bonds + '</b>: warm <b>' + n.bondsWarm + '</b>, hostile <b>' + n.bondsHostile + '</b> · following a leader <b>' + n.following + '</b> · bands ' + (n.bands.length ? '<b>' + esc(n.bands.join(', ')) + '</b>' : '<b>none</b>') +
@@ -1441,7 +1446,7 @@ function renderCulture() {
   h += '<div class="cseg" role="group" aria-label="View">' + [['peoples', 'By people'], ['spread', 'How ideas spread'], ['between', 'Between peoples'], ['time', 'As it happened']].map(function (v) { return '<button data-act="cultv" data-id="' + v[0] + '" aria-pressed="' + (view === v[0]) + '">' + v[1] + '</button>'; }).join('') + '</div>';
   const holdersLine = function (it) { const lv = live[it.id], ps = Object.keys(lv.p); return 'held by <b>' + lv.n + '</b>' + (ps.length > 1 || (ps.length === 1 && +ps[0] !== it.people) ? ' (' + ps.map(function (p) { return peopleDot(+p) + esc(peopleName(+p)) + ' ' + lv.p[p]; }).join(', ') + ')' : '') + (it.tellings ? ' · passed on ' + it.tellings + ' time' + (it.tellings > 1 ? 's' : '') : '') + (it.changed ? ' · changed in the telling ' + it.changed + ' time' + (it.changed > 1 ? 's' : '') : '') + (it.depth > 1 ? ' · ' + it.depth + ' mouths from its maker' : ''); };
   const variant = function (it) { for (const hid in it.holders) { const m = st.minds[hid]; if (!m || m.dead || +hid === it.byId) continue; const t = (m.tales || []).filter(function (q) { return q.cid === it.id; })[0]; if (t && t.text !== it.text) return '<div class="alt">As ' + esc(st.names[hid] || 'another') + ' tells it now: “' + esc(t.text) + '”</div>'; } return ''; };
-  const card = function (it, p) { return '<div class="idea ' + it.kind + '"><div class="t"><span class="tag">' + esc(it.kind) + '</span>' + esc(it.title) + '</div><div class="m">' + (it.by ? 'first from ' + (it.byId != null ? nameLink(it.byId) : esc(it.by)) : 'older than memory') + ', day ' + it.day + (it.about ? ' · about ' + esc(it.about) : '') + (p != null && it.people != null && it.people !== p ? ' · came from ' + peopleDot(it.people) + esc(peopleName(it.people)) : '') + '</div>' + (it.text && it.kind !== 'lesson' && it.kind !== 'saying' ? '<blockquote>“' + verse(it.text) + '”</blockquote>' : '') + (['tale', 'song', 'poem', 'myth'].indexOf(it.kind) >= 0 ? variant(it) : '') + '<div class="m">' + holdersLine(it) + '</div></div>'; };
+  const card = function (it, p) { return '<div class="idea ' + it.kind + '"><div class="t"><span class="tag">' + esc(it.kind) + '</span>' + esc(it.title) + '</div><div class="m">' + (it.by ? 'first from ' + (it.byId != null ? nameLink(it.byId) : esc(it.by)) : 'older than memory') + ', day ' + it.day + (it.about ? ' · about ' + esc(it.about) : '') + (it.occasion ? ' · ' + esc(({ dying: 'a death poem', elegy: 'a lament', love: 'a love song', birth: 'a lullaby', deed: 'a song of a deed', myth: 'the myth of a people' })[it.occasion] || it.occasion) + (it.form ? ' (' + esc(it.form) + ')' : '') : '') + (p != null && it.people != null && it.people !== p ? ' · came from ' + peopleDot(it.people) + esc(peopleName(it.people)) : '') + '</div>' + (it.text && it.kind !== 'lesson' && it.kind !== 'saying' ? '<blockquote>“' + verse(it.text) + '”</blockquote>' : '') + (['tale', 'song', 'poem', 'myth', 'fable'].indexOf(it.kind) >= 0 ? variant(it) : '') + '<div class="m">' + holdersLine(it) + '</div></div>'; };
   if (view === 'peoples') {
     h += '<div class="cseg" role="group" aria-label="People"><button data-act="cultp" data-id="all" aria-pressed="' + (pf == null) + '">All</button>' + P.map(function (p, i) { return '<button data-act="cultp" data-id="' + i + '" aria-pressed="' + (pf === i) + '">' + peopleDot(i) + esc(p.name) + '</button>'; }).join('') + '</div>';
     P.forEach(function (p, i) {
@@ -1450,7 +1455,7 @@ function renderCulture() {
       h += '<h3>' + peopleDot(i) + esc(p.name) + ' <small>' + esc(p.noun || '') + ' · ' + mem.length + ' living' + (w.regions[p.region] ? ' · ' + esc(w.regions[p.region].name) : '') + '</small></h3>';
       if (p.custom) h += '<div class="idea"><div class="t"><span class="tag">custom</span>Held since before memory</div><blockquote>“' + esc(p.custom) + '”</blockquote></div>';
       const sect = function (title, list, max) { if (!list.length) return ''; list.sort(function (x, y) { return live[y.id].n - live[x.id].n || y.day - x.day; }); return '<div class="m" style="margin:12px 0 6px;font-weight:600;color:var(--text)">' + title + '</div>' + list.slice(0, max).map(function (it) { return card(it, i); }).join('') + (list.length > max ? '<p class="muted">and ' + (list.length - max) + ' more</p>' : ''); };
-      const got = sect('Teachings', mine.filter(function (it) { return it.kind === 'belief'; }), 6) + sect('Myths, tales, songs and poems', mine.filter(function (it) { return ['myth', 'tale', 'song', 'poem'].indexOf(it.kind) >= 0; }), 10);
+      const got = sect('Teachings', mine.filter(function (it) { return it.kind === 'belief'; }), 6) + sect('Myths, tales, songs and poems', mine.filter(function (it) { return ['myth', 'tale', 'song', 'poem', 'fable'].indexOf(it.kind) >= 0; }), 10);
       h += got;
       const say = mine.filter(function (it) { return (it.kind === 'saying' || it.kind === 'lesson') && live[it.id].p[i]; }).sort(function (x, y) { return live[y.id].p[i] - live[x.id].p[i] || y.day - x.day; });
       if (say.length) h += '<div class="m" style="margin:12px 0 6px;font-weight:600;color:var(--text)">Sayings and hard lessons</div><ul class="tl">' + say.slice(0, 8).map(function (it) { return '<li>“' + esc(it.text) + '” <span class="muted">· ' + (it.kind === 'saying' && it.by ? 'from ' + esc(it.by) + ' · ' : '') + 'day ' + it.day + ' · held by ' + live[it.id].p[i] + ' of ' + mem.length + '</span></li>'; }).join('') + '</ul>';
@@ -1770,7 +1775,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 26, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 27, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1791,10 +1796,14 @@ function amendCheck() {
 /* the state of every being, as one document that is overwritten */
 function recState1() {
   if (!dbNS || recBusy) return; recBusy = true;
-  const d = SWM.digest(st); let body = { digest: d };
-  if (JSON.stringify(body).length > 230000) { d.beings.forEach(function (q) { q.ties = {}; if (q.body) q.body.policy = q.body.policy.slice(0, 6); }); body = { digest: d, trimmed: true }; }
+  /* The store takes a document of 256 KB at most, and the state of forty beings with their ties and memories is over a megabyte (the seventeenth run:
+     every send of it failed with invalid_argument). So it goes in parts: state/latest holds the world, the tallies and each being in brief, and
+     state/beings-0, -1, ... hold the beings in full, as many to a document as fit. */
+  const d = SWM.digest(st), parts = SWM.parts ? SWM.parts(d, 180000) : { head: { digest: d }, parts: [] }, body = parts.head;
   let mk = null; try { const Mk = st.maker || {}; mk = { day: SW.day(w), visits: (Mk.log || []).slice(-8), requests: (st.rec ? st.rec.all : []).filter(function (r) { return r.t === 'request'; }).slice(-30), lessons: Mk.lessons || [], heritage: SWK.legacy(st), culture: SWK.stats(st).culture }; if (JSON.stringify(mk).length > 200000) mk.visits = mk.visits.slice(-3); } catch (e) { mk = null; }
-  dbNS.doc('runs/' + st.runId + '/state/latest').set(body).then(function () { return mk ? dbNS.doc('runs/' + st.runId + '/state/maker').set(mk) : null; }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; }).then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); });
+  let chain = dbNS.doc('runs/' + st.runId + '/state/latest').set(body);
+  parts.parts.forEach(function (pt, n) { chain = chain.then(function () { return dbNS.doc('runs/' + st.runId + '/state/beings-' + n).set(pt); }); });
+  chain.then(function () { return mk ? dbNS.doc('runs/' + st.runId + '/state/maker').set(mk) : null; }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; }).then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); });
 }
 function recDownload() {
   const ex = SWM.exportRun(st); ex.heritage = SWK.legacy(st);
@@ -1836,7 +1845,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 26, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 27, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }
@@ -1890,7 +1899,7 @@ function newWorld(seed) {
   const keep = st ? st.settings : null;
   const legacy = st ? SWK.legacy(st) : null;
   if (st && !U.choosing) save(); /* the world being left is kept under its name */
-  const fresh = SWM.createState(SW.createWorld(seed), keep ? JSON.parse(JSON.stringify(keep)) : SWM.defaultSettings()); fresh.world.name = worldName(null);
+  const fresh = SWM.createState(SW.createWorld(seed, window.EVOLU_SEAS === 0 ? {} : { seas: 1 }), keep ? JSON.parse(JSON.stringify(keep)) : SWM.defaultSettings()); fresh.world.name = worldName(null);
   attach(fresh); U.playing = true;
   if (st.settings.autoWake && st.sample) st.on = true;
   SWK.inherit(st, legacy);

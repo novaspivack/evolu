@@ -14,10 +14,17 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 26, to be watched and tuned
+## NOW: built in Generations 14 to 27, to be watched and tuned
 
 | Item | State |
 | --- | --- |
+| **Verse on its occasions:** a death poem when an elder nears death, a lament from whoever was closest, a love song when courting is answered, a lullaby for a first child, a song of a deed, the myth of each people; ten forms with lines, beats and rhyme; spoken aloud, carried, told on; one at the head of each chapter | Built in 27. Seventeen runs made none. Watch: asked, made, and asked but never given; whether the verse keeps its form; whether laments and myths are told on. |
+| **A tradition for every people** (nine: spirits of the land, the watching dead, the angry sky, warring gods, the guardian, the open hand, the inner path, the mother, the sky father): told to each mind, weighting its drives, saying whose word carries; the act of offering | Built in 27. Watch: whether peoples of different traditions come to live differently; whether anyone doubts, leaves or founds a teaching against it; whether offerings are made and by whom. |
+| **Courting answered:** one who is warm toward the one who courts answers without having planned it (`mate.answer`) | Built in 27. Twenty-seven plans to mate gave two births in the seventeenth run. Watch births against deaths of age. |
+| **Seas:** a world begun on the page has an ocean across the known land, a greater one beyond with two islands, and two great lakes; a crossing is recorded; one with a vessel is told what lies across | Built in 27, for new worlds only. Watch: whether anyone crosses, and whether peoples on the two shores meet. |
+| **The trees, first steps** (the audit's proposals 1, 2, 4, 5): band practice, labour as building, signals and alchemy with something behind them, how each way was come by | Built in 27. Riding and currency left as they were and tracked. |
+| **A thought waits for its plan** unless one weighty thing happens (urge 6 or more) | Mended in 27: the bar of Generation 25 was a sum of urges that small things filled, and a third of thoughts still came mid-plan. |
+| **The final state sent in parts** | Mended in 27: it had grown to 1.07 MB against a limit of 256 KiB. |
 | **A community raises better buildings:** a way is a band's when two members hold it; any member may then raise its buildings; when one stands the whole band learns the way; a better building is raised in place of the one it grows out of and serves in its stead; settlements and buildings show their age | Built in 26, by Nova's rule. Watch: whether bands come to hold ways in common, whether anything is raised in place, whether settlements pass the first age |
 | **Whatever takes more than hands hold is a work brought to in loads** | Built in 26. A forge, a well, a mill, an infirmary, a barracks, a boat and every ship could never be made before. Watch: whether they are now |
 | **Everything a being knows how to make is before it,** with what it lacks for each; "build raft" makes a raft; every kind of building shown in turn | Built in 25. In fourteen runs no vessel, cloak or basket was made, because the prompt showed only the last six recipes added to the world. Watch: whether rafts and the older recipes are made now; whether a vessel is worth making where most water can be swum |
@@ -79,7 +86,9 @@ Answered by the seventh run: people do earn a following (nine pledges), and less
 **Next in order (Nova, 23 November, after Generation 25):**
 
 1. **A community raises better buildings:** built in Generation 26.
-2. **The big round: the trees, and what is built from them** (its own section, after this one). The audit is done (`docs/tree-audit.md`); its five proposals wait for Nova's word.
+2. **The big round: the trees, and what is built from them** (its own section, after this one). The audit is done (`docs/tree-audit.md`); four of its five proposals were built in Generation 27 and the fifth (lower thresholds for riding and currency) was left alone by Nova's choice and is tracked.
+3. **Generation 28 (agreed 23 November):** more kinds of structure; the maker composing structures from blocks with attributes; libraries that load by age; roads, vehicles, and transport by sea and air; settlements that depend on one another. Also waiting: teaching before death (alchemy was lost with its one holder in the seventeenth run), a day that goes round the world, hatred, peacemakers, rivalry and heroes, a rite for the dead, islands in the near ocean, seas for a world carried on.
+4. **Generations 29 and 30:** groups (see SCALE).
 3. Then, as agreed earlier the same day: a day that goes round the world; hatred that lasts, peacemakers, rivalry for mates, heroes and duels.
 
 Left out by Nova's choice: flood in the season of rains. Farther out: the sim in groups, peoples, planets (the section SCALE, below).
@@ -202,6 +211,9 @@ These run through every stage and are picked up as runs call for them.
 - **Speed.** A world moment costs about 2.8 ms in the larger world, up from 2.
 - **Nothing passes between strangers.** In seven runs: no trade, no planned fight, no animal tamed, and peoples that meet a handful of times.
 - **No tale, song, myth or teaching has yet been made** by a real mind, though sayings and hard lessons spread and cross between peoples.
+- **Founders age out together.** In the seventeenth run nine died of age in ten days and two were born. Generation 27 answers with courting that is answered and with the maker's longer life reaching the living; the ages of founders were left as they are. If births still do not keep pace, spread the founders' ages.
+- **The chronicler's prompt is about 100,000 characters,** a quarter of it the numbers sent twice (now and at the last chapter).
+- **Almost all water in a world made before Generation 27 can be swum,** so a vessel matters little there. Only new worlds have seas.
 - **The store is a quarter full:** 24 MB of 100 MB and 569 documents on 23 November, nearly all of it the chunks of past runs. Old runs will have to be pruned or the record thinned before it fills.
 - **The record of a run is too large to read from the store.** An interrupted run can be read only through its final state and, from Generation 15, the maker's own small document. A full analysis needs the downloaded run log.
 - **The later ages are sketches.** From about the fourth age the ways, minerals and buildings have names and looks but little that they do.
@@ -235,3 +247,4 @@ A short index; the detail is in the design log.
 | 24 | Memory in a window, history in files: a journal of the year in hand, a markdown file for each year with an index of whom it speaks of, recall by asking and by sight, the foods and people before a being now shown in full and the rest counted; the maker's last four visits in full and recall of older ones; all of it inside the saved world |
 | 25 | Everything one knows how to make shown; pens and driven herds; weirs, fields and the larder; thought by plan; the sea gives back |
 | 26 | A community advances together: ways held in common, learned by all when a building stands; better buildings raised in place of older; works too big for the hands brought in loads; the age of a settlement shown |
+| 27 | Verse on its occasions and at the head of each chapter; a tradition for every people and the act of offering; courting answered; seas, islands and great lakes for new worlds; a crossing recorded; band practice, labour as building, signals and alchemy; the waiting bar and the sending of the state mended |

@@ -101,7 +101,7 @@ const reply = JSON.stringify({ thought: 'I will stay by the water.', feeling: 'c
     /* one who knows rafts and has been stopped by water is reminded what the way is for */
     a.knows.rafts = 1; a.press = { water: 3 }; a.things = {}; const p1 = M.buildPrompt(st, st.minds[a.id], 'routine'); a.things = { raft: 1 }; const p2 = M.buildPrompt(st, st.minds[a.id], 'routine'); a.things = {}; a.knows.rafts = 0; const p3 = M.buildPrompt(st, st.minds[a.id], 'routine');
     ok(/Deep water has stopped you more than once, and you know the way of rafts\. make \{what: raft\}/.test(p1) && !/Deep water has stopped you/.test(p2) && !/Deep water has stopped you/.test(p3), 'a being stopped by water who knows rafts and holds no vessel is told what a raft needs and does; one who holds a raft, or does not know the way, is not');
-    ok(K.HERITAGE.ops.some(o => o.group === 'mate' && o.key === 'minEnergy' && o.value === 64) && K.HERITAGE.lessons.length >= 54 && K.HERITAGE.ideas.length >= 34 && K.SEED.some(s => /never puts the minds to sleep/.test(s)) && M.digest(st).generation >= 23, 'the heritage and the roadmap hold what the fourteenth run kept, in Generation 23 and after');
+    ok(K.HERITAGE.ops.some(o => o.group === 'mate' && o.key === 'minEnergy' && o.value <= 64) && K.HERITAGE.lessons.length >= 54 && K.HERITAGE.ideas.length >= 34 && K.SEED.some(s => /never puts the minds to sleep/.test(s)) && M.digest(st).generation >= 23, 'the heritage and the roadmap hold what the fourteenth run kept, in Generation 23 and after');
   }
   console.log(fails ? fails + ' FAILED' : 'ALL PASS');
 })().catch(e => { console.log('FAIL the checks broke: ' + (e && e.stack || e)); });

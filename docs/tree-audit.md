@@ -87,3 +87,23 @@ The first three ages are furnished. From the fourth on, the tree is mostly names
 3. **Give riding and currency a reachable start:** riding from two tamed; currency from three trades. Or leave them and watch, now that trades and taming are easier than they were.
 4. **Furnish or fold the empty ways.** Signals and alchemy in the first three ages should do something. From the fourth age on, decide with the libraries by age: either each way gets a building, a recipe or a rule, or it waits in a file that is not loaded yet.
 5. **Record how each way was come by** (found, taught, watched, learned from a building), so the next audit can answer what this one could not.
+
+## Added after the seventeenth run (day 72, under Generation 26)
+
+Run again with the fourth run file of the same world (`node tests/tools/tree-audit.js`).
+
+| | day 12 | day 25 | day 60 | day 72 |
+| --- | --- | --- | --- | --- |
+| alive | 21 | 34 | 43 | 36 |
+| ways held by someone, of 68 | 16 | 23 | 28 | 27 |
+| second age, of 16 | 1 | 5 | 9 | 9 |
+| third age, of 11 | 0 | 1 | 2 | 1 |
+| ways held by the middle being | 3 | 5 | 7 | 10 |
+
+- **A way was lost.** Alchemy had one holder at day 60 and none at day 72: its holder died of age and had taught no one. Signals has one holder, bridges one, and wells, sailing, devices, writing and the calendar two each. With eleven elders among thirty-six, more will go the same way unless they are taught on. Nothing in the world yet makes an elder teach before dying beyond the line it is told when it grows old; the death poem of Generation 27 is asked for at the same moment and may or may not help.
+- **Knowledge spread among the living** (the middle being went from seven ways to ten) while its frontier stood still: no new way in ten days.
+- **Nine held smelting and no forge was raised,** though since Generation 26 two holders are enough for any of the band to raise one in place of a workshop. Ten days is short; it is the first thing to look for in the next run.
+- **Riding and currency:** left as they were by Nova's choice, and now tracked. No trade was done in the ten days (six thefts). The maker reads `reachOfRidingAndCurrency` at every visit.
+
+What Generation 27 did with the audit's proposals: (1) the practice of a band counts toward a way for each member (`culture.bandPractice`, half); (2) every six units carried to a work count as one building; (3) thresholds left alone and tracked; (4) signals carry a voice two and a half times as far and alchemy makes a tonic and a wakefire, so the ways with nothing behind them fell from 15 to 13 of 68, all of the fourth age and after; (5) how each way was come by is recorded on the being (`knows[way].how`: people, parents, taught, found, building) and in the final state (`body.came`), and the audit tool counts it for any run file that has it.
+

@@ -61,7 +61,7 @@ const T = SW.T;
     const { w, st, ev, em } = fresh(7); w.creatures = []; const a = w.agents[0], b = w.agents[1], m = st.minds[a.id], mb = st.minds[b.id];
     const quiet = o => { o.policy = [{ if: [], do: 'linger' }]; o.e = 95; o.thirst = 0; o.hp = 100; };
     const idle = n => { for (let k = 0; k < n; k++) { w.creatures = []; w.agents.forEach(quiet); SW.step(w, () => {}); M.tick(st); } }; /* the world goes on, and nothing is told to anyone */
-    ok(st.settings.planWait === 180 && st.settings.v >= 13 && M.WEIGHTY === 3, 'a new setting: a being in the middle of a plan waits for it, up to 180 moments');
+    ok(st.settings.planWait === 180 && st.settings.v >= 13 && M.WEIGHTY >= 3, 'a new setting: a being in the middle of a plan waits for it, up to 180 moments');
     think(st, a, 'routine', { plan: [{ do: 'linger', ticks: 300 }] }); m.urge = 0; b.plan = []; b.intent = null; mb.urge = 0;
     idle(40);
     ok(M.planLeft(a) >= 150 && !M.ready(st, m, a) && M.ready(st, mb, b), "after 40 quiet moments one with no plan is waiting to think, and one with " + M.planLeft(a) + " moments of plan still ahead is not");
@@ -71,13 +71,14 @@ const T = SW.T;
     think(st, a, 'routine', { plan: [{ do: 'linger', ticks: 300 }] }); m.urge = 0; idle(5);
     M.tell(st, a.id, 'The sky cleared.', 1); const small = M.ready(st, m, a);
     M.tell(st, a.id, 'You harvested the last food from a berry plant, and the plant died.', 1); const two = M.ready(st, m, a);
-    M.tell(st, a.id, 'Zichi said to you: "Come north with me."', 4);
-    ok(!small && !two && M.ready(st, m, a), 'a small thing does not break into a plan, nor do two; being spoken to does');
+    for (let k = 0; k < 12; k++) M.tell(st, a.id, 'After "sharing", done together: energy +' + k + '; joy rose in you.', 5); const many = M.ready(st, m, a), sum = m.urge;
+    M.tell(st, a.id, 'Zichi said to you: "Come north with me."', 10);
+    ok(!small && !two && !many && sum > 50 && M.ready(st, m, a), 'a small thing does not break into a plan, nor do two, nor a dozen middling ones whose urges add up to ' + Math.round(sum) + ' (the fault of Generation 25: the bar was a sum, and held no one back); being spoken to does');
     /* a plan that runs out brings a thought at once */
     think(st, a, 'routine', { plan: [{ do: 'linger', ticks: 6 }] }); m.urge = 0; for (let k = 0; k < 8; k++) { w.creatures = []; w.agents.forEach(quiet); SW.step(w, em); M.tick(st); }
     ok(M.planLeft(a) === 0 && M.ready(st, m, a) && m.events.some(e => /Your plan is now empty/.test(e.text)), 'when the plan runs out the being is waiting to think again at once');
     /* the clock of the world waits only for those who are waiting */
-    st.on = true; st.sample = async () => ({ text: '{}' }); w.agents.forEach(o => { const q = st.minds[o.id]; q.lastT = w.tick - 200; q.urge = 1.2; o.intent = { do: 'linger', ticks: 250 }; o.plan = []; });
+    st.on = true; st.sample = async () => ({ text: '{}' }); w.agents.forEach(o => { const q = st.minds[o.id]; q.lastT = w.tick - 120; q.weightyT = -1; q.urge = 1.2; o.intent = { do: 'linger', ticks: 250 }; o.plan = []; });
     const waitingForNone = M.pace(st); w.agents.forEach(o => { o.intent = null; o.plan = []; }); const waitingForAll = M.pace(st);
     ok(waitingForNone === 1 && waitingForAll < 0.2, 'the clock does not slow for beings who are in the middle of their plans (pace ' + waitingForNone + '), and slows as before for those whose plans have run out (' + waitingForAll + ')');
     /* turned off, it is as it was */

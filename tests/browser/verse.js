@@ -1,0 +1,43 @@
+/* Generation 27 on the page: a world begun here has seas; a chapter is headed by a verse of the people's own; the final state goes to the
+   store in parts, none above what a document may hold (256 KiB). The store is a stand-in. */
+const { chromium } = require(process.env.PLAYWRIGHT || 'playwright');
+const http = require('http'), fs = require('fs'), path = require('path');
+const dir = path.join(__dirname, '..', '..', 'src');
+const srv = http.createServer((req, res) => { const f = path.join(dir, req.url === '/' ? 'index.html' : req.url.split('?')[0]); fs.readFile(f, (e, d) => { if (e) { res.writeHead(404); res.end(); } else { res.writeHead(200, { 'content-type': f.endsWith('.js') ? 'text/javascript' : 'text/html' }); res.end(d); } }); }).listen(8143);
+const errs = []; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) errs.push(m); };
+(async () => {
+  const browser = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  page.on('pageerror', e => errs.push(e.message)); page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
+  await page.addInitScript(() => {
+    window.EVOLU_SEED = 7; window.DBwrites = [];
+    const db = { doc: p => ({ get: () => Promise.resolve({ exists: false, data: () => null }), set: body => { const s = JSON.stringify(body); if (new Blob([s]).size > 262144) { window.DBwrites.push({ p: p, size: new Blob([s]).size, refused: 1 }); return Promise.reject({ code: 'invalid_argument' }); } window.DBwrites.push({ p: p, size: new Blob([s]).size }); return Promise.resolve(); } }) };
+    window.claude = { use: name => Promise.resolve(name === 'db' ? db : null) };
+  });
+  await page.goto('http://localhost:8143/'); await page.waitForTimeout(1500);
+  const a = await page.evaluate(() => { const d = window.SWdebug, w = d.st.world; d.U.playing = false; let open = 0; for (let i = 0; i < w.W * w.H; i++) if (w.terrain[i] === 0 && !(w.narrow && w.narrow[i])) open++;
+    return { seas: !!(w.seas && w.seas.plan), oceans: w.seas ? w.seas.plan.oceans.length : 0, open: open, trad: w.peoples.map(P => P.tradition), n: w.agents.length }; });
+  ok(a.seas && a.oceans === 2 && a.open > 700 && a.n === 15, 'a world begun on the page has seas: two oceans, ' + a.open + ' tiles of open water in the known land, fifteen founders');
+  ok(a.trad.length === 3 && a.trad.every(Boolean), 'and each of its peoples a tradition (' + a.trad.join(', ') + ')');
+  const b = await page.evaluate(() => { const d = window.SWdebug, st = d.st, who = st.world.agents[0], P = st.world.peoples[who.people];
+    st.story.chapters.push({ n: 1, day0: 1, day1: 4, title: 'The first frost', text: 'They came down to the water.', epigraph: { text: 'Frost on the reed bed / all I kept I gave away / the river <b>goes</b> on', title: 'Last frost', by: who.name, people: P.name, day: 3, kind: 'poem', occasion: 'dying', about: null } });
+    st.story.chapters.push({ n: 2, day0: 5, day1: 8, title: 'A quiet span', text: 'Little was made.', epigraph: { text: 'What is given returns.', title: 'the Open Hand', by: null, people: P.name, day: null, kind: 'tradition', occasion: null, about: null } });
+    st.story.chapters.push({ n: 3, day0: 9, day1: 12, title: 'Before verse', text: 'An older chapter has none.' });
+    st.story.rev = (st.story.rev || 0) + 1; d.setTab('story'); return { who: who.name, people: P.name }; });
+  await page.waitForTimeout(1200);
+  const c = await page.evaluate(() => { const pane = document.getElementById('pane-story'), ep = Array.from(pane.querySelectorAll('blockquote.epi')); return { n: ep.length, html: ep.map(e => e.innerHTML), text: ep.map(e => e.innerText), bold: pane.querySelectorAll('blockquote.epi b').length, heads: pane.querySelectorAll('h3').length }; });
+  ok(c.n === 2 && c.heads >= 3, 'a chapter that has one is headed by its epigraph; one written before has none and is shown as it was');
+  ok(c.html.some(h => (h.match(/<br>/g) || []).length === 2) && c.bold === 0 && c.html.some(h => /&lt;b&gt;goes/.test(h)), 'the verse is set line under line, and what it holds is shown as text, never as markup');
+  ok(c.text.some(t => t.indexOf('the death poem of ' + b.who + ' of ' + b.people + ', day 3') >= 0) && c.text.some(t => /from the teaching of the Open Hand, as held among /.test(t)), 'under it stands whose it is: "' + (c.text[1] || c.text[0] || '').split('\n').pop().slice(0, 80) + '"');
+  /* send everything now */
+  await page.evaluate(() => { window.SWdebug.setTab('setup'); }); await page.waitForTimeout(600);
+  const pressed = await page.evaluate(() => { const bt = document.querySelector('[data-act="recsend"]'); if (bt) bt.click(); return !!bt; });
+  await page.waitForTimeout(5000);
+  const s = await page.evaluate(() => ({ writes: window.DBwrites, note: (document.getElementById('recNote') || {}).innerText || '' }));
+  const st = s.writes.filter(q => /\/state\//.test(q.p));
+  ok(pressed && st.some(q => /state\/latest$/.test(q.p)) && st.some(q => /state\/beings-0$/.test(q.p)) && st.some(q => /state\/maker$/.test(q.p)), 'Send everything now writes the state as a head, the beings in parts, and the maker\'s document (' + st.map(q => q.p.split('/').pop() + ' ' + q.size).join(', ') + ')');
+  ok(s.writes.length > 0 && !s.writes.some(q => q.refused) && Math.max.apply(null, s.writes.map(q => q.size)) <= 262144, 'no document is above what the store takes (the largest is ' + Math.max.apply(null, s.writes.map(q => q.size)) + ' bytes of 262,144)');
+  ok(!/failed|invalid_argument/.test(s.note), 'and the page reports no failed send: "' + s.note.replace(/\s+/g, ' ').slice(0, 110) + '"');
+  console.log('ERRORS', errs.length, errs.slice(0, 8).join('\n'));
+  await browser.close(); srv.close();
+})().catch(e => { console.error('FAIL', e); process.exit(1); });

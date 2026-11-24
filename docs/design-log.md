@@ -12,6 +12,86 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## Generation 27 (built, not yet run with real minds): verse, traditions, seas, courting answered
+
+Nova, 23 November, with the run file of day 72: he agreed to the audit's proposals, except that the thresholds for riding and currency stay and are watched, and that signals and alchemy should do something and not be folded away. He asked for poems and songs that are really composed (a poem of wisdom from one who is dying, a love poem, a poem by a band for its dead), for myths, fables and stories handed down, for chapter headings in the manner of Dune, for forms with rhyme and metre; for mythologies and religions that differ by people and shape how each lives, the kindly and the hard; for the run's own faults to be mended (mating that does not succeed, no one crossing water); for new worlds to have at least one great ocean, large lakes and islands large enough for a civilisation; and for the "send everything now" button to stop failing. "Make a plan for this big, big iteration, and then do it."
+
+### What the seventeenth run showed (Generation 26, Wenenvale carried on, days 63 to 72)
+
+789 thoughts, no call refused. Counted from the run file with code (`runs/generation-26-run-r5614-mwsokxmr-day72.json`).
+
+- **The people are ageing out.** Forty-five alive became thirty-six: nine deaths, every one of old age, and two births. Of the thirty-six, eleven are elders and two are children. Food is no longer what kills. The maker saw it: "Once food is sound, the population curve is set by the age structure, not by hunger. Many newcomers who arrived together grow old together, so a cluster of deaths from age can undo many seasons of good feeding."
+- **Mating did not succeed, and the cause was mine.** Twenty-seven thoughts planned to mate, twelve courtings were recorded, two children came. A child needed each of two minds to plan the same act toward the other within eighty moments of the world. Nothing in the world let one who was willing simply answer.
+- **No one crossed water.** Five rafts were made (twenty-three hold the way of rafts and eleven that of boats) and not one crossing. The maker: "Making is not using: four rafts appeared once the way had spread to twenty-two people, yet water is still the heaviest hardship for most peoples. A vessel only matters if the beings' aims carry them to a shore while they hold it." The deeper cause: in that world about 150 of 2,000 tiles of water are more than two steps from a shore. Almost everything can be swum; a vessel has nowhere to matter.
+- **No poem, no song, no tale.** Not one record of the kind in ten days, and none in the sixteen runs before. I read the kept prompts: the field is offered once, as `"tale": null or {...}`, among some thirty others, and only in the deep thoughts. Nothing ever asked for one.
+- **The waiting bar of Generation 25 did nothing.** A being in the middle of a plan was to wait for it unless something weighty happened. 36% of thoughts still came with a plan in hand, as before. The bar was a sum of urges with a threshold of 3; speech heard (1 to 3 each), hunger and small events filled it within moments. I had told Nova it would save a fifth, then a tenth; in the run it saved nothing.
+- **"Send everything now" failed** with `invalid_argument` on every try: the final state was 1,073,127 bytes (ties 402 KB, the year in hand of each memory 328 KB, seventeen dead 250 KB) and the store takes 256 KiB to a document.
+- **A way was lost:** alchemy, held by one at day 60, by no one at day 72. Its holder died having taught no one. Signals has one holder.
+- **No forge, no well, nothing raised in place, no way held in common made use of,** though nine hold smelting. Ten days is too short to judge Generation 26.
+- **No trade** (six thefts). The chronicler was given everything recorded (177 of 177, then 241 of 301 and 241 of 281 by weight and day) and wrote chapters 14 to 16; chapter 13 was replaced from the store on day 63 as arranged. Its prompt is about 100,000 characters.
+- **The maker** visited on days 66 and 70. It sowed rimewort three times, eased `mate.minEnergy` from 64 to 61, lengthened `body.lifespan` from 19,200 to 22,000 and raised `drives.desire` to 1.25. It asked twice for the same two things: that one who holds a vessel be told it can cross and what lies across, and that a crossing be recorded so it could see one.
+
+### Built
+
+**From the run**
+
+- **Courting is answered** (`mate.answer`, 0.3). When one courts another who is warm toward them by that much, is not courting someone else and has not just answered, the other answers: both are then courting, and if both are grown and fed a child comes, with one mind having planned. One who is not warm does not answer. In the check, the same pair gives no birth with the law at 0 and a birth with it at 0.3.
+- **A crossing is an event** (`crossed`: who, how long afloat, whether over open water, where they landed), counted on the being and in the world; **one who holds a vessel is told** that it carries over any water and what lies over the water in each direction ("to the east, 2 steps off, 16 steps of water (10 of them open water that cannot be swum) and then land (the Halul Woods), where you have not been"). Both are the maker's requests.
+- **Seas, for worlds begun from now on.** An ocean runs from ice to ice across the known land, about nineteen steps from shore to shore where I measured it and ten of them open water; a greater ocean, nearly twice as wide, lies on the far side of the world with two islands (178 and 147 tiles of land in seed 7; a founding band holds about thirty); two great lakes have open hearts. In seed 7 the open water in the known land went from 144 tiles to 1,174, and the land left is 86% of what it was. In all six seeds I looked at, the founding peoples begin on both shores, so they meet by vessel or by the long way over the ice. The seas are laid by a chance of their own: the lands, their names and their hearts are the ones the same seed gives without seas, and a world made without the option is tile for tile what it was. A world already begun is not changed.
+- **A thought waits for its plan** unless one event of urge 6 or more reaches the being (`M.WEIGHTY`, `m.weightyT`) or `planWait` moments have passed. Nothing is summed.
+- **The final state goes in parts:** a head (the world, the tallies, culture, each being in brief) and the beings in full, as many to a document as fit under 180,000 characters. The real 1.07 MB state from this run splits into a head of 74 KB and six parts of at most 177 KB, with all fifty-three beings and nothing trimmed.
+- **A change of lifespan reaches the living.** The maker's lengthening applied only to those not yet born, so it did nothing for the elders it was meant for. The op now rescales each living being's span by the same measure.
+- **Heritage folded in:** the three laws the maker kept (life 22,000, mating energy 61, desire 1.25) and its three new lessons. Left out again: the stone at "Tlama's Rest" and the spring by a named being, which belong to that world. Diffed against the heritage before: three ops added, one replaced, nothing else moved. It now holds 51 changes, 57 lessons, 34 ideas.
+
+**From the audit of the trees**
+
+- **The practice of a band counts** toward a way for each member, at half (`culture.bandPractice`): one who has tamed nothing, in a band that has tamed six, stands at 3 of 4 before riding.
+- **Labour counts as building:** every six units carried to a work under way count as one building raised.
+- **Signals carry a voice** two and a half times as far (33 steps for 13): speech, the call to muster and the rally. **Alchemy makes** a tonic (two foods by a fire: mends 35 and breaks a sickness) and a wakefire (ore and wood by a fire: learning half again as fast for two days). Ways with nothing behind them fell from 15 to 13 of 68.
+- **How each way was come by** is kept on the being and in the final state (people, parents, taught, found, building).
+- **Riding and currency** left as they are. The maker reads at every visit how near anyone is to each.
+
+**Verse and story**
+
+- **Occasions.** A verse is asked of a being by name, at the head of what it is told, in whatever kind of thought comes next, and the asking is weighty enough to break into a plan: a **death poem** when an elder passes nine tenths of its life ("what your whole life has taught you, said so that those who come after can carry it"); a **lament** from whoever was closest when someone dies, kin before others, told what the dead one did in life and their death poem if they left one, "on behalf of all who knew them"; a **love song** when courting is answered; a **lullaby** for a first child; a **song of a deed** for a crossing of open water or a great work raised; and once for each people the **myth** of how the world and they came to be, asked of the one who knows most, out of the tradition they hold.
+- **Forms**, as data the maker can add to: death poem (three unrhymed lines: something seen in this season, what life taught, a letting go), lament (four lines of four beats rhymed in pairs, the name in the first), love song (four of three beats rhymed by turns), ballad (four, three, four, three; second and fourth rhyme), lullaby, chant, boast (broken lines that alliterate), saying (two lines, the second turning the first), dread, law. The mind is told to count the beats and mend what limps. A song of a deed takes the form its people's tradition favours.
+- **What becomes of it.** It is a tale like any other: kept in the culture with its occasion and form, spoken aloud so that those in earshot who understand the tongue now carry it, told on by teaching and changed in the telling. A verse asked for and not given in three thoughts lapses and is counted. Fables are a kind of tale now.
+- **Epigraphs.** Each chapter of the story is headed by a verse or myth the people made in the days it covers (a death poem first, then a lament, a myth, a love song, a song of a deed, a lullaby), with whose it is; if they made none, by a line of the tradition of the most numerous people. Nothing is written for them. The chronicler is also handed up to twelve of their verses and told to quote them exactly and make none of its own.
+
+**Traditions**
+
+- **Nine, as data** (`laws.traditions`; the maker can add one and give it to a people): the Spirits of the Land, the Watching Dead, the Angry Sky (hard powers bought off "with gifts, with obedience, and with the blood of what is hunted"), the Warring Gods, the Guardian, the Open Hand, the Inner Path (mastery of anger, craving and fear; "kindness is the proof of it"), the Mother, the Sky Father. Each people is given one when it comes into being, most often the one that suits its country and about one time in three another; across thirty seeds all nine are held by someone.
+- **What a tradition does.** It is told to every mind of the people in every thought, with the words "you may keep it, doubt it, or come to hold something else". It weights what presses on them (the same fear presses 0.52 under the Angry Sky and 0.32 among the Warring Gods; half as much on one who has taken up a teaching). It says whose word carries (mothers, fathers, elders, the strong, teachers, or no one), which adds to standing. It gives the form its songs take.
+- **The offering** (act `offer`): a food given up at a fire or a shrine. It is gone; the giver's fear and grief ease by the measure of the tradition (1.8 under the Angry Sky, 0.5 for the Open Hand, whose giving goes to people); those of the same tradition who see it think better of the giver. Nothing in the world says an offering moves the weather, and nothing offers a person: what a hard tradition leads a people to do is left to them.
+
+### Measured
+
+- **Balance on instinct, twelve seeds, forty days,** against Generation 26 in the same sitting: without seas every figure is the same (15.1 alive, 0.3 deaths, 2,545 plants), because nothing here touches a body that is not given a plan. With seas: 15.1 alive, 1.3 deaths (0.7 starved, 0.6 to beasts), plants down 17% with the land.
+- **Speed:** 2.21 ms a moment against 2.16 (within the noise of the sitting), with or without seas.
+- **Prompts:** the tradition adds 337 characters to every thought (22,417 to 22,754 at the start of a world); an asked verse adds about 1,170 to the thought that carries it.
+
+### Tested
+
+- **781 checks in 23 numbered files, the two mind pipelines, the long ecology run and 12 checks of the page in headless Chrome: all pass.** The new file (`tests/23`, 76 checks) goes through the mind wherever a mind is meant to reach something: a plan to mate written by one mind and nothing by the other; a plan to walk to the far shore, with the arrival asserted and a control without a vessel that does not arrive; a plan step `offer` that fails without a fire with the reason told, then succeeds by one; verse given in a reply's `tale` and found in the culture, on the being and in the heads of those in earshot.
+- **Controls:** no birth with `mate.answer` at 0 and a birth at 0.3 from the same pair; no answer from one who is not warm, from a child, from close kin, or where no child can come (I had first put the answering before those bars and moved it behind them on review); the same fear under two traditions; the same seed with and without seas has the same lands and names.
+- **A world saved by Generation 26** loads, is given the traditions, the forms and each people its tradition, has no seas, and runs on with its elders asked for their death poems. The fixture for the save check is now Generation 26's.
+- **On the page** (`tests/browser/verse.js`): a world begun there has seas (1,174 tiles of open water in the known land for seed 7); an epigraph is set line under line with whose it is, and markup inside a verse is shown as text; "Send everything now" writes a head, the beings in parts and the maker's document, none above 262,144 bytes, and reports no failure. The real 1.07 MB state was split with the same function outside the browser.
+- **Older checks moved by the folded heritage** (two): one pinned a life at 19,200 moments and one the mating energy at 64; both now read the law as made and what the maker has since done with it.
+- **Not tested:** the verse of a real mind, the look of the seas on the globe beyond the page loading without error, and anything about how thirty-six minds behave when told their traditions.
+
+### Not built, and not known
+
+- **Whether real minds will write verse that keeps its form.** The checks give a stand-in's lines and show the asking, the uptake, the hearing and the keeping. Counting beats is hard for a model; I expect the death poem and the saying to come out best and the rhymed forms to be uneven. What tests cannot show is how real minds behave; that holds for everything above.
+- **Whether traditions change how peoples live.** They weight drives and are told in every thought; whether an Angry Sky people come to live differently from an Open Hand people is the thing to watch, and the maker has the figures for it.
+- **Whether courting answered is enough.** It removes the coincidence two minds needed. It does not make anyone court.
+- **Islands in the near ocean:** not built. The ocean across the known land is narrow enough to cross on a raft and has no islands; the islands are in the far ocean, behind the veil.
+- **Seas for a world carried on:** not built. Wenenvale stays as it is.
+- **Founders' ages:** not changed. They still begin the same age and grow old together; births and the longer life are the answer for now.
+- **Teaching before death:** not built. Alchemy was lost with its one holder.
+- **A rite for the dead, sacrifice with a consequence in the world, gods that answer:** not built, by design: an offering eases the one who gives and nothing more.
+- **The chronicler's prompt** is still about 100,000 characters.
+- Generation 28 (structures, the maker's building blocks, libraries by age, roads and vehicles, settlements that depend on one another) and the groups of 29 and 30 are as planned in `ROADMAP.md`.
+
 ## Generation 26 (built, not yet run with real minds): a community raises better buildings; the audit of the trees
 
 Nova, 23 November, after Generation 25: communities should come to better buildings by the tree, when at least two members hold the new knowledge, and the whole community should have it once the building stands. Then a round on the trees themselves, and farther out the sim in groups, peoples and planets. He asked for a plan and for it to be carried out; the plan is in `ROADMAP.md`, and this generation is its first step: his rule for buildings, and the audit that the round on the trees begins with (`docs/tree-audit.md`).

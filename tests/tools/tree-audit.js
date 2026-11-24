@@ -1,8 +1,8 @@
-/* audit of the trees against the three run files of one world (days 12, 25, 60) */
+/* audit of the trees against the run files of one world (days 12, 25, 60, 72). From Generation 27 a run file also says how each way was come by (body.came). */
 const fs = require('fs'), SW = require('../../src/engine.js'), M = require('../../src/minds.js'), K = require('../../src/maker.js');
 const w0 = SW.createWorld(7), st0 = M.createState(w0); K.inherit(st0, null); const L = w0.laws, T = L.tree, ways = Object.keys(T);
 const out = {};
-for (const [name, file] of [['day 12', '../../runs/generation-20-run-r5614-mwsokxmr-day12.json'], ['day 25', '../../runs/generation-21-run-r5614-mwsokxmr-day25.json'], ['day 60', '../../runs/generation-22-run-r5614-mwsokxmr-day60.json']]) {
+for (const [name, file] of [['day 12', '../../runs/generation-20-run-r5614-mwsokxmr-day12.json'], ['day 25', '../../runs/generation-21-run-r5614-mwsokxmr-day25.json'], ['day 60', '../../runs/generation-22-run-r5614-mwsokxmr-day60.json'], ['day 72', '../../runs/generation-26-run-r5614-mwsokxmr-day72.json']]) {
   const r = JSON.parse(fs.readFileSync(require('path').join(__dirname, file), 'utf8')), B = (r.digest.beings || []).filter(b => !b.dead);
   const held = {}, self = {}, perBeing = [];
   const KN = b => { const kn = (b.body && b.body.knows) || {}, o = {}; if (Array.isArray(kn)) kn.forEach(q => { const id = typeof q === 'string' ? q.split(' ')[0].replace(/[^a-z]/g, '') : (q.way || q.id || q.k); if (id) o[id] = q; }); else for (const k in kn) o[k] = kn[k]; return o; };
@@ -11,6 +11,7 @@ for (const [name, file] of [['day 12', '../../runs/generation-20-run-r5614-mwsok
   const byEra = {}; ways.forEach(k => { const e = T[k].era || 1; byEra[e] = byEra[e] || { all: 0, held: 0 }; byEra[e].all++; if (held[k]) byEra[e].held++; });
   out[name] = { alive: B.length, held, self, byEra, perBeing };
   console.log(name + ': alive ' + B.length + '; ways held by someone: ' + Object.keys(held).length + ' of ' + ways.length + '; by age ' + Object.keys(byEra).map(e => e + ':' + byEra[e].held + '/' + byEra[e].all).join(' ') + '; ways per being: least ' + perBeing[0] + ', middle ' + perBeing[perBeing.length >> 1] + ', most ' + perBeing[perBeing.length - 1]);
+  { const how = {}; B.forEach(b => { const c = (b.body && b.body.came) || null; if (c) for (const k in c) how[c[k]] = (how[c[k]] || 0) + 1; }); if (Object.keys(how).length) console.log('  how the ways held were come by: ' + JSON.stringify(how)); }
   if (name === 'day 60') {
     /* how each way is held: found by its holder or learned from another */
     const rows = Object.keys(held).sort((a, b) => held[b] - held[a]).map(k => k + ' ' + held[k] + '(' + (self[k] || 0) + ' found it)');
