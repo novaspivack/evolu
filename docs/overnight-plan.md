@@ -17,17 +17,17 @@ Nova's message of 23 Nov 22:10, in full substance. Work in waves; each wave is a
 - [x] (all but the aphrodisiac and lasting changes of trait) Plants: edible fruits and berries on trees, bushes, scrub and cactus; some poisonous, psychoactive, healing, more or less nutritious, giving strength and stamina, aphrodisiac for a while, changing other traits; herbs likewise.
 - [x] Terrain drawing: mountains of different sizes (hills, boulders, foothills, big and huge mountains); mesas and rock formations in deserts; cactus, scrub and joshua trees in deserts, pine in temperate forest, palms in rainforest.
 
-## Wave 3: Generation 31
-- [ ] Tech tree, other trees and catalogues built out so everything has attributes and works; think how each looks and what it does to the land.
-- [ ] Ages: a medieval phase with castles; the steam age; the industrial and fossil fuel age; the computer age.
-- [ ] City structures: utilities, factories, government buildings, hospitals, apartments, office buildings.
-- [ ] Building changes the landscape: trees cut, ground paved, depending on where things are put.
-- [ ] Start a world at a chosen tech level / stage of development (Setup), with history and culture filled in correctly for later stages.
-- [ ] Culture evolves with the tech level: old ideas and stories replaced or surviving in modernised form; science begins to replace mythology; some of the culture remains.
-- [ ] Troubles of advanced civilisations, a first set: crime, wars, pollution, garbage, social unrest, industrialisation, poverty, corruption, political division, booms, crashes and recessions.
+## Wave 3: Generation 31 (LIVE, with the zoom-out of Wave 4)
+- [ ] (begun: the library of structures to the sixth age; recipes and goods of later ages not built out) Tech tree, other trees and catalogues built out so everything has attributes and works; think how each looks and what it does to the land.
+- [x] Ages: a medieval phase with castles; the steam age; the industrial and fossil fuel age; the computer age.
+- [x] City structures: utilities, factories, government buildings, hospitals, apartments, office buildings.
+- [x] Building changes the landscape: trees cut, ground paved, depending on where things are put.
+- [x] Start a world at a chosen tech level / stage of development (Setup), with history and culture filled in correctly for later stages.
+- [ ] (begun: tradition presses less in later ages; stories do not yet change) Culture evolves with the tech level: old ideas and stories replaced or surviving in modernised form; science begins to replace mythology; some of the culture remains.
+- [ ] (begun: smoke and waste; the rest is in ROADMAP) Troubles of advanced civilisations, a first set: crime, wars, pollution, garbage, social unrest, industrialisation, poverty, corruption, political division, booms, crashes and recessions.
 
 ## Wave 4: Generation 32
-- [ ] Zoom out farther from the planet: the solar system, the local group, the galaxy, other galaxies. A quick way to zoom all the way out, or back to the planet, from planet view or farther.
+- [x] Zoom out farther from the planet: the solar system, the local group, the galaxy, other galaxies. A quick way to zoom all the way out, or back to the planet, from planet view or farther.
 - [ ] Groups (the plan in ROADMAP "SCALE"): resolution by attention, a fixed number of minds, group minds, rates calibrated against individual runs. A first step.
 
 ## Roadmap only (recorded, not tonight)

@@ -12,6 +12,42 @@ What is planned is in [`ROADMAP.md`](../ROADMAP.md), not here.
 - **My tests** are three things: the ecology run headless across several seeds; the whole mind pipeline run against a *scripted stand-in* for Claude; and the page loaded in headless Chrome at desktop and phone widths with no errors.
 - **What my tests cannot show** is how real Claude minds behave. Those calls only happen on your account when you open the page. Everything about mind behaviour below is either from your one reported run or untested.
 
+## Generation 31 (built, not yet run with real minds): the later ages, a world begun old, the view beyond the planet
+
+The third wave of the night of 23 November, with the first part of the fourth (`docs/overnight-plan.md`). No run came between.
+
+### Built
+
+- **The library to the sixth age:** 35 structures and 29 blocks across six ages, as data. The third age has a keep (raised where a tower stood) and a castle (where a keep stood, needing a well), a town hall, a guild hall, a granary, a tavern, a glass works, an aqueduct and an apothecary. The fourth: a foundry (where a forge stood), tenements, a gas works, a water works, a laboratory, a parliament (where a town hall stood) and a bank. The fifth: a refinery, apartments (where tenements stood), offices, a ministry (where a parliament stood), a reactor and a launch pad. The sixth: a data centre, a fusion plant and an orbital yard. Each belongs to a way of the tree no later than its own age and depends on other works.
+- **Works change the land.** A structure may clear the ground about it when it stands (`clears`: trees and plants felled within that many steps) and may foul it every day after (`fouls`: plants within that many steps are set back, and one who stands in the smoke loses a little health and is told why). A foundry clears two steps and fouls three; a refinery clears three and fouls five. This is the first of the troubles that a civilisation makes for itself.
+- **A world begun in a later age.** Setup now offers the age a new world begins in, from the beginning to the sixth. The founders know every way of the ages before and most of that age; each people follows one of its own and stands in one settlement with the works of those ages (41 to 49 buildings in the fourth age, seed 7), every dependent work within reach of what it needs, with a store, a paved way and the library open to the next age. From the first moment it is a world like any other.
+- **Its history.** The Story begins with a page set down by the world itself and marked as such ("No chronicler saw these days"), naming each people, its land, its tradition and its settlement. Every mind carries the tale of its people's founding and is told where it stands. Where an age has science, its knowers hold a teaching, the Method. None of this is written by a model; the minds write their own myths and verse from the first days as in any world.
+- **Culture with the age.** In the third age and after, the old tradition presses less on what a people are driven by (0.85 of its weight in the third age, 0.6 in the fourth, 0.4 from the fifth), and from the fourth each mind is told that much the tradition once explained is explained by measure and trial, and that many keep it as custom and story.
+- **The view beyond the planet.** Past the smallest globe the view goes on out: the planet among the worlds of its star, the star among the near stars, the galaxy with the world marked in it, and the galaxies. Scrolling in comes back the same way. The key 9, or "farthest" in the bar at the foot, goes all the way out; 0, or "planet", comes straight back. It is a picture, made from the seed of the world: nothing out there is simulated.
+- **For the maker:** the age a world began in, the ages open, what fouls and what was cleared.
+
+### Measured
+
+- **Balance on instinct, twelve seeds, forty days:** the same as Generation 30 in every figure (15.2 alive, 0.5 deaths, 2,504 plants). Nothing here touches a world that begins at the beginning.
+- **Speed:** 2.54 ms a moment against 2.55. A world begun in the fifth age with about 150 buildings ran at 2.5 ms.
+- **Prompts in a world begun in the fourth age,** with fifty ways known: 28,700 characters for an ordinary thought, 36,800 for a deep one.
+- **The tradition's weight:** the same fear under the Angry Sky presses 0.52 in the first age and 0.47 in the fourth.
+
+### Tested
+
+- **884 checks in 27 numbered files, the two mind pipelines, the long ecology run and 12 checks of the page in headless Chrome: all pass.** The new file (`tests/27`, 25 checks): every structure of the library belongs to a way no later than its age, and everything it depends on or is raised in place of exists; a foundry raised in loads by a mind's plans, in place of a forge, clears the ground about it, and the next day its smoke sets back a plant three steps off and not one seven steps off, and takes health from one who stands in it and not from one beyond; a world begun in the fourth age has every way of the first three ages, one settlement to each people with every dependent work within reach of what it needs, a head for each people, a first page of history naming each people, and a founding tale in every mind; it runs three days with no deaths on instinct and is saved and loaded; worlds begun in ages two, three, five and six stand and run a day; a world saved by Generation 30 runs on.
+- **On the page:** Setup offers the age; a world begun in the third age is made in the browser; the view goes out to the galaxies and back with no error, and the pictures of the star's worlds and of the galaxy were looked at.
+- **Not tested:** any of the later ages with minds; a real pointer on the two buttons (the functions they call are exercised); the wheel through all four far levels step by step.
+
+### Not built, and not known
+
+- **Vehicles and craft that move; goods carried between settlements:** still not built. The stations, harbours, hangars and launch pads are places.
+- **The other troubles** (crime beyond theft, unrest, poverty, corruption, booms and crashes, forms of rule): not built. They are in the roadmap.
+- **History written as a chronicler would write it:** the first page of a world begun old is a plain list set down by the world. A fuller past (who founded what, wars, old verse) would need the chronicler and the minds to write it before the first day.
+- **Old stories changing into new ones:** only the weight of the tradition changes with the age. Tales do not yet turn into histories.
+- **Groups:** not begun. Every being still thinks for itself.
+- **Later ages have never been run with minds.** The prompts fit (28,700 characters for an ordinary thought and 36,800 for a deep one in the fourth age, with fifty ways known), and the checks show the world stands and runs on instinct. What minds make of a town with a parliament and a gas works is unknown.
+
 ## Generation 30 (built, not yet run with real minds): the land as it is known, the pull of the unknown, more that grows
 
 The second wave of the night of 23 November (`docs/overnight-plan.md`). No run came between this generation and the last; nothing here answers a record.

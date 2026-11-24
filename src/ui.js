@@ -371,7 +371,57 @@ function clampCam() {
 function sx(tx) { return wrapd(tx + 0.5 - cam.x) * cam.z + W / 2; }
 function sy(ty) { return (ty + 0.5 - cam.y) * cam.z + H / 2; }
 function toWorld(px, py) { let x = (px - W / 2) / cam.z + cam.x - 0.5; if (w.wrap) x = ((x + 0.5) % w.W + w.W) % w.W - 0.5; return { x: x, y: (py - H / 2) / cam.z + cam.y - 0.5 }; }
+/* ---------- BEYOND THE PLANET (Generation 31) ----------
+   Past the smallest globe the view goes on out: the planet among the worlds of its star, the star among its neighbours, the galaxy, and the
+   galaxies. U.far runs from 0 (the planet) to 4 (the galaxies). It is a picture only: nothing out there is simulated yet. Everything in it is
+   made from the seed of the world, so the same world always has the same sky. Keys: 9 goes all the way out, 0 comes back to the planet. */
+const COSMOS = { seed: null };
+function cosmosOf(seed) {
+  if (COSMOS.seed === seed) return COSMOS; let s = (Math.imul((seed | 0) + 4242, 0x9E3779B1)) >>> 0; const r = function () { s = (Math.imul(s ^ (s >>> 15), 0x2C1B3C6D) + 0x9E3779B9) >>> 0; return ((s ^ (s >>> 13)) >>> 0) / 4294967296; };
+  COSMOS.seed = seed; COSMOS.back = []; for (let k = 0; k < 260; k++) COSMOS.back.push([r(), r(), 0.3 + r() * 0.7, r()]);
+  const n = 4 + Math.floor(r() * 5), home = 1 + Math.floor(r() * Math.min(3, n - 1)); COSMOS.home = home; COSMOS.planets = [];
+  for (let k = 0; k < n; k++) COSMOS.planets.push({ orbit: 0.16 + k * (0.8 / n) + r() * 0.03, size: k === home ? 5 : 2.5 + r() * (k > n / 2 ? 7 : 3), hue: k === home ? 150 : Math.floor(r() * 360), sat: k === home ? 55 : 20 + r() * 40, a0: r() * 6.2832, ring: k !== home && r() < 0.25 });
+  COSMOS.sunHue = 30 + r() * 30; COSMOS.stars = []; for (let k = 0; k < 70; k++) COSMOS.stars.push({ x: (r() - 0.5) * 1.9, y: (r() - 0.5) * 1.9, m: 0.6 + r() * r() * 3.2, hue: [210, 45, 30, 15, 0][Math.floor(r() * 5)] });
+  COSMOS.arm = []; for (let k = 0; k < 1500; k++) { const t = Math.pow(r(), 0.7), arm = k % 2, an = arm * 3.14159 + t * 5.4 + (r() - 0.5) * (0.5 + 0.9 * (1 - t)), rad = t * 0.92 + (r() - 0.5) * 0.06; COSMOS.arm.push([Math.cos(an) * rad, Math.sin(an) * rad * 0.62, 0.35 + r() * 0.65, t]); }
+  COSMOS.here = { t: 0.5 + r() * 0.25, arm: Math.floor(r() * 2) }; COSMOS.gal = []; for (let k = 0; k < 11; k++) COSMOS.gal.push({ x: (r() - 0.5) * 1.8, y: (r() - 0.5) * 1.7, s: 0.04 + r() * 0.07, rot: r() * 3.14, e: 0.35 + r() * 0.6, hue: 200 + r() * 60, spiral: r() < 0.6 });
+  COSMOS.gal[0].x = 0; COSMOS.gal[0].y = 0; COSMOS.gal[0].s = 0.085; COSMOS.gal[0].spiral = true; COSMOS.gal[0].e = 0.62; COSMOS.gal[0].rot = 0;
+  return COSMOS;
+}
+function drawCosmos(far) {
+  const c = cx; c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const C = cosmosOf(w.seed), mx = W / 2, my = H / 2, R = Math.min(W, H) * 0.46, lvl = Math.min(3, Math.floor(far - 0.0001)), fr = far - lvl, k = 1.35 - fr * 0.75, name = w.name || 'this world';
+  c.globalAlpha = 1; c.fillStyle = '#03050a'; c.fillRect(0, 0, W, H);
+  C.back.forEach(function (q) { c.globalAlpha = 0.25 + q[2] * 0.5 * (0.7 + 0.3 * Math.sin(U.time * (0.4 + q[3]) + q[3] * 9)); c.fillStyle = '#dfe6ff'; c.fillRect(q[0] * W, q[1] * H, q[2] > 0.9 ? 2 : 1, q[2] > 0.9 ? 2 : 1); }); c.globalAlpha = 1;
+  const label = function (t, x, y, sub) { c.textAlign = 'center'; c.font = '700 14px "Bricolage Grotesque", sans-serif'; c.lineWidth = 3; c.strokeStyle = 'rgba(3,5,10,0.85)'; c.strokeText(t, x, y); c.fillStyle = '#e8ecf6'; c.fillText(t, x, y); if (sub) { c.font = '500 11px "Instrument Sans", sans-serif'; c.fillStyle = 'rgba(200,208,228,0.8)'; c.fillText(sub, x, y + 15); } };
+  if (lvl === 0) { /* the worlds of its star */
+    const g = c.createRadialGradient(mx, my, 0, mx, my, 46 * k); g.addColorStop(0, 'hsla(' + C.sunHue + ',100%,88%,1)'); g.addColorStop(0.25, 'hsla(' + C.sunHue + ',95%,62%,0.9)'); g.addColorStop(1, 'hsla(' + C.sunHue + ',90%,50%,0)'); c.fillStyle = g; c.beginPath(); c.arc(mx, my, 46 * k, 0, 6.2832); c.fill();
+    C.planets.forEach(function (p, i) { const ro = p.orbit * R * k, an = p.a0 + U.time * 0.05 / Math.pow(p.orbit * 6, 1.5), px = mx + Math.cos(an) * ro, py = my + Math.sin(an) * ro * 0.5;
+      c.strokeStyle = i === C.home ? 'rgba(160,220,190,0.45)' : 'rgba(150,165,200,0.2)'; c.lineWidth = 1; c.beginPath(); c.ellipse(mx, my, ro, ro * 0.5, 0, 0, 6.2832); c.stroke();
+      c.fillStyle = 'hsl(' + p.hue + ',' + p.sat + '%,' + (i === C.home ? 52 : 46) + '%)'; c.beginPath(); c.arc(px, py, p.size * k, 0, 6.2832); c.fill();
+      if (p.ring) { c.strokeStyle = 'rgba(210,200,170,0.6)'; c.beginPath(); c.ellipse(px, py, p.size * k * 1.9, p.size * k * 0.6, 0.3, 0, 6.2832); c.stroke(); }
+      if (i === C.home) { c.strokeStyle = 'rgba(255,255,255,0.8)'; c.beginPath(); c.arc(px, py, p.size * k + 5, 0, 6.2832); c.stroke(); label(name, px, py - p.size * k - 12, 'day ' + SW.day(w) + ' · ' + w.agents.length + ' living'); } });
+    label('The worlds of its star', mx, H - 92, 'scroll in to come down to ' + name + ' · scroll out for the stars');
+  } else if (lvl === 1) { /* its star among the near stars */
+    C.stars.forEach(function (q) { const x = mx + q.x * R * k, y = my + q.y * R * k; c.fillStyle = 'hsla(' + q.hue + ',70%,82%,0.9)'; c.beginPath(); c.arc(x, y, q.m * 0.9, 0, 6.2832); c.fill(); if (q.m > 2.6) { c.fillStyle = 'hsla(' + q.hue + ',80%,80%,0.18)'; c.beginPath(); c.arc(x, y, q.m * 3.2, 0, 6.2832); c.fill(); } });
+    c.fillStyle = 'hsl(' + C.sunHue + ',100%,80%)'; c.beginPath(); c.arc(mx, my, 3.2, 0, 6.2832); c.fill(); c.strokeStyle = 'rgba(255,255,255,0.75)'; c.lineWidth = 1; c.beginPath(); c.arc(mx, my, 10, 0, 6.2832); c.stroke();
+    label('The star of ' + name, mx, my - 18); label('Among the near stars', mx, H - 92, 'scroll out for the galaxy · 0 returns to the planet');
+  } else if (lvl === 2) { /* the galaxy */
+    const g = c.createRadialGradient(mx, my, 0, mx, my, R * k * 0.3); g.addColorStop(0, 'rgba(255,240,210,0.85)'); g.addColorStop(1, 'rgba(255,220,170,0)'); c.fillStyle = g; c.beginPath(); c.arc(mx, my, R * k * 0.3, 0, 6.2832); c.fill();
+    const rot = U.time * 0.004, cr = Math.cos(rot), sr = Math.sin(rot); C.arm.forEach(function (q) { const x = q[0] * cr - q[1] * sr / 0.62, y = (q[0] * sr + q[1] * cr / 0.62) * 0.62; c.globalAlpha = q[2] * 0.8; c.fillStyle = q[3] < 0.25 ? '#ffe9c4' : q[3] < 0.6 ? '#cfe0ff' : '#9fb8ff'; c.fillRect(mx + x * R * k, my + y * R * k, 1.4, 1.4); }); c.globalAlpha = 1;
+    const ht = C.here.t, ha = C.here.arm * 3.14159 + ht * 5.4 + rot, hx = mx + Math.cos(ha) * ht * 0.92 * R * k, hy = my + Math.sin(ha) * ht * 0.92 * 0.62 * R * k; c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 1.2; c.beginPath(); c.arc(hx, hy, 7, 0, 6.2832); c.stroke(); label(name + ' is here', hx, hy - 14);
+    label('The galaxy', mx, H - 92, 'scroll out for the galaxies beyond');
+  } else { /* the galaxies */
+    C.gal.forEach(function (q, i) { const x = mx + q.x * R * k, y = my + q.y * R * k, s = q.s * R * k * 1.6; c.save(); c.translate(x, y); c.rotate(q.rot); c.scale(1, q.e);
+      const g = c.createRadialGradient(0, 0, 0, 0, 0, s); g.addColorStop(0, 'hsla(' + (i ? q.hue : 40) + ',70%,90%,0.95)'); g.addColorStop(0.3, 'hsla(' + q.hue + ',60%,72%,0.45)'); g.addColorStop(1, 'hsla(' + q.hue + ',60%,60%,0)'); c.fillStyle = g; c.beginPath(); c.arc(0, 0, s, 0, 6.2832); c.fill();
+      if (q.spiral) { c.strokeStyle = 'hsla(' + q.hue + ',70%,85%,0.5)'; c.lineWidth = 1; for (let a2 = 0; a2 < 2; a2++) { c.beginPath(); for (let t = 0; t <= 1; t += 0.08) { const an = a2 * 3.14159 + t * 4.4, rr = t * s * 0.95; if (t === 0) c.moveTo(Math.cos(an) * rr, Math.sin(an) * rr); else c.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); } c.stroke(); } }
+      c.restore(); if (!i) { c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineWidth = 1; c.beginPath(); c.arc(x, y, s * 0.9 + 6, 0, 6.2832); c.stroke(); label('The galaxy of ' + name, x, y - s * 0.9 - 12); } });
+    label('The galaxies', mx, H - 92, 'as far as the view goes · 0 returns to the planet');
+  }
+  c.textAlign = 'left';
+}
+function farTo(v) { U.far = clamp(v, 0, 4); if (U.far > 0 && w.wrap) { cam.z = zGlobe() * 0.3; clampCam(); } else if (w.wrap && U.far === 0 && !isGlobe()) { /* stay where one was */ } $('tip').hidden = true; }
 function zoomAt(px, py, k) {
+  if (w.wrap && ((U.far || 0) > 0 || (k < 1 && cam.z <= zGlobe() * 0.305))) { U.far = clamp((U.far || 0) - Math.log(k) * 0.9, 0, 4); if (U.far < 0.02) U.far = 0; return; } /* past the smallest globe the view goes on out, and comes back the same way */
   if (w.wrap) { const was = isGlobe(); if (was || cam.z * k < zGlobe()) { cam.z = cam.z * k; clampCam(); if (was && !isGlobe()) cam.z = Math.max(cam.z, zGlobe() * 1.02); return; } } /* to and from the globe, the middle of the view stays put */
   const before = toWorld(px, py); cam.z = clamp(cam.z * k, w.wrap ? zGlobe() * 0.3 : cam.fit * 0.85, 110);
   const after = toWorld(px, py); cam.x += wrapd(before.x - after.x); cam.y += before.y - after.y; clampCam();
@@ -462,6 +512,7 @@ function drawSpace(alpha) {
   c.globalAlpha = 1;
 }
 function draw() {
+  if (w.wrap && (U.far || 0) > 0) { drawCosmos(U.far); return; }
   if (w.wrap) {
     const far = isGlobe(), tg = far ? 1 : 0, now = U.time, dt = Math.min(0.1, now - (SPACE.last || now)); SPACE.last = now;
     U.globeT = (U.globeT || 0) + (tg - (U.globeT || 0)) * 0.2; if (Math.abs(tg - U.globeT) < 0.02) U.globeT = tg;
@@ -1097,10 +1148,13 @@ cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', e
 cv.addEventListener('pointerleave', function () { $('tip').hidden = true; });
 cv.addEventListener('dblclick', function (e) { if (isGlobe()) { cam.z = zGlobe() * 1.6; clampCam(); } else zoomAt(e.offsetX, e.offsetY, 1.8); });
 cv.addEventListener('wheel', function (e) { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, Math.exp(-e.deltaY * 0.0016)); }, { passive: false });
+if ($('farOut')) { $('farOut').addEventListener('click', function () { if (w.wrap) farTo(4); }); $('farHome').addEventListener('click', function () { if (w.wrap) { farTo(0); fitWorld(); } }); }
 window.addEventListener('keydown', function (e) {
   const tag = (e.target.tagName || '').toLowerCase(); if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
   const k = e.key, step = 80 / cam.z;
   if (k === ' ') { e.preventDefault(); togglePlay(); }
+  else if (k === '9' || k === 'End') { if (w.wrap) farTo(4); }
+  else if (k === '0' || k === 'Home') { if (w.wrap) { farTo(0); fitWorld(); } }
   else if (k === 'f' || k === 'F') toggleFollow();
   else if (k === 'm' || k === 'M') toggleSound();
   else if (k === '+' || k === '=') zoomAt(W / 2, H / 2, 1.3);
@@ -1351,8 +1405,8 @@ $('panel').addEventListener('click', function (e) {
   else if (act === 'makertoggle') { st.settings.maker.on = !st.settings.maker.on; U.keys.maker = ''; U.keys.settings = ''; save(); }
   else if (act === 'recsend') recFlush(true);
   else if (act === 'recsave') recDownload();
-  else if (act === 'newworld') newWorld(+$('setSeed').value || Math.floor(Math.random() * 9999) + 1);
-  else if (act === 'randomworld') newWorld(Math.floor(Math.random() * 9999) + 1);
+  else if (act === 'newworld') { U.startAge = +($('setAge') || {}).value || 1; newWorld(+$('setSeed').value || Math.floor(Math.random() * 9999) + 1); }
+  else if (act === 'randomworld') { U.startAge = +($('setAge') || {}).value || 1; newWorld(Math.floor(Math.random() * 9999) + 1); }
   else if (act === 'openworld') openWorld(el.dataset.id);
   else if (act === 'forgetworld') { if (U.forget === el.dataset.id) { U.forget = null; libDel(el.dataset.id); } else U.forget = el.dataset.id; U.keys.settings = ''; }
 });
@@ -1445,7 +1499,7 @@ function renderStory() {
   if (SWK.error) h += '<p class="note">' + esc(SWK.error) + '</p>';
   if (S.trends.length) h += '<h3>Trends</h3><ul class="events">' + S.trends.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
   if (S.threads.length) h += '<h3>Threads</h3>' + S.threads.map(function (t) { return '<div class="mk"><b>' + esc(t.name) + '</b> <span class="v">' + esc(t.kind) + '</span><div class="q">' + esc(t.text) + '</div></div>'; }).join('');
-  h += S.chapters.length ? S.chapters.slice().reverse().map(function (c) { return '<h3>' + c.n + '. ' + esc(c.title) + ' <small>days ' + c.day0 + ' to ' + c.day1 + '</small></h3>' + (c.amended ? '<p class="note">' + esc(c.amended) + '</p>' : '') + (c.epigraph && c.epigraph.text ? '<blockquote class="epi">' + verse(c.epigraph.text) + '<cite>' + esc(c.epigraph.kind === 'tradition' ? 'from the teaching of ' + c.epigraph.title + ', as held among ' + c.epigraph.people : ((({ dying: 'the death poem of ', elegy: 'a lament by ', love: 'a love song by ', birth: 'a lullaby by ', deed: 'a song by ', myth: 'a myth told by ' })[c.epigraph.occasion]) || 'from "' + c.epigraph.title + '", by ') + (c.epigraph.by || 'one whose name is lost') + (c.epigraph.people ? ' of ' + c.epigraph.people : '') + (c.epigraph.day ? ', day ' + c.epigraph.day : '')) + '</cite></blockquote>' : '') + '<p class="chapter">' + esc(c.text) + '</p>'; }).join('') : '<p class="muted">No chapter yet. The first is written on day ' + (1 + st.settings.story.every) + ' while the minds are awake, or press the button.</p>';
+  h += S.chapters.length ? S.chapters.slice().reverse().map(function (c) { return '<h3>' + c.n + '. ' + esc(c.title) + ' <small>days ' + c.day0 + ' to ' + c.day1 + '</small></h3>' + (c.made === 'world' ? '<p class="note">Set down by the world itself from what stands in it. No chronicler saw these days.</p>' : '') + (c.amended ? '<p class="note">' + esc(c.amended) + '</p>' : '') + (c.epigraph && c.epigraph.text ? '<blockquote class="epi">' + verse(c.epigraph.text) + '<cite>' + esc(c.epigraph.kind === 'tradition' ? 'from the teaching of ' + c.epigraph.title + ', as held among ' + c.epigraph.people : ((({ dying: 'the death poem of ', elegy: 'a lament by ', love: 'a love song by ', birth: 'a lullaby by ', deed: 'a song by ', myth: 'a myth told by ' })[c.epigraph.occasion]) || 'from "' + c.epigraph.title + '", by ') + (c.epigraph.by || 'one whose name is lost') + (c.epigraph.people ? ' of ' + c.epigraph.people : '') + (c.epigraph.day ? ', day ' + c.epigraph.day : '')) + '</cite></blockquote>' : '') + '<p class="chapter">' + esc(c.text) + '</p>'; }).join('') : '<p class="muted">No chapter yet. The first is written on day ' + (1 + st.settings.story.every) + ' while the minds are awake, or press the button.</p>';
   const n = SWK.stats(st), kv = function (o) { return Object.keys(o).filter(function (k) { return o[k]; }).map(function (k) { return k + ' <b>' + o[k] + '</b>'; }).join(' · ') || 'none'; };
   h += '<h3>The numbers <small>day ' + n.day + ', ' + n.season + '</small></h3><div class="nums">alive <b>' + n.alive + '</b> (children <b>' + n.children + '</b>, elders <b>' + n.elders + '</b>) · ever lived <b>' + n.everBorn + '</b> · died <b>' + n.deaths + '</b>' + (n.deaths ? ' (' + kv(n.deathCauses) + ')' : '') +
     '<br>energy, middle being <b>' + n.energyMedian + '</b> · lowest health <b>' + n.healthLowest + '</b> · sick <b>' + n.sick + '</b><br>bonds <b>' + n.bonds + '</b>: warm <b>' + n.bondsWarm + '</b>, hostile <b>' + n.bondsHostile + '</b> · following a leader <b>' + n.following + '</b> · bands ' + (n.bands.length ? '<b>' + esc(n.bands.join(', ')) + '</b>' : '<b>none</b>') +
@@ -1726,7 +1780,7 @@ function renderSettings() {
     '<h3>Run record <small>so Claude can read the whole run afterwards</small></h3><p class="note" id="recNote">' + recText() + '</p><div class="form"><label for="setRec">Record this run<small>Every thought, everything said, every event, and each being\'s state, kept with this artifact, where you and Claude can read it (and anyone you later share the artifact with)</small></label><select class="field" id="setRec"><option value="1"' + (S.record ? ' selected' : '') + '>on</option><option value="0"' + (S.record ? '' : ' selected') + '>off</option></select></div>' +
     '<div class="row"><button class="btn" data-act="recsend">Send everything now</button><button class="btn" data-act="recsave">Download run log</button></div>' +
     '<h3>Sound</h3><div class="form"><label for="setVol">Volume</label><input type="range" id="setVol" min="0" max="1" step="0.05" value="' + SWA.vol + '"></div>' +
-    '<h3>World</h3><div class="form"><label for="setBounty">The land<small>How fast food grows back. Lean land makes beings compete</small></label><select class="field" id="setBounty">' + [[1, 'lush'], [0.7, 'fair'], [0.5, 'lean'], [0.3, 'harsh']].map(function (q) { return '<option value="' + q[0] + '"' + (Math.abs((w.laws.ecology.bounty == null ? 1 : w.laws.ecology.bounty) - q[0]) < 0.06 ? ' selected' : '') + '>' + q[1] + '</option>'; }).join('') + '</select><label for="setSeed">Seed<small>the same seed grows the same land</small></label><input type="number" id="setSeed" min="1" max="99999" value="' + w.seed + '"><label for="setName">Name of this world</label><input type="text" id="setName" maxlength="28" value="' + esc(w.name || '') + '"></div><div class="row"><button class="btn" data-act="newworld">Begin a new world from this seed</button><button class="btn" data-act="randomworld">Surprise me</button></div>' +
+    '<h3>World</h3><div class="form"><label for="setBounty">The land<small>How fast food grows back. Lean land makes beings compete</small></label><select class="field" id="setBounty">' + [[1, 'lush'], [0.7, 'fair'], [0.5, 'lean'], [0.3, 'harsh']].map(function (q) { return '<option value="' + q[0] + '"' + (Math.abs((w.laws.ecology.bounty == null ? 1 : w.laws.ecology.bounty) - q[0]) < 0.06 ? ' selected' : '') + '>' + q[1] + '</option>'; }).join('') + '</select><label for="setSeed">Seed<small>the same seed grows the same land</small></label><input type="number" id="setSeed" min="1" max="99999" value="' + w.seed + '"><label for="setAge">Begin at<small>a new world may begin in a later age, with its settlements, ways and history already there</small></label><select class="field" id="setAge">' + [[1, 'the beginning'], [2, 'the second age: smiths, roads, writing'], [3, 'the third age: castles and towns'], [4, 'the fourth age: steam and industry'], [5, 'the fifth age: fuel, power, flight'], [6, 'the sixth age: machines that think']].map(function (q) { return '<option value="' + q[0] + '"' + ((U.startAge || 1) === q[0] ? ' selected' : '') + '>' + q[1] + '</option>'; }).join('') + '</select><label for="setName">Name of this world</label><input type="text" id="setName" maxlength="28" value="' + esc(w.name || '') + '"></div><div class="row"><button class="btn" data-act="newworld">Begin a new world from this seed</button><button class="btn" data-act="randomworld">Surprise me</button></div>' +
     '<p class="note" id="saveNote">' + (LIB.db ? 'Every world is kept in this browser under its name as it runs. Beginning a new one does not lose this one.' : 'The world is saved in this browser as it runs. This browser keeps only one world: beginning a new one replaces it.') + '</p>' +
     (function () { const others = LIB.list.filter(function (m) { return m.id !== st.runId; }); return '<h3>Saved worlds <small>in this browser</small></h3>' + (others.length ? others.map(function (m) { return '<div class="world"><div><b>' + esc(m.name || 'A world') + '</b><small>' + esc(worldLine(m)) + '</small></div><span><button class="btn" data-act="openworld" data-id="' + esc(m.id) + '">Continue</button> <button class="btn" data-act="forgetworld" data-id="' + esc(m.id) + '">' + (U.forget === m.id ? 'Really forget?' : 'Forget') + '</button></span></div>'; }).join('') : '<p class="muted">No other world is saved here yet.</p>'); })();
   const bind = function (id, fn) { $(id).onchange = function () { fn(this.value); save(); }; };
@@ -1804,7 +1858,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 30, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 31, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1874,7 +1928,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 30, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 31, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }
@@ -1922,7 +1976,7 @@ function attach(state) {
   if (w.agents.length) { cam.x = w.agents.reduce(function (s, a) { return s + a.x; }, 0) / w.agents.length + 0.5; cam.y = w.agents.reduce(function (s, a) { return s + a.y; }, 0) / w.agents.length + 0.5; }
   else { cam.x = w.W / 2; cam.y = w.H / 2; }
   clampCam(); syncButtons();
-  window.SWdebug = { bubbleAt: bubbleAt, openBubble: openBubble, st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco, bubble: bubble, placeBubbles: placeBubbles, hudRects: hudRects };
+  window.SWdebug = { farTo: farTo, cosmosOf: cosmosOf, bubbleAt: bubbleAt, openBubble: openBubble, st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco, bubble: bubble, placeBubbles: placeBubbles, hudRects: hudRects };
 }
 function newWorld(seed) {
   const keep = st ? st.settings : null;
@@ -1932,6 +1986,7 @@ function newWorld(seed) {
   attach(fresh); U.playing = true;
   if (st.settings.autoWake && st.sample) st.on = true;
   SWK.inherit(st, legacy);
+  { const ag = +(window.EVOLU_AGE || U.startAge || 1); if (ag > 1) { SW.beginAt(w, ag); SWM.backfill(st, ag); } } /* a world may begin in a later age (Generation 31) */
   SWM.chron(st, 'birth', w.peoples.map(function (P) { return P.name + ' (' + P.noun + ') in ' + (w.regions[P.region] ? w.regions[P.region].name : 'the land'); }).join('; ') + ': ' + w.peoples.length + ' peoples woke in different lands of a new world, a sea between them (seed ' + seed + ').', []);
   $('notice').hidden = true; save(); setTab('inspect'); if (U.choosing) showChooser();
 }

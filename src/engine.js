@@ -1108,6 +1108,85 @@ SW.FLORA = {
   luckleaf: { growth: 0.003, maxFood: 2, regrow: 0.002, nutrition: 3, fx: [{ on: 'luck', times: 1.3, for: 480 }], seedRate: 0.0015, seedRadius: 2, lifespan: 3000, root: 'luck', biomes: ['lakeland', 'marsh', 'steppe'], soil: { grass: 0.5, marsh: 0.4 }, form: { form: 'flower', hue: 130 } },
   ironmoss: { growth: 0.002, maxFood: 2, regrow: 0.0015, nutrition: 5, fx: [{ on: 'toughness', times: 1.3, for: 480 }, { on: 'warmth', times: 1.2, for: 240 }], seedRate: 0.0015, seedRadius: 2, lifespan: 5000, root: 'moss', hardy: 1, biomes: ['arctic', 'antarctic', 'tundra'], soil: { snow: 0.8, rock: 0.4 }, form: { form: 'rosette', hue: 205 } }
 };
+/* THE LATER AGES OF THE LIBRARY (Generation 31): an age of castles and towns, an age of steam and industry, an age of fuel, power and flight,
+   and an age of machines that think. Each structure belongs to a way of the tree, costs what it costs (anything above the hands is raised
+   in loads), depends on other works, and may change the land: clears (trees and plants felled within that many steps when it stands) and
+   fouls (smoke and waste within that many steps, every day: plants there are set back and those who stand in it lose a little health). */
+(function () {
+  const add = function (n, blocks, buildings) { const A = SW.LIBRARY[n] = SW.LIBRARY[n] || { blocks: {}, buildings: {} }; Object.assign(A.blocks, blocks); Object.assign(A.buildings, buildings); };
+  add(3, { curtainwall: { stone: 6, fx: [{ on: 'fear', by: -0.25 }], hint: 'a wall of dressed stone: those within fear less' }, chambers: { wood: 3, stone: 2, fx: [{ on: 'health', by: 8 }, { on: 'warmth', times: 1.2, for: 240 }], hint: 'chambers to live in' }, counting: { wood: 3, craft: 0.3, fx: [{ on: 'lore', by: 0.2 }], hint: 'a counting room: reckoning and record' } }, {
+    keep: { way: 'architecture', from: 'tower', wood: 6, stone: 18, sight: 5, fx: [{ on: 'fear', by: -0.5 }], clears: 2, hint: 'a keep of stone raised where a tower stood: far sight, and little fear for those within. A great work' },
+    castle: { way: 'siegecraft', from: 'keep', wood: 10, stone: 30, needs: ['well'], sight: 6, bond: 0.05, fx: [{ on: 'fear', by: -0.6 }, { on: 'health', by: 8 }], clears: 3, hint: 'a castle with walls and a hall, raised where a keep stood: the seat of those who hold the land. It needs a well within its reach. A great work' },
+    townhall: { way: 'cities', from: 'moot', wood: 8, stone: 12, needs: ['market'], bond: 0.07, fx: [{ on: 'lonely', by: -0.3 }], clears: 2, hint: 'a hall where a town is governed and its people meet. It needs a market near it. A great work' },
+    guildhall: { way: 'iron', wood: 8, stone: 8, needs: ['forge'], craft: 0.8, bond: 0.04, hint: 'a hall of those who share a craft: what is made near it is made much more surely. It needs a forge near it. A great work' },
+    granary: { way: 'cities', wood: 8, stone: 4, needs: ['field'], fx: [{ on: 'fear', by: -0.2 }], hint: 'a great store of grain beside the fields: the cold season is feared less. It needs a field near it' },
+    tavern: { way: 'cities', wood: 6, stone: 2, needs: ['store'], bond: 0.06, fx: [{ on: 'joy', by: 0.25 }, { on: 'lonely', by: -0.3 }], hint: 'a house of food, drink and talk. It needs a store near it' },
+    glassworks: { way: 'glass', wood: 5, stone: 8, needs: ['kiln'], craft: 0.5, fouls: 2, hint: 'a works of furnaces where glass is made. It needs a kiln near it, and its smoke lies two steps about it' },
+    aqueduct: { way: 'architecture', wood: 2, stone: 14, needs: ['well'], fx: [{ on: 'health', by: 12 }, { on: 'sick', by: -1 }], hint: 'water carried on arches from a well to where people live: health, and a sickness broken. A great work' },
+    apothecary: { way: 'alchemy', wood: 5, stone: 4, needs: ['kiln'], fx: [{ on: 'health', by: 18 }, { on: 'sick', by: -1 }], hint: 'a house of cures made by the mixing of substances. It needs a kiln near it' }
+  });
+  add(4, { boiler: { wood: 2, stone: 4, craft: 0.6, hint: 'a boiler: steam for the work' }, chimney: { stone: 4, craft: 0.3, hint: 'a chimney over a great fire' }, pipes: { stone: 3, fx: [{ on: 'health', by: 10 }], hint: 'pipes that bring clean water' } }, {
+    foundry: { way: 'steam', from: 'forge', wood: 8, stone: 16, craft: 1.1, clears: 2, fouls: 3, hint: 'a foundry driven by steam, raised where a forge stood: far more is made, and its smoke lies three steps about it. A great work' },
+    mill: null,
+    tenement: { way: 'steam', wood: 12, stone: 8, needs: ['factory'], bond: 0.05, fx: [{ on: 'warmth', times: 1.2, for: 240 }], clears: 1, hint: 'close-built rooms for those who work in the factory near it: many live there and grow close. A great work' },
+    gasworks: { way: 'chemistry', wood: 4, stone: 14, needs: ['factory'], fx: [{ on: 'warmth', times: 1.4, for: 480 }], fouls: 4, hint: 'a works that makes gas for light and heat: warmth for two days, and foul air four steps about it. A great work' },
+    waterworks: { way: 'mechanics', wood: 4, stone: 14, needs: ['well'], fx: [{ on: 'health', by: 20 }, { on: 'sick', by: -1 }], hint: 'pumps and pipes that bring clean water to a town: health, and a sickness broken. A great work' },
+    laboratory: { way: 'science', wood: 6, stone: 10, needs: ['school'], fx: [{ on: 'lore', by: 0.8 }, { on: 'learning', times: 1.4, for: 480 }], hint: 'a house of trial and measure: understanding grows there faster than anywhere. It needs a school near it. A great work' },
+    parliament: { way: 'printing', from: 'townhall', wood: 10, stone: 20, bond: 0.08, reach: 2, fx: [{ on: 'anger', by: -0.3 }], hint: 'a house where those chosen by a people speak and decide: anger is eased, and a voice from it carries. Raised where a town hall stood. A great work' },
+    bank: { way: 'printing', wood: 6, stone: 12, needs: ['market'], craft: 0.4, fx: [{ on: 'fear', by: -0.2 }], hint: 'a house where wealth is kept and lent. It needs a market near it. A great work' }
+  });
+  delete SW.LIBRARY[4].buildings.mill;
+  add(5, { wiring: { stone: 2, reach: 2, craft: 0.3, hint: 'wires that carry power' }, lifts: { stone: 4, bond: 0.03, hint: 'lifts between many floors' }, glasswall: { stone: 3, sight: 2, hint: 'walls of glass' } }, {
+    refinery: { way: 'oil', wood: 6, stone: 18, needs: ['enginehouse'], craft: 1.2, clears: 3, fouls: 5, hint: 'a works that makes fuel from oil: much is made by it, the ground is cleared for it, and its foul air lies five steps about. A great work' },
+    apartments: { way: 'electricity', from: 'tenement', wood: 8, stone: 18, needs: ['powerhouse'], bond: 0.06, fx: [{ on: 'warmth', times: 1.4, for: 480 }, { on: 'health', by: 10 }], hint: 'homes on many floors with light and heat. They need a power house near them. A great work' },
+    office: { way: 'computing', wood: 6, stone: 16, needs: ['powerhouse'], craft: 0.9, fx: [{ on: 'lore', by: 0.4 }], hint: 'a building where the work is reckoning and record. It needs a power house near it. A great work' },
+    ministry: { way: 'radio', from: 'parliament', wood: 8, stone: 22, needs: ['mast'], bond: 0.08, reach: 4, hint: 'the house from which a whole land is governed, with a voice that reaches it. It needs a mast near it. A great work' },
+    reactor: { way: 'atomics', wood: 4, stone: 26, needs: ['powerhouse'], craft: 1.4, hint: 'a pile of the smallest things, giving power without smoke. It needs a power house near it. A great work' },
+    launchpad: { way: 'rocketry', wood: 6, stone: 22, needs: ['factory'], sight: 6, clears: 3, fouls: 3, hint: 'a field from which craft are sent up beyond the sky. It needs a factory near it. A great work' }
+  });
+  add(6, { core: { stone: 6, craft: 1, hint: 'a core of thinking machines' } }, {
+    datacentre: { way: 'internet', wood: 4, stone: 24, needs: ['powerhouse'], reach: 8, fx: [{ on: 'lore', by: 1 }, { on: 'learning', times: 1.5, for: 480 }], hint: 'halls of thinking machines joined to all others: understanding, and a voice across the world. It needs a power house near it. A great work' },
+    fusionplant: { way: 'nuclear', from: 'reactor', wood: 4, stone: 30, craft: 1.5, hint: 'the fire of the stars held in a vessel: power without end or smoke. Raised where a reactor stood. A great work' },
+    orbitalyard: { way: 'spaceflight', wood: 6, stone: 30, needs: ['spaceport'], sight: 8, hint: 'a yard where craft that live beyond the sky are built. It needs a spaceport near it. A great work' }
+  });
+})();
+/* what a structure does to the land when it stands, and every day after */
+function landUse(w, kind, i) {
+  const B = w.laws.buildings[kind], r = B && B.clears; if (!r) return; const x0 = i % w.W, y0 = (i - x0) / w.W; let felled = 0;
+  for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const X = x0 + dx, Y = y0 + dy; if (!inb(w, X, Y)) continue; const j = idx(w, X, Y); if (j === i || w.shelters[j] || w.stores[j]) continue; if (w.plants[j]) { w.plants[j] = null; felled++; } if (w.trees && w.trees[j] > 0) { w.trees[j] = 0; felled++; } }
+  w.tally.cleared = (w.tally.cleared || 0) + felled;
+}
+function foulStep(w, emit) {
+  const bk = w.bkind || {}; let any = 0;
+  for (const k in bk) { const i = +k, B = w.laws.buildings[bk[i]], r = B && B.fouls; if (!r || !w.shelters[i]) continue; any++; const x0 = i % w.W, y0 = (i - x0) / w.W;
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const X = x0 + dx, Y = y0 + dy; if (!inb(w, X, Y)) continue; const p = w.plants[idx(w, X, Y)]; if (p) { p.g = Math.max(0, (p.g || 0) - 0.12); if (p.food > 0) p.food--; w.tally.fouled = (w.tally.fouled || 0) + 1; } }
+    for (let q = 0; q < w.agents.length; q++) { const a = w.agents[q]; if (a.dead || cheb(a.x, a.y, x0, y0) > r) continue; a.hp = Math.max(1, a.hp - 2); w.tally.smoke = (w.tally.smoke || 0) + 1; emit({ type: 'smoke', a: a.id, kind: bk[i] }); } }
+  return any;
+}
+/* A WORLD BEGUN AT A LATER AGE (Generation 31). For trying the later ages, and for worlds that are meant to start there. The founders know the
+   ways of every age before the one chosen and most of that age; each band stands in a settlement with the works of those ages, set out so that
+   what depends on another stands near it, with stores, fields and a paved way; the library is open to the age after. Nothing here is scripted
+   afterwards: from the first moment it is a world like any other. The minds are told the history (M.backfill). */
+SW.beginAt = function (w, age) {
+  age = Math.max(1, Math.min(6, Math.round(age || 1))); if (age < 2) return 0; use(w); const L = w.laws, T2 = L.tree, keep = w.rng; w.rng = Math.imul((w.seed | 0) + 313 * age, 0x2545F491) | 0; rnd(w);
+  for (let n = 2; n <= Math.min(6, age + 1); n++) { w.eraT = null; if ((w.ageOpen || 0) < n) { const A = SW.LIBRARY[n]; L.blocks = L.blocks || {}; if (A) { for (const k in A.blocks) if (!L.blocks[k]) L.blocks[k] = Object.assign({ age: n }, JSON.parse(JSON.stringify(A.blocks[k]))); for (const k in A.buildings) if (!L.buildings[k]) L.buildings[k] = Object.assign({ age: n }, JSON.parse(JSON.stringify(A.buildings[k]))); } w.ageOpen = n; } }
+  const ways = Object.keys(T2).filter(function (k) { return (T2[k].era || 1) < age || ((T2[k].era || 1) === age && rnd(w) < 0.65); });
+  w.agents.forEach(function (a) { const P = a.people != null ? w.peoples[a.people] : null; ways.forEach(function (k) { if (!a.knows[k] && ((T2[k].era || 1) < age || rnd(w) < 0.7)) a.knows[k] = { how: 'people', name: 'the way of ' + k, idea: 'known to ' + (P ? P.name : 'your people') + ' for generations', look: null, tick: 0, by: 0, byName: P ? P.name : 'your people' }; }); a.lore = Math.max(a.lore || 0, age * 3); a.wood = Math.max(a.wood || 0, 4); a.stone = Math.max(a.stone || 0, 4); });
+  const roots = {}; w.agents.forEach(function (a) { const r = a.people != null ? 'p' + a.people : 'r' + rootOf(w, a).id; (roots[r] = roots[r] || []).push(a); }); /* one settlement to each founding people */
+  const free = function (i) { const t = w.terrain[i]; return t !== T.WATER && t !== T.SHALLOWS && t !== T.VOID && t !== T.ROCK && !w.shelters[i] && !w.stores[i] && !w.walls[i] && !(w.lodes && w.lodes[i]); };
+  let raisedN = 0;
+  for (const rid in roots) { const band = roots[rid], head = band.slice().sort(function (p, q) { return (q.lore || 0) - (p.lore || 0) || p.id - q.id; })[0]; band.forEach(function (o) { if (o !== head && o.leader == null) o.leader = head.id; }); /* a people that has come this far has someone it follows, and its works are one settlement */ let cx = 0, cy = head.y; band.forEach(function (a) { cx += wdx(a.x - head.x); }); cx = wrapX(w, Math.round(head.x + cx / band.length));
+    const spots = []; for (let r = 1; r <= 6 && spots.length < 70; r++) /* within six steps of the middle, so that any two works are within reach of each other */ for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r || ((dx + dy) & 1)) continue; const X = wrapX(w, cx + dx), Y = cy + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y); if (free(i) && !band.some(function (a) { return a.x === X && a.y === Y; })) spots.push(i); }
+    const put = function (kind, owner) { const i = spots.shift(); if (i == null) return -1; if (kind === 'store') { w.stores[i] = { by: owner.id, items: [] }; for (let q = 0; q < 6; q++) w.stores[i].items.push({ k: 'grain', n: 1, t: w.tick }); } else { w.shelters[i] = owner.id; if (kind !== 'shelter') { w.bkind = w.bkind || {}; w.bkind[i] = kind; } } w.plants[i] = null; if (w.trees && w.trees[i]) w.trees[i] = 0; w.tally.built = w.tally.built || {}; w.tally.built[kind] = (w.tally.built[kind] || 0) + 1; raisedN++; return i; };
+    band.forEach(function (a) { put('shelter', a); }); put('store', head); put('hall', head);
+    /* works of the ages reached, each after what it depends on; a newer kind stands in place of the one it grew from */
+    const B = L.buildings, have = { store: 1, hall: 1, shelter: 1 }, want = Object.keys(B).filter(function (k) { const b = B[k], e = b.way && T2[b.way] ? (T2[b.way].era || 1) : 1; return b.way && e <= age && head.knows[b.way] && b.beside !== 'water' && !b.on && k !== 'pen'; }).sort(function (p, q) { return (T2[B[p].way].era || 1) - (T2[B[q].way].era || 1) || (p < q ? -1 : 1); });
+    for (let pass = 0; pass < 3; pass++) want.forEach(function (k) { if (have[k] || raisedN > 400) return; const b = B[k]; if ((b.needs || []).some(function (q) { return !Object.keys(have).some(function (h) { return h === q || isOfLine(w, h, q); }); })) return; if (b.from && b.from !== 'shelter' && !have[b.from]) return; const owner = band[(Object.keys(have).length) % band.length]; if (put(k, owner) >= 0) { have[k] = 1; } });
+    /* a paved way through it */
+    for (let dx = -9; dx <= 9; dx++) { const X = wrapX(w, cx + dx); if (!inb(w, X, cy)) continue; const i = idx(w, X, cy); if (free(i)) { w.roads[i] = age >= 3 ? 1 : 4; w.plants[i] = null; } }
+  }
+  w.startAge = age; w.eraT = null; w.rng = keep; SW.findSettlements(w, noop); return raisedN;
+};
 /* SEAS (Generation 27): a world begun with opts.seas has an ocean that divides the known land, a greater ocean on the far side of the world with
    islands large enough to live on, and two great lakes. Their hearts are open water: more than two steps from any shore, where no one can swim
    and only a vessel carries. They are laid out by a chance of their own (the seed, not the world's stream), so the lands, their names and their
@@ -1791,6 +1870,7 @@ function stepCreatures(w, emit) {
   /* the sea gives back what was fished and hunted out of it: a kind of the sea that has fallen below its least number comes in again on open water */
   if (w.tick % L.time.dayLength === 3) SW.openAges(w, emit);
   if (w.fogDirty && w.tick % 20 === 0) { w.fogDirty = 0; narrowWater(w); WF.delete(w.terrain); }
+  if (w.tick % L.time.dayLength === 13 && (w.ageOpen || 0) >= 3) foulStep(w, emit);
   if (w.tick % L.time.dayLength === 5) fadeWear(w); if (w.tick % L.time.dayLength === 9) feedHounds(w, emit); /* the library: an age is opened when its people come near it (no chance is drawn) */
   if ((L.ecology.seaReturn || 0) > 0 && w.tick % 60 === 41) { /* looked at once in sixty moments, by a chance of its own, so the world's own stream of chance is left as it was */
     const ks = Object.keys(L.creatures).filter(function (k) { const q = L.creatures[k]; return q.sea && !q.retired && (counts[k] || 0) < (q.minPop || 2); });
@@ -2129,6 +2209,7 @@ function heldInCommon(w, a, way) { const need = (w.laws.culture || {}).commonAt 
 SW.bandMembers = bandMembers; SW.heldInCommon = heldInCommon;
 SW.commonWays = function (w, a) { use(w); const need = (w.laws.culture || {}).commonAt || 2, B = bandMembers(w, a), c = {}, out = []; if (B.length < need) return out; B.forEach(function (o) { for (const k in o.knows) c[k] = (c[k] || 0) + 1; }); for (const k in c) if (c[k] >= need) out.push(k); return out; };
 function raised(w, a, kind, i, emit) {
+  landUse(w, kind, i); /* some works clear the ground about them when they stand (Generation 31) */
   const B = w.laws.buildings[kind], way = B && B.way; if (!way || !w.laws.tree[way] || !heldInCommon(w, a, way)) return;
   const band = bandMembers(w, a), from = band.filter(function (o) { return o.knows[way]; })[0], got = [];
   band.forEach(function (o) { if (o.knows[way]) return; const src = from.knows[way]; o.knows[way] = { how: 'building', name: src.name, idea: src.idea, look: src.look || null, tick: w.tick, by: src.by, byName: src.byName, from: kind }; o.lore = Math.round((o.lore + 0.15) * 100) / 100; o.loreWhy = 'a way learned from what the band built'; got.push(o.id); });

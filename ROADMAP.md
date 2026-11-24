@@ -14,10 +14,15 @@ Open and emergent. Make things possible, give them a cost and a use, and never s
 
 Knowledge is earned slowly, in ages. Later things need earlier ones, need materials that must be found and carried, and need people enough to make them.
 
-## NOW: built in Generations 14 to 30, to be watched and tuned
+## NOW: built in Generations 14 to 31, to be watched and tuned
 
 | Item | State |
 | --- | --- |
+| **The library to the sixth age** (35 structures: castles and towns, steam and industry, fuel and power, thinking machines), each depending on other works | Built in 31. Never yet run with minds. |
+| **Works that clear the ground and works that foul it** (smoke sets plants back and costs health) | Built in 31. The first trouble a civilisation makes for itself. |
+| **A world begun in a later age,** with settlements, ways, a head for each people and a first page of history | Built in 31 (Setup, Begin at). For trying the later ages. |
+| **The old tradition presses less in the later ages** | Built in 31. |
+| **The view beyond the planet:** its star's worlds, the near stars, the galaxy, the galaxies; 9 and 0, or the two buttons | Built in 31. A picture only. |
 | **A world that begins mostly unknown** and is found by going to its edge with a purpose or in need; the pull of the unknown on the hungry, the crowded and the ambitious | Built in 30, for new worlds. Watch: how fast the known land grows; whether need sends people out; whether peoples who begin apart find one another. |
 | **Fifteen new plants** with effects of their own, each in its country | Built in 30, for new worlds. Watch: whether poisons are learned and avoided, and the herbs used. |
 | **Mountains of several sizes, mesas, cactus, pine and palm** in the picture of the land | Built in 30. |
@@ -223,6 +228,15 @@ These run through every stage and are picked up as runs call for them.
 - **Speed.** A world moment costs about 2.8 ms in the larger world, up from 2.
 - **Nothing passes between strangers.** In seven runs: no trade, no planned fight, no animal tamed, and peoples that meet a handful of times.
 - **No tale, song, myth or teaching has yet been made** by a real mind, though sayings and hard lessons spread and cross between peoples.
+- **Asked for on 23 November and not yet built** (in the order I would take them):
+  1. Vehicles and craft that move (a cart on a road, a train between stations, a ship between harbours, a craft of the air between fields), and goods carried between settlements as a thing in the world (caravans, sea lanes).
+  2. The troubles of later ages beyond smoke: crime, garbage, poverty, corruption, social unrest, political division, wars between settlements of one people; then booms, crashes and recessions, technology bubbles, gilded ages; then forms of rule (dictatorship, oligarchy) and terrorism.
+  3. Culture that turns with the age: old stories kept in modernised form, tales becoming histories, science beside and then in place of myth in what is written, not only in what presses.
+  4. An aphrodisiac and plants that change a trait for good (each needs a new kind of effect).
+  5. Islands in the near ocean; seas and the unknown for a world carried on.
+  6. A newborn kept near its parents (one was gored at a day old in the eighteenth run).
+  7. Groups (SCALE): bands and peoples thinking as one when there are too many to think alone; then the planet, its species, and the worlds of other stars as places of play. The view beyond the planet is drawn (Generation 31) and nothing in it is simulated.
+  8. The far end of the tree: superintelligence with its goods and harms, nanotech, biowar, mass unemployment, robots and conflict with them, contact with others.
 - **Prompts are at a middle of 34,900 characters** (eighteenth run), with a longest of 48,700. About 13,300 is standing text and the reply format; the ways a being knows take 4,900. To be cut by section, measured first.
 - **A newborn can wander off and be killed** (a day-old child was gored in the eighteenth run). Not looked into.
 - **No offering, no trade and no forge** in the eighteenth run.
@@ -266,3 +280,4 @@ A short index; the detail is in the design log.
 | 28 | Structures from blocks, designed by the maker; a library by age; works that depend on one another; settlements told of one another and of the paved ways between; food against beings by land; a crossing chronicled once for each land; an elder told what only it knows |
 | 29 | Ways on the ground by grade and walkers that keep to them; kept hunters fed on scraps; settlements named in their own tongue; speech boxes that open; ice at the poles; the maker's own blocks; fewer things break into a plan |
 | 30 | A world that begins mostly unknown and is found on foot; the pull of the unknown on the hungry, crowded and ambitious; fifteen new plants; mountains of several sizes, mesas, cactus, pine and palm |
+| 31 | The library to the sixth age; works that clear and foul the land; a world begun in a later age with its history; tradition pressing less in later ages; the view beyond the planet |
