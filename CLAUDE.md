@@ -10,6 +10,10 @@ Evolu is a self-modifying world simulation by Nova Spivack that runs as a Claude
 - **While Nova is running a world, do nothing he can see.** Do not publish (it reloads the open page), do not send files into the conversation, do not show an artifact, do not attach or register anything. A run was cut short on 22 Nov 2026 by something of this kind. Finish every visible step before telling him a generation is ready, then stop, and wait for him to say the run is over.
 - One commit per published generation, message `Generation N: <one line>`. `src/` at that commit must be what is live.
 
+## Work in progress
+
+`docs/overnight-plan.md` is the checklist of the waves asked for on 23 Nov 2026 (Generations 29 to 32). If it has unticked items, that is the work: read it first, tick what ships, and keep `ROADMAP.md` in step.
+
 ## When you are handed a run file
 
 The file's `_READ_ME_FIRST` says the same thing more briefly. Do this without being asked:
