@@ -16,7 +16,45 @@ const LANDS = {
   marsh: { scale: [0, 2, 3, 7, 8], root: 92.5, voice: 'flute' }, tundra: { scale: [0, 2, 7, 9, 10], root: 130.8, voice: 'glass' }
 };
 const MOODS = { calm: null, bright: { scale: [0, 2, 4, 7, 9], up: 1.122 }, solemn: { scale: [0, 3, 5, 7, 10], up: 0.891 }, tense: { scale: [0, 1, 5, 6, 10], up: 1 }, strange: { scale: [0, 2, 4, 6, 8], up: 1 }, festive: { scale: [0, 2, 4, 7, 9], up: 1.189, quick: 1 } };
-let voice = 'bell', quick = 0, nextDrum = 0, era = 1;
+let voice = 'bell', quick = 0, nextDrum = 0, era = 1, nextAge = 0, FULL = [0, 2, 4, 5, 7, 9, 11];
+/* THE MUSIC OF AN AGE (Generation 32). The first two ages keep the mode and the voice of their land. From the third, the age gives the mode and the voice
+   (the land still gives the pitch), and a figure of its own is heard now and then: a lute over a drone, a waltz at the keys with an engine's beat,
+   a walking bass with muted brass, a run of quick machine notes over a low hum. */
+const AGES = {
+  3: { penta: [0, 3, 5, 7, 10], full: [0, 2, 3, 5, 7, 9, 10], voice: 'pluck' },
+  4: { penta: [0, 2, 4, 7, 9], full: [0, 2, 4, 5, 7, 9, 11], voice: 'keys' },
+  5: { penta: [0, 2, 4, 7, 10], full: [0, 2, 4, 5, 7, 9, 10], voice: 'horn' },
+  6: { penta: [0, 3, 5, 7, 10], full: [0, 2, 3, 5, 7, 8, 10], voice: 'synth' }
+};
+function hzF(step) { const n = FULL.length, oct = Math.floor(step / n), deg = ((step % n) + n) % n; return rootHz * Math.pow(2, oct + FULL[deg] / 12); }
+A.ageOf = function () { return era; };
+function ageFigure(o) {
+  const crowd = o && o.crowd > 0, g0 = crowd ? 1 : 0.7;
+  if (era === 3) { /* a lute, stepping, over a drone of root and fifth */
+    swell({ f: hzF(7), dur: 7, gain: 0.016 * g0 }); swell({ f: hzF(11), dur: 7, gain: 0.011 * g0, pan: 0.3 });
+    let s = 14 + Math.floor(Math.random() * 4), at = 0.5; const n = 6 + Math.floor(Math.random() * 5);
+    for (let k = 0; k < n; k++) { s = Math.max(12, Math.min(22, s + [-2, -1, -1, 1, 1, 2][Math.floor(Math.random() * 6)])); chime({ f: hzF(s), gain: 0.03 * g0, pan: -0.2, at: at, voice: 'pluck' }); at += k % 3 === 2 ? 0.62 : 0.31; }
+    return at + 6;
+  }
+  if (era === 4) { /* three in a bar at the keys; where people are, an engine keeps time beneath */
+    const bars = [[7, 9, 11], [10, 12, 14], [11, 13, 15], [7, 9, 11]], beat = 0.34; let at = 0;
+    bars.forEach(function (b) { chime({ f: hzF(b[0]), gain: 0.03 * g0, at: at, pan: -0.3, voice: 'keys' }); chime({ f: hzF(b[1] + 7), gain: 0.017 * g0, at: at + beat, pan: 0.2, voice: 'keys' }); chime({ f: hzF(b[2] + 7), gain: 0.017 * g0, at: at + 2 * beat, pan: 0.3, voice: 'keys' }); at += 3 * beat; });
+    chime({ f: hzF(21), gain: 0.022 * g0, at: at, voice: 'keys' });
+    if (crowd) for (let k = 0; k < 12; k++) burst({ f: k % 4 === 0 ? 240 : 420, type: 'lowpass', dur: 0.09, gain: k % 4 === 0 ? 0.035 : 0.018, at: k * beat, q: 0.7, pan: 0.5 });
+    return at + 7;
+  }
+  if (era === 5) { /* a walking bass, and muted brass on the off beats; a hum of wires under it */
+    const walk = [0, 2, 4, 5, 7, 5, 4, 2], beat = 0.3; let at = 0;
+    walk.forEach(function (d, k) { tone({ f: hzF(d), type: 'triangle', dur: 0.26, gain: 0.05 * g0, at: at, lp: 500, wet: 0.2 }); if (k % 2) [9, 11, 13].forEach(function (c2, j) { tone({ f: hzF(c2 + (k > 4 ? 1 : 0)), type: 'sawtooth', dur: 0.14, gain: 0.011 * g0, at: at + 0.02, lp: 1100, pan: (j - 1) * 0.3, wet: 0.5 }); }); at += beat; });
+    if (crowd) tone({ f: 60, dur: at, gain: 0.012, attack: 0.5, lp: 200 });
+    return at + 8;
+  }
+  /* era 6: a run of quick notes that turns on itself, over a low hum */
+  const pat = [0, 2, 4, 7, 4, 2, 0, 2, 4, 9, 4, 2, 0, 2, 4, 7], beat = 0.15; let at = 0; const base = 14 + 2 * Math.floor(Math.random() * 2);
+  pat.forEach(function (d, k) { tone({ f: hzF(base + d), type: k % 2 ? 'square' : 'sawtooth', dur: 0.13, gain: 0.012 * g0, at: at, lp: 900 + 500 * Math.sin(k / 16 * 3.14), pan: Math.sin(k * 0.8) * 0.5, wet: 0.6 }); at += beat; });
+  swell({ f: hzF(0) / 2, dur: at + 4, gain: 0.03 * g0 }); swell({ f: hzF(4), dur: at + 4, gain: 0.012 * g0, pan: -0.4 });
+  return at + 8;
+}
 let master, wet, music, windGain, windFilter, rainGain, rootHz = 110, recent = [], nextChord = 0, nextNote = 0, lastStep = 7;
 
 function hz(step) { const oct = Math.floor(step / 5), deg = ((step % 5) + 5) % 5; return rootHz * Math.pow(2, oct + SCALE[deg] / 12); }
@@ -78,7 +116,7 @@ A.setVolume = function (v) { A.vol = v; if (A.on && master) master.gain.setTarge
 A.scene = function (night, season, sky, o) {
   if (!A.on) return;
   const ctx = A.ctx, t = ctx.currentTime;
-  { const Ld = LANDS[(o && o.biome) || 'mixed'] || LANDS.mixed, Md = MOODS[(o && o.mood) || 'calm']; SCALE = Md ? Md.scale : Ld.scale; rootHz = Ld.root * (Md ? Md.up : 1); voice = Ld.voice; quick = Md && Md.quick ? 1 : 0; era = (o && o.era) || 1; A.land = (o && o.biome) || 'mixed'; A.mood = (o && o.mood) || 'calm';
+  { const Ld = LANDS[(o && o.biome) || 'mixed'] || LANDS.mixed, Md = MOODS[(o && o.mood) || 'calm']; SCALE = Md ? Md.scale : Ld.scale; rootHz = Ld.root * (Md ? Md.up : 1); voice = Ld.voice; quick = Md && Md.quick ? 1 : 0; era = (o && o.era) || 1; { const Ag = AGES[Math.min(6, era)]; if (Ag) { if (!Md) SCALE = Ag.penta; FULL = Ag.full; voice = Ag.voice; } else FULL = [0, 2, 4, 5, 7, 9, 11]; if (Ag && t >= nextAge) { if (!nextAge) nextAge = t + 4; else nextAge = t + ageFigure(o) + (quick ? 6 : 12) + Math.random() * (night > 0.5 ? 26 : 14); } } A.land = (o && o.biome) || 'mixed'; A.mood = (o && o.mood) || 'calm';
     /* where peoples have settled and learned, a slow drum is heard now and then; later ages add to it */
     if (era >= 2 && o && o.crowd > 0 && t >= nextDrum) { const beats = era >= 4 ? [0, 0.5, 1, 1.5, 2, 2.5] : era >= 3 ? [0, 0.75, 1.5, 1.875] : [0, 1.1]; beats.forEach(function (b, k) { tone({ f: k % 2 ? 62 : 55, to: 40, dur: 0.5, gain: 0.05, attack: 0.008, at: b * (quick ? 0.6 : 1), wet: 0.3 }); }); if (era >= 3) chime({ f: hz(5), gain: 0.012, at: 0.4 }); nextDrum = t + (quick ? 9 : 18) + Math.random() * (quick ? 10 : 30); }
   }
@@ -97,7 +135,7 @@ A.scene = function (night, season, sky, o) {
     const count = Math.random() < 0.35 ? 1 : 2 + Math.floor(Math.random() * 3); let at = 0;
     for (let k = 0; k < count; k++) {
       lastStep = Math.max(9, Math.min(17, lastStep + [-2, -1, -1, 1, 1, 2, 3][Math.floor(Math.random() * 7)]));
-      chime({ f: hz(lastStep), gain: dark ? 0.02 : 0.028, pan: Math.random() * 1.2 - 0.6, at: at });
+      chime({ f: hz(lastStep), gain: dark ? 0.02 : 0.028, pan: Math.random() * 1.2 - 0.6, at: at, voice: voice });
       at += 0.9 + Math.random() * 1.6;
     }
     nextNote = t + at + (quick ? 2 : 6) + Math.random() * (dark ? 20 : quick ? 5 : 11);
@@ -138,7 +176,7 @@ function swell(o) {
 function chime(o) {
   const ctx = A.ctx; if (!ctx || !music) return;
   const t = ctx.currentTime + (o.at || 0), g = ctx.createGain();
-  const V = { bell: { att: 0.04, tail: 1.1, parts: [[1, 1], [2.01, 0.18], [4.2, 0.04]], type: 'sine' }, flute: { att: 0.22, tail: 0.7, parts: [[1, 1], [2, 0.06]], type: 'sine' }, horn: { att: 0.3, tail: 1.3, parts: [[1, 1], [2, 0.3], [3, 0.12]], type: 'triangle' }, pluck: { att: 0.008, tail: 0.35, parts: [[1, 1], [2, 0.35], [3, 0.15], [5.1, 0.05]], type: 'triangle' }, glass: { att: 0.02, tail: 1.8, parts: [[1, 0.8], [2.76, 0.3], [5.4, 0.08]], type: 'sine' } }[voice] || { att: 0.04, tail: 1.1, parts: [[1, 1], [2.01, 0.18]], type: 'sine' };
+  const V = { bell: { att: 0.04, tail: 1.1, parts: [[1, 1], [2.01, 0.18], [4.2, 0.04]], type: 'sine' }, flute: { att: 0.22, tail: 0.7, parts: [[1, 1], [2, 0.06]], type: 'sine' }, horn: { att: 0.3, tail: 1.3, parts: [[1, 1], [2, 0.3], [3, 0.12]], type: 'triangle' }, pluck: { att: 0.008, tail: 0.35, parts: [[1, 1], [2, 0.35], [3, 0.15], [5.1, 0.05]], type: 'triangle' }, glass: { att: 0.02, tail: 1.8, parts: [[1, 0.8], [2.76, 0.3], [5.4, 0.08]], type: 'sine' }, keys: { att: 0.006, tail: 0.6, parts: [[1, 1], [2, 0.42], [3, 0.16], [4, 0.07]], type: 'triangle' }, synth: { att: 0.03, tail: 0.5, parts: [[1, 0.7], [1.005, 0.7], [2, 0.2]], type: 'sawtooth' } }[o.voice || voice] || { att: 0.04, tail: 1.1, parts: [[1, 1], [2.01, 0.18]], type: 'sine' };
   g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(o.gain, t + V.att); g.gain.setTargetAtTime(0.0001, t + V.att, V.tail);
   V.parts.forEach(function (h) {
     const osc = ctx.createOscillator(), hg = ctx.createGain(); osc.type = V.type; osc.frequency.value = o.f * h[0]; hg.gain.value = h[1];
@@ -215,7 +253,7 @@ A.event = function (type, o) {
     case 'birth': if (allow()) [0, 2, 4, 7].forEach(function (d, k) { tone({ f: hz(step + d), type: 'triangle', dur: 0.5, gain: v(0.06), pan: pan, at: k * 0.11, wet: 0.7 }); }); break;
     case 'court': if (allow()) { tone({ f: hz(step + 2), dur: 0.25, gain: v(0.05), pan: pan, wet: 0.6 }); tone({ f: hz(step + 4), dur: 0.4, gain: v(0.05), pan: pan, at: 0.22, wet: 0.6 }); } break;
     case 'gave': if (allow()) { tone({ f: hz(step + 4), dur: 0.2, gain: v(0.045), pan: pan, wet: 0.5 }); tone({ f: hz(step + 6), dur: 0.3, gain: v(0.04), pan: pan, at: 0.12, wet: 0.5 }); } break;
-    case 'built': if (allow()) [0, 0.16, 0.3].forEach(function (at, k) { burst({ f: 520 + k * 60, dur: 0.07, gain: v(0.2), pan: pan, at: at, q: 4 }); }); break;
+    case 'built': if (allow()) { if (era >= 5) { for (let k = 0; k < 7; k++) burst({ f: 1800, dur: 0.03, gain: v(0.1), pan: pan, at: k * 0.045, q: 6 }); tone({ f: 90, to: 60, type: 'sawtooth', dur: 0.4, gain: v(0.05), pan: pan, at: 0.34, lp: 400 }); } else if (era >= 3) [0, 0.18, 0.36].forEach(function (at, k) { tone({ f: 1500 + k * 90, to: 1300, type: 'triangle', dur: 0.06, gain: v(0.07), pan: pan, at: at, wet: 0.3 }); burst({ f: 2600, dur: 0.04, gain: v(0.1), pan: pan, at: at, q: 5 }); }); else [0, 0.16, 0.3].forEach(function (at, k) { burst({ f: 520 + k * 60, dur: 0.07, gain: v(0.2), pan: pan, at: at, q: 4 }); }); } break;
     case 'marked': if (allow()) { burst({ f: 640, dur: 0.07, gain: v(0.18), pan: pan, q: 4 }); tone({ f: hz(step + 6), dur: 0.6, gain: v(0.035), pan: pan, at: 0.08, wet: 0.7 }); } break;
     case 'variety': if (allow()) [9, 11, 12, 14, 16].forEach(function (d, k) { tone({ f: hz(d), dur: 0.35, gain: v(0.035), pan: pan + (k - 2) * 0.1, at: k * 0.06, wet: 0.9 }); }); break;
     case 'extinct': if (allow()) tone({ f: hz(4), to: hz(-3), dur: 1.6, gain: 0.04, wet: 0.9 }); break;
@@ -234,6 +272,8 @@ A.event = function (type, o) {
     case 'craft': if (allow()) { [0, 0.1].forEach(function (at) { burst({ f: 900, dur: 0.05, gain: v(0.12), pan: pan, at: at, q: 5 }); }); tone({ f: hz(step + 4), dur: 0.22, gain: v(0.03), pan: pan, at: 0.2, wet: 0.5 }); } break;
     case 'tamed': if (allow()) { tone({ f: hz(step + 7), to: hz(step + 9), dur: 0.18, gain: v(0.04), pan: pan, wet: 0.5 }); tone({ f: hz(step + 11), dur: 0.28, gain: v(0.035), pan: pan, at: 0.2, wet: 0.6 }); } break;
     case 'rode': if (allow(true)) [0, 0.12, 0.3, 0.42].forEach(function (at) { burst({ f: 220, dur: 0.05, gain: v(0.14), pan: pan, at: at, q: 2 }); }); break;
+    case 'drove': if (allow(true)) { if (o.steam) { for (let k = 0; k < 4; k++) burst({ f: 300, type: 'lowpass', dur: 0.1, gain: v(0.12), pan: pan, at: k * 0.17, q: 0.7 }); tone({ f: 880, to: 860, type: 'triangle', dur: 0.3, gain: v(0.02), pan: pan, at: 0.7, wet: 0.4 }); } else { tone({ f: 74, to: 96, type: 'sawtooth', dur: 0.7, gain: v(0.06), pan: pan, lp: 380 }); tone({ f: 148, to: 190, type: 'square', dur: 0.7, gain: v(0.012), pan: pan, lp: 600 }); } } break;
+    case 'smoke': if (allow(true)) burst({ f: 180, type: 'lowpass', dur: 1.2, gain: v(0.08), pan: pan, q: 0.5 }); break;
     case 'telling': if (allow()) { tone({ f: hz(step - 7), dur: 1.8, gain: v(0.03), pan: pan, wet: 0.9 }); [0, 2, 0, 4].forEach(function (d, k) { tone({ f: hz(step + d), type: 'triangle', dur: 0.4, gain: v(0.03), pan: pan, at: 0.2 + k * 0.38, lp: 1800, wet: 0.7 }); }); } break;
     case 'rite': if (allow()) [0, 4, 7, 12].forEach(function (d, k) { tone({ f: hz(step + d), type: 'triangle', dur: 1.0, gain: v(0.035), pan: pan, at: k * 0.2, wet: 1 }); }); break;
     case 'shared': if (allow()) { tone({ f: hz(step + 2), dur: 0.5, gain: v(0.035), pan: pan, wet: 0.7 }); tone({ f: hz(step + 6), dur: 0.5, gain: v(0.03), pan: pan, at: 0.04, wet: 0.7 }); } break;

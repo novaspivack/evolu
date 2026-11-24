@@ -40,6 +40,77 @@ function kindLook(name, owner) {
   };
   const hue = [28, 38, 20, 46, 14, 58, 32][tone], wood = 'hsl(' + hue + ',34%,29%)', thatch = 'hsl(' + (hue + 12) + ',44%,46%)', dark = 'hsl(' + hue + ',30%,13%)', line = 'hsl(' + hue + ',36%,24%)', stone = 'hsl(' + (205 + tone * 5) + ',7%,56%)', stone2 = 'hsl(' + (205 + tone * 5) + ',7%,42%)', sh = [{ t: 'ellipse', x: 0.05, y: 0.36, w: 0.46, h: 0.08, fill: '#141a14' }];
   let h = 0; for (let k = 0; k < name.length; k++) h = (h * 31 + name.charCodeAt(k)) % 997;
+  /* LOOKS BY FAMILY AND AGE (Generation 32): a dwelling, a stronghold, a civic house, a works, a tower of glass each has its own shape, so that a
+     town of a later age looks like one. Each returns here; kinds without a family keep the older looks below. */
+  { const R = function (x, y, hw, hh, fill) { sh.push({ t: 'rect', x: x, y: y, w: hw, h: hh, fill: fill }); }, Ln = function (x, y, x2, y2, lw, stroke) { sh.push({ t: 'line', x: x, y: y, x2: x2, y2: y2, lw: lw, stroke: stroke }); },
+      Tr = function (x, y, s, fill, rot) { sh.push({ t: 'tri', x: x, y: y, s: s, rot: rot || 0, fill: fill }); }, El = function (x, y, ew, eh, fill) { sh.push({ t: 'ellipse', x: x, y: y, w: ew, h: eh, fill: fill }); },
+      wins = function (x0, y0, cols, rows, dx, dy, hw, hh, fill, alt) { for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) R(x0 + q * dx, y0 + r * dy, hw, hh, alt && (q * 3 + r * 5 + h) % 4 === 0 ? alt : fill); },
+      smoke = function (x, y) { El(x + 0.02, y - 0.05, 0.05, 0.035, 'rgba(205,205,210,0.6)'); El(x + 0.07, y - 0.13, 0.07, 0.045, 'rgba(205,205,210,0.4)'); El(x + 0.13, y - 0.22, 0.09, 0.05, 'rgba(205,205,210,0.22)'); },
+      cren = function (x0, x1, y, n, fill) { for (let q = 0; q < n; q++) R(x0 + (x1 - x0) * q / (n - 1), y, (x1 - x0) / (n - 1) * 0.28, 0.03, fill); },
+      stack = function (x, top, fill) { R(x, (0.38 + top) / 2, 0.04, (0.38 - top) / 2, fill); R(x, top + 0.01, 0.05, 0.015, 'hsl(12,20%,22%)'); smoke(x, top); },
+      flag = function (x, y) { Ln(x, y + 0.16, x, y - 0.04, 0.02, '#2a2f38'); Tr(x + 0.06, y, 0.09, ['#d9534f', '#e0b23c', '#4f8fd9', '#6fbf73', '#b06fd9', '#e08a3c', '#d94f9c'][tone], 1.57); };
+    const brick = 'hsl(' + (10 + tone) + ',38%,34%)', brick2 = 'hsl(' + (10 + tone) + ',30%,26%)', slate = 'hsl(215,14%,28%)', tile = 'hsl(' + (10 + tone * 2) + ',52%,40%)', plaster = 'hsl(' + (36 + tone * 2) + ',30%,72%)', glass = 'hsl(' + (196 + tone * 3) + ',46%,60%)', glass2 = 'hsl(' + (196 + tone * 3) + ',40%,44%)', steel = 'hsl(210,10%,60%)', steel2 = 'hsl(210,10%,38%)', conc = 'hsl(' + (200 + tone * 4) + ',5%,66%)', conc2 = 'hsl(210,5%,50%)', lit = '#ffd97a', pale2 = 'hsl(' + (40 + tone * 3) + ',14%,80%)', night = 'hsl(215,22%,20%)';
+    let fam = 1;
+    switch (name) {
+      /* dwellings */
+      case 'house': R(0, 0.35, 0.29, 0.03, stone2); R(0, 0.2, 0.26, 0.14, plaster); Ln(-0.26, 0.2, 0.26, 0.2, 0.02, wood); Ln(-0.12, 0.08, -0.12, 0.33, 0.02, wood); Ln(0.12, 0.08, 0.12, 0.33, 0.02, wood); Tr(0, -0.1, 0.36, thatch); R(0, 0.26, 0.045, 0.08, dark); R(0.18, 0.16, 0.035, 0.035, '#3a2c1c'); break;
+      case 'townhouse': R(0, 0.36, 0.24, 0.025, stone2); R(0, 0.1, 0.21, 0.26, plaster); Ln(-0.21, 0.1, 0.21, 0.1, 0.022, wood); Ln(-0.21, -0.14, 0.21, -0.14, 0.022, wood); Ln(0, -0.14, 0, 0.1, 0.018, wood); Tr(0, -0.3, 0.28, tile); wins(-0.11, -0.04, 2, 1, 0.22, 0, 0.04, 0.045, '#2c3440'); R(-0.1, 0.25, 0.045, 0.09, dark); R(0.11, 0.2, 0.04, 0.04, '#2c3440'); break;
+      case 'rowhouse': R(0, 0.14, 0.43, 0.22, brick); R(0, -0.1, 0.45, 0.035, slate); Ln(-0.145, -0.08, -0.145, 0.36, 0.012, brick2); Ln(0.145, -0.08, 0.145, 0.36, 0.012, brick2); wins(-0.29, 0.02, 3, 1, 0.29, 0, 0.045, 0.045, '#2c3440', lit); for (let q = 0; q < 3; q++) { R(-0.33 + q * 0.29, 0.27, 0.035, 0.085, dark); R(-0.24 + q * 0.29, 0.22, 0.03, 0.035, '#2c3440'); } R(-0.2, -0.2, 0.035, 0.08, brick2); R(0.2, -0.2, 0.035, 0.08, brick2); smoke(-0.2, -0.28); break;
+      case 'tenement': R(0, 0, 0.3, 0.37, brick2); R(0, -0.38, 0.32, 0.025, conc2); wins(-0.19, -0.27, 3, 4, 0.19, 0.15, 0.045, 0.04, '#1c222c', lit); R(0, 0.3, 0.05, 0.07, dark); Ln(-0.3, 0.2, 0.3, 0.2, 0.012, 'hsl(12,20%,18%)'); R(0.22, -0.44, 0.03, 0.05, brick); break;
+      case 'apartments': R(0, -0.04, 0.27, 0.42, conc); wins(-0.17, -0.38, 3, 6, 0.17, 0.13, 0.055, 0.035, glass2, lit); for (let q = 0; q < 6; q++) Ln(-0.27, -0.33 + q * 0.13, 0.27, -0.33 + q * 0.13, 0.014, conc2); R(0, 0.33, 0.07, 0.05, night); R(-0.14, -0.5, 0.06, 0.035, steel2); break;
+      case 'office': R(0, 0.3, 0.34, 0.08, conc2); R(0, -0.1, 0.2, 0.42, glass); for (let q = 0; q < 7; q++) Ln(-0.2, -0.46 + q * 0.11, 0.2, -0.46 + q * 0.11, 0.012, glass2); Ln(-0.07, -0.5, -0.07, 0.22, 0.012, glass2); Ln(0.07, -0.5, 0.07, 0.22, 0.012, glass2); R(0.13, -0.2, 0.05, 0.3, 'rgba(255,255,255,0.22)'); Ln(0, -0.52, 0, -0.66, 0.015, steel2); R(0, 0.33, 0.06, 0.05, night); break;
+      /* strongholds */
+      case 'keep': R(0, 0.08, 0.2, 0.3, stone); cren(-0.18, 0.18, -0.25, 4, stone); R(0, -0.2, 0.22, 0.025, stone2); R(-0.09, -0.02, 0.015, 0.05, dark); R(0.09, -0.02, 0.015, 0.05, dark); El(0, 0.3, 0.06, 0.09, dark); flag(0, -0.42); break;
+      case 'castle': R(0, 0.2, 0.42, 0.18, stone); cren(-0.2, 0.2, -0.01, 5, stone); R(-0.36, 0.06, 0.1, 0.32, stone2); R(0.36, 0.06, 0.1, 0.32, stone2); cren(-0.43, -0.29, -0.29, 3, stone2); cren(0.29, 0.43, -0.29, 3, stone2); El(0, 0.3, 0.08, 0.1, dark); Ln(-0.05, 0.22, -0.05, 0.38, 0.01, '#3a3a3a'); Ln(0.05, 0.22, 0.05, 0.38, 0.01, '#3a3a3a'); R(-0.36, -0.02, 0.015, 0.05, dark); R(0.36, -0.02, 0.015, 0.05, dark); flag(-0.36, -0.46); flag(0.36, -0.46); break;
+      /* civic houses */
+      case 'townhall': R(0, 0.19, 0.34, 0.19, plaster); Tr(0, -0.06, 0.4, tile); R(0, -0.2, 0.08, 0.2, plaster); El(0, -0.24, 0.05, 0.05, '#f4f0e0'); Ln(0, -0.24, 0, -0.28, 0.012, '#222'); Ln(0, -0.24, 0.03, -0.24, 0.012, '#222'); Tr(0, -0.46, 0.1, slate); wins(-0.22, 0.14, 3, 1, 0.22, 0, 0.04, 0.05, '#2c3440'); El(0, 0.31, 0.05, 0.08, dark); break;
+      case 'guildhall': R(0, 0.18, 0.32, 0.2, plaster); R(0, -0.06, 0.26, 0.05, brick); R(0, -0.15, 0.18, 0.05, brick); R(0, -0.24, 0.1, 0.05, brick); wins(-0.2, 0.1, 3, 1, 0.2, 0, 0.045, 0.06, '#2c3440', lit); El(0, 0.31, 0.05, 0.07, dark); Ln(0.24, 0.0, 0.24, 0.22, 0.014, wood); R(0.24, 0.1, 0.04, 0.07, ['#d9534f', '#e0b23c', '#4f8fd9', '#6fbf73', '#b06fd9', '#e08a3c', '#d94f9c'][tone]); break;
+      case 'parliament': R(0, 0.36, 0.46, 0.025, conc2); R(0, 0.2, 0.44, 0.16, pale2); for (let q = 0; q < 7; q++) Ln(-0.36 + q * 0.12, 0.34, -0.36 + q * 0.12, 0.1, 0.035, '#f4f0e6'); R(0, 0.06, 0.45, 0.03, '#e6e0d0'); Tr(0, -0.02, 0.16, '#e6e0d0'); El(0, -0.14, 0.15, 0.13, 'hsl(170,22%,52%)'); R(0, -0.02, 0.17, 0.03, pale2); Ln(0, -0.27, 0, -0.42, 0.015, '#caa84a'); El(0, -0.28, 0.025, 0.025, '#caa84a'); break;
+      case 'ministry': R(0, 0.12, 0.42, 0.26, conc); for (let q = 0; q < 6; q++) Ln(-0.33 + q * 0.132, 0.36, -0.33 + q * 0.132, -0.08, 0.04, pale2); R(0, -0.13, 0.44, 0.03, conc2); wins(-0.265, 0.02, 5, 2, 0.132, 0.16, 0.02, 0.045, night); flag(0, -0.3); break;
+      case 'bank': R(0, 0.36, 0.36, 0.025, conc2); R(0, 0.2, 0.32, 0.16, pale2); for (let q = 0; q < 4; q++) Ln(-0.24 + q * 0.16, 0.34, -0.24 + q * 0.16, 0.08, 0.055, '#f4f0e6'); R(0, 0.04, 0.34, 0.03, '#e6e0d0'); Tr(0, -0.1, 0.3, '#e6e0d0'); El(0, -0.08, 0.05, 0.05, '#e0b23c'); R(0, 0.28, 0.04, 0.08, night); break;
+      case 'hospital': R(0, 0.1, 0.36, 0.28, '#eef0ee'); wins(-0.26, -0.08, 5, 3, 0.13, 0.13, 0.035, 0.035, glass2, lit); R(0, -0.3, 0.1, 0.1, '#eef0ee'); R(0, -0.3, 0.07, 0.022, '#d23c3c'); R(0, -0.3, 0.022, 0.07, '#d23c3c'); R(0, 0.32, 0.06, 0.06, night); break;
+      case 'laboratory': R(0, 0.2, 0.36, 0.17, '#e4e8ea'); El(-0.18, 0.02, 0.13, 0.11, steel); Ln(-0.18, -0.06, -0.08, -0.16, 0.03, steel2); wins(0.0, 0.14, 3, 1, 0.12, 0, 0.04, 0.04, 'hsl(150,60%,58%)'); R(0.26, -0.04, 0.03, 0.08, steel2); El(0.26, -0.15, 0.04, 0.04, 'hsl(150,70%,60%)'); R(-0.2, 0.3, 0.04, 0.07, night); break;
+      /* works */
+      case 'foundry': R(0, 0.2, 0.4, 0.18, brick); for (let q = 0; q < 3; q++) Tr(-0.26 + q * 0.2, -0.02, 0.13, slate, 30); stack(0.34, -0.36, brick2); El(-0.1, 0.3, 0.07, 0.08, '#ff8a2a'); El(-0.1, 0.31, 0.04, 0.05, '#ffd060'); wins(0.08, 0.16, 2, 1, 0.12, 0, 0.035, 0.04, '#ffb04a'); break;
+      case 'factory': R(0, 0.18, 0.42, 0.2, brick2); for (let q = 0; q < 4; q++) Tr(-0.3 + q * 0.2, -0.06, 0.12, steel2, 30); stack(-0.34, -0.4, brick); stack(0.36, -0.3, brick); wins(-0.3, 0.12, 5, 2, 0.15, 0.13, 0.045, 0.035, '#27303a', lit); break;
+      case 'gasworks': R(-0.12, 0.14, 0.24, 0.24, 'hsl(190,10%,36%)'); El(-0.12, -0.1, 0.24, 0.07, 'hsl(190,10%,48%)'); for (let q = 0; q < 4; q++) Ln(-0.36 + q * 0.16, 0.38, -0.36 + q * 0.16, -0.24, 0.016, steel2); Ln(-0.36, -0.24, 0.12, -0.24, 0.016, steel2); Ln(-0.36, 0.06, 0.12, 0.06, 0.012, steel2); R(0.3, 0.24, 0.12, 0.14, brick); stack(0.34, -0.2, brick2); break;
+      case 'refinery': R(-0.28, 0.2, 0.12, 0.18, steel); El(-0.28, 0.02, 0.12, 0.05, '#c8ccd0'); R(0.0, 0.24, 0.1, 0.14, steel); El(0.0, 0.1, 0.1, 0.04, '#c8ccd0'); R(0.28, 0.0, 0.045, 0.38, steel2); for (let q = 0; q < 4; q++) Ln(0.22, -0.26 + q * 0.16, 0.34, -0.26 + q * 0.16, 0.014, '#c8ccd0'); Ln(-0.16, 0.3, 0.24, 0.3, 0.025, 'hsl(28,50%,44%)'); Ln(0.1, 0.16, 0.24, 0.16, 0.02, 'hsl(28,50%,44%)'); Tr(0.28, -0.46, 0.08, '#ff7a1a'); Tr(0.28, -0.44, 0.045, '#ffd060'); break;
+      case 'glassworks': R(0.2, 0.24, 0.2, 0.14, brick); Tr(-0.14, 0.02, 0.4, brick2); R(-0.14, 0.3, 0.2, 0.08, brick2); El(-0.14, -0.36, 0.05, 0.03, '#ffb04a'); smoke(-0.14, -0.38); El(-0.14, 0.3, 0.06, 0.07, '#ff8a2a'); wins(0.12, 0.2, 2, 1, 0.14, 0, 0.04, 0.04, 'hsl(180,60%,70%)'); break;
+      case 'powerhouse': R(0, 0.16, 0.38, 0.22, brick2); stack(-0.26, -0.44, conc2); stack(-0.1, -0.44, conc2); wins(-0.26, 0.12, 4, 2, 0.13, 0.14, 0.04, 0.045, lit); Ln(0.3, 0.38, 0.3, -0.2, 0.02, steel2); Ln(0.2, -0.1, 0.4, -0.1, 0.02, steel2); Ln(0.22, -0.2, 0.38, -0.2, 0.02, steel2); sh.push({ t: 'star', x: 0.3, y: -0.32, s: 0.07, n: 4, fill: '#ffe45a' }); break;
+      case 'waterworks': R(-0.2, 0.26, 0.2, 0.12, brick); wins(-0.3, 0.24, 3, 1, 0.1, 0, 0.03, 0.045, '#2c3440'); Ln(0.12, 0.38, 0.16, -0.06, 0.03, steel2); Ln(0.36, 0.38, 0.32, -0.06, 0.03, steel2); Ln(0.14, 0.2, 0.34, 0.2, 0.016, steel2); R(0.24, -0.16, 0.15, 0.12, 'hsl(205,40%,46%)'); El(0.24, -0.28, 0.15, 0.05, 'hsl(205,44%,58%)'); Ln(0.24, -0.04, 0.24, 0.38, 0.03, 'hsl(205,30%,40%)'); break;
+      /* the newest ages */
+      case 'datacentre': R(0, 0.2, 0.44, 0.17, night); for (let r = 0; r < 3; r++) for (let q = 0; q < 12; q++) R(-0.385 + q * 0.07, 0.1 + r * 0.09, 0.012, 0.012, (q + r * 2 + h) % 5 === 0 ? '#ff6a5a' : (q + r) % 2 ? '#5affc0' : '#5ac8ff'); R(-0.24, -0.01, 0.08, 0.04, steel2); R(0.0, -0.01, 0.08, 0.04, steel2); El(0.3, -0.08, 0.09, 0.07, '#d8dce0'); Ln(0.3, -0.08, 0.36, -0.2, 0.014, steel2); break;
+      case 'reactor': El(-0.16, 0.2, 0.22, 0.22, conc); R(-0.16, 0.32, 0.24, 0.06, conc2); R(0.26, 0.12, 0.11, 0.26, '#d8dad8'); El(0.26, -0.14, 0.13, 0.04, '#eceeec'); El(0.26, 0.38, 0.15, 0.03, conc2); El(0.3, -0.24, 0.1, 0.06, 'rgba(240,240,245,0.6)'); El(0.36, -0.36, 0.13, 0.07, 'rgba(240,240,245,0.35)'); sh.push({ t: 'star', x: -0.16, y: 0.16, s: 0.07, n: 3, fill: '#ffe45a' }); break;
+      case 'fusionplant': R(0, 0.26, 0.42, 0.12, 'hsl(220,14%,30%)'); El(0, 0.04, 0.34, 0.2, steel); El(0, 0.04, 0.24, 0.12, 'hsl(285,80%,66%)'); El(0, 0.04, 0.14, 0.06, '#f4e8ff'); for (let q = 0; q < 6; q++) Ln(-0.3 + q * 0.12, -0.12, -0.3 + q * 0.12, 0.2, 0.02, steel2); R(0.34, 0.0, 0.03, 0.26, steel2); El(0.34, -0.28, 0.035, 0.035, '#5ac8ff'); break;
+      case 'launchpad': R(0, 0.36, 0.42, 0.03, conc2); Ln(-0.24, 0.36, -0.24, -0.44, 0.03, steel2); Ln(-0.14, 0.36, -0.14, -0.44, 0.02, steel2); for (let q = 0; q < 6; q++) Ln(-0.24, 0.3 - q * 0.14, -0.14, 0.2 - q * 0.14, 0.012, steel2); Ln(-0.14, -0.2, 0.02, -0.2, 0.016, steel2); R(0.08, 0.02, 0.06, 0.3, '#f0f0f2'); Tr(0.08, -0.34, 0.07, '#d23c3c'); Tr(-0.0, 0.3, 0.06, '#d23c3c'); Tr(0.16, 0.3, 0.06, '#d23c3c'); R(0.08, -0.06, 0.03, 0.03, '#5ac8ff'); break;
+      case 'orbitalyard': R(0, 0.36, 0.44, 0.03, conc2); for (let q = 0; q < 4; q++) Ln(-0.4 + q * 0.26, 0.36, -0.4 + q * 0.26, -0.3, 0.02, steel2); Ln(-0.4, -0.3, 0.38, -0.3, 0.02, steel2); Ln(-0.4, 0.0, 0.38, 0.0, 0.012, steel2); El(-0.02, 0.14, 0.3, 0.1, '#e4e6ea'); El(-0.02, 0.14, 0.2, 0.05, 'hsl(200,60%,60%)'); Tr(0.3, 0.14, 0.08, '#e4e6ea', 90); sh.push({ t: 'star', x: 0.3, y: -0.42, s: 0.05, n: 4, fill: '#fff8c0' }); break;
+      case 'spaceport': R(0, 0.36, 0.44, 0.03, conc2); El(-0.18, 0.22, 0.2, 0.18, '#d8dce0'); El(-0.18, 0.2, 0.12, 0.08, glass); R(0.22, 0.06, 0.05, 0.26, '#f0f0f2'); Tr(0.22, -0.26, 0.06, '#d23c3c'); Tr(0.16, 0.3, 0.05, '#d23c3c'); Tr(0.28, 0.3, 0.05, '#d23c3c'); Ln(0.36, 0.36, 0.36, -0.2, 0.02, steel2); break;
+      case 'airport': Ln(-0.46, 0.36, 0.46, 0.36, 0.05, '#3c4046'); for (let q = 0; q < 5; q++) Ln(-0.36 + q * 0.18, 0.36, -0.28 + q * 0.18, 0.36, 0.012, '#f0f0e0'); El(-0.2, 0.2, 0.22, 0.16, steel); R(-0.2, 0.26, 0.12, 0.08, night); R(0.26, 0.04, 0.035, 0.28, conc); R(0.26, -0.26, 0.08, 0.05, glass); Ln(0.26, -0.3, 0.26, -0.42, 0.012, steel2); break;
+      case 'hangar': El(0, 0.2, 0.4, 0.26, steel); El(0, 0.24, 0.3, 0.18, night); Ln(0, 0.06, 0, 0.4, 0.012, steel2); Ln(-0.4, 0.38, 0.4, 0.38, 0.03, conc2); Tr(0.0, 0.28, 0.07, '#e4e6ea'); Ln(-0.12, 0.3, 0.12, 0.3, 0.025, '#e4e6ea'); break;
+      case 'mast': Ln(-0.12, 0.38, 0, -0.5, 0.022, steel2); Ln(0.12, 0.38, 0, -0.5, 0.022, steel2); for (let q = 0; q < 5; q++) { const yy = 0.28 - q * 0.15, ww = 0.11 - q * 0.02; Ln(-ww, yy, ww, yy - 0.1, 0.01, steel2); Ln(ww, yy, -ww, yy - 0.1, 0.01, steel2); } El(0, -0.5, 0.03, 0.03, '#ff4a3a'); Ln(0, -0.3, -0.42, 0.38, 0.006, 'rgba(200,200,200,0.5)'); Ln(0, -0.3, 0.42, 0.38, 0.006, 'rgba(200,200,200,0.5)'); R(0.3, 0.3, 0.09, 0.07, conc2); break;
+      case 'station': Ln(-0.48, 0.4, 0.48, 0.4, 0.014, '#8a8a8a'); Ln(-0.48, 0.34, 0.48, 0.34, 0.014, '#8a8a8a'); for (let q = 0; q < 9; q++) Ln(-0.44 + q * 0.11, 0.33, -0.44 + q * 0.11, 0.41, 0.014, '#5a4630'); R(0, 0.14, 0.34, 0.14, brick); R(0, -0.02, 0.42, 0.025, slate); for (let q = 0; q < 4; q++) Ln(-0.36 + q * 0.24, 0.0, -0.36 + q * 0.24, 0.28, 0.016, steel2); wins(-0.2, 0.12, 3, 1, 0.2, 0, 0.05, 0.06, '#2c3440', lit); R(0, -0.14, 0.06, 0.1, brick); El(0, -0.16, 0.04, 0.04, '#f4f0e0'); break;
+      /* trade, rest and water */
+      case 'granary': for (let q = 0; q < 4; q++) El(-0.24 + q * 0.16, 0.36, 0.035, 0.03, stone2); R(0, 0.16, 0.3, 0.16, wood); El(0, 0.0, 0.32, 0.1, thatch); R(0, 0.04, 0.32, 0.04, thatch); Ln(-0.07, 0.1, 0.07, 0.3, 0.014, line); Ln(0.07, 0.1, -0.07, 0.3, 0.014, line); R(0, 0.2, 0.08, 0.11, 'rgba(0,0,0,0.25)'); El(0, -0.04, 0.03, 0.03, dark); break;
+      case 'tavern': R(0, 0.2, 0.3, 0.17, plaster); Ln(-0.3, 0.12, 0.3, 0.12, 0.02, wood); Tr(0, -0.1, 0.4, tile); wins(-0.18, 0.2, 2, 1, 0.36, 0, 0.045, 0.045, lit); R(0, 0.27, 0.045, 0.09, dark); Ln(0.3, 0.02, 0.44, 0.02, 0.016, wood); R(0.4, 0.1, 0.05, 0.05, '#c0822a'); El(-0.38, 0.32, 0.05, 0.06, '#7a5a34'); break;
+      case 'guesthouse': R(0, 0.12, 0.3, 0.25, plaster); Tr(0, -0.24, 0.38, thatch); wins(-0.18, 0.02, 3, 2, 0.18, 0.15, 0.04, 0.04, '#2c3440', lit); R(0, 0.3, 0.04, 0.07, dark); Ln(-0.3, 0.1, 0.3, 0.1, 0.016, wood); break;
+      case 'roadhouse': R(-0.06, 0.22, 0.38, 0.15, wood); R(-0.06, 0.04, 0.42, 0.04, thatch); El(0.2, 0.3, 0.08, 0.1, dark); wins(-0.34, 0.2, 3, 1, 0.13, 0, 0.035, 0.04, lit); Ln(0.4, 0.38, 0.4, -0.14, 0.02, line); R(0.4, -0.16, 0.06, 0.045, '#c0822a'); break;
+      case 'bathhouse': R(0, 0.24, 0.36, 0.13, pale2); El(0, 0.1, 0.22, 0.14, 'hsl(18,40%,56%)'); R(0, 0.2, 0.38, 0.03, stone2); El(0, 0.3, 0.14, 0.05, 'hsl(195,60%,60%)'); El(-0.04, -0.12, 0.05, 0.04, 'rgba(235,240,245,0.6)'); El(0.02, -0.22, 0.07, 0.05, 'rgba(235,240,245,0.38)'); break;
+      case 'apothecary': R(0, 0.2, 0.24, 0.17, plaster); Tr(0, -0.06, 0.3, slate); for (let q = 0; q < 4; q++) R(-0.18 + q * 0.12, 0.1, 0.06, 0.03, q % 2 ? '#f0f0e8' : 'hsl(150,50%,40%)'); R(-0.1, 0.24, 0.07, 0.06, 'hsl(160,50%,70%)'); R(0.12, 0.28, 0.04, 0.08, dark); El(0.3, 0.0, 0.05, 0.05, 'hsl(150,56%,42%)'); R(0.3, 0.0, 0.03, 0.01, '#fff'); R(0.3, 0.0, 0.01, 0.03, '#fff'); break;
+      case 'aqueduct': R(0, -0.1, 0.48, 0.05, stone); Ln(-0.48, -0.16, 0.48, -0.16, 0.025, 'hsl(200,60%,62%)'); for (let q = 0; q < 4; q++) R(-0.42 + q * 0.28, 0.16, 0.045, 0.22, stone2); for (let q = 0; q < 3; q++) El(-0.28 + q * 0.28, -0.04, 0.095, 0.05, stone); break;
+      case 'lighthouse': R(0, 0.26, 0.11, 0.12, '#f0f0ec'); R(0, 0.06, 0.095, 0.08, '#d23c3c'); R(0, -0.1, 0.08, 0.08, '#f0f0ec'); R(0, -0.24, 0.07, 0.06, '#d23c3c'); R(0, -0.36, 0.09, 0.06, '#2c3440'); El(0, -0.36, 0.05, 0.04, '#fff3a0'); Ln(0.06, -0.36, 0.46, -0.46, 0.02, 'rgba(255,243,160,0.5)'); Ln(0.06, -0.36, 0.46, -0.28, 0.02, 'rgba(255,243,160,0.3)'); Tr(0, -0.46, 0.07, '#2c3440'); break;
+      case 'beacon': Ln(-0.1, 0.38, 0, -0.1, 0.03, line); Ln(0.1, 0.38, 0, -0.1, 0.03, line); Ln(-0.06, 0.16, 0.06, 0.16, 0.02, line); R(0, -0.14, 0.09, 0.04, '#3a3a3a'); Tr(0, -0.28, 0.1, '#ff8a2a'); Tr(0, -0.25, 0.06, '#ffd060'); break;
+      case 'harbour': R(0, 0.3, 0.46, 0.08, stone2); for (let q = 0; q < 5; q++) R(-0.4 + q * 0.2, 0.2, 0.02, 0.03, '#2a2a2a'); Ln(-0.26, 0.22, -0.26, -0.3, 0.03, steel2); Ln(-0.26, -0.3, 0.06, -0.18, 0.025, steel2); Ln(0.06, -0.18, 0.06, 0.0, 0.01, '#222'); R(0.06, 0.04, 0.045, 0.04, 'hsl(28,50%,44%)'); R(0.28, 0.14, 0.12, 0.08, wood); Tr(0.28, 0.0, 0.12, thatch); break;
+      case 'landing': R(0, 0.24, 0.4, 0.035, wood); for (let q = 0; q < 4; q++) Ln(-0.34 + q * 0.226, 0.4, -0.34 + q * 0.226, 0.14, 0.035, line); Ln(0.34, 0.14, 0.34, -0.14, 0.02, line); El(0.34, -0.16, 0.035, 0.035, '#ffd060'); break;
+      /* older kinds that shared a look with another (Generation 32: hall and igloo, kiln and workshop, moot and school, press and engine house, barracks and forge were drawn the same) */
+      case 'igloo': El(0, 0.16, 0.34, 0.26, '#eef4f8'); R(0, 0.37, 0.38, 0.035, '#dfe8ee'); Ln(-0.31, 0.22, 0.31, 0.22, 0.012, '#c0d0dc'); Ln(-0.27, 0.08, 0.27, 0.08, 0.012, '#c0d0dc'); Ln(-0.16, -0.04, 0.16, -0.04, 0.012, '#c0d0dc'); for (let q = 0; q < 4; q++) Ln(-0.21 + q * 0.14, 0.08, -0.21 + q * 0.14, 0.22, 0.012, '#c0d0dc'); El(0, 0.31, 0.085, 0.1, '#28323c'); break;
+      case 'moot': sh.push({ t: 'ring', n: 9, d: 0.38, y: 0.18, s: 0.05, fill: wood }); El(0, 0.2, 0.2, 0.1, 'rgba(120,96,60,0.35)'); R(0, 0.18, 0.06, 0.09, stone); flag(0, -0.08); break;
+      case 'kiln': El(0, 0.14, 0.26, 0.26, 'hsl(18,40%,42%)'); R(0, 0.37, 0.3, 0.03, 'hsl(18,30%,30%)'); R(0, -0.13, 0.05, 0.04, 'hsl(18,30%,30%)'); smoke(0, -0.16); El(0, 0.29, 0.09, 0.08, '#ff8a2a'); El(0, 0.3, 0.05, 0.05, '#ffd060'); Ln(0.3, 0.36, 0.44, 0.36, 0.04, wood); Ln(0.32, 0.3, 0.44, 0.3, 0.04, line); break;
+      case 'press': R(0, 0.2, 0.3, 0.17, plaster); Tr(0, -0.06, 0.36, slate); Ln(0, 0.08, 0, 0.3, 0.03, '#3a3a3a'); R(0, 0.1, 0.13, 0.02, '#3a3a3a'); R(0, 0.3, 0.1, 0.03, '#5a4630'); R(-0.2, 0.26, 0.05, 0.06, '#f4f0e0'); R(0.2, 0.26, 0.05, 0.06, '#f4f0e0'); Ln(0.17, 0.24, 0.23, 0.24, 0.01, '#333'); Ln(0.17, 0.28, 0.23, 0.28, 0.01, '#333'); break;
+      case 'barracks': R(0, 0.22, 0.42, 0.14, wood); R(0, 0.06, 0.44, 0.03, stone2); for (let q = 0; q < 4; q++) El(-0.27 + q * 0.18, 0.22, 0.045, 0.055, ['#d9534f', '#e0b23c', '#4f8fd9', '#6fbf73', '#b06fd9', '#e08a3c', '#d94f9c'][tone]); Ln(-0.4, 0.36, -0.4, -0.02, 0.02, '#8a8d92'); Tr(-0.4, -0.06, 0.05, '#c8ccd0'); flag(0.36, -0.14); break;
+      default: fam = 0;
+    }
+    if (fam) return (KIND_CACHE[key] = { anim: 'none', shapes: sh });
+  }
   if (name === 'pen') { sh.length = 0; sh.push({ t: 'ellipse', y: 0.14, w: 0.42, h: 0.26, fill: 'rgba(120,96,60,0.35)' }, { t: 'ring', n: 11, d: 0.86, y: 0.14, s: 0.05, fill: wood }, { t: 'line', x: -0.4, y: 0.06, x2: 0.4, y2: 0.06, lw: 0.02, stroke: line }, { t: 'line', x: -0.34, y: 0.3, x2: 0.34, y2: 0.3, lw: 0.02, stroke: line }); return (KIND_CACHE[key] = { anim: 'none', shapes: sh }); }
   if (name === 'weir') { sh.length = 0; sh.push({ t: 'ellipse', y: 0.2, w: 0.46, h: 0.16, fill: 'rgba(60,120,160,0.55)' }); for (let q = 0; q < 6; q++) sh.push({ t: 'line', x: -0.36 + q * 0.145, y: 0.34 - (q % 2) * 0.05, x2: -0.36 + q * 0.145, y2: -0.04 - (q % 2) * 0.05, lw: 0.035, stroke: line }); sh.push({ t: 'line', x: -0.38, y: 0.08, x2: 0.38, y2: 0.02, lw: 0.02, stroke: wood }); return (KIND_CACHE[key] = { anim: 'none', shapes: sh }); }
   if (name === 'field') { sh.length = 0; sh.push({ t: 'rect', y: 0.14, w: 0.8, h: 0.5, fill: 'hsl(34,36%,24%)' }); for (let q = 0; q < 4; q++) sh.push({ t: 'line', x: -0.36, y: -0.04 + q * 0.12, x2: 0.36, y2: -0.04 + q * 0.12, lw: 0.035, stroke: 'hsl(48,62%,52%)' }); return (KIND_CACHE[key] = { anim: 'none', shapes: sh }); }
@@ -62,6 +133,15 @@ function kindLook(name, owner) {
   else if (form === 1) sh.push({ t: 'ring', n: 7, d: 0.72, y: 0.18, s: 0.07, fill: stone2 }, { t: 'rect', y: 0.1, w: 0.1, h: 0.26, fill: stone }, { t: 'rect', y: -0.18, w: 0.2, h: 0.05, fill: stone }, { t: 'star', y: -0.36, s: 0.1, n: 6, fill: '#f2d28a' }, { t: 'ring', n: 3, d: 0.24, y: 0.3, s: 0.035, fill: '#e8a04a' });
   else if (form === 2) sh.push({ t: 'rect', x: -0.08, y: 0.16, w: 0.36, h: 0.18, fill: wood }, { t: 'tri', x: -0.08, y: -0.06, s: 0.4, rot: 0, fill: thatch }, { t: 'rect', x: 0.36, y: 0.02, w: 0.07, h: 0.34, fill: stone2 }, { t: 'circle', x: 0.36, y: -0.38, s: 0.07, fill: 'rgba(200,200,200,0.5)' }, { t: 'circle', x: 0.42, y: -0.52, s: 0.05, fill: 'rgba(200,200,200,0.35)' }, { t: 'rect', x: -0.08, y: 0.24, w: 0.14, h: 0.1, fill: dark }, { t: 'circle', x: -0.08, y: 0.26, s: 0.035, fill: '#f08a3c' }, { t: 'line', x: -0.42, y: 0.34, x2: -0.3, y2: 0.2, lw: 0.03, stroke: stone });
   else sh.push({ t: 'rect', y: 0.1, w: 0.2, h: 0.5, fill: stone2 }, { t: 'rect', y: -0.44, w: 0.3, h: 0.07, fill: stone }, { t: 'rect', x: -0.2, y: -0.56, w: 0.07, h: 0.08, fill: stone }, { t: 'rect', x: 0, y: -0.56, w: 0.07, h: 0.08, fill: stone }, { t: 'rect', x: 0.2, y: -0.56, w: 0.07, h: 0.08, fill: stone }, { t: 'rect', y: -0.12, w: 0.06, h: 0.1, fill: dark }, { t: 'rect', y: 0.28, w: 0.09, h: 0.14, fill: dark }, { t: 'line', x: -0.2, y: 0.1, x2: 0.2, y2: 0.1, lw: 0.015, stroke: dark });
+  /* what tells apart kinds that share a form (Generation 32) */
+  if (name === 'longhall') sh.push({ t: 'tri', x: -0.3, y: -0.06, s: 0.36, fill: thatch }, { t: 'tri', x: 0.3, y: -0.06, s: 0.36, fill: thatch }, { t: 'ellipse', x: -0.3, y: -0.44, w: 0.05, h: 0.035, fill: 'rgba(210,210,215,0.5)' }, { t: 'ellipse', x: 0.3, y: -0.44, w: 0.05, h: 0.035, fill: 'rgba(210,210,215,0.5)' });
+  else if (name === 'school') sh.push({ t: 'line', x: 0.4, y: 0.36, x2: 0.4, y2: -0.1, lw: 0.025, stroke: line }, { t: 'line', x: 0.3, y: -0.1, x2: 0.46, y2: -0.1, lw: 0.025, stroke: line }, { t: 'circle', x: 0.34, y: -0.02, s: 0.055, fill: '#e0b23c' }, { t: 'rect', x: -0.2, y: 0.2, w: 0.07, h: 0.05, fill: '#2a3238' });
+  else if (name === 'forge') sh.push({ t: 'rect', x: -0.4, y: 0.32, w: 0.07, h: 0.03, fill: '#2a2c30' }, { t: 'rect', x: -0.4, y: 0.36, w: 0.035, h: 0.03, fill: '#2a2c30' }, { t: 'ring', n: 5, d: 0.1, x: -0.4, y: 0.2, s: 0.018, fill: '#ffb04a' }, { t: 'ellipse', x: -0.08, y: 0.26, w: 0.07, h: 0.06, fill: '#ff8a2a' });
+  else if (name === 'enginehouse') sh.push({ t: 'circle', x: -0.3, y: 0.18, s: 0.15, stroke: '#2a2c30', lw: 0.03 }, { t: 'circle', x: -0.3, y: 0.18, s: 0.03, fill: '#2a2c30' }, { t: 'line', x: -0.3, y: 0.18, x2: 0.1, y2: -0.02, lw: 0.03, stroke: '#5a5e64' }, { t: 'line', x: -0.45, y: 0.18, x2: -0.15, y2: 0.18, lw: 0.015, stroke: '#2a2c30' });
+  else if (name === 'emberhall') sh.push({ t: 'ellipse', y: 0.26, w: 0.1, h: 0.09, fill: '#ff8a2a' }, { t: 'ellipse', y: 0.28, w: 0.055, h: 0.05, fill: '#ffd060' }, { t: 'ring', n: 5, d: 0.2, y: -0.5, s: 0.02, fill: '#ffb04a' });
+  else if (['hall', 'shrine', 'workshop', 'tower', 'observatory'].indexOf(name) < 0) { /* a kind with no look of its own (one the maker made): a sign of its own colour and shape, from its name */
+    const hu = (h * 37) % 360, col = 'hsl(' + hu + ',72%,60%)', k4 = Math.floor(h / 4) % 4; sh.push({ t: 'line', x: -0.38, y: 0.36, x2: -0.38, y2: -0.12, lw: 0.022, stroke: line });
+    sh.push(k4 === 0 ? { t: 'star', x: -0.38, y: -0.2, s: 0.09, n: 5, fill: col } : k4 === 1 ? { t: 'circle', x: -0.38, y: -0.2, s: 0.075, fill: col } : k4 === 2 ? { t: 'rect', x: -0.38, y: -0.2, w: 0.07, h: 0.07, fill: col } : { t: 'tri', x: -0.38, y: -0.2, s: 0.1, fill: col }); }
   return (KIND_CACHE[key] = { anim: 'none', shapes: aged(sh) });
 }
 function structLook(kind, owner, i) {
@@ -122,6 +202,64 @@ function topMood(a) { let k = null, v = 0.35; for (const m in MOOD_COLOR) if (a.
 const GRAVE = { anim: 'none', shapes: [{ t: 'rect', y: 0.05, w: 0.13, h: 0.17, fill: '#8d939c' }, { t: 'circle', y: -0.1, s: 0.13, fill: '#8d939c' }] };
 
 /* ---------- the look interpreter ---------- */
+/* WAYS ON THE MAP (Generation 32, reworked the same day). A way was drawn as a slab filling its tile, so a street was as wide as a house, its
+   corners were square and nothing led to a door. Now a way is a ribbon along the middle of its tiles, about a third of a building wide: each tile
+   is joined to its neighbours (straight on to the four beside it, and aslant only where there is no squared way round), a tile with two neighbours
+   is a curve between them, and each building beside a road has a path from its door. Tracks are thin and broken; a bridge is of planks. */
+function wayLinks(x, y, tracks) {
+  const ok = function (X, Y) { if (Y < 0 || Y >= w.H) return false; if (w.wrap) X = ((X % w.W) + w.W) % w.W; else if (X < 0 || X >= w.W) return false; const g = w.roads[Y * w.W + X]; return tracks ? !!g : !!g && g !== 3; };
+  const out = []; if (ok(x + 1, y)) out.push([1, 0]); if (ok(x - 1, y)) out.push([-1, 0]); if (ok(x, y + 1)) out.push([0, 1]); if (ok(x, y - 1)) out.push([0, -1]);
+  for (let q = 0; q < 4; q++) { const dx = q & 1 ? 1 : -1, dy = q & 2 ? 1 : -1; if (ok(x + dx, y + dy) && !ok(x + dx, y) && !ok(x, y + dy)) out.push([dx, dy]); }
+  return out;
+}
+function drawWays(c, x0, x1, y0, y1, z, tracks) {
+  if (!w.roads) return; if (tracks && z < 4) return;
+  const paths = {}, doors = {}, add = function (g) { return paths[g] || (paths[g] = new Path2D()); }; let any = false;
+  for (const k in w.roads) { const g = w.roads[k]; if (tracks ? g !== 3 : g === 3) continue; const i = +k, x = i % w.W, y = (i - x) / w.W; if (y < y0 || y > y1 || x < x0 || x > x1) continue;
+    const px = sx(x), py = sy(y); if (px < -z || px > W + z) continue; any = true;
+    const L = wayLinks(x, y, tracks), P = add(g), h = z / 2;
+    if (L.length === 0) { P.moveTo(px - 0.5, py); P.lineTo(px + 0.5, py); }
+    else if (L.length === 1) { P.moveTo(px, py); P.lineTo(px + L[0][0] * h, py + L[0][1] * h); }
+    else if (L.length === 2) { P.moveTo(px + L[0][0] * h, py + L[0][1] * h); P.quadraticCurveTo(px, py, px + L[1][0] * h, py + L[1][1] * h); }
+    else for (let q = 0; q < L.length; q++) { P.moveTo(px, py); P.lineTo(px + L[q][0] * h, py + L[q][1] * h); }
+    if (!tracks && z >= 6) for (let q = 0; q < 8; q++) { const dx = [0, 1, -1, 0, 1, -1, 1, -1][q], dy = [-1, 0, 0, 1, -1, -1, 1, 1][q]; /* the building this road passes: q 0 is the one whose door faces it */
+      let X = x + dx; const Y = y + dy; if (Y < 0 || Y >= w.H) continue; if (w.wrap) X = ((X % w.W) + w.W) % w.W; else if (X < 0 || X >= w.W) continue; const j = Y * w.W + X;
+      if (!(w.shelters[j] > 0 || w.stores[j])) continue; const bk = w.bkind && w.bkind[j]; if (bk === 'field' || bk === 'pen' || bk === 'weir') continue;
+      if (!doors[j] || q < doors[j].q) doors[j] = { q: q, bx: px + dx * z, by: py + dy * z, rx: px, ry: py, g: g }; } }
+  if (!any) return;
+  c.save(); c.lineCap = 'round'; c.lineJoin = 'round'; c.setLineDash([]);
+  if (tracks) { if (paths[3]) { c.strokeStyle = 'rgba(126,102,68,0.62)'; c.lineWidth = Math.max(1, z * 0.1); c.lineCap = 'butt'; if (z >= 9) c.setLineDash([z * 0.22, z * 0.1]); c.stroke(paths[3]); } c.restore(); return; }
+  { const D = new Path2D(); let n = 0; for (const j in doors) { const d = doors[j]; D.moveTo(d.bx, d.by + z * 0.3); D.quadraticCurveTo(d.bx, d.by + z * 0.3 + (d.ry - d.by - z * 0.3) * 0.6, d.rx, d.ry); n++; }
+    if (n) { c.strokeStyle = 'rgba(70,58,42,0.45)'; c.lineWidth = Math.max(1, z * 0.1); c.stroke(D); c.strokeStyle = '#9c8a6a'; c.lineWidth = Math.max(1, z * 0.06); c.stroke(D); } }
+  const lay2 = function (g, edge, we, fill, wf) { if (!paths[g]) return; c.strokeStyle = edge; c.lineWidth = Math.max(1.5, z * we); c.stroke(paths[g]); };
+  /* the edges of every grade first, then the surfaces, so that where two ways meet neither cuts across the other */
+  lay2(4, '#5f4930', 0.3); lay2(1, '#57524a', 0.34); lay2(2, '#3a2917', 0.4);
+  if (paths[4]) { c.strokeStyle = '#a3835a'; c.lineWidth = Math.max(1, z * 0.21); c.stroke(paths[4]); if (z >= 16) { c.strokeStyle = 'rgba(122,96,62,0.7)'; c.lineWidth = Math.max(1, z * 0.03); c.setLineDash([z * 0.3, z * 0.22]); c.stroke(paths[4]); c.setLineDash([]); } }
+  if (paths[1]) { c.strokeStyle = '#b4ada0'; c.lineWidth = Math.max(1, z * 0.25); c.stroke(paths[1]); if (z >= 16) { c.strokeStyle = 'rgba(92,86,78,0.55)'; c.lineWidth = Math.max(1, z * 0.25); c.lineCap = 'butt'; c.setLineDash([z * 0.012, z * 0.16]); c.stroke(paths[1]); c.setLineDash([]); c.lineCap = 'round'; } }
+  if (paths[2]) { c.strokeStyle = '#94713f'; c.lineWidth = Math.max(1, z * 0.31); c.stroke(paths[2]); if (z >= 9) { c.strokeStyle = 'rgba(58,40,22,0.75)'; c.lineWidth = Math.max(1, z * 0.31); c.lineCap = 'butt'; c.setLineDash([z * 0.03, z * 0.1]); c.stroke(paths[2]); c.setLineDash([]); } }
+  c.restore();
+}
+/* VEHICLES ON THE MAP (Generation 32): what a being drives or draws is shown with it. A vehicle for made roads shows on a road; a wagon
+   or a cart when its holder is moving or on a road; an engine of the field when moving. The most capable is the one shown. */
+const VEH_ORDER = ['truck', 'steamwagon', 'armouredcar', 'motorcar', 'tractor', 'tractionengine', 'wagon', 'chariot', 'cart'];
+function vehicleOf(w, a, moving) {
+  if (!a.things) return null; const tt = w.terrain[a.y * w.W + a.x]; if (tt === 0 || tt === 5) return null;
+  const rd = w.roads ? w.roads[a.y * w.W + a.x] : 0, made = rd && rd !== 3, G = w.laws.goods;
+  for (let k = 0; k < VEH_ORDER.length; k++) { const v = VEH_ORDER[k]; if (!(a.things[v] > 0) || !G[v]) continue; if (G[v].road ? made : (moving || made)) { if (G[v].draft && !SW.draftNear(w, a)) continue; return v; } }
+  return null;
+}
+function drawVehicle(c, kind, px, py, z, f, hue) {
+  const wheel = function (x, y, r) { c.fillStyle = '#17181a'; c.beginPath(); c.arc(px + f * x * z, py + y * z, r * z, 0, 6.2832); c.fill(); c.fillStyle = '#8a8d92'; c.beginPath(); c.arc(px + f * x * z, py + y * z, r * z * 0.4, 0, 6.2832); c.fill(); },
+    box = function (x, y, hw, hh, fill) { c.fillStyle = fill; c.fillRect(px + f * x * z - hw * z, py + y * z - hh * z, 2 * hw * z, 2 * hh * z); }, body = 'hsl(' + ((hue || 0) % 360) + ',55%,48%)', wood = '#7a5632';
+  c.save();
+  if (kind === 'cart' || kind === 'wagon' || kind === 'chariot') { const L2 = kind === 'wagon' ? 0.42 : 0.3; box(-0.2, 0.3, L2, 0.09, wood); box(-0.2, 0.2, L2, 0.02, '#5a3e22'); if (kind === 'wagon') { c.fillStyle = '#e8e2d0'; c.beginPath(); c.ellipse(px - f * 0.2 * z, py + 0.2 * z, 0.36 * z, 0.2 * z, 0, 3.1416, 6.2832); c.fill(); } c.strokeStyle = '#5a3e22'; c.lineWidth = Math.max(1, z * 0.03); c.beginPath(); c.moveTo(px + f * (L2 - 0.2) * z, py + 0.32 * z); c.lineTo(px + f * 0.56 * z, py + 0.3 * z); c.stroke(); wheel(-0.2 - L2 * 0.55, 0.42, 0.1); wheel(-0.2 + L2 * 0.55, 0.42, 0.1); }
+  else if (kind === 'steamwagon') { box(-0.1, 0.28, 0.44, 0.1, '#3a342e'); box(0.2, 0.16, 0.14, 0.1, '#23282c'); box(0.3, 0.0, 0.03, 0.1, '#23282c'); c.fillStyle = 'rgba(220,220,225,0.5)'; c.beginPath(); c.arc(px + f * 0.26 * z, py - 0.16 * z, 0.07 * z, 0, 6.2832); c.fill(); box(-0.24, 0.14, 0.26, 0.06, wood); wheel(-0.36, 0.42, 0.11); wheel(0.24, 0.42, 0.09); }
+  else if (kind === 'truck') { box(-0.16, 0.2, 0.34, 0.16, '#c8ccd0'); box(0.32, 0.26, 0.14, 0.12, body); box(0.36, 0.2, 0.06, 0.04, '#bfe4f4'); wheel(-0.36, 0.42, 0.09); wheel(-0.1, 0.42, 0.09); wheel(0.32, 0.42, 0.09); }
+  else if (kind === 'motorcar') { box(0, 0.32, 0.4, 0.07, body); box(-0.04, 0.2, 0.2, 0.07, body); box(-0.04, 0.2, 0.15, 0.045, '#bfe4f4'); c.fillStyle = '#fff3a0'; c.fillRect(px + f * 0.38 * z - z * 0.02, py + 0.3 * z, z * 0.04, z * 0.03); wheel(-0.24, 0.42, 0.085); wheel(0.24, 0.42, 0.085); }
+  else if (kind === 'armouredcar') { box(0, 0.3, 0.42, 0.1, '#5a6638'); box(-0.02, 0.16, 0.16, 0.07, '#4a552e'); c.strokeStyle = '#2e351c'; c.lineWidth = Math.max(1.5, z * 0.05); c.beginPath(); c.moveTo(px + f * 0.1 * z, py + 0.15 * z); c.lineTo(px + f * 0.5 * z, py + 0.1 * z); c.stroke(); wheel(-0.28, 0.43, 0.085); wheel(0, 0.43, 0.085); wheel(0.28, 0.43, 0.085); }
+  else { const green = kind === 'tractor' ? '#3f8a3a' : '#2e3236'; box(0.06, 0.26, 0.3, 0.09, green); box(-0.16, 0.14, 0.12, 0.1, kind === 'tractor' ? '#2f6a2c' : '#23282c'); box(0.26, 0.08, 0.025, 0.12, '#23282c'); if (kind !== 'tractor') { c.fillStyle = 'rgba(220,220,225,0.5)'; c.beginPath(); c.arc(px + f * 0.3 * z, py - 0.1 * z, 0.07 * z, 0, 6.2832); c.fill(); } wheel(-0.2, 0.38, 0.16); wheel(0.3, 0.43, 0.09); }
+  c.restore();
+}
 function drawLook(c, look, px, py, S, o) {
   if (!look || !look.shapes) return;
   o = o || {};
@@ -550,18 +688,15 @@ function drawFlat() {
     }
     c.stroke();
   }
+  drawWays(c, x0, x1, y0, y1, z, true);  /* tracks worn by feet lie under what grows */
   /* things on the ground */
   for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
     const i = y * w.W + x;
-    if (w.terrain[i] === 3 && w.trees[i] < 3 && z > 5) { /* where trees were felled: bare earth and stumps */
+    if (w.terrain[i] === 3 && w.trees[i] < 3 && z > 5 && !(w.roads[i] && w.roads[i] !== 3) && !(w.shelters[i] > 0) && !w.stores[i]) { /* where trees were felled: bare earth and stumps (not under a street or a building) */
       const gone = 3 - w.trees[i], px = sx(x), py = sy(y);
       c.fillStyle = 'rgba(104,88,62,' + (0.3 + 0.2 * gone) + ')'; c.beginPath(); c.ellipse(px, py, z * (0.3 + 0.09 * gone), z * (0.26 + 0.08 * gone), hash(x, y, 430) * 3, 0, 6.2832); c.fill();
       if (z > 11) for (let k = 0; k < gone; k++) { const gx = px + (hash(x, y, 440 + k) - 0.5) * z * 0.6, gy = py + (hash(x, y, 450 + k) - 0.5) * z * 0.5, r = z * 0.07; c.fillStyle = '#4a3826'; c.beginPath(); c.ellipse(gx, gy + r * 0.5, r, r * 0.7, 0, 0, 6.2832); c.fill(); c.fillStyle = '#b89a6a'; c.beginPath(); c.ellipse(gx, gy, r, r * 0.6, 0, 0, 6.2832); c.fill(); }
     }
-    if (w.roads && w.roads[i] === 2) { c.fillStyle = '#7a5a36'; c.fillRect(sx(x) - z * 0.5, sy(y) - z * 0.3, z, z * 0.6); c.strokeStyle = '#3f2c1a'; c.lineWidth = Math.max(1, z * 0.03); for (let k = -1; k <= 1; k++) { c.beginPath(); c.moveTo(sx(x) + k * z * 0.28, sy(y) - z * 0.3); c.lineTo(sx(x) + k * z * 0.28, sy(y) + z * 0.3); c.stroke(); } c.strokeRect(sx(x) - z * 0.5, sy(y) - z * 0.3, z, z * 0.6); }
-    else if (w.roads && w.roads[i] === 3) { if (z > 5) { c.fillStyle = 'rgba(120,98,66,0.55)'; c.fillRect(sx(x) - z * 0.5, sy(y) - z * 0.1, z, z * 0.2); } } /* a track worn by feet */
-    else if (w.roads && w.roads[i] === 4) { c.fillStyle = 'rgba(134,106,70,0.88)'; c.fillRect(sx(x) - z * 0.5, sy(y) - z * 0.22, z, z * 0.44); } /* a dirt road */
-    else if (w.roads && w.roads[i]) { c.fillStyle = 'rgba(170,162,150,0.9)'; c.fillRect(sx(x) - z * 0.5, sy(y) - z * 0.28, z, z * 0.56); if (z > 12) { c.strokeStyle = 'rgba(96,90,82,0.7)'; c.lineWidth = 1; c.strokeRect(sx(x) - z * 0.5, sy(y) - z * 0.28, z * 0.5, z * 0.56); c.strokeRect(sx(x), sy(y) - z * 0.28, z * 0.5, z * 0.28); } }
     if (w.lodes && w.lodes[i] && z > 5.5) {
       const hu = (L.minerals[w.lodes[i].k] || {}).hue || 0, kq = w.lodes[i].k, grey = kq === 'coal' || kq === 'obsidian' || kq === 'peat';
       for (let k = 0; k < 5; k++) { const gx = sx(x) + (hash(x, y, 470 + k) - 0.5) * z * 0.7, gy = sy(y) + (hash(x, y, 480 + k) - 0.5) * z * 0.55, r = z * (0.07 + 0.05 * hash(x, y, 490 + k)); c.fillStyle = grey ? (k % 2 ? '#1c1a22' : '#3a3644') : 'hsl(' + hu + ',' + (kq === 'salt' ? 12 : 68) + '%,' + (k === 0 ? 84 : k % 2 ? 62 : 48) + '%)'; c.beginPath(); c.moveTo(gx, gy - r); c.lineTo(gx + r * 0.8, gy); c.lineTo(gx, gy + r * 0.7); c.lineTo(gx - r * 0.8, gy); c.closePath(); c.fill(); }
@@ -592,6 +727,7 @@ function drawFlat() {
       c.globalAlpha = 1;
     }
   }
+  drawWays(c, x0, x1, y0, y1, z, false); /* made roads lie over the ground and under what is built */
   /* workings: places where a law of the world has been bent */
   for (let k = 0; k < w.fields.length; k++) {
     const f = w.fields[k], px = sx(f.x), py = sy(f.y), R = (f.r + 0.5) * z, col = fieldColor(f), left = (f.until - w.tick) / L.magic.duration;
@@ -649,7 +785,8 @@ function drawFlat() {
       const stg = SW.stage(w, e), bs = stg === 'child' ? 0.68 : 1;
       if (stg === 'elder') { c.strokeStyle = '#8a7654'; c.lineWidth = Math.max(1, z * 0.05); c.lineCap = 'round'; c.beginPath(); c.moveTo(px + z * 0.36 * (e.f < 0 ? -1 : 1), py + z * 0.44); c.lineTo(px + z * 0.31 * (e.f < 0 ? -1 : 1), py - z * 0.5); c.stroke(); }
       { const tt = w.terrain[e.y * w.W + e.x]; if ((tt === 0 || tt === 5) && e.things) { const fl = SW.floatOf(w, e); if (fl > 0) { c.fillStyle = fl > 2 ? '#8a6a3c' : '#6b4a2a'; c.beginPath(); c.ellipse(px, py + z * 0.42, z * (fl > 2 ? 0.5 : fl <= 0.6 ? 0.8 : 0.6), z * 0.16, 0, 0, 6.2832); c.fill(); if (fl <= 0.6) { c.strokeStyle = '#3f2c1a'; c.lineWidth = Math.max(1, z * 0.04); c.beginPath(); c.moveTo(px + z * 0.3, py + z * 0.36); c.lineTo(px + z * 0.3, py - z * 0.9); c.stroke(); c.fillStyle = '#e8dcc0'; c.beginPath(); c.moveTo(px + z * 0.32, py - z * 0.86); c.lineTo(px + z * 0.78, py - z * 0.1); c.lineTo(px + z * 0.32, py - z * 0.1); c.closePath(); c.fill(); } } } }
-      drawLook(c, e.look, px, py - z * 0.1 + (1 - bs * (e.tall || 1)) * z * 0.42, z * 1.45 * bs * (e.tall || 1), { flip: e.f < 0, moving: moving, phase: e.id });
+      drawLook(c, e.look, px, py - z * (e.mount ? 0.34 : 0.1) + (1 - bs * (e.tall || 1)) * z * 0.42, z * 1.45 * bs * (e.tall || 1) * (e.mount ? 0.82 : 1), { flip: e.f < 0, moving: moving, phase: e.id }); /* a rider sits above its mount */
+      { const vk = vehicleOf(w, e, moving); if (vk) { drawVehicle(c, vk, px, py, z, e.f < 0 ? -1 : 1, e.hue); if (moving && ['truck', 'motorcar', 'armouredcar', 'tractor', 'steamwagon', 'tractionengine'].indexOf(vk) >= 0) { U.droveT = U.droveT || {}; if (!(U.time - (U.droveT[e.id] || -9) < 5)) { U.droveT[e.id] = U.time; soundAt('drove', e.x, e.y, { steam: vk === 'steamwagon' || vk === 'tractionengine' }); } } } }
       if (e.sick > 0) { c.fillStyle = 'rgba(166,220,90,0.9)'; for (let k = 0; k < 3; k++) { const an = U.time * 1.6 + k * 2.094; c.beginPath(); c.arc(px + Math.cos(an) * z * 0.36, py - z * 0.2 + Math.sin(an) * z * 0.24, Math.max(1.2, z * 0.04), 0, 6.2832); c.fill(); } }
       if (band && band.leader === e.id) { /* a leader wears its band's colour as a crown */
         const cy = py - z * 0.86, cw = z * 0.2; c.fillStyle = band.color; c.beginPath();
@@ -1045,6 +1182,7 @@ function onWorldEvent(ev) {
     case 'tended': if (a) { glyph(ev.x, ev.y, ev.took ? '+' + ev.took + ' ' + ev.food : 'tending the ' + ev.kind, '#a8d08d', 2.2); motes(ev.x, ev.y, '#a8d08d', 4); } break;
     case 'fed': if (a) motes(a.x, a.y, '#ffd9a0', 3); break;
     case 'rode': if (a && !ev.off) { burst(a.x, a.y, '#cdbb96', 4); soundAt('rode', a.x, a.y); } break;
+    case 'smoke': if (a) soundAt('smoke', a.x, a.y); break;
     /* Generation 27 */
     case 'ageopen': showNotice('The ' + (['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth'][ev.age] || 'next') + ' age has opened' + ((ev.kinds || []).length ? ': ' + ev.kinds.join(', ') + ' can now be raised by those who learn their ways.' : '.')); break; /* Generation 28 */
     case 'versed': if (a) { motes(a.x, a.y, '#ffe9a0', 14); glyph(a.x, a.y, '\u266a ' + ({ dying: 'a death poem', elegy: 'a lament', love: 'a love song', birth: 'a lullaby', deed: 'a song of a deed', myth: 'a myth' }[ev.occasion] || 'a verse'), '#ffe9a0', 3.6); addFx({ type: 'ring', x: a.x, y: a.y, r: 4, life: 3, color: 'rgba(255,233,160,0.75)' }); soundAt('telling', a.x, a.y, voice); } break;
@@ -1858,7 +1996,7 @@ function recFlush(force) {
   dbNS.doc('runs/' + run + '/chunks/' + String(n).padStart(5, '0')).set({ n: n, items: items }).then(function () {
     if (world !== st) return;
     R.chunk = n; R.sent += items.length;
-    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 31, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
+    return dbNS.doc('runs/' + run).set({ readme: SWM.README, run: run, generation: 32, seed: w.seed, day: SW.day(w), tick: w.tick, thoughts: st.used, alive: w.agents.length, chunks: n, records: R.sent, updated: new Date().toISOString() });
   }).then(function () { recState = 'ok'; }, function (e) { recState = (e && e.code) || 'failed'; if (/not_granted|capability|revoked/.test(recState)) dbNS = null; })
     .then(function () { recBusy = false; if ($('recNote')) $('recNote').innerHTML = recText(); if (recDrain || R.chunk % 5 === 0) recState1(); });
 }
@@ -1928,7 +2066,7 @@ function worldName(from) { /* a name for a world: by chance for a new one, or al
   const pick = function (arr, k) { return arr[from == null ? Math.floor(Math.random() * arr.length) : (h >>> (k * 7)) % arr.length]; };
   return pick(NAME_A, 0) + pick(NAME_B, 1) + pick(NAME_C, 2);
 }
-function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 31, rim: !!ww.veil, at: Date.now() }; }
+function metaOf(state) { const ww = state.world; return { id: state.runId, name: ww.name || worldName(state.runId), seed: ww.seed, day: SW.day(ww), alive: ww.agents.length, thoughts: state.total || state.used || 0, generation: 32, rim: !!ww.veil, at: Date.now() }; }
 function save() {
   if (U.choosing || !st) return; /* a world not yet chosen is not kept, and replaces nothing */
   let str = null; try { str = JSON.stringify(SWM.snapshot(st)); } catch (e) { return; }
@@ -1976,7 +2114,7 @@ function attach(state) {
   if (w.agents.length) { cam.x = w.agents.reduce(function (s, a) { return s + a.x; }, 0) / w.agents.length + 0.5; cam.y = w.agents.reduce(function (s, a) { return s + a.y; }, 0) / w.agents.length + 0.5; }
   else { cam.x = w.W / 2; cam.y = w.H / 2; }
   clampCam(); syncButtons();
-  window.SWdebug = { farTo: farTo, cosmosOf: cosmosOf, bubbleAt: bubbleAt, openBubble: openBubble, st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco, bubble: bubble, placeBubbles: placeBubbles, hudRects: hudRects };
+  window.SWdebug = { wayLinks: wayLinks, drawWays: drawWays, kindLook: kindLook, vehicleOf: vehicleOf, drawVehicle: drawVehicle, farTo: farTo, cosmosOf: cosmosOf, bubbleAt: bubbleAt, openBubble: openBubble, st: st, U: U, cam: cam, save: save, LIB: LIB, clampCam: clampCam, isGlobe: isGlobe, zGlobe: zGlobe, fitWorld: fitWorld, event: onWorldEvent, skyHere: skyHere, notice: showNotice, verse: verse, setTab: setTab, drawEco: drawEco, bubble: bubble, placeBubbles: placeBubbles, hudRects: hudRects };
 }
 function newWorld(seed) {
   const keep = st ? st.settings : null;
@@ -1986,7 +2124,7 @@ function newWorld(seed) {
   attach(fresh); U.playing = true;
   if (st.settings.autoWake && st.sample) st.on = true;
   SWK.inherit(st, legacy);
-  { const ag = +(window.EVOLU_AGE || U.startAge || 1); if (ag > 1) { SW.beginAt(w, ag); SWM.backfill(st, ag); } } /* a world may begin in a later age (Generation 31) */
+  { const ag = +(window.EVOLU_AGE || U.startAge || 1); if (ag > 1) { SW.beginAt(w, ag); SWM.backfill(st, ag); buildTerrain(); SPACE.tex = null; } } /* a world may begin in a later age (Generation 31); its people know more land, so the land is painted again (Generation 32) */
   SWM.chron(st, 'birth', w.peoples.map(function (P) { return P.name + ' (' + P.noun + ') in ' + (w.regions[P.region] ? w.regions[P.region].name : 'the land'); }).join('; ') + ': ' + w.peoples.length + ' peoples woke in different lands of a new world, a sea between them (seed ' + seed + ').', []);
   $('notice').hidden = true; save(); setTab('inspect'); if (U.choosing) showChooser();
 }

@@ -9,7 +9,7 @@ Nova's message of 23 Nov 22:10, in full substance. Work in waves; each wave is a
 - [x] Poles: why are they never filled in or explorable? Make them land that is seen and can be reached (not empty voids on the globe).
 - [x] A tamed dog or beast helps its keeper hunt and defends them, and must be fed scraps of their food.
 - [x] Roads by stage: hunting tracks to rich places, dirt roads between settlements, stone roads, paved roads; people follow roads to get places; vehicles too.
-- [ ] (blocks the maker makes for itself: done in 29; the rest moved to Wave 3) Left from 28: vehicles and craft that move (cart on a road, train between stations, craft of the air); goods carried between settlements as a thing in the world (caravans, sea lanes); blocks the maker makes for itself; fuller library for ages three to six (most of this in Wave 3).
+- [x] (Generation 32, in part) Vehicles: a being's own horse, plough, wagon, engines, motor car, truck, tractor, armoured car, all with attributes that act. NOT built and moved to ROADMAP: trains, ships on lanes, craft of the air, caravans and goods carried between settlements.; fuller library for ages three to six (most of this in Wave 3).
 
 ## Wave 2: Generation 30 (LIVE)
 - [x] A new world starts with less land filled in: only around where people are; they explore the rest.
@@ -18,17 +18,17 @@ Nova's message of 23 Nov 22:10, in full substance. Work in waves; each wave is a
 - [x] Terrain drawing: mountains of different sizes (hills, boulders, foothills, big and huge mountains); mesas and rock formations in deserts; cactus, scrub and joshua trees in deserts, pine in temperate forest, palms in rainforest.
 
 ## Wave 3: Generation 31 (LIVE, with the zoom-out of Wave 4)
-- [ ] (begun: the library of structures to the sixth age; recipes and goods of later ages not built out) Tech tree, other trees and catalogues built out so everything has attributes and works; think how each looks and what it does to the land.
+- [ ] (begun: the library of structures to the sixth age; Generation 32 added dwellings by age and the vehicles and tools of the second, fourth and fifth ages as recipes and goods; other goods of later ages not built out) Tech tree, other trees and catalogues built out so everything has attributes and works; think how each looks and what it does to the land.
 - [x] Ages: a medieval phase with castles; the steam age; the industrial and fossil fuel age; the computer age.
 - [x] City structures: utilities, factories, government buildings, hospitals, apartments, office buildings.
 - [x] Building changes the landscape: trees cut, ground paved, depending on where things are put.
 - [x] Start a world at a chosen tech level / stage of development (Setup), with history and culture filled in correctly for later stages.
 - [ ] (begun: tradition presses less in later ages; stories do not yet change) Culture evolves with the tech level: old ideas and stories replaced or surviving in modernised form; science begins to replace mythology; some of the culture remains.
-- [ ] (begun: smoke and waste; the rest is in ROADMAP) Troubles of advanced civilisations, a first set: crime, wars, pollution, garbage, social unrest, industrialisation, poverty, corruption, political division, booms, crashes and recessions.
+- [ ] (HELD by Nova on 24 Nov with groups; begun: smoke and waste; the rest is in ROADMAP) Troubles of advanced civilisations, a first set: crime, wars, pollution, garbage, social unrest, industrialisation, poverty, corruption, political division, booms, crashes and recessions.
 
 ## Wave 4: Generation 32
 - [x] Zoom out farther from the planet: the solar system, the local group, the galaxy, other galaxies. A quick way to zoom all the way out, or back to the planet, from planet view or farther.
-- [ ] Groups (the plan in ROADMAP "SCALE"): resolution by attention, a fixed number of minds, group minds, rates calibrated against individual runs. A first step.
+- [ ] Groups: HELD by Nova on 24 Nov ("Let's discuss it before you implement that stuff"). A proposal is in `docs/groups-proposal.md`. Do not build until he answers. The troubles of later ages are held with it.
 
 ## Roadmap only (recorded, not tonight)
 Terrorism, dictatorships, oligarchies, gilded ages, stock markets in full, technology bubbles; superintelligence and its benefits and harms, nanotech, biowar, mass unemployment, robotics, conflict between humans and robots; contact with aliens; planet, species and galaxy levels of play.

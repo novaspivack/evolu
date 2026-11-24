@@ -816,7 +816,7 @@ SW.refreshLooks = function (w) {
   });
   w.lookV = 5; return true;
 };
-const BASE_KINDS = { barrelcactus: 1, joshuafruit: 1, scrubberry: 1, visionbud: 1, dunethorn: 1, pinenut: 1, elderberry: 1, nightberry: 1, heartroot: 1, staghorn: 1, palmfruit: 1, calmroot: 1, brightcap: 1, luckleaf: 1, ironmoss: 1, berry: 1, grain: 1, redcap: 1, thornpear: 1, mudroot: 1, frostmoss: 1, ironnut: 1, sunleaf: 1, dreamcap: 1, emberroot: 1, hopper: 1, stalker: 1, skit: 1, hornback: 1, ridgecat: 1,
+const BASE_KINDS = { horse: 1, barrelcactus: 1, joshuafruit: 1, scrubberry: 1, visionbud: 1, dunethorn: 1, pinenut: 1, elderberry: 1, nightberry: 1, heartroot: 1, staghorn: 1, palmfruit: 1, calmroot: 1, brightcap: 1, luckleaf: 1, ironmoss: 1, berry: 1, grain: 1, redcap: 1, thornpear: 1, mudroot: 1, frostmoss: 1, ironnut: 1, sunleaf: 1, dreamcap: 1, emberroot: 1, hopper: 1, stalker: 1, skit: 1, hornback: 1, ridgecat: 1,
   /* the life of the ice, of the sea and of the rainforest, and the dog: these are never struck from the world's book, since their country may lie where no one has yet been */
   dog: 1, caribou: 1, mammoth: 1, penguin: 1, wolf: 1, icebear: 1, floeseal: 1, stormbird: 1, whale: 1, orca: 1, snowberry: 1, frostcap: 1, icekelp: 1, windroot: 1, glowcap: 1, cloudberry: 1,
   treeape: 1, mudsnout: 1, skybird: 1, shadowcat: 1, coilsnake: 1, rivermaw: 1, goldfruit: 1, canopynut: 1, vinebean: 1, feverbark: 1, firepod: 1 };
@@ -1028,7 +1028,8 @@ SW.openAges = function (w, emit) {
   for (let n = (w.ageOpen || 0) + 1; n <= upTo; n++) {
     const A = SW.LIBRARY[n], got = [];
     if (A) { for (const k in (A.blocks || {})) if (!L.blocks[k]) L.blocks[k] = Object.assign({ age: n }, JSON.parse(JSON.stringify(A.blocks[k])));
-      for (const k in (A.buildings || {})) if (!L.buildings[k]) { L.buildings[k] = Object.assign({ age: n }, JSON.parse(JSON.stringify(A.buildings[k]))); got.push(k); } }
+      for (const k in (A.buildings || {})) if (!L.buildings[k]) { L.buildings[k] = Object.assign({ age: n }, JSON.parse(JSON.stringify(A.buildings[k]))); got.push(k); }
+      for (const k in (A.recipes || {})) if (!L.recipes[k]) L.recipes[k] = JSON.parse(JSON.stringify(A.recipes[k])); for (const k in (A.goods || {})) if (!L.goods[k]) L.goods[k] = JSON.parse(JSON.stringify(A.goods[k])); }
     w.ageOpen = n; if (emit && n > 2) emit({ type: 'ageopen', age: n, kinds: got });
   }
   return w.ageOpen;
@@ -1136,6 +1137,22 @@ SW.FLORA = {
     bank: { way: 'printing', wood: 6, stone: 12, needs: ['market'], craft: 0.4, fx: [{ on: 'fear', by: -0.2 }], hint: 'a house where wealth is kept and lent. It needs a market near it. A great work' }
   });
   delete SW.LIBRARY[4].buildings.mill;
+  /* Generation 32: dwellings by age, so that a town looks like its age; and vehicles, which do in later ages what the horse and the ox did */
+  Object.assign(SW.LIBRARY[2].buildings, { house: { way: 'masonry', from: 'shelter', wood: 4, stone: 2, fx: [{ on: 'warmth', times: 1.2, for: 240 }, { on: 'health', by: 6 }], hint: 'a house of timber on a stone footing, raised where a shelter stood: warmer and healthier to live in' } });
+  Object.assign(SW.LIBRARY[3].buildings, { townhouse: { way: 'architecture', from: 'house', wood: 5, stone: 5, fx: [{ on: 'warmth', times: 1.3, for: 240 }, { on: 'health', by: 8 }], bond: 0.03, hint: 'a town house of two floors, raised where a house stood' } });
+  Object.assign(SW.LIBRARY[4].buildings, { rowhouse: { way: 'steam', from: 'townhouse', wood: 6, stone: 6, fx: [{ on: 'warmth', times: 1.3, for: 480 }, { on: 'health', by: 8 }], bond: 0.04, hint: 'a brick house in a row, with a chimney, raised where a town house stood' } });
+  const veh = function (n, recipes, goods) { const A = SW.LIBRARY[n]; A.recipes = Object.assign(A.recipes || {}, recipes); A.goods = Object.assign(A.goods || {}, goods); };
+  veh(2, { plough: { way: 'farming', needs: { wood: 4 }, gives: { thing: 'plough' }, hint: 'A plough: a field you hold and tend yields sooner; sooner still when a horse or an ox of yours draws it.' },
+           wagon: { way: 'wheel', needs: { wood: 6, thing: 'cart' }, gives: { thing: 'wagon' }, hint: 'A wagon, made from a cart: with a horse or an ox of yours walking with you, you carry 10 more.' } },
+         { plough: { plough: 0.8, draft: 0, hint: 'a plough: fields yield sooner' }, wagon: { land: 1, carry: 10, draft: 1, hint: 'a wagon drawn by a horse or an ox of yours' } });
+  veh(4, { tractionengine: { way: 'steam', needs: { ore: 6, wood: 2 }, gives: { thing: 'tractionengine' }, hint: 'An engine on wheels that draws the plough and the load: fields you hold yield in half the time, and you carry 8 more, with no animal.' },
+           steamwagon: { way: 'steam', needs: { ore: 5, wood: 4 }, gives: { thing: 'steamwagon' }, hint: 'A wagon driven by steam: on a made road you carry 14 more and cover twice the ground.' } },
+         { tractionengine: { land: 1, plough: 0.5, engine: 1, carry: 8, hint: 'an engine that draws plough and load' }, steamwagon: { land: 1, road: 1, carry: 14, speed: 1, hint: 'a steam wagon for made roads' } });
+  veh(5, { motorcar: { way: 'oil', needs: { ore: 5, wood: 1 }, gives: { thing: 'motorcar' }, hint: 'A motor car: on a made road you cover twice the ground and carry 4 more.' },
+           truck: { way: 'oil', needs: { ore: 6, wood: 2 }, gives: { thing: 'truck' }, hint: 'A truck: on a made road you carry 20 more and cover twice the ground.' },
+           tractor: { way: 'oil', needs: { ore: 6 }, gives: { thing: 'tractor' }, hint: 'A tractor: fields you hold yield in a third of the time.' },
+           armouredcar: { way: 'oil', needs: { ore: 6, thing: 'motorcar' }, gives: { thing: 'armouredcar' }, hint: 'An armoured car: on land your blows land twice as hard.' } },
+         { motorcar: { land: 1, road: 1, carry: 4, speed: 1, hint: 'a motor car for made roads' }, truck: { land: 1, road: 1, carry: 20, speed: 1, hint: 'a truck for made roads' }, tractor: { land: 1, plough: 0.34, engine: 1, hint: 'a tractor: fields yield much sooner' }, armouredcar: { land: 1, fight: 2, hint: 'an armoured car' } });
   add(5, { wiring: { stone: 2, reach: 2, craft: 0.3, hint: 'wires that carry power' }, lifts: { stone: 4, bond: 0.03, hint: 'lifts between many floors' }, glasswall: { stone: 3, sight: 2, hint: 'walls of glass' } }, {
     refinery: { way: 'oil', wood: 6, stone: 18, needs: ['enginehouse'], craft: 1.2, clears: 3, fouls: 5, hint: 'a works that makes fuel from oil: much is made by it, the ground is cleared for it, and its foul air lies five steps about. A great work' },
     apartments: { way: 'electricity', from: 'tenement', wood: 8, stone: 18, needs: ['powerhouse'], bond: 0.06, fx: [{ on: 'warmth', times: 1.4, for: 480 }, { on: 'health', by: 10 }], hint: 'homes on many floors with light and heat. They need a power house near them. A great work' },
@@ -1169,23 +1186,124 @@ function foulStep(w, emit) {
    afterwards: from the first moment it is a world like any other. The minds are told the history (M.backfill). */
 SW.beginAt = function (w, age) {
   age = Math.max(1, Math.min(6, Math.round(age || 1))); if (age < 2) return 0; use(w); const L = w.laws, T2 = L.tree, keep = w.rng; w.rng = Math.imul((w.seed | 0) + 313 * age, 0x2545F491) | 0; rnd(w);
-  for (let n = 2; n <= Math.min(6, age + 1); n++) { w.eraT = null; if ((w.ageOpen || 0) < n) { const A = SW.LIBRARY[n]; L.blocks = L.blocks || {}; if (A) { for (const k in A.blocks) if (!L.blocks[k]) L.blocks[k] = Object.assign({ age: n }, JSON.parse(JSON.stringify(A.blocks[k]))); for (const k in A.buildings) if (!L.buildings[k]) L.buildings[k] = Object.assign({ age: n }, JSON.parse(JSON.stringify(A.buildings[k]))); } w.ageOpen = n; } }
-  const ways = Object.keys(T2).filter(function (k) { return (T2[k].era || 1) < age || ((T2[k].era || 1) === age && rnd(w) < 0.65); });
+  for (let n = 2; n <= Math.min(6, age + 1); n++) { w.eraT = null; if ((w.ageOpen || 0) < n) { const A = SW.LIBRARY[n]; L.blocks = L.blocks || {}; if (A) { for (const k in A.blocks) if (!L.blocks[k]) L.blocks[k] = Object.assign({ age: n }, JSON.parse(JSON.stringify(A.blocks[k]))); for (const k in A.buildings) if (!L.buildings[k]) L.buildings[k] = Object.assign({ age: n }, JSON.parse(JSON.stringify(A.buildings[k]))); for (const k in (A.recipes || {})) if (!L.recipes[k]) L.recipes[k] = JSON.parse(JSON.stringify(A.recipes[k])); for (const k in (A.goods || {})) if (!L.goods[k]) L.goods[k] = JSON.parse(JSON.stringify(A.goods[k])); } w.ageOpen = n; } }
+  const keystone = { 3: ['architecture', 'cities', 'iron'], 4: ['steam', 'science', 'printing'], 5: ['oil', 'electricity', 'radio'], 6: ['internet', 'computing'] }[age] || []; /* the ways an age is known by are always among those its peoples have (Generation 32) */
+  const ways = Object.keys(T2).filter(function (k) { return (T2[k].era || 1) < age || ((T2[k].era || 1) === age && (rnd(w) < 0.65 || keystone.indexOf(k) >= 0)); });
   w.agents.forEach(function (a) { const P = a.people != null ? w.peoples[a.people] : null; ways.forEach(function (k) { if (!a.knows[k] && ((T2[k].era || 1) < age || rnd(w) < 0.7)) a.knows[k] = { how: 'people', name: 'the way of ' + k, idea: 'known to ' + (P ? P.name : 'your people') + ' for generations', look: null, tick: 0, by: 0, byName: P ? P.name : 'your people' }; }); a.lore = Math.max(a.lore || 0, age * 3); a.wood = Math.max(a.wood || 0, 4); a.stone = Math.max(a.stone || 0, 4); });
   const roots = {}; w.agents.forEach(function (a) { const r = a.people != null ? 'p' + a.people : 'r' + rootOf(w, a).id; (roots[r] = roots[r] || []).push(a); }); /* one settlement to each founding people */
   const free = function (i) { const t = w.terrain[i]; return t !== T.WATER && t !== T.SHALLOWS && t !== T.VOID && t !== T.ROCK && !w.shelters[i] && !w.stores[i] && !w.walls[i] && !(w.lodes && w.lodes[i]); };
   let raisedN = 0;
-  for (const rid in roots) { const band = roots[rid], head = band.slice().sort(function (p, q) { return (q.lore || 0) - (p.lore || 0) || p.id - q.id; })[0]; band.forEach(function (o) { if (o !== head && o.leader == null) o.leader = head.id; }); /* a people that has come this far has someone it follows, and its works are one settlement */ let cx = 0, cy = head.y; band.forEach(function (a) { cx += wdx(a.x - head.x); }); cx = wrapX(w, Math.round(head.x + cx / band.length));
-    const spots = []; for (let r = 1; r <= 6 && spots.length < 70; r++) /* within six steps of the middle, so that any two works are within reach of each other */ for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r || ((dx + dy) & 1)) continue; const X = wrapX(w, cx + dx), Y = cy + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y); if (free(i) && !band.some(function (a) { return a.x === X && a.y === Y; })) spots.push(i); }
-    const put = function (kind, owner) { const i = spots.shift(); if (i == null) return -1; if (kind === 'store') { w.stores[i] = { by: owner.id, items: [] }; for (let q = 0; q < 6; q++) w.stores[i].items.push({ k: 'grain', n: 1, t: w.tick }); } else { w.shelters[i] = owner.id; if (kind !== 'shelter') { w.bkind = w.bkind || {}; w.bkind[i] = kind; } } w.plants[i] = null; if (w.trees && w.trees[i]) w.trees[i] = 0; w.tally.built = w.tally.built || {}; w.tally.built[kind] = (w.tally.built[kind] || 0) + 1; raisedN++; return i; };
-    band.forEach(function (a) { put('shelter', a); }); put('store', head); put('hall', head);
-    /* works of the ages reached, each after what it depends on; a newer kind stands in place of the one it grew from */
-    const B = L.buildings, have = { store: 1, hall: 1, shelter: 1 }, want = Object.keys(B).filter(function (k) { const b = B[k], e = b.way && T2[b.way] ? (T2[b.way].era || 1) : 1; return b.way && e <= age && head.knows[b.way] && b.beside !== 'water' && !b.on && k !== 'pen'; }).sort(function (p, q) { return (T2[B[p].way].era || 1) - (T2[B[q].way].era || 1) || (p < q ? -1 : 1); });
-    for (let pass = 0; pass < 3; pass++) want.forEach(function (k) { if (have[k] || raisedN > 400) return; const b = B[k]; if ((b.needs || []).some(function (q) { return !Object.keys(have).some(function (h) { return h === q || isOfLine(w, h, q); }); })) return; if (b.from && b.from !== 'shelter' && !have[b.from]) return; const owner = band[(Object.keys(have).length) % band.length]; if (put(k, owner) >= 0) { have[k] = 1; } });
-    /* a paved way through it */
-    for (let dx = -9; dx <= 9; dx++) { const X = wrapX(w, cx + dx); if (!inb(w, X, cy)) continue; const i = idx(w, X, cy); if (free(i)) { w.roads[i] = age >= 3 ? 1 : 4; w.plants[i] = null; } }
+  for (const rid in roots) { const band = roots[rid], head = band.slice().sort(function (p, q) { return (q.lore || 0) - (p.lore || 0) || p.id - q.id; })[0]; band.forEach(function (o) { if (o !== head && o.leader == null) o.leader = head.id; }); ways.forEach(function (k) { if (!head.knows[k]) head.knows[k] = { how: 'people', name: 'the way of ' + k, idea: 'known to your people for generations', look: null, tick: 0, by: 0, byName: 'your people' }; }); /* the one a people follows holds all its ways */ /* a people that has come this far has someone it follows, and its works are one settlement */ let cx = 0, cy = head.y; band.forEach(function (a) { cx += wdx(a.x - head.x); }); cx = wrapX(w, Math.round(head.x + cx / band.length));
+    /* THE TOWN (Generation 32). Streets first: a main street with a bend, a cross street, and in later ages a second cross street, a slanting
+       lane and a ring; then plots beside the streets, never on them. Works that depend on another are set as near to it as a plot allows;
+       works that foul stand at the edge; fields lie outside the built ground. The later the age, the wider the ground the town takes and
+       the more of the wood about it is felled. The land about it is known farther out in a later age. */
+    const Rr = age >= 5 ? 9 : age >= 3 ? 8 : 6, street = {}, grade = age >= 3 ? 1 : 4;
+    if (w.fog && w.veil) openDisc(w, cx, cy, ((L.explore || {}).start || 22) + 2 * (age - 1));
+    /* the town stands where there is ground for it: the place within ten steps of the people with the most open land about it, and the people stand there */
+    { const open = function (X0, Y0) { let n = 0; for (let dy = -Rr; dy <= Rr; dy++) for (let dx = -Rr; dx <= Rr; dx++) { const X = wrapX(w, X0 + dx), Y = Y0 + dy; if (inb(w, X, Y) && free(idx(w, X, Y))) n++; } return n; }; let bx = cx, by = cy, bs = open(cx, cy);
+      for (let dy = -10; dy <= 10; dy += 2) for (let dx = -10; dx <= 10; dx += 2) { const X = wrapX(w, cx + dx), Y = cy + dy; if (!inb(w, X, Y) || Y < Rr + 2 || Y > w.H - Rr - 3 || (!w.wrap && (X < Rr + 2 || X > w.W - Rr - 3))) continue; const sc = open(X, Y) - 3 * Math.max(Math.abs(dx), Math.abs(dy)); if (sc > bs) { bs = sc; bx = X; by = Y; } }
+      if (bx !== cx || by !== cy) { cx = bx; cy = by; const taken = {}; band.forEach(function (a) { if (cheb(a.x, a.y, cx, cy) <= 3 && free(idx(w, a.x, a.y)) && !taken[idx(w, a.x, a.y)]) { taken[idx(w, a.x, a.y)] = 1; return; } for (let r = 1; r <= 5; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const X = wrapX(w, cx + dx), Y = cy + dy; if (Math.max(Math.abs(dx), Math.abs(dy)) !== r || !inb(w, X, Y)) continue; const i = idx(w, X, Y); if (free(i) && !taken[i]) { taken[i] = 1; a.x = X; a.y = Y; a.px = X; a.py = Y; return; } } }); } }
+    /* STREETS THAT WIND (Generation 32, reworked the same day: the first plan was all straight runs and square corners). A street is a line of tiles
+       from one point to the next, stepping aslant where the line slants, so it runs at any angle; its points are shifted a little by chance, so no
+       street is ruled. Streets start at the middle and go outward. Rock is cut through; water up to three tiles wide is bridged; wider water ends
+       the street. No four street tiles ever make a square, so a street is one tile wide everywhere. */
+    const groundAt = function (dx, dy) { const X = wrapX(w, cx + dx), Y = cy + dy; if (!inb(w, X, Y)) return 0; const i = idx(w, X, Y), t = w.terrain[i]; if (t === T.VOID || w.shelters[i] || w.stores[i] || w.walls[i] || (w.lodes && w.lodes[i])) return 0; return t === T.WATER || t === T.SHALLOWS ? 2 : 1; };
+    const isSt = function (dx, dy) { const X = wrapX(w, cx + dx), Y = cy + dy; return inb(w, X, Y) && !!street[idx(w, X, Y)]; };
+    let pend = null; /* a tile left out so as not to make a square: laid after all if the street would otherwise be parted there */
+    const squares = function (dx, dy) { for (let ox = -1; ox <= 0; ox++) for (let oy = -1; oy <= 0; oy++) { let n = 0; for (let ax = 0; ax <= 1; ax++) for (let ay = 0; ay <= 1; ay++) if ((dx + ox + ax !== dx || dy + oy + ay !== dy) && isSt(dx + ox + ax, dy + oy + ay)) n++; if (n >= 3) return true; } return false; };
+    const touches = function (dx, dy) { for (let ay = -1; ay <= 1; ay++) for (let ax = -1; ax <= 1; ax++) if ((ax || ay) && isSt(dx + ax, dy + ay)) return true; return false; };
+    const lay = function (dx, dy, g, first) { if (isSt(dx, dy)) { pend = null; return; }
+      if (pend && !first && !touches(dx, dy) && Math.max(Math.abs(pend[0] - dx), Math.abs(pend[1] - dy)) <= 1) { /* join by another tile beside this one that makes no square, if there is one; else by the tile left out */
+        let alt = null; for (let ay = -1; ay <= 1 && !alt; ay++) for (let ax = -1; ax <= 1 && !alt; ax++) { const qx = dx + ax, qy = dy + ay; if ((!ax && !ay) || isSt(qx, qy) || groundAt(qx, qy) !== 1 || !touches(qx, qy) || squares(qx, qy)) continue; alt = [qx, qy]; }
+        if (alt) street[idx(w, wrapX(w, cx + alt[0]), cy + alt[1])] = g === 2 ? grade : g; else street[idx(w, wrapX(w, cx + pend[0]), cy + pend[1])] = pend[2]; }
+      pend = null; if (squares(dx, dy)) { pend = [dx, dy, g]; return; }
+      street[idx(w, wrapX(w, cx + dx), cy + dy)] = g; };
+    const lineTo = function (out, x0, y0, x1, y1) { const ddx = Math.abs(x1 - x0), ddy = Math.abs(y1 - y0), sx2 = x0 < x1 ? 1 : -1, sy2 = y0 < y1 ? 1 : -1; let err = ddx - ddy, x = x0, y = y0; for (let guard = 0; guard < 80; guard++) { if (!out.length || out[out.length - 1][0] !== x || out[out.length - 1][1] !== y) out.push([x, y]); if (x === x1 && y === y1) break; const e2 = 2 * err; if (e2 > -ddy) { err -= ddy; x += sx2; } if (e2 < ddx) { err += ddx; y += sy2; } } };
+    const run = function (pts) { const tiles = []; for (let q = 0; q + 1 < pts.length; q++) lineTo(tiles, pts[q][0], pts[q][1], pts[q + 1][0], pts[q + 1][1]); let k = 0;
+      while (k < tiles.length) { const g = groundAt(tiles[k][0], tiles[k][1]); if (g === 1) { lay(tiles[k][0], tiles[k][1], grade); k++; } else if (g === 2) { let e = k; while (e < tiles.length && groundAt(tiles[e][0], tiles[e][1]) === 2) e++; if (k > 0 && e < tiles.length && e - k <= 3 && groundAt(tiles[e][0], tiles[e][1]) === 1) { for (let b = k; b < e; b++) lay(tiles[b][0], tiles[b][1], 2); k = e; } else break; } else k++; }
+      return tiles; };
+    const jit = function () { return ri(w, 5) - 2; }, half = Rr >> 1, at2 = function (tiles, f) { for (let q = 0; q < tiles.length; q++) if (f(tiles[q])) return tiles[q]; return tiles[Math.min(tiles.length - 1, 3)]; };
+    const mE = run([[0, 0], [half, jit()], [Rr, jit()]]), mW = run([[0, 0], [-half, jit()], [-Rr, jit()]]);                      /* the main street, east and west from the middle */
+    const cN = run([[0, 0], [jit(), -half], [jit(), -Rr + 1]]), cS = run([[0, 0], [jit(), half], [jit(), Rr - 1]]);              /* the cross street, north and south */
+    { const a1 = at2(mE, function (t) { return t[0] === 3; }), a2 = at2(mW, function (t) { return t[0] === -3; }); run([a1, [half + 1, -half + jit()], [Rr - 2, -Rr + 2]]); run([a2, [-half - 1, half + jit()], [-Rr + 2, Rr - 2]]); }   /* two lanes that leave the main street aslant */
+    if (age >= 3) { const a3 = at2(cN, function (t) { return t[1] === -3; }), a4 = at2(cS, function (t) { return t[1] === 3; }); run([a3, [-half + jit(), -half - 1], [-Rr + 2, -Rr + 2]]); run([a4, [half + jit(), half + 1], [Rr - 2, Rr - 2]]); }   /* and two that leave the cross street */
+    if (age >= 4) { const Q = Rr - 1, c8 = Math.round(Q * 0.45), ring = [[Q, -c8], [Q, c8], [c8, Q], [-c8, Q], [-Q, c8], [-Q, -c8], [-c8, -Q], [c8, -Q]], gap = ri(w, 8); for (let q = 0; q < 8; q++) if (q !== gap) run([ring[q], ring[(q + 1) % 8]]); }   /* a round about the town, open in one place */
+    { /* a stub that joins nothing is not a street: what is not joined to the streets of the middle, and is small, is taken up again */
+      const seen = {}, flood = function (i0) { const q = [i0], got = [i0]; seen[i0] = 1; while (q.length) { const c = q.pop(), x = c % w.W, y = (c - x) / w.W; for (let d = 0; d < 8; d++) { const X = wrapX(w, x + HEAD[d][0]), Y = y + HEAD[d][1]; if (!inb(w, X, Y)) continue; const j = idx(w, X, Y); if (street[j] && !seen[j]) { seen[j] = 1; q.push(j); got.push(j); } } } return got; };
+      let mid = -1, md = 99; for (const k in street) { const x = (+k) % w.W, y = Math.floor((+k) / w.W), d = cheb(x, y, cx, cy); if (d < md) { md = d; mid = +k; } } if (mid >= 0) flood(mid);
+      for (const k in street) if (!seen[+k]) { const part = flood(+k); if (part.length <= 8) part.forEach(function (j) { delete street[j]; }); } }
+    for (const k in street) { w.roads[+k] = street[k]; if (street[k] !== 2) { w.plants[+k] = null; if (w.trees && w.trees[+k]) w.trees[+k] = 0; } }
+    if (age >= 3 && w.trees) for (let dy = -Rr - 1; dy <= Rr + 1; dy++) for (let dx = -Rr - 1; dx <= Rr + 1; dx++) { const X = wrapX(w, cx + dx), Y = cy + dy; if (inb(w, X, Y) && w.trees[idx(w, X, Y)] > 0 && (age >= 4 || Math.max(Math.abs(dx), Math.abs(dy)) <= Rr - 2)) { w.trees[idx(w, X, Y)] = 0; w.tally.cleared = (w.tally.cleared || 0) + 1; } }
+    const DWELL = { house: 1, townhouse: 1, rowhouse: 1, tenement: 1, apartments: 1 };
+    const plots = []; for (let dy = -Rr; dy <= Rr; dy++) for (let dx = -Rr; dx <= Rr; dx++) { const X = wrapX(w, cx + dx), Y = cy + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y); if (street[i] || !free(i) || band.some(function (a) { return a.x === X && a.y === Y; })) continue;
+      let by = false; for (let q = 0; q < 8 && !by; q++) { const X2 = wrapX(w, X + HEAD[q][0]), Y2 = Y + HEAD[q][1]; if (inb(w, X2, Y2) && street[idx(w, X2, Y2)]) by = true; } if (by) plots.push({ i: i, x: X, y: Y, d: Math.max(Math.abs(dx), Math.abs(dy)), used: 0 }); }
+    plots.sort(function (p, q) { return p.d - q.d || p.i - q.i; });
+    const where = {}, dist = function (p, k) { let b = 99; Object.keys(where).forEach(function (h) { if (h === k || isOfLine(w, h, k)) where[h].forEach(function (q) { b = Math.min(b, cheb(p.x, p.y, q.x, q.y)); }); }); return b; };
+    const put = function (kind, owner, needs, far) { let best = null, bs = 1e9; for (let q = 0; q < plots.length; q++) { const p = plots[q]; if (p.used) continue; let worst = 0; (needs || []).forEach(function (n) { worst = Math.max(worst, dist(p, n)); }); if (worst > ((L.build || {}).near || 12)) continue; const sc = (far ? -p.d : p.d) * 10 + worst; if (sc < bs) { bs = sc; best = p; } }
+      if (!best) return -1; best.used = 1; const i = best.i; if (kind === 'store') { w.stores[i] = { by: owner.id, items: [] }; for (let q = 0; q < 6; q++) w.stores[i].items.push({ k: 'grain', n: 1, t: w.tick }); } else { w.shelters[i] = owner.id; if (kind !== 'shelter') { w.bkind = w.bkind || {}; w.bkind[i] = kind; } }
+      w.plants[i] = null; if (w.trees && w.trees[i]) w.trees[i] = 0; (where[kind] = where[kind] || []).push(best); w.tally.built = w.tally.built || {}; w.tally.built[kind] = (w.tally.built[kind] || 0) + 1; raisedN++; return i; };
+    const B = L.buildings, home = age >= 6 && B.apartments ? 'apartments' : age >= 5 && B.tenement ? 'tenement' : age >= 4 && B.rowhouse ? 'rowhouse' : age >= 3 && B.townhouse ? 'townhouse' : B.house ? 'house' : 'shelter';
+    put('store', head); put('hall', head); band.forEach(function (a) { put(home, a); }); for (let q = 0; q < age * 5; q++) put(home, band[q % band.length]);
+    const have = function (k) { return Object.keys(where).some(function (h) { return h === k || isOfLine(w, h, k); }); };
+    const want = Object.keys(B).filter(function (k) { const b = B[k], e = b.way && T2[b.way] ? (T2[b.way].era || 1) : 1; return b.way && e <= age && head.knows[b.way] && b.beside !== 'water' && !b.on && k !== 'pen' && !b.yields && (b.stone || 0) < 40 && !DWELL[k] && ['dock', 'weir', 'harbour', 'landing', 'lighthouse'].indexOf(k) < 0; }).sort(function (p, q) { return (T2[B[p].way].era || 1) - (T2[B[q].way].era || 1) || (p < q ? -1 : 1); });
+    for (let pass = 0; pass < 3; pass++) want.forEach(function (k) { if (where[k] || raisedN > 400) return; const b = B[k]; if ((b.needs || []).some(function (q) { return q !== 'field' && !have(q); })) return; if (b.from && b.from !== 'shelter' && !have(b.from) && !where[b.from]) return; put(k, band[Object.keys(where).length % band.length], (b.needs || []).filter(function (q) { return q !== 'field'; }), !!b.fouls); });
+    /* the newer kind stands in place of the one it grew from: where both were set down, the older is taken away */
+    Object.keys(where).forEach(function (k) { const b = B[k]; if (b && b.from && where[b.from] && b.from !== 'shelter' && !DWELL[b.from] && ['hall', 'store'].indexOf(b.from) < 0) { where[b.from].forEach(function (p) { if (w.bkind[p.i] === b.from) { w.shelters[p.i] = 0; delete w.bkind[p.i]; p.used = 0; raisedN--; } }); delete where[b.from]; } });
+    /* fields outside the built ground */
+    if (B.field) { let nf = 0; for (let ring = Rr + 1; ring <= Rr + 2 && nf < 2 + age; ring++) for (let dx = -ring; dx <= ring && nf < 2 + age; dx += 3) for (const dy of [-ring, ring]) { const X = wrapX(w, cx + dx), Y = cy + dy; if (!inb(w, X, Y)) continue; const i = idx(w, X, Y); if (!free(i) || w.roads[i]) continue; w.shelters[i] = head.id; w.bkind = w.bkind || {}; w.bkind[i] = 'field'; w.plants[i] = null; if (w.trees && w.trees[i]) w.trees[i] = 0; nf++; raisedN++; (where.field = where.field || []).push({ i: i, x: X, y: Y }); } }
+    /* what a people of that age would have: animals that work, and the vehicles and tools of the age, each in someone's hands */
+    if (age >= 2) { const G = L.goods, giveT = function (a, k) { if (!a || !G[k]) return; a.things = a.things || {}; a.things[k] = Math.max(a.things[k] || 0, 1); w.tally.vehicles = w.tally.vehicles || {}; w.tally.vehicles[k] = (w.tally.vehicles[k] || 0) + 1; };
+      giveT(head, 'cart'); giveT(head, 'plough'); giveT(band[1 % band.length], 'wagon'); if (age >= 3) giveT(band[2 % band.length], 'wagon');
+      if (age >= 4) { giveT(head, 'tractionengine'); giveT(band[3 % band.length], 'steamwagon'); }
+      if (age >= 5) { giveT(head, 'tractor'); giveT(band[1 % band.length], 'truck'); giveT(band[2 % band.length], 'motorcar'); giveT(band[4 % band.length], 'motorcar'); }
+      if (L.creatures.horse) for (let q = 0; q < Math.min(3, band.length); q++) { const a = band[(q + 1) % band.length]; let X = a.x, Y = a.y; for (let t = 0; t < 12; t++) { const X2 = wrapX(w, a.x + ri(w, 5) - 2), Y2 = a.y + ri(w, 5) - 2; if (inb(w, X2, Y2) && free(idx(w, X2, Y2))) { X = X2; Y = Y2; break; } }
+        const c = newCreature(w, 'horse', X, Y, { e: 80, age: 700 + ri(w, 900) }); c.owner = head.id; c.keeper = a.id; c.calm = 30; w.creatures.push(c); a.stats.tamed = (a.stats.tamed || 0) + 1; } }
   }
   w.startAge = age; w.eraT = null; w.rng = keep; SW.findSettlements(w, noop); return raisedN;
+};
+/* ---------- GENERATION 32: horses and work animals, vehicles, dwellings by age, looks that differ ---------- */
+/* an area of the unknown made known at once (for a world begun old: a people that has lived somewhere for generations knows the land about it) */
+function openDisc(w, x0, y0, r) {
+  const V = w.veil; if (!V) return 0; let n = 0;
+  for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const X = wrapX(w, x0 + dx), Y = y0 + dy; if (Y < 0 || Y >= w.H || (!w.wrap && (X < 0 || X >= w.W))) continue; const i = Y * w.W + X; if (V.t[i] == null) continue;
+    w.terrain[i] = V.t[i]; w.fert[i] = V.f[i]; delete V.t[i]; delete V.f[i]; n++; if (V.lodes[i]) { w.lodes[i] = V.lodes[i]; delete V.lodes[i]; } if (V.ore[i]) { w.ore[i] = V.ore[i]; delete V.ore[i]; } if (V.river && V.river[i]) { w.river[i] = V.river[i]; delete V.river[i]; }
+    const tt = w.terrain[i]; if (tt !== T.WATER && tt !== T.SHALLOWS && w.fert[i] > 0.1 && rnd(w) < 0.16 + w.fert[i] * 0.3) { const k = kindFor(w, i); if (k) w.plants[i] = newPlant(w, k, 1, i); } }
+  if (n) { V.caves = V.caves.filter(function (i) { if (w.terrain[i] !== T.VOID) { w.shelters[i] = -1; w.bkind[i] = 'cave'; return false; } return true; }); w.openTiles = (w.openTiles || 0) + n; narrowWater(w); WF.delete(w.terrain); }
+  return n;
+}
+/* THE HORSE, and animals that work (for worlds begun with opts.flora). A horse is gentle: one who knows herding and has tamed it can ride it at
+   once, without the long way of riding. An animal that can draw (draft: horse, plains ox) and walks with its keeper carries for them
+   (ecology.packCarry each, up to two), lets a wagon be used, and makes a tended field yield sooner (ecology.draftYield of the wait). */
+SW.FAUNA = { horse: { from: 'plainsox', set: { speed: 0.75, maxEnergy: 110, meat: 5, tough: 2, gore: 0, milk: 0, ride: 1, draft: 1, gentle: 1, root: 'horse', fleeRange: 5, wary: 3, breedChance: 0.0016 } } };
+function addFauna(w) { const C = w.laws.creatures; for (const k in SW.FAUNA) { const F = SW.FAUNA[k], base = C[F.from]; if (!base || C[k]) continue; const sp = JSON.parse(JSON.stringify(base)); delete sp.look; Object.assign(sp, F.set); C[k] = sp; } if (C.plainsox) C.plainsox.draft = 1; w.laws.ecology.packCarry = 4; w.laws.ecology.draftYield = 0.7; w.laws.ecology.rideFight = 1.3; }
+function draftNear(w, a, r) { if (!a || !(a.stats.tamed > 0)) return 0; let n = 0; for (let k = 0; k < w.creatures.length; k++) { const c = w.creatures[k], s = w.laws.creatures[c.sp]; if (!c.dead && s && s.draft && c.pen == null && c.keeper === a.id && cheb(c.x, c.y, a.x, a.y) <= r) n++; } return n; }
+SW.draftNear = function (w, a) { use(w); return draftNear(w, a, 3); };
+/* does one go swiftly here: mounted, or with a vehicle that runs on a made road (goods with speed) while standing on one */
+function swift(w, a) { if (a.mount) return true; if (!a.things) return false; const rd = w.roads[idx(w, a.x, a.y)]; if (!rd || rd === 3) return false; const G = w.laws.goods; for (const k in a.things) if (a.things[k] > 0 && G[k] && G[k].speed) return true; return false; }
+SW.swift = function (w, a) { use(w); return swift(w, a); };
+/* how soon a tended field yields: sooner with a draft animal of the holder near, sooner with a plough, sooner still with both; an engine of the field does it alone */
+function tilthFactor(w, h) { if (!h) return 1; const G = w.laws.goods, dn = draftNear(w, h, 6); let f = dn ? (w.laws.ecology.draftYield || 1) : 1, pl = 1, eng = 1; for (const k in (h.things || {})) if (h.things[k] > 0 && G[k] && G[k].plough) { if (G[k].engine) eng = Math.min(eng, G[k].plough); else pl = Math.min(pl, G[k].plough); } return Math.min(f * pl, eng); }
+/* EVERY KIND LOOKS ITSELF. Two kinds of plant, or of animal, may never look the same: the looks are compared by their shapes and colours,
+   and a kind that would look like one before it is drawn again from another seed, and if it still does, is given a mark of its own. */
+function hslOf(c) { if (!c) return null; let m = /^#([0-9a-f]{6})$/i.exec(c); if (m) { const v = parseInt(m[1], 16), r = (v >> 16) / 255, g = ((v >> 8) & 255) / 255, b = (v & 255) / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn; if (d < 0.001) return { h: 0, s: 0, l: l }; const sa = d / (1 - Math.abs(2 * l - 1) || 1), h = mx === r ? ((g - b) / d + 6) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; return { h: h * 60, s: sa, l: l }; }
+  m = /hsla?\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%/.exec(c); if (m) return { h: +m[1] % 360, s: +m[2] / 100, l: +m[3] / 100 }; return null; }
+function coloursAlike(a, b) { if (a === b) return true; const A = hslOf(a), B = hslOf(b); if (!A || !B) return false; if (Math.abs(A.l - B.l) > 0.2) return false; const ga = A.s < 0.14, gb = B.s < 0.14; if (ga || gb) return ga && gb; const d = Math.abs(A.h - B.h); return Math.min(d, 360 - d) < 40; }
+/* two looks are alike when they are made of the same shapes in the same order and every shape is of nearly the same colour as its fellow */
+SW.alikeLooks = function (A, B) { const a = (A && A.shapes) || [], b = (B && B.shapes) || []; if (a.length !== b.length) return false; for (let k = 0; k < a.length; k++) { if (a[k].t !== b[k].t) return false; if (!coloursAlike(a[k].fill || a[k].stroke, b[k].fill || b[k].stroke)) return false; } return true; };
+SW.distinctLooks = function (w) {
+  let changed = 0;
+  [['plants', function (k, sp, t) { return SW.genPlant(k + '#' + t, sp.form); }], ['creatures', function (k, sp, t) { return SW.genBeast(k + '#' + t, !!sp.predator, sp.form); }]].forEach(function (q) {
+    const reg = w.laws[q[0]], before = []; Object.keys(reg).forEach(function (k) { const sp = reg[k]; if (!sp.look || !sp.look.shapes) return;
+      const clash = function (look) { for (let b = 0; b < before.length; b++) if (SW.alikeLooks(look, before[b])) return true; return false; };
+      if (clash(sp.look)) { changed++; let hh = 0; for (let c = 0; c < k.length; c++) hh = (hh * 31 + k.charCodeAt(c)) % 3600; let done = false;
+        /* first another drawing from the same parts; then the colour of its last part (the fruit, the flower, the marking) turned round the wheel; then a mark of its own */
+        for (let t = 1; t <= 5 && !done; t++) { const L2 = q[1](k, sp, t); if (L2 && L2.shapes && !clash(L2)) { sp.look = L2; done = true; } }
+        for (let t = 0; t < 9 && !done; t++) { const L2 = JSON.parse(JSON.stringify(sp.look)), last = L2.shapes[L2.shapes.length - 1], col = 'hsl(' + ((hh + t * 43) % 360) + ',' + (t % 2 ? 62 : 78) + '%,' + (t % 3 === 2 ? 70 : 56) + '%)'; if (last.fill) last.fill = col; else last.stroke = col; if (!clash(L2)) { sp.look = L2; done = true; } }
+        for (let t = 0; t < 12 && !done; t++) { const L2 = JSON.parse(JSON.stringify(sp.look)), col = 'hsl(' + ((hh + t * 67) % 360) + ',82%,' + (t % 2 ? 72 : 58) + '%)', kindOfMark = (hh + t) % 4;
+          L2.shapes.push(kindOfMark === 0 ? { t: 'star', y: -0.3, s: 0.09, n: 5, fill: col } : kindOfMark === 1 ? { t: 'ring', n: 4 + (t % 3), d: 0.3, y: 0, s: 0.035, fill: col } : kindOfMark === 2 ? { t: 'line', x: -0.2, y: 0.22, x2: 0.2, y2: 0.22, lw: 0.05, stroke: col } : { t: 'tri', y: -0.34, s: 0.1, fill: col }); L2.mark = 1; if (!clash(L2)) { sp.look = L2; done = true; } } }
+      before.push(sp.look); }); });
+  return changed;
 };
 /* SEAS (Generation 27): a world begun with opts.seas has an ocean that divides the known land, a greater ocean on the far side of the world with
    islands large enough to live on, and two great lakes. Their hearts are open water: more than two steps from any shore, where no one can swim
@@ -1460,7 +1578,7 @@ SW.createWorld = function (seed, opts) {
     creatures: [], agents: [], graves: [], marks: [], places: [], inventions: [], edicts: [], devices: {}, settlements: [], looks: {}, wars: [], fished: {}, river: {}, ore: {}, sites: [], fields: [], regions: [], region: [], lodes: {}, bkind: {}, roads: {}, works: {}, peoples: [], tally: { made: {}, eaten: {}, built: {} }, weather: { kind: 'clear', until: 160 }, names: {},
     laws: SW.defaultLaws(), nextId: 1
   };
-  if (opts.flora) { for (const k in SW.FLORA) w.laws.plants[k] = JSON.parse(JSON.stringify(SW.FLORA[k])); w.flora = 1; }
+  if (opts.flora) { for (const k in SW.FLORA) w.laws.plants[k] = JSON.parse(JSON.stringify(SW.FLORA[k])); w.flora = 1; addFauna(w); }
   if (opts.seas) w.seas = { m: opts.margin != null ? opts.margin : 36, my: opts.margin != null ? opts.margin : 14 };
   use(w); genTerrain(w);
   { const Mg = opts.margin != null ? opts.margin : 36, My = opts.margin != null ? opts.margin : 14; if (Mg > 0) veil(w, Mg, My); narrowWater(w); w.tally.lived = 0; }
@@ -1475,6 +1593,7 @@ SW.createWorld = function (seed, opts) {
   }
   for (const ck in w.laws.creatures) { const cs = w.laws.creatures[ck]; if (!cs.look) cs.look = SW.genBeast(ck, !!cs.predator, cs.form); }
   for (const pk in w.laws.plants) { const ps = w.laws.plants[pk]; if (!ps.look) ps.look = SW.genPlant(pk, ps.form); }
+  if (opts.flora) SW.distinctLooks(w); /* no two kinds look the same (Generation 32) */
   for (const bk in SW.BEAST_LOOKS) if (w.laws.creatures[bk]) w.laws.creatures[bk].look = JSON.parse(JSON.stringify(SW.BEAST_LOOKS[bk]));
   w.lookV = 5;
   const bands = opts.bands != null ? opts.bands : 3, per = opts.agents != null ? opts.agents : 5, chosen = [];
@@ -1495,6 +1614,11 @@ SW.createWorld = function (seed, opts) {
     if (per >= 4) { SW.settle(w, Math.ceil(per / 2), P); SW.settle(w, Math.floor(per / 2), P); } else SW.settle(w, per, P);
   }
   seedRich(w);
+  if (opts.flora && w.laws.creatures.horse) { /* a herd of horses on open grass not far from each people, placed by a chance of its own */
+    const keepR = w.rng; w.rng = Math.imul((w.seed | 0) + 5519, 0x2545F491) | 0; rnd(w); const seenP = {};
+    w.agents.forEach(function (a) { if (a.people == null || seenP[a.people]) return; seenP[a.people] = 1; let spot = null; for (let t = 0; t < 200 && !spot; t++) { const X = wrapX(w, a.x + ri(w, 37) - 18), Y = a.y + ri(w, 37) - 18; if (inb(w, X, Y) && w.terrain[idx(w, X, Y)] === T.GRASS && cheb(X, Y, a.x, a.y) >= 7) spot = { x: X, y: Y }; }
+      if (spot) for (let q = 0; q < 6; q++) { const X = wrapX(w, spot.x + ri(w, 5) - 2), Y = spot.y + ri(w, 5) - 2; if (inb(w, X, Y) && w.terrain[idx(w, X, Y)] !== T.WATER && w.terrain[idx(w, X, Y)] !== T.SHALLOWS && w.terrain[idx(w, X, Y)] !== T.VOID) w.creatures.push(newCreature(w, 'horse', X, Y, { e: 70, age: 900 + ri(w, 800) })); } });
+    w.rng = keepR; }
   if (opts.fog) fogIn(w);
   return w;
 };
@@ -1703,9 +1827,9 @@ function nearestGraze(w, c, s, range) {
 }
 /* a life has three stages: a child is small, cheap to feed and quick to learn; an elder is slow and weak but teaches well */
 SW.stage = function (w, a) { const A = w.laws.age; return a.age < a.life * A.childUntil ? 'child' : a.age >= a.life * A.elderFrom ? 'elder' : 'adult'; };
-function strengthOf(w, a) { const g = SW.stage(w, a); let f = 1; if (a.things && w.laws.goods) { const tt = w.terrain[idx(w, a.x, a.y)], wet = tt === T.WATER || tt === T.SHALLOWS; for (const k in w.laws.goods) { const G = w.laws.goods[k]; if (G.fight && a.things[k] > 0 && (G.float ? wet : !wet) && G.fight > f) f = G.fight; } } return f * (g === 'child' ? w.laws.age.childStrength : g === 'elder' ? w.laws.age.elderStrength : 1); }
+function strengthOf(w, a) { const g = SW.stage(w, a); let f = 1; if (a.things && w.laws.goods) { const tt = w.terrain[idx(w, a.x, a.y)], wet = tt === T.WATER || tt === T.SHALLOWS; for (const k in w.laws.goods) { const G = w.laws.goods[k]; if (G.fight && a.things[k] > 0 && (G.float ? wet : !wet) && G.fight > f) f = G.fight; } } if (a.mount && (w.laws.ecology.rideFight || 0) > f) f = w.laws.ecology.rideFight; /* one who fights from the saddle (Generation 32) */ return f * (g === 'child' ? w.laws.age.childStrength : g === 'elder' ? w.laws.age.elderStrength : 1); }
 SW.strengthOf = strengthOf;
-function cap(w, a) { let g = 0; if (a.things && w.laws.goods) { const tt = w.terrain[idx(w, a.x, a.y)], wet = tt === T.WATER || tt === T.SHALLOWS; for (const k in w.laws.goods) { const G = w.laws.goods[k]; if (a.things[k] > 0 && G.carry && (G.float ? wet : !wet || !G.land)) g += G.carry; } } return w.laws.body.carryMax + (a.pots || 0) * w.laws.craft.potCarry + (a.mount ? w.laws.ecology.rideCarry || 0 : 0) + g; }
+function cap(w, a) { let g = 0; if (a.things && w.laws.goods) { const tt = w.terrain[idx(w, a.x, a.y)], wet = tt === T.WATER || tt === T.SHALLOWS; for (const k in w.laws.goods) { const G = w.laws.goods[k]; if (a.things[k] > 0 && G.carry && (G.float ? wet : !wet || !G.land) && (!G.road || (w.roads[idx(w, a.x, a.y)] && w.roads[idx(w, a.x, a.y)] !== 3)) && (!G.draft || draftNear(w, a, 3))) g += G.carry; } } if (w.laws.ecology.packCarry) g += Math.min(2, draftNear(w, a, 3)) * w.laws.ecology.packCarry; return w.laws.body.carryMax + (a.pots || 0) * w.laws.craft.potCarry + (a.mount ? w.laws.ecology.rideCarry || 0 : 0) + g; }
 SW.carryCap = cap;
 function sicken(w, a, from, emit) {
   if (a.dead || a.sick > 0 || (a.immune || 0) > w.tick) return false;
@@ -1784,8 +1908,8 @@ function stepYields(w, emit) {
     if (!Y) { delete T0[key]; continue; }
     if (w.tick - t.at > (Y.tend || 480)) continue;
     if (Y.seasons && Y.seasons.indexOf(ssn) < 0) { t.last = w.tick; continue; }
-    if (w.tick - t.last < (Y.every || 60)) continue;
-    t.last = w.tick;
+    const per = (Y.every || 60) * tilthFactor(w, w.shelters[i] > 0 ? agentById(w, w.shelters[i]) : null); if (w.tick - t.last < per) continue;
+    t.last = w.tick - t.last > 2 * per ? w.tick : t.last + per; /* the measure is kept between looks, so a shorter wait is not rounded away (Generation 32); for the waits as written it gives what it gave */
     const holder = w.shelters[i], h = holder > 0 ? agentById(w, holder) : null, x = i % w.W, y = Math.floor(i / w.W); let best = -1, bd = 9;
     for (let dy = -8; dy <= 8; dy++) for (let dx = -8; dx <= 8; dx++) {
       if (!inb(w, x + dx, y + dy)) continue; const j = idx(w, x + dx, y + dy), so = w.stores[j]; if (!so || so.items.length >= L.craft.storeMax) continue;
@@ -2199,6 +2323,9 @@ SW.upgrade = function (w) {
     if (L.tree && L.tree.storage && L.tree.storage.n === 4) L.tree.storage.n = 3;
     if (L.body && L.body.lifespan === 14400) { L.body.lifespan = 19200; w.agents.forEach(function (a) { if (a.life && a.life < 18000) a.life = Math.round(a.life * 19200 / 14400); }); } }
   if (!w.relics) w.relics = []; if (!w.faiths) w.faiths = {}; if (!w.culture) w.culture = { seq: 1, items: {}, log: [], days: [], rites: {} };
+  if (w.looks32 == null) { w.looks32 = 1; SW.distinctLooks(w); if (w.flora && !w.laws.creatures.horse) addFauna(w);
+    /* what the library has gained since this world opened its ages (dwellings by age, ploughs, wagons and engines) is given to it too: only what it lacks */
+    for (let n = 1; n <= (w.ageOpen || 0); n++) { const A = SW.LIBRARY[n]; if (!A) continue; ['blocks', 'buildings', 'recipes', 'goods'].forEach(function (t) { const src = A[t] || {}; w.laws[t] = w.laws[t] || {}; for (const k in src) if (!w.laws[t][k]) w.laws[t][k] = t === 'blocks' || t === 'buildings' ? Object.assign({ age: n }, JSON.parse(JSON.stringify(src[k]))) : JSON.parse(JSON.stringify(src[k])); }); } } /* a world carried on: kinds that looked alike are told apart (Generation 32) */
   return w;
 };
 /* the best vessel a being holds: the cost of a step on deep water with it, or 0 if it has none */
@@ -2273,7 +2400,7 @@ SW.reach = function (w, a) { const L = w.laws; let f = a && a.knows && a.knows.s
 function nearB(w, a, prop, kind) { let v = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const x = a.x + dx, y = a.y + dy; if (!inb(w, x, y)) continue; const k = buildingAt(w, idx(w, x, y)); if (!k) continue; if (kind) { if (isOfLine(w, k, kind)) v = 1; } else v = Math.max(v, w.laws.buildings[k][prop] || 0); } return v; }
 /* a kind of building, or one that grew out of it: what needs a forge is served by a factory */
 function isOfLine(w, k, kind) { const B = w.laws.buildings; for (let n = 0; k && n < 8; n++) { if (k === kind) return true; k = B[k] && B[k].from; } return false; }
-SW.isOfLine = isOfLine;
+SW.isOfLine = isOfLine; SW.capacity = function (w, a) { use(w); return cap(w, a); };
 SW.wellbeing = function (a) { return { suffering: a.suffer || 0, happiness: a.happy == null ? 0.4 : a.happy, satisfaction: a.sat == null ? 0.5 : a.sat }; };
 function waterBeside(w, a) {
   if (w.terrain[idx(w, a.x, a.y)] === T.SHALLOWS) return true;
@@ -2505,6 +2632,7 @@ function act(w, a, r, S, emit) {
     }
     case 'pave': {
       const tt = w.terrain[here], g0 = w.roads[here], stoneWay = !!a.knows.roads && a.stone >= 1;
+      if (w.shelters[here] > 0 || w.stores[here] || w.walls[here] || (w.works && w.works[here])) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'Something is built here, and a road does not run through what is built. Step off it and make the road beside it.' }); return false; } /* a road goes round what stands (Generation 32) */
       if (tt === T.WATER || tt === T.SHALLOWS || g0 === 1 || g0 === 2 || (g0 === 4 && !stoneWay)) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: g0 === 1 || g0 === 2 ? 'This ground is already paved. Step on and pave the next.' : g0 === 4 ? 'A dirt road already runs here. To lay stone on it takes the way of roads and 1 stone a step. Step on and work the next.' : 'Water cannot be paved.' }); return false; }
       if (!stoneWay) { /* anyone can beat a dirt road: it costs effort and no stone */
         a.e -= (L.build.dirtCost || 1.5); w.roads[here] = 4; if (w.plants[here] && !w.plants[here].t) w.plants[here] = null; a.stats.paved = (a.stats.paved || 0) + 1; w.tally.dirtRoad = (w.tally.dirtRoad || 0) + 1; a.fin = 1; a.doing = 'beating a dirt road'; emit({ type: 'paved', a: a.id, x: a.x, y: a.y, n: a.stats.paved, grade: 'dirt' }); return true; }
@@ -2568,15 +2696,16 @@ function act(w, a, r, S, emit) {
     case 'milk': case 'shear': case 'ride': {
       const want = r.do === 'milk' ? 'milk' : r.do === 'shear' ? 'wool' : 'ride';
       const sledOk = want === 'ride' && a.things && a.things.sled > 0 && a.knows.herding && w.terrain[here] === T.SNOW; /* with a sled, on snow, herding is knowledge enough */
-      if (want === 'ride' ? !(a.knows.riding || sledOk) : !a.knows.herding) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: want === 'ride' ? 'You do not yet know how to stay on an animal\'s back. That is the way of riding, which comes to those who have kept and tamed animals a long while.' : 'You do not yet know how to ' + r.do + ' an animal. That is the way of herding, which comes to those who have tamed animals.' }); return false; }
+      const gentleOk = want === 'ride' && !!a.knows.herding && w.creatures.some(function (o) { const so = L.creatures[o.sp]; return !o.dead && so && so.gentle && so.ride && o.keeper === a.id && cheb(o.x, o.y, a.x, a.y) <= 2; }); /* a gentle animal that is yours bears you once you know herding (Generation 32) */
+      if (want === 'ride' ? !(a.knows.riding || sledOk || gentleOk) : !a.knows.herding) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: want === 'ride' ? 'You do not yet know how to stay on an animal\'s back. That is the way of riding, which comes to those who have kept and tamed animals a long while. A horse is gentler: one who knows herding and has tamed a horse can ride it at once.' : 'You do not yet know how to ' + r.do + ' an animal. That is the way of herding, which comes to those who have tamed animals.' }); return false; }
       if (r.do === 'ride' && a.mount) { a.mount = null; a.fin = 1; a.doing = 'getting down'; emit({ type: 'rode', a: a.id, off: true }); return true; }
       let c = null;
-      for (let k = 0; k < w.creatures.length && !c; k++) { const o = w.creatures[k], so = L.creatures[o.sp]; if (!o.dead && so && (so[want] || (sledOk && so.sled)) && o.owner != null && (o.keeper === a.id || o.owner === rootOf(w, a).id) && cheb(o.x, o.y, a.x, a.y) <= (want === 'ride' ? 2 : 1) && o.age > so.matureAge && (want === 'ride' || (o[want + 'At'] || -1e9) + L.time.dayLength * (want === 'wool' ? 2 : 0.5) < w.tick)) c = o; }
+      for (let k = 0; k < w.creatures.length && !c; k++) { const o = w.creatures[k], so = L.creatures[o.sp]; if (!o.dead && so && (so[want] || (sledOk && so.sled)) && (want !== 'ride' || a.knows.riding || (sledOk && so.sled) || so.gentle) && o.owner != null && (o.keeper === a.id || o.owner === rootOf(w, a).id) && cheb(o.x, o.y, a.x, a.y) <= (want === 'ride' ? 2 : 1) && o.age > so.matureAge && (want === 'ride' || (o[want + 'At'] || -1e9) + L.time.dayLength * (want === 'wool' ? 2 : 0.5) < w.tick)) c = o; }
       if (!c) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: want === 'ride' ? 'You tried to mount, but no grown animal of yours that can bear a rider is beside you.' : 'You tried to ' + r.do + ', but no grown animal of yours that gives ' + want + ' is beside you and ready. (Not every kind gives it, and each must be left a while between.)' }); return false; }
       a.fin = 1;
       if (want === 'milk') { if (a.carry.length >= cap(w, a)) return false; c.milkAt = w.tick; c.e -= 4; a.carry.push({ k: 'milk', n: L.ecology.milkEnergy }); a.doing = 'milking a ' + c.sp; }
       else if (want === 'wool') { c.woolAt = w.tick; a.things = a.things || {}; a.things.wool = (a.things.wool || 0) + 1; a.doing = 'shearing a ' + c.sp; }
-      else { a.mount = c.id; c.keeper = a.id; a.doing = 'mounting a ' + c.sp; }
+      else { a.mount = c.id; c.keeper = a.id; a.doing = 'mounting a ' + c.sp; w.tally.rides = (w.tally.rides || 0) + 1; }
       a.stats[want] = (a.stats[want] || 0) + 1;
       emit({ type: want === 'milk' ? 'milked' : want === 'wool' ? 'sheared' : 'rode', a: a.id, kind: c.sp }); return true;
     }
@@ -2703,6 +2832,8 @@ function act(w, a, r, S, emit) {
         { const th = a.things || {}, fuel = th.coal > 0 ? 'coal' : th.peat > 0 ? 'peat' : null; if (fuel) th[fuel]--; w.fires[here] = Math.max(w.fires[here], w.tick) + L.craft.fireLife * (fuel === 'coal' ? 4 : fuel === 'peat' ? 2.5 : 1); }
         emit({ type: 'built', a: a.id, x: a.x, y: a.y, what: 'fire' }); SW.glimpse(w, a, 'fire', emit); a.doing = 'tending a fire'; return true;
       }
+      /* nothing is raised on a made road but a wall, which bars it (Generation 32) */
+      if (r.what !== 'wall' && w.roads[here] && w.roads[here] !== 3 && !(w.works && w.works[here])) { w.tally.roadRefused = (w.tally.roadRefused || 0) + 1; if (r === a.intent) emit({ type: 'fail', a: a.id, text: 'A road runs here, and nothing is raised on a road but a wall to bar it. Step off it and build beside it.' }); return false; }
       if (L.buildings && L.buildings[r.what]) {
         const B = L.buildings[r.what], bw = B.wood || 0, bs = B.stone || 0, say = function (t) { if (r === a.intent) emit({ type: 'fail', a: a.id, text: t }); return false; };
         if (B.way && !a.knows[B.way] && !(w.works[here] && w.works[here].kind === r.what) && !heldInCommon(w, a, B.way)) return say('You tried to raise a ' + r.what + ', but you do not know how. It belongs to the way of ' + B.way + ', and fewer than ' + ((L.culture || {}).commonAt || 2) + ' of your band hold it.');
@@ -3156,7 +3287,7 @@ function stepAgents(w, emit) {
     if (!a.intent && a.plan.length) a.intent = a.plan.shift();
     if (!done && a.intent) {
       done = act(w, a, a.intent, S, emit);
-      if (done && a.mount && !a.fin && RIDES[a.intent.do]) act(w, a, a.intent, senses(w, a), emit); /* mounted, twice the ground */
+      if (done && !a.fin && RIDES[a.intent.do] && swift(w, a)) { if (!a.mount) w.tally.drove = (w.tally.drove || 0) + 1; act(w, a, a.intent, senses(w, a), emit); } /* mounted, or in a vehicle on a road: twice the ground */
       a.intent.ticks = (a.intent.ticks || 1) - 1;
       if (done && a.fin) a.intent = null;
       else if (!done || a.intent.ticks <= 0) { emit({ type: 'intent_done', a: a.id, did: a.intent.do, ok: done, left: a.plan.length }); a.intent = null; }
